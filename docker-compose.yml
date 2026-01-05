@@ -1,0 +1,41 @@
+# =============================================================================
+# Interview Assistant - Docker Compose Configuration
+# =============================================================================
+# This file makes it easy to run the Interview Assistant container locally.
+#
+# SETUP (choose one method):
+#
+# Option 1: Create a .env.docker file (recommended for local dev)
+#   Copy your secrets to .env.docker (it's gitignored by default)
+#   Then run: docker compose up --build
+#
+# Option 2: Set environment variables inline
+#   OPENAI_API_KEY=your_key GITHUB_TOKEN=your_token docker compose up --build
+#
+# =============================================================================
+
+services:
+  interview-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    # Load environment variables from .env.docker
+    # Format: KEY=value (one per line, no quotes needed)
+    env_file:
+      - .env.docker
+    volumes:
+      # Persist interview history data
+      - interview-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  interview-data:
+    name: data
