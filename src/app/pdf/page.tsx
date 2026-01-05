@@ -9,6 +9,7 @@ import { ArrowLeft, Download, Loader2, RefreshCw } from 'lucide-react';
 import { useInterviewStore } from '@/store/interviewStore';
 import { calculateAggregateScores } from '@/lib/langchain';
 import { ParsedQuestion, StarterQuestion, InterviewSession } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
 
 // Dynamically import PDF components (they don't work with SSR)
 const PDFViewer = dynamic(
@@ -307,6 +308,7 @@ function PDFReport({ session, questions, aggregateScores }: PDFReportProps) {
 
 export default function PDFGenerationPage() {
     const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
     const { session: storeSession, getAllQuestions, resetSession } = useInterviewStore();
     const [isClient, setIsClient] = useState(false);
     const [historySession, setHistorySession] = useState<InterviewSession | null>(null);
@@ -334,10 +336,14 @@ export default function PDFGenerationPage() {
     const session = historySession || storeSession;
 
     useEffect(() => {
-        if (isClient && !session && !historySession) {
-            router.push('/');
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
         }
-    }, [session, historySession, isClient, router]);
+        if (isClient && !session && !historySession) {
+            router.push('/dashboard');
+        }
+    }, [session, historySession, isClient, router, isAuthenticated, authLoading]);
 
     if (!session || !isClient) {
         return (
@@ -358,7 +364,17 @@ export default function PDFGenerationPage() {
     const handleNewInterview = () => {
         resetSession();
         sessionStorage.removeItem('pdf-session');
-        router.push('/');
+        // Reset to phase 1 for completely new setup
+        useInterviewStore.getState().setSetupPhase(1);
+        router.push('/dashboard');
+    };
+
+    const handleRepeatInterview = () => {
+        resetSession();
+        sessionStorage.removeItem('pdf-session');
+        // Keep selections, go to phase 2 for new candidate details
+        useInterviewStore.getState().setSetupPhase(2);
+        router.push('/dashboard');
     };
 
     const handleBack = () => {
@@ -387,11 +403,17 @@ export default function PDFGenerationPage() {
 
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={handleRepeatInterview}
+                            className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            Repeat Interview
+                        </button>
+                        <button
                             onClick={handleNewInterview}
                             className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium flex items-center gap-2"
                         >
-                            <RefreshCw className="w-4 h-4" />
-                            New Interview
+                            New Setup
                         </button>
                         <PDFDownloadLink
                             document={

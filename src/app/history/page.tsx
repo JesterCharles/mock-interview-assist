@@ -19,9 +19,11 @@ import {
 import { InterviewSession, ParsedQuestion, StarterQuestion } from '@/lib/types';
 import { calculateAggregateScores } from '@/lib/langchain';
 import { useInterviewStore } from '@/store/interviewStore';
+import { useAuth } from '@/lib/auth-context';
 
 export default function HistoryPage() {
     const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
     const { session: currentSession } = useInterviewStore();
 
     const [history, setHistory] = useState<InterviewSession[]>([]);
@@ -30,8 +32,12 @@ export default function HistoryPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
         loadHistory();
-    }, []);
+    }, [authLoading, isAuthenticated, router]);
 
     const loadHistory = async () => {
         try {
@@ -107,7 +113,7 @@ export default function HistoryPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
-                        onClick={() => router.push('/')}
+                        onClick={() => router.push('/dashboard')}
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
@@ -131,7 +137,7 @@ export default function HistoryPage() {
                             Completed interviews will appear here after generating a PDF report.
                         </p>
                         <button
-                            onClick={() => router.push('/')}
+                            onClick={() => router.push('/dashboard')}
                             className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                         >
                             Start an Interview
@@ -175,8 +181,8 @@ export default function HistoryPage() {
                                                             <Star
                                                                 key={star}
                                                                 className={`w-4 h-4 ${star <= scores.averageScore
-                                                                        ? 'text-amber-400 fill-amber-400'
-                                                                        : 'text-gray-300'
+                                                                    ? 'text-amber-400 fill-amber-400'
+                                                                    : 'text-gray-300'
                                                                     }`}
                                                             />
                                                         ))}
@@ -281,8 +287,8 @@ export default function HistoryPage() {
                                                                             <Star
                                                                                 key={star}
                                                                                 className={`w-3 h-3 ${star <= (assessment.finalScore || 0)
-                                                                                        ? 'text-amber-400 fill-amber-400'
-                                                                                        : 'text-gray-300'
+                                                                                    ? 'text-amber-400 fill-amber-400'
+                                                                                    : 'text-gray-300'
                                                                                     }`}
                                                                             />
                                                                         ))}

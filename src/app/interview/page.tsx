@@ -9,9 +9,11 @@ import { useInterviewStore } from '@/store/interviewStore';
 import QuestionCard from '@/components/QuestionCard';
 import ProgressBar from '@/components/ProgressBar';
 import { ParsedQuestion, StarterQuestion } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
 
 export default function InterviewPage() {
     const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
     const {
         session,
         getCurrentQuestion,
@@ -33,10 +35,14 @@ export default function InterviewPage() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
-        if (!session || session.status !== 'in-progress') {
-            router.push('/');
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
         }
-    }, [session, router]);
+        if (!session || session.status !== 'in-progress') {
+            router.push('/dashboard');
+        }
+    }, [session, router, isAuthenticated, authLoading]);
 
     const currentQuestion = getCurrentQuestion();
     const allQuestions = getAllQuestions();
@@ -125,7 +131,7 @@ export default function InterviewPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <button
-                        onClick={() => router.push('/')}
+                        onClick={() => router.push('/dashboard')}
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />

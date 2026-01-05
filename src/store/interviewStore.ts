@@ -26,6 +26,7 @@ interface InterviewStore {
     };
     interviewLevel: 'entry' | 'experienced';
     selectedTechs: GitHubFile[];
+    techWeights: Record<string, number>; // Maps tech path to weight (1-5)
     loadingQuestions: boolean;
 
     // Actions
@@ -33,6 +34,7 @@ interface InterviewStore {
     setRepoConfig: (config: { owner: string; repo: string; branch: string }) => void;
     setInterviewLevel: (level: 'entry' | 'experienced') => void;
     setSelectedTechs: (techs: GitHubFile[]) => void;
+    setTechWeight: (techPath: string, weight: number) => void;
     setLoadingQuestions: (loading: boolean) => void;
 
     // Session management
@@ -93,16 +95,29 @@ export const useInterviewStore = create<InterviewStore>()(
             },
             interviewLevel: 'entry',
             selectedTechs: [],
+            techWeights: {},
             loadingQuestions: false,
 
             setSetupPhase: (phase) => set({ setupPhase: phase }),
             setRepoConfig: (config) => set({ repoConfig: config }),
             setInterviewLevel: (level) => set({ interviewLevel: level }),
             setSelectedTechs: (techs) => set({ selectedTechs: techs }),
+            setTechWeight: (techPath, weight) => set((state) => ({
+                techWeights: { ...state.techWeights, [techPath]: weight }
+            })),
             setLoadingQuestions: (loading) => set({ loadingQuestions: loading }),
 
             createSession: (questions, questionCount, selectedWeeks, candidateName, interviewerName, interviewLevel = 'entry') => {
-                const selectedQuestions = selectRandomQuestions(questions, questionCount, interviewLevel);
+                // Build weights mapping: weekNumber -> weight
+                // Note: weekNumber corresponds to the index+1 of selectedTechs (matching how questions are parsed)
+                const state = get();
+                const weekWeights: Record<number, number> = {};
+                state.selectedTechs.forEach((tech, index) => {
+                    const weekNumber = index + 1;
+                    weekWeights[weekNumber] = state.techWeights[tech.path] ?? 1;
+                });
+
+                const selectedQuestions = selectRandomQuestions(questions, questionCount, interviewLevel, weekWeights);
                 // Generate fresh starter questions with random variations
                 const starterQuestions = generateStarterQuestions();
 

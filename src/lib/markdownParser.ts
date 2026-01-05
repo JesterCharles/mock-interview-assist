@@ -89,12 +89,13 @@ export function shuffleArray<T>(array: T[]): T[] {
 /**
  * Select random questions from parsed questions
  * Stratifies by WEEK first, then by difficulty within each week
- * This ensures dispersed sampling across all selected weeks
+ * Uses weights for proportional distribution when provided
  */
 export function selectRandomQuestions(
     questions: ParsedQuestion[],
     count: number,
-    interviewLevel: 'entry' | 'experienced' = 'entry' // Default to entry
+    interviewLevel: 'entry' | 'experienced' = 'entry',
+    weights?: Record<number, number> // weekNumber to weight mapping
 ): ParsedQuestion[] {
     // Group questions by week (or source)
     const byWeek = new Map<number, ParsedQuestion[]>();
@@ -112,9 +113,14 @@ export function selectRandomQuestions(
 
     if (numWeeks === 0) return [];
 
-    // Determine how many questions per week (as evenly as possible)
-    const perWeek = Math.floor(count / numWeeks);
-    const remainder = count % numWeeks;
+    // Calculate total weight and proportional questions per week
+    let totalWeight = 0;
+    const weekWeights: number[] = [];
+    weeks.forEach((week) => {
+        const weight = weights?.[week] ?? 1;
+        weekWeights.push(weight);
+        totalWeight += weight;
+    });
 
     const selected: ParsedQuestion[] = [];
 
@@ -129,10 +135,23 @@ export function selectRandomQuestions(
         advancedRatio = 0.5;
     }
 
+    // Calculate questions per week based on weights
+    let assignedCount = 0;
+    const perWeekCounts: number[] = [];
+    weeks.forEach((_, index) => {
+        if (index === weeks.length - 1) {
+            // Last week gets the remainder to ensure exact count
+            perWeekCounts.push(count - assignedCount);
+        } else {
+            const weekCount = Math.floor((weekWeights[index] / totalWeight) * count);
+            perWeekCounts.push(weekCount);
+            assignedCount += weekCount;
+        }
+    });
+
     weeks.forEach((week, index) => {
         const weekQuestions = byWeek.get(week)!;
-        // Give extra question to first 'remainder' weeks for even distribution
-        const weekCount = perWeek + (index < remainder ? 1 : 0);
+        const weekCount = perWeekCounts[index];
 
         // Within each week, stratify by difficulty
         const beginnerQuestions = weekQuestions.filter(q => q.difficulty === 'beginner');

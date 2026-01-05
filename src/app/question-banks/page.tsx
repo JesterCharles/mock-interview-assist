@@ -3,6 +3,7 @@
 // Question Banks page - View and manage interview question banks
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     FileText,
     Upload,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import { parseInterviewQuestions } from '@/lib/markdownParser';
 import { ParsedQuestion } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
 
 interface QuestionBank {
     id: string;
@@ -79,6 +81,9 @@ const BUILT_IN_BANKS: QuestionBank[] = [
 ];
 
 export default function QuestionBanksPage() {
+    const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
+
     const [isLoading, setIsLoading] = useState(true);
     const [customBanks, setCustomBanks] = useState<QuestionBank[]>([]);
     const [builtInBanks, setBuiltInBanks] = useState<QuestionBank[]>(BUILT_IN_BANKS);
@@ -89,9 +94,13 @@ export default function QuestionBanksPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
         loadBanks();
         loadBuiltInCounts();
-    }, []);
+    }, [authLoading, isAuthenticated, router]);
 
     const loadBanks = async () => {
         try {

@@ -19,9 +19,11 @@ import {
 import { useInterviewStore } from '@/store/interviewStore';
 import { calculateAggregateScores } from '@/lib/langchain';
 import { ParsedQuestion, StarterQuestion } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
 
 export default function ReviewPage() {
     const router = useRouter();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
     const {
         session,
         getAllQuestions,
@@ -45,6 +47,7 @@ export default function ReviewPage() {
     const [editingOverall, setEditingOverall] = useState(false);
     const [overallTechnical, setOverallTechnical] = useState<number>(0);
     const [overallSoftSkill, setOverallSoftSkill] = useState<number>(0);
+    const [softSkillWeight, setSoftSkillWeight] = useState<number>(50); // 50% default weight
     const [technicalFeedbackText, setTechnicalFeedbackText] = useState('');
     const [softSkillFeedbackText, setSoftSkillFeedbackText] = useState('');
 
@@ -57,11 +60,17 @@ export default function ReviewPage() {
         // Only check after hydration to avoid race condition with persisted store
         if (!isHydrated) return;
 
+        // Auth check first
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
         // Only allow access to review page if interview is finished
         if (!session || (session.status !== 'review' && session.status !== 'completed')) {
-            router.push('/');
+            router.push('/dashboard');
         }
-    }, [session, router, isHydrated]);
+    }, [session, router, isHydrated, isAuthenticated, authLoading]);
 
     // Auto-generate overall feedback when page loads (if not already set)
     useEffect(() => {
@@ -290,7 +299,20 @@ export default function ReviewPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <p className="text-sm text-gray-500 mb-1">Overall Score</p>
-                        <p className="text-3xl font-bold text-indigo-600">{aggregateScores.averageScore}/5</p>
+                        {editingOverall ? (
+                            <>
+                                <p className="text-3xl font-bold text-indigo-600">
+                                    {(
+                                        (overallTechnical * (100 - softSkillWeight) + overallSoftSkill * softSkillWeight) / 100
+                                    ).toFixed(1)}/5
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Tech {100 - softSkillWeight}% / Soft {softSkillWeight}%
+                                </p>
+                            </>
+                        ) : (
+                            <p className="text-3xl font-bold text-indigo-600">{aggregateScores.averageScore}/5</p>
+                        )}
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative group">
                         <p className="text-sm text-gray-500 mb-1">Technical Score</p>
@@ -313,15 +335,31 @@ export default function ReviewPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative group">
                         <p className="text-sm text-gray-500 mb-1">Soft Skills Score</p>
                         {editingOverall ? (
-                            <input
-                                type="number"
-                                min="1"
-                                max="5"
-                                step="0.1"
-                                value={overallSoftSkill}
-                                onChange={(e) => setOverallSoftSkill(parseFloat(e.target.value) || 0)}
-                                className="w-20 text-2xl font-bold text-purple-600 bg-purple-50 border border-purple-200 rounded px-2 py-1"
-                            />
+                            <>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    step="0.1"
+                                    value={overallSoftSkill}
+                                    onChange={(e) => setOverallSoftSkill(parseFloat(e.target.value) || 0)}
+                                    className="w-20 text-2xl font-bold text-purple-600 bg-purple-50 border border-purple-200 rounded px-2 py-1"
+                                />
+                                <div className="mt-3">
+                                    <label className="text-xs text-gray-500 block mb-1">
+                                        Soft Skills Weight: {softSkillWeight}%
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="50"
+                                        step="5"
+                                        value={softSkillWeight}
+                                        onChange={(e) => setSoftSkillWeight(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                    />
+                                </div>
+                            </>
                         ) : (
                             <p className="text-3xl font-bold text-purple-600">
                                 {(session?.overallSoftSkillScore ?? aggregateScores.softSkillScore).toFixed(1)}/5
@@ -483,7 +521,7 @@ export default function ReviewPage() {
                                                                 <textarea
                                                                     value={editFeedback}
                                                                     onChange={(e) => setEditFeedback(e.target.value)}
-                                                                    className="w-full h-24 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                                    className="w-full h-24 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                                                                 />
                                                             </div>
                                                             <div className="flex justify-end gap-3">
