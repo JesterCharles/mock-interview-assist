@@ -20,18 +20,15 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "80:3000"
     # Load environment variables from .env.docker
     # Format: KEY=value (one per line, no quotes needed)
     env_file:
       - .env.docker
-    environment:
-      - CURRICULUM_DIR=/training
     volumes:
       # Persist interview history data
       - interview-data:/app/data
-      # Mount parent training folder so the app can read curriculum markdowns
-      - ../:/training:ro
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
