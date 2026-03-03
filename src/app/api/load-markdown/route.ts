@@ -21,8 +21,10 @@ export async function GET(request: NextRequest) {
             allowedDir = BANKS_DIR;
         } else if (filePath) {
             // Load from curriculum training folder
+            // In Docker, this might be mounted, so we allow overriding via env var
             const projectRoot = process.cwd();
-            const trainingDir = path.resolve(projectRoot, '..'); // Go up to training folder
+            const defaultTrainingDir = path.resolve(projectRoot, '..'); // Go up to training folder
+            const trainingDir = process.env.CURRICULUM_DIR || defaultTrainingDir;
             fullPath = path.join(trainingDir, filePath);
             allowedDir = trainingDir;
         } else {
