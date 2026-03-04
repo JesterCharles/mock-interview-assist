@@ -197,7 +197,12 @@ export function calculateAggregateScores(
 
     // Calculate soft skills score (percentage of positive indicators)
     const softSkillsTotal = validAssessments.reduce((sum, a) => {
-        const skills = a.softSkills;
+        const skills = a.softSkills || {
+            clearlySpoken: false,
+            eyeContact: false,
+            confidence: false,
+            structuredThinking: false
+        };
         const positiveCount = [
             skills.clearlySpoken,
             skills.eyeContact,
