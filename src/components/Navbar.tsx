@@ -113,14 +113,16 @@ export default function Navbar() {
                             </button>
                         </>
                     ) : (
-                        /* Not authenticated - show login link */
-                        <Link
-                            href="/login"
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition-colors"
-                        >
-                            <LogIn className="w-4 h-4" />
-                            Login
-                        </Link>
+                        /* Not authenticated - show public features + login link */
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/login"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition-colors"
+                            >
+                                <LogIn className="w-4 h-4" />
+                                Trainer Mock Login
+                            </Link>
+                        </div>
                     )}
                 </div>
 

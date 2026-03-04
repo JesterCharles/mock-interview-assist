@@ -80,6 +80,11 @@ Specific Feedback: ${assessment.llmFeedback || assessment.finalFeedback}
         const chain = SUMMARY_PROMPT.pipe(model);
         const response = await chain.invoke({
             sessionData: sessionSummary
+        }, {
+            tags: ["summary-agent"],
+            metadata: {
+                question_count: questions.length
+            }
         });
 
         // Parse JSON output

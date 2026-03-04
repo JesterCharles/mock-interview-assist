@@ -21,10 +21,10 @@ export default function ProgressBar({
     onNavigate,
 }: ProgressBarProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-sm border border-slate-700 p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-gray-700">Interview Progress</h3>
-                <span className="text-sm text-gray-500">
+                <h3 className="text-sm font-medium text-slate-200">Interview Progress</h3>
+                <span className="text-sm text-slate-400">
                     Question {currentIndex + 1} of {totalQuestions}
                 </span>
             </div>
@@ -45,12 +45,12 @@ export default function ProgressBar({
                             className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${isCurrent
                                 ? 'bg-indigo-600 text-white scale-110 shadow-md'
                                 : isSkipped
-                                    ? 'bg-gray-200 text-gray-400'
+                                    ? 'bg-slate-700 text-slate-500'
                                     : isCompleted
                                         ? 'bg-green-500 text-white'
                                         : isProcessing
-                                            ? 'bg-yellow-400 text-white animate-pulse'
-                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                            ? 'bg-amber-500 text-white animate-pulse'
+                                            : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
                                 }`}
                             title={`Question ${index + 1}${isSkipped ? ' (Skipped)' : isCompleted ? ' (Completed)' : ''}`}
                         >
@@ -67,9 +67,9 @@ export default function ProgressBar({
             </div>
 
             {/* Progress bar */}
-            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-2 bg-slate-700/50 rounded-full overflow-hidden">
                 <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                     style={{
                         width: `${((currentIndex + 1) / totalQuestions) * 100}%`,
                     }}

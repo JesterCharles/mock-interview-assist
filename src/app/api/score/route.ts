@@ -51,6 +51,38 @@ SCORE: [1-5]
 FEEDBACK: [your detailed feedback]`],
 ]);
 
+// Public prompt for automated interviews - entirely transcript based
+const PUBLIC_SCORING_PROMPT = ChatPromptTemplate.fromMessages([
+    ['system', `You are an expert technical interviewer evaluating a candidate's response in an automated public interview.
+
+You must provide DETAILED, SPECIFIC feedback (4-5 sentences) based ONLY on comparing their transcript to the expected model answer. Do NOT evaluate eye contact, confidence, or spoken clarity, as this is a text-based transcript analysis.
+
+Your feedback MUST include:
+1. What they got right (1-2 sentences)
+2. What technical concepts they missed or misunderstood compared to the model answer (1-2 sentences)
+3. One actionable improvement tip (1 sentence)
+
+SCORING GUIDELINES:
+- Score 1: No coherent answer, completely wrong, or completely off-topic.
+- Score 2: Attempted but missed major core concepts from the expected answer.
+- Score 3: Basic understanding, but lacking depth or missing key details.
+- Score 4: Good answer, covers most of the expected elements accurately.
+- Score 5: Excellent, comprehensive, perfectly aligns with or exceeds expectations.`],
+    ['human', `Evaluate this PUBLIC automated interview response from candidate '{candidateName}':
+
+QUESTION: {question}
+
+MODEL EXPECTATION:
+{modelAnswerSection}
+
+{transcript}
+
+Provide DETAILED feedback (4-5 sentences) and a score from 1-5 evaluating only their technical accuracy.
+
+SCORE: [1-5]
+FEEDBACK: [your detailed feedback]`],
+]);
+
 // Separate prompt for STARTER QUESTIONS - evaluates against guidelines, not keywords
 const STARTER_SCORING_PROMPT = ChatPromptTemplate.fromMessages([
     ['system', `You are evaluating a candidate's response to an introductory/behavioral interview question.
@@ -96,6 +128,8 @@ FEEDBACK: [your detailed feedback]`],
 ]);
 
 interface ScoreRequestBody {
+    isPublic?: boolean;
+    candidateName?: string;
     question: {
         question: string;
         modelAnswer?: string;
@@ -141,7 +175,25 @@ export async function POST(request: NextRequest) {
 
         let response;
 
-        if (isStarterQuestion && question.guidelines) {
+        if (body.isPublic) {
+            // Use public transcript question prompt (Ignores trainer soft-skills/keywords)
+            const input = {
+                candidateName: body.candidateName || 'Candidate',
+                question: question.question,
+                modelAnswerSection: question.modelAnswer || 'No model answer provided.',
+                transcript: assessment.interviewerNotes || 'No transcript available.'
+            };
+
+            const chain = PUBLIC_SCORING_PROMPT.pipe(model);
+            response = await chain.invoke(input, {
+                tags: ["score-agent", "public-question"],
+                metadata: {
+                    type: 'public_technical',
+                    candidate_name: body.candidateName,
+                    question_length: question.question.length
+                }
+            });
+        } else if (isStarterQuestion && question.guidelines) {
             // Use starter question prompt
             const input = {
                 questionType: question.type === 'about-yourself' ? 'About Yourself / Background' : 'Project Experience',
@@ -155,7 +207,13 @@ export async function POST(request: NextRequest) {
             };
 
             const chain = STARTER_SCORING_PROMPT.pipe(model);
-            response = await chain.invoke(input);
+            response = await chain.invoke(input, {
+                tags: ["score-agent", "starter-question"],
+                metadata: {
+                    type: question.type,
+                    question_length: question.question.length
+                }
+            });
         } else {
             // Use technical question prompt
             const keywordsHit = assessment.keywordsHit.length;
@@ -178,7 +236,14 @@ export async function POST(request: NextRequest) {
             };
 
             const chain = TECHNICAL_SCORING_PROMPT.pipe(model);
-            response = await chain.invoke(input);
+            response = await chain.invoke(input, {
+                tags: ["score-agent", "technical-question"],
+                metadata: {
+                    type: 'technical',
+                    question_length: question.question.length,
+                    model_answer_provided: !!question.modelAnswer
+                }
+            });
         }
 
         // Parse the response - try multiple formats
