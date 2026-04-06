@@ -65,21 +65,20 @@ export class GitHubService {
      */
     async findQuestionBanks(path: string = ''): Promise<GitHubFile[]> {
         const contents = await this.getContents(path);
-        const results: GitHubFile[] = [];
 
-        for (const item of contents) {
-            if (item.type === 'file' && item.name.endsWith('.md')) {
-                results.push(item);
-            } else if (item.type === 'dir') {
-                try {
-                    const subContents = await this.findQuestionBanks(item.path);
-                    results.push(...subContents);
-                } catch (e) {
-                    console.warn(`Skipping directory ${item.path}:`, e);
-                }
-            }
-        }
+        const files = contents.filter(item => item.type === 'file' && item.name.endsWith('.md'));
+        const dirs = contents.filter(item => item.type === 'dir');
 
-        return results;
+        // Fetch all subdirectories in parallel instead of sequentially
+        const subResults = await Promise.all(
+            dirs.map(dir =>
+                this.findQuestionBanks(dir.path).catch(e => {
+                    console.warn(`Skipping directory ${dir.path}:`, e);
+                    return [] as GitHubFile[];
+                })
+            )
+        );
+
+        return [...files, ...subResults.flat()];
     }
 }

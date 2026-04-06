@@ -26,8 +26,8 @@ services:
     env_file:
       - .env.docker
     volumes:
-      # Persist interview history data
-      - interview-data:/app/data
+      # Persist interview history data directly to the host ./data folder
+      - ./data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
@@ -35,7 +35,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
-volumes:
-  interview-data:
-    name: data

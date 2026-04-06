@@ -1,7 +1,5 @@
 'use client';
 
-// Global navigation bar component - simplified
-
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -11,7 +9,8 @@ import {
     Menu,
     X,
     LogIn,
-    LogOut
+    LogOut,
+    Zap
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -60,20 +59,22 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="bg-slate-900 border-b border-slate-700 sticky top-0 z-50">
+        <nav className="bg-slate-900/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-50">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-14">
                     {/* Logo / Brand */}
-                    <Link href={isAuthenticated ? "/dashboard" : "/login"} className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <FileText className="w-4 h-4 text-white" />
+                    <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
+                        <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow duration-300">
+                            <Zap className="w-4 h-4 text-white" />
                         </div>
-                        <span className="font-semibold text-white hidden sm:block">Interview Assessment</span>
+                        <span className="font-bold text-white hidden sm:block tracking-tight">
+                            Next Level <span className="gradient-text-static">Mock</span>
+                        </span>
                     </Link>
 
                     {/* Show loading state or navigation based on auth */}
                     {isLoading ? (
-                        <div className="text-gray-500 text-sm">Loading...</div>
+                        <div className="text-slate-500 text-sm">Loading...</div>
                     ) : isAuthenticated ? (
                         <>
                             {/* Desktop Navigation */}
@@ -85,9 +86,9 @@ export default function Navbar() {
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'text-gray-300 hover:text-white hover:bg-slate-800'
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${active
+                                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                                                : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                                                 }`}
                                         >
                                             {item.icon}
@@ -97,7 +98,7 @@ export default function Navbar() {
                                 })}
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-800 transition-colors ml-2"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all duration-200 ml-2"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Logout
@@ -107,7 +108,7 @@ export default function Navbar() {
                             {/* Mobile Menu Button */}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="md:hidden p-2 text-gray-400 hover:text-white"
+                                className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
                             >
                                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                             </button>
@@ -117,10 +118,10 @@ export default function Navbar() {
                         <div className="flex items-center gap-3">
                             <Link
                                 href="/login"
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/[0.06] border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.15] transition-all duration-200"
                             >
                                 <LogIn className="w-4 h-4" />
-                                Trainer Mock Login
+                                Trainer Login
                             </Link>
                         </div>
                     )}
@@ -128,7 +129,7 @@ export default function Navbar() {
 
                 {/* Mobile Navigation - only when authenticated */}
                 {isAuthenticated && mobileMenuOpen && (
-                    <div className="md:hidden py-2 border-t border-slate-700">
+                    <div className="md:hidden py-2 border-t border-white/[0.06] animate-slide-up">
                         {navItems.map((item) => {
                             const active = isItemActive(item);
 
@@ -136,9 +137,9 @@ export default function Navbar() {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium ${active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-gray-300 hover:bg-slate-800'
+                                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${active
+                                        ? 'bg-indigo-500/20 text-indigo-300'
+                                        : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                                         }`}
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -149,7 +150,7 @@ export default function Navbar() {
                         })}
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:bg-slate-800 w-full text-left"
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] w-full text-left rounded-lg transition-all duration-200"
                         >
                             <LogOut className="w-4 h-4" />
                             Logout

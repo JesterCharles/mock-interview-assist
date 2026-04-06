@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 
 // Enhanced prompt for TECHNICAL QUESTIONS - detailed feedback addressing missed keywords and soft skills
 const TECHNICAL_SCORING_PROMPT = ChatPromptTemplate.fromMessages([
@@ -11,16 +12,20 @@ const TECHNICAL_SCORING_PROMPT = ChatPromptTemplate.fromMessages([
 
 Your feedback MUST be 4-5 sentences and include:
 1. Acknowledge what they did well (1 sentence)
-2. For EACH missed keyword: explain what it is and why it matters in this context (1-2 sentences)
+2. Review the "Keywords MISSED" list. Cross-reference these with the INTERVIEWER NOTES. If the candidate actually covered the underlying concept of a "missed keyword" using their own words or different phrasing, YOU MUST OVERRIDE AND TREAT IT AS A HIT. Only explain concepts that are genuinely missing or misunderstood (1-2 sentences). Do NOT blindly trust the "Keywords MISSED" list.
 3. Address soft skills: praise positives, provide coaching for negatives (1 sentence)
 4. Give ONE specific, actionable improvement tip (1 sentence)
 
 SCORING GUIDELINES:
 - Score 1: No answer, "I don't know", or completely wrong answer with no keywords
 - Score 2: Attempted but missed most key concepts, vague or confused response
-- Score 3: Basic understanding, hit some keywords, but gaps in explanation
-- Score 4: Good answer, hit most keywords, clear communication
-- Score 5: Excellent, comprehensive, hit all/most keywords with confident delivery
+- Score 3: Basic understanding, hit some keywords, but major gaps in explanation
+- Score 4: Solid answer but lacked focus or had a notable omission of a primary core concept.
+- Score 5: Excellent! Demonstrates a solid grasp of the core concepts. ALWAYS DEFAULT to 5/5 if the candidate provides a fundamentally correct, coherent, and practically sound answer. Do NOT withhold a 5/5 just because they missed a nuance or secondary concept. Reward practical, real-world experience heavily.
+
+NOTE: Do not be hyper-critical. Candidates have limited time to speak. A concise, accurate summary of the core concepts is sufficient for a 5/5. 
+SEMANTIC FLEXIBILITY & PARAPHRASING: Do NOT dock points or withhold a 5/5 score if the candidate does not explicitly state every element from the core evaluation criteria or does not use exact terminology. If the candidate accurately conveys the underlying conceptual meaning or provides a valid real-world example proving competence, reward them with full credit (5/5). NEVER withhold a 5/5 for missing "reflective" elements like "lessons learned" or theoretical catchphrases (e.g., "disagree and commit") if their story demonstrates competence. The provided criteria are a guide, not a strict checklist.
+PRIVACY & CONFIDENTIALITY AWARENESS: Candidates are often bound by Non-Disclosure Agreements (NDAs) or strict company privacy policies. Do NOT penalize candidates for omitting specific metrics, proprietary architectural details, company names, or granular evaluation criteria if they explain their general approach, outcomes, or the core trade-offs well. If they demonstrate clear analytical thinking without revealing proprietary details, reward them generously.
 
 Example good feedback:
 "Strong explanation of the core concept, demonstrating solid foundational knowledge. However, you missed mentioning 'gradient descent' - this is the optimization algorithm that adjusts model weights during training, essential for explaining how learning happens. You also didn't cover 'backpropagation' which describes how errors flow backward through the network to update weights. Your structured thinking was excellent, though maintaining more eye contact would improve engagement. For future interviews, try practicing the 'what, why, how' framework: explain what the concept is, why it matters, and how it works in practice."`],
@@ -43,7 +48,7 @@ INTERVIEWER NOTES: {notes}
 
 Provide DETAILED feedback (4-5 sentences) that:
 1. Acknowledges strengths
-2. Explains EACH missed keyword and why it matters
+2. Explains ONLY genuinely missed core concepts. Critically evaluate the "Keywords MISSED" against the notes, and if the concept is semantically present, do NOT mention it as missed.
 3. Comments on soft skills (both positive and areas to improve)
 4. Gives one actionable improvement tip
 
@@ -59,15 +64,21 @@ You must provide DETAILED, SPECIFIC feedback (4-5 sentences) based ONLY on compa
 
 Your feedback MUST include:
 1. What they got right (1-2 sentences)
-2. What technical concepts they missed or misunderstood compared to the model answer (1-2 sentences)
+2. What major technical concepts they missed or misunderstood (1-2 sentences). *CRITICAL: If they successfully covered the core concepts (even via paraphrasing), do NOT fabricate or nitpick misses just to fill this requirement. Instead, simply state that their coverage was thorough.*
 3. One actionable improvement tip (1 sentence)
 
 SCORING GUIDELINES:
 - Score 1: No coherent answer, completely wrong, or completely off-topic.
 - Score 2: Attempted but missed major core concepts from the expected answer.
-- Score 3: Basic understanding, but lacking depth or missing key details.
-- Score 4: Good answer, covers most of the expected elements accurately.
-- Score 5: Excellent, comprehensive, perfectly aligns with or exceeds expectations.`],
+- Score 3: Basic understanding, but missing significant key details.
+- Score 4: Solid answer but lacked focus or had a notable factual omission of a primary core concept.
+- Score 5: Excellent! Demonstrates clear, accurate understanding of the core concepts. ALWAYS DEFAULT to a 5/5 if the candidate provides a fundamentally correct, coherent, and practically sound answer. Do NOT withhold a 5/5 just because they missed a nuance or secondary concept from the model answer. Reward practical, real-world experience heavily.
+
+NOTE: Do not be hyper-critical. Candidates have a limited word count (1000 chars) to express complex thoughts. A concise, accurate digest of the core concepts is sufficient for a 5/5. Do not demand an exhaustive textbook response.
+
+SEMANTIC FLEXIBILITY & PARAPHRASING: Do NOT dock points or withhold a 5/5 score if the candidate does not explicitly state every element from the model answer or does not use exact terminology. If the candidate accurately conveys the underlying conceptual meaning or provides a strong real-world example, reward them with full credit (5/5). NEVER withhold a 5/5 for missing "reflective" elements like "lessons learned" or theoretical catchphrases (e.g., "disagree and commit") if their story demonstrates competence. The model answer is a guide, not a strict text-matching rubric.
+
+PRIVACY & CONFIDENTIALITY AWARENESS: Candidates are often bound by Non-Disclosure Agreements (NDAs). Do NOT penalize candidates for omitting specific metrics, proprietary details, or granular criteria if they explain their general approach or outcomes. Reward analytical thinking and structured communication even if specific proprietary project details are withheld.`],
     ['human', `Evaluate this PUBLIC automated interview response from candidate '{candidateName}':
 
 QUESTION: {question}
@@ -91,15 +102,21 @@ These questions ("tell me about yourself", "describe a project") don't have tech
 Instead, evaluate based on the GUIDELINES provided and soft skills demonstrated.
 
 SCORING CRITERIA:
-- Score 5 (Excellent): Hit all guidelines, confident, engaging, well-structured, memorable
-- Score 4 (Good): Hit most guidelines, clear communication, good flow, professional
+- Score 5 (Excellent): Hit the main intent of the question, clear communication, solid professional example. ALWAYS DEFAULT to 5/5 if the answer is fundamentally sound and professional. Do NOT withhold a 5/5 for missing nuanced reflections (like "lessons learned") or explicit textbook catchphrases.
+- Score 4 (Good): Clear communication but lacked focus or had a notable omission.
 - Score 3 (Average): Hit some guidelines, adequate but could be more detailed/engaging
-- Score 2 (Below Average): Missed key guidelines, unclear, too brief, or unfocused
-- Score 1 (Poor): Minimal effort, didn't address the question, no structure
+- Score 2: (Below Average): Missed key guidelines, unclear, too brief, or unfocused
+- Score 1: (Poor): Minimal effort, didn't address the question, no structure
+
+NOTE ON PRIVACY/CONFIDENTIALITY (CRITICAL):
+Candidates are often bound by Non-Disclosure Agreements (NDAs) or strict company privacy policies. Do NOT penalize a candidate for omitting specific metrics, proprietary architectures, company names, or granular project details if they explain their high-level decisions, general approach, and outcomes well. Do not demand exhaustive detail or overly specific criteria if it sounds like they are describing a real corporate project. Give strong scores (4 or 5) for candidates who demonstrate analytical thinking and clear communication even if they must withhold specific proprietary details. Do not be overly harsh or default to a 3 just because details are sparse due to confidentiality.
+
+SEMANTIC FLEXIBILITY & PARAPHRASING:
+Do NOT dock points or withhold a 5/5 score if the candidate does not explicitly hit every single detail of the Expected Guidelines. If they convey the core conceptual meaning using their own phrasing or provide a strong real-world example, give them full credit (5/5). NEVER withhold a 5/5 for missing "reflective" elements like "lessons learned" or theoretical catchphrases (e.g., "disagree and commit") if the story itself demonstrates professional competence. Avoid treating the guidelines as a rigid, exact-match checklist where missing a minor detail drops their score.
 
 Your feedback should be 4-5 sentences:
 1. What they did well
-2. Which guidelines they missed and how to address them
+2. Which guidelines they missed and how to address them. *CRITICAL: If they implicitly addressed the guidelines, do NOT penalize them or fabricate a miss. Only mention guidelines if genuinely completely missing.*
 3. Soft skills observations
 4. One specific tip for improvement
 
@@ -173,83 +190,113 @@ export async function POST(request: NextRequest) {
         // Determine if this is a starter question or technical question
         const isStarterQuestion = question.type === 'about-yourself' || question.type === 'project-work';
 
-        let response;
+        // LANGGRAPH WORKFLOW SETUP
+        const ScoringState = Annotation.Root({
+            isPublic: Annotation<boolean>(),
+            isStarter: Annotation<boolean>(),
+            question: Annotation<any>(),
+            assessment: Annotation<any>(),
+            candidateName: Annotation<string>(),
+            responseContent: Annotation<string>()
+        });
 
-        if (body.isPublic) {
-            // Use public transcript question prompt (Ignores trainer soft-skills/keywords)
+        const routeEvaluation = (state: typeof ScoringState.State) => {
+            if (state.isPublic) return "evaluatePublic";
+            if (state.isStarter && state.question.guidelines) return "evaluateStarter";
+            return "evaluateTechnical";
+        };
+
+        const evaluatePublic = async (state: typeof ScoringState.State) => {
             const input = {
-                candidateName: body.candidateName || 'Candidate',
-                question: question.question,
-                modelAnswerSection: question.modelAnswer || 'No model answer provided.',
-                transcript: assessment.interviewerNotes || 'No transcript available.'
+                candidateName: state.candidateName,
+                question: state.question.question,
+                modelAnswerSection: state.question.modelAnswer || 'No model answer provided.',
+                transcript: state.assessment.interviewerNotes || 'No transcript available.'
             };
-
-            const chain = PUBLIC_SCORING_PROMPT.pipe(model);
-            response = await chain.invoke(input, {
+            const response = await PUBLIC_SCORING_PROMPT.pipe(model).invoke(input, {
                 tags: ["score-agent", "public-question"],
                 metadata: {
                     type: 'public_technical',
-                    candidate_name: body.candidateName,
-                    question_length: question.question.length
+                    candidate_name: state.candidateName,
+                    question_length: state.question.question.length
                 }
             });
-        } else if (isStarterQuestion && question.guidelines) {
-            // Use starter question prompt
-            const input = {
-                questionType: question.type === 'about-yourself' ? 'About Yourself / Background' : 'Project Experience',
-                question: question.question,
-                guidelines: question.guidelines.map((g, i) => `${i + 1}. ${g}`).join('\n'),
-                clearlySpoken: assessment.softSkills.clearlySpoken ? 'Yes' : 'No',
-                eyeContact: assessment.softSkills.eyeContact ? 'Yes' : 'No',
-                confidence: assessment.softSkills.confidence ? 'Yes' : 'No',
-                structuredThinking: assessment.softSkills.structuredThinking ? 'Yes' : 'No',
-                notes: assessment.interviewerNotes || 'No additional notes',
-            };
+            return { responseContent: typeof response.content === 'string' ? response.content : JSON.stringify(response.content) };
+        };
 
-            const chain = STARTER_SCORING_PROMPT.pipe(model);
-            response = await chain.invoke(input, {
+        const evaluateStarter = async (state: typeof ScoringState.State) => {
+            const input = {
+                questionType: state.question.type === 'about-yourself' ? 'About Yourself / Background' : 'Project Experience',
+                question: state.question.question,
+                guidelines: state.question.guidelines.map((g: string, i: number) => `${i + 1}. ${g}`).join('\n'),
+                clearlySpoken: state.assessment.softSkills.clearlySpoken ? 'Yes' : 'No',
+                eyeContact: state.assessment.softSkills.eyeContact ? 'Yes' : 'No',
+                confidence: state.assessment.softSkills.confidence ? 'Yes' : 'No',
+                structuredThinking: state.assessment.softSkills.structuredThinking ? 'Yes' : 'No',
+                notes: state.assessment.interviewerNotes || 'No additional notes',
+            };
+            const response = await STARTER_SCORING_PROMPT.pipe(model).invoke(input, {
                 tags: ["score-agent", "starter-question"],
                 metadata: {
-                    type: question.type,
-                    question_length: question.question.length
+                    type: state.question.type,
+                    question_length: state.question.question.length
                 }
             });
-        } else {
-            // Use technical question prompt
-            const keywordsHit = assessment.keywordsHit.length;
-            const totalKeywords = keywordsHit + assessment.keywordsMissed.length;
+            return { responseContent: typeof response.content === 'string' ? response.content : JSON.stringify(response.content) };
+        };
 
+        const evaluateTechnical = async (state: typeof ScoringState.State) => {
+            const keywordsHit = state.assessment.keywordsHit.length;
+            const totalKeywords = keywordsHit + state.assessment.keywordsMissed.length;
             const input = {
-                question: question.question,
-                modelAnswerSection: question.modelAnswer
-                    ? `MODEL ANSWER (for reference):\n${question.modelAnswer.slice(0, 800)}`
+                question: state.question.question,
+                modelAnswerSection: state.question.modelAnswer
+                    ? `MODEL ANSWER (for reference):\n${state.question.modelAnswer.slice(0, 800)}`
                     : '',
                 keywordsHit: keywordsHit,
                 totalKeywords: totalKeywords,
-                keywordsList: assessment.keywordsHit.length > 0 ? assessment.keywordsHit.join(', ') : 'None',
-                keywordsMissed: assessment.keywordsMissed.length > 0 ? assessment.keywordsMissed.join(', ') : 'None',
-                clearlySpoken: assessment.softSkills.clearlySpoken ? 'Yes' : 'No',
-                eyeContact: assessment.softSkills.eyeContact ? 'Yes' : 'No',
-                confidence: assessment.softSkills.confidence ? 'Yes' : 'No',
-                structuredThinking: assessment.softSkills.structuredThinking ? 'Yes' : 'No',
-                notes: assessment.interviewerNotes || 'No additional notes',
+                keywordsList: state.assessment.keywordsHit.length > 0 ? state.assessment.keywordsHit.join(', ') : 'None',
+                keywordsMissed: state.assessment.keywordsMissed.length > 0 ? state.assessment.keywordsMissed.join(', ') : 'None',
+                clearlySpoken: state.assessment.softSkills.clearlySpoken ? 'Yes' : 'No',
+                eyeContact: state.assessment.softSkills.eyeContact ? 'Yes' : 'No',
+                confidence: state.assessment.softSkills.confidence ? 'Yes' : 'No',
+                structuredThinking: state.assessment.softSkills.structuredThinking ? 'Yes' : 'No',
+                notes: state.assessment.interviewerNotes || 'No additional notes',
             };
-
-            const chain = TECHNICAL_SCORING_PROMPT.pipe(model);
-            response = await chain.invoke(input, {
+            const response = await TECHNICAL_SCORING_PROMPT.pipe(model).invoke(input, {
                 tags: ["score-agent", "technical-question"],
                 metadata: {
                     type: 'technical',
-                    question_length: question.question.length,
-                    model_answer_provided: !!question.modelAnswer
+                    question_length: state.question.question.length,
+                    model_answer_provided: !!state.question.modelAnswer
                 }
             });
-        }
+            return { responseContent: typeof response.content === 'string' ? response.content : JSON.stringify(response.content) };
+        };
 
-        // Parse the response - try multiple formats
-        const content = typeof response.content === 'string'
-            ? response.content
-            : JSON.stringify(response.content);
+        const workflow = new StateGraph(ScoringState)
+            .addNode("evaluatePublic", evaluatePublic)
+            .addNode("evaluateStarter", evaluateStarter)
+            .addNode("evaluateTechnical", evaluateTechnical)
+            .addConditionalEdges(START, routeEvaluation)
+            .addEdge("evaluatePublic", END)
+            .addEdge("evaluateStarter", END)
+            .addEdge("evaluateTechnical", END)
+            .compile();
+
+        const finalState = await workflow.invoke({
+            isPublic: !!body.isPublic,
+            isStarter: isStarterQuestion,
+            question: question,
+            assessment: assessment,
+            candidateName: body.candidateName || 'Candidate',
+            responseContent: ''
+        }, {
+            runName: "Scoring_Agent",
+            tags: ["score-workflow"]
+        });
+
+        const content = finalState.responseContent;
 
         // Log for debugging
         console.log('LLM Response:', content.slice(0, 500));

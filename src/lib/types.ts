@@ -28,7 +28,7 @@ export interface QuestionAssessment {
     llmFeedback?: string;
     finalScore?: number;
     finalFeedback?: string;
-    status: 'pending' | 'in-progress' | 'processing' | 'ready' | 'validated';
+    status: 'pending' | 'in-progress' | 'processing' | 'ready' | 'validated' | 'scoring';
 }
 
 export interface SoftSkillsAssessment {

@@ -22,6 +22,7 @@ export default function PublicInterviewPage() {
     const [fingerprint, setFingerprint] = useState<string>('');
     const [rateInfo, setRateInfo] = useState<RateLimitInfo | null>(null);
     const [isConfirming, setIsConfirming] = useState(false);
+    const [isLoadingTopics, setIsLoadingTopics] = useState(true);
     const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +49,10 @@ export default function PublicInterviewPage() {
     // Interview State
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    // The highest question index the candidate has reached (for locking)
+    const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [transcript, setTranscript] = useState('');
+    const [cumulativeTranscript, setCumulativeTranscript] = useState('');
     const [followUpPrompt, setFollowUpPrompt] = useState<string | null>(null);
     const [isFollowUp, setIsFollowUp] = useState(false);
     const [agentLoading, setAgentLoading] = useState(false);
@@ -84,6 +88,8 @@ export default function PublicInterviewPage() {
                     setStep('limit-reached');
                 } else {
                     setRateInfo(data);
+                    // Show the page shell immediately - topics load in background
+                    setStep('topics');
                     fetchTopics();
                 }
             } catch (err) {
@@ -95,14 +101,16 @@ export default function PublicInterviewPage() {
     }, []);
 
     const fetchTopics = async () => {
+        setIsLoadingTopics(true);
         try {
             // Using placeholder config because /api/github ignores credentials/repos and uses environment variables
             const service = new GitHubService('owner', 'repo', 'main');
             const files = await service.findQuestionBanks('');
             setAvailableTopics(files);
-            setStep('topics');
         } catch (e) {
             console.error("Error fetching topics from GitHub", e);
+        } finally {
+            setIsLoadingTopics(false);
         }
     };
 
@@ -188,11 +196,96 @@ export default function PublicInterviewPage() {
         setStep('interview');
     };
 
+    // Helper: clean a topic path into a readable name like "AI ML Fundamentals"
+    const formatTopicName = (path: string) => {
+        const segment = path.split('/')[0] || path;
+        return segment.replace(/\.md$/i, '').replace(/[-_]/g, ' ');
+    };
+
     const handleSubmitAnswer = async () => {
         if (!transcript.trim()) return;
 
         const currentQ = questions[currentIndex];
 
+        // Build the full cumulative transcript (original + follow-up)
+        const fullTranscript = cumulativeTranscript
+            ? `${cumulativeTranscript}\n\n[Follow-up Response]\n${transcript}`
+            : transcript;
+
+        // If this is a follow-up response, skip the agent entirely -- go straight to scoring & advance
+        if (isFollowUp) {
+            const questionId = currentQ.id;
+            setSessionData((prev: any) => ({
+                ...prev,
+                assessments: {
+                    ...prev.assessments,
+                    [questionId]: {
+                        status: 'scoring',
+                        didNotGetTo: false,
+                        llmScore: undefined,
+                        llmFeedback: 'Scoring in progress...',
+                        finalScore: undefined,
+                        finalFeedback: 'Scoring in progress...',
+                        keywordsHit: [],
+                        keywordsMissed: currentQ.keywords || []
+                    }
+                }
+            }));
+
+            // Score in background
+            fetch('/api/score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    isPublic: true,
+                    candidateName: sessionData.candidateName,
+                    question: {
+                        question: currentQ.question,
+                        modelAnswer: currentQ.modelAnswer,
+                        type: 'technical'
+                    },
+                    assessment: {
+                        keywordsHit: [],
+                        keywordsMissed: [],
+                        softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
+                        interviewerNotes: `Candidate Transcript:\n${fullTranscript}\n\nAgent Reasoning: Follow-up completed.`
+                    }
+                })
+            }).then(r => r.json()).then(scoreResult => {
+                setSessionData((prev: any) => ({
+                    ...prev,
+                    assessments: {
+                        ...prev.assessments,
+                        [questionId]: {
+                            status: 'validated',
+                            didNotGetTo: false,
+                            llmScore: scoreResult.score || 3,
+                            llmFeedback: scoreResult.feedback || 'Follow-up completed.',
+                            finalScore: scoreResult.score || 3,
+                            finalFeedback: scoreResult.feedback || 'Follow-up completed.',
+                            keywordsHit: [],
+                            keywordsMissed: currentQ.keywords || []
+                        }
+                    }
+                }));
+            }).catch(err => {
+                console.error('Background scoring error for question', questionId, err);
+            });
+
+            // Advance immediately
+            if (currentIndex < questions.length - 1) {
+                setCurrentIndex((prev: number) => prev + 1);
+                setIsFollowUp(false);
+                setFollowUpPrompt(null);
+                setTranscript('');
+                setCumulativeTranscript('');
+            } else {
+                handleFinish();
+            }
+            return;
+        }
+
+        // Initial response: call the Agent API to decide if follow-up is needed
         setAgentLoading(true);
         setAgentPhase('Transmitting response to Agent...');
 
@@ -211,7 +304,6 @@ export default function PublicInterviewPage() {
             }
         }, 1500);
 
-        // Call Agent API
         try {
             const res = await fetch('/api/public/interview/agent', {
                 method: 'POST',
@@ -221,22 +313,45 @@ export default function PublicInterviewPage() {
                     interview_id: 'public-' + new Date().getTime(),
                     current_question_index: currentIndex + 1,
                     topic: currentQ.topic || 'General Technical',
-                    full_response_so_far: (followUpPrompt ? `${followUpPrompt}\n` : '') + transcript,
-                    char_count: transcript.length
+                    original_question: currentQ.question,
+                    full_response_so_far: fullTranscript,
+                    char_count: fullTranscript.length
                 })
             });
 
             const result = await res.json();
 
-            if (!isFollowUp && result.needs_followup && result.follow_up_question) {
-                // Present follow-up
+            if (result.needs_followup && result.follow_up_question) {
+                setCumulativeTranscript(transcript);
                 setIsFollowUp(true);
                 setFollowUpPrompt(result.follow_up_question);
-                setTranscript(''); // Clear for next input
+                setTranscript('');
             } else {
-                // Done with this question, save real score/feedback via agent
-                setAgentPhase('Evaluating final answer...');
-                const scoreRes = await fetch('/api/score', {
+                // Fix 2: Use the full cumulative transcript for scoring, not just the last input
+                const transcriptForScoring = fullTranscript;
+
+                // Fix 3: Write a placeholder immediately so the UI can advance without waiting
+                const questionId = currentQ.id;
+                setSessionData((prev: any) => ({
+                    ...prev,
+                    assessments: {
+                        ...prev.assessments,
+                        [questionId]: {
+                            status: 'scoring',
+                            didNotGetTo: false,
+                            llmScore: undefined,
+                            llmFeedback: 'Scoring in progress...',
+                            finalScore: undefined,
+                            finalFeedback: 'Scoring in progress...',
+                            keywordsHit: [],
+                            keywordsMissed: currentQ.keywords || []
+                        }
+                    }
+                }));
+
+                // Fix 3: Score in the background - do NOT await this
+                const agentReasoning = result.reasoning || 'Completed answering.';
+                fetch('/api/score', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -251,32 +366,38 @@ export default function PublicInterviewPage() {
                             keywordsHit: [],
                             keywordsMissed: [],
                             softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
-                            interviewerNotes: `Candidate Transcript:\n${result.appended_response || transcript}\n\nAgent Reasoning: ${result.reasoning || 'Completed answering.'}`
+                            interviewerNotes: `Candidate Transcript:\n${transcriptForScoring}\n\nAgent Reasoning: ${agentReasoning}`
                         }
                     })
+                }).then(scoreRes => scoreRes.json()).then(scoreResult => {
+                    setSessionData((prev: any) => ({
+                        ...prev,
+                        assessments: {
+                            ...prev.assessments,
+                            [questionId]: {
+                                status: 'validated',
+                                didNotGetTo: false,
+                                llmScore: scoreResult.score || 3,
+                                llmFeedback: scoreResult.feedback || `Agent observed: ${agentReasoning}`,
+                                finalScore: scoreResult.score || 3,
+                                finalFeedback: scoreResult.feedback || `Agent observed: ${agentReasoning}`,
+                                keywordsHit: [],
+                                keywordsMissed: currentQ.keywords || []
+                            }
+                        }
+                    }));
+                }).catch(err => {
+                    console.error('Background scoring error for question', questionId, err);
+                    // Leave the placeholder in place; PDF will show 'Scoring in progress' for that question
                 });
 
-                const scoreResult = await scoreRes.json();
-
-                const updatedAssessments = { ...sessionData.assessments };
-                updatedAssessments[currentQ.id] = {
-                    status: 'validated',
-                    didNotGetTo: false,
-                    llmScore: scoreResult.score || 3,
-                    llmFeedback: scoreResult.feedback || ("Agent observed: " + (result.reasoning || "Adequate response.")),
-                    finalScore: scoreResult.score || 3,
-                    finalFeedback: scoreResult.feedback || ("Agent observed: " + (result.reasoning || "Adequate response.")),
-                    keywordsHit: [],
-                    keywordsMissed: currentQ.keywords || []
-                };
-                setSessionData((prev: any) => ({ ...prev, assessments: updatedAssessments }));
-
-                // Move to next question or finish
+                // Fix 3: Advance immediately without waiting for scoring
                 if (currentIndex < questions.length - 1) {
                     setCurrentIndex((prev: number) => prev + 1);
                     setIsFollowUp(false);
                     setFollowUpPrompt(null);
                     setTranscript('');
+                    setCumulativeTranscript('');
                 } else {
                     handleFinish();
                 }
@@ -289,6 +410,7 @@ export default function PublicInterviewPage() {
                 setIsFollowUp(false);
                 setFollowUpPrompt(null);
                 setTranscript('');
+                setCumulativeTranscript('');
             } else {
                 handleFinish();
             }
@@ -328,6 +450,7 @@ export default function PublicInterviewPage() {
         if (currentIndex < questions.length - 1) {
             setCurrentIndex((prev: number) => prev + 1);
             setTranscript('');
+            setCumulativeTranscript('');
         } else {
             handleFinish();
         }
@@ -384,9 +507,14 @@ export default function PublicInterviewPage() {
 
     if (step === 'loading') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
-                <Loader2 className="w-10 h-10 animate-spin text-indigo-400 mb-4" />
-                <p className="text-gray-300">Initializing secure session...</p>
+            <div className="nlm-bg flex flex-col items-center justify-center p-4">
+                <div className="flex flex-col items-center animate-fade-in">
+                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
+                        <Loader2 className="w-7 h-7 animate-spin text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2">Next Level Mock</h2>
+                    <p className="text-slate-400 text-sm">Initializing secure session...</p>
+                </div>
             </div>
         );
     }
@@ -394,17 +522,19 @@ export default function PublicInterviewPage() {
     if (step === 'limit-reached') {
         const nextTime = rateInfo?.nextReset ? new Date(rateInfo.nextReset).toLocaleString() : 'tomorrow';
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-8 text-center border-t-4 border-t-amber-500">
-                    <Clock className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white mb-2">Limit Reached</h2>
-                    <p className="text-slate-300 mb-6">
-                        You have reached the maximum number of public interviews allowed per day (2).
-                        Please come back later to continue practicing.
+            <div className="nlm-bg flex items-center justify-center p-4">
+                <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up">
+                    <div className="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-500/20">
+                        <Clock className="w-7 h-7 text-amber-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Session Limit Reached</h2>
+                    <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+                        You have reached the maximum number of interviews allowed per day.
+                        Come back to continue practicing.
                     </p>
-                    <div className="bg-slate-700/50 rounded-lg p-4 mb-4 border border-slate-600">
-                        <p className="text-sm font-medium text-amber-400">Your limit will reset at:</p>
-                        <p className="font-bold text-white mt-1">{nextTime}</p>
+                    <div className="glass-card p-4 mb-4">
+                        <p className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Resets at</p>
+                        <p className="font-bold text-white text-lg">{nextTime}</p>
                     </div>
                 </div>
             </div>
@@ -413,14 +543,19 @@ export default function PublicInterviewPage() {
 
     if (step === 'topics') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 md:p-12">
-                <div className="max-w-5xl mx-auto space-y-6">
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-white">Public Interview Practice</h1>
-                        <p className="text-slate-300 mt-2">Select up to 3 topics from our question banks. You will be asked 10 questions total.</p>
+            <div className="nlm-bg p-6 md:p-12">
+                <div className="max-w-5xl mx-auto space-y-8">
+                    {/* Header */}
+                    <div className="text-center mb-4 animate-slide-up">
+                        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
+                            Next Level <span className="gradient-text">Mock</span>
+                        </h1>
+                        <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
+                            Select up to 3 topics from our question banks. You will be assessed across 10 questions.
+                        </p>
                         {error && (
-                            <div className="mt-4 inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-lg text-red-400 text-sm font-medium animate-in fade-in slide-in-from-top-2">
-                                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                            <div className="mt-4 inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl text-red-400 text-sm font-medium animate-slide-up">
+                                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                                 {error}
                             </div>
                         )}
@@ -428,118 +563,140 @@ export default function PublicInterviewPage() {
 
                     <div className="flex flex-col lg:flex-row gap-8 items-start">
                         {/* Left Side: Topic Selection */}
-                        <div className="flex-1 w-full space-y-6">
-                            {/* Search Bar */}
+                        <div className="flex-1 w-full space-y-5">
+                            {/* Search */}
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                                 <input
                                     type="text"
                                     value={techSearch}
                                     onChange={(e) => setTechSearch(e.target.value)}
-                                    placeholder="Search topics..."
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                    placeholder={isLoadingTopics ? "Loading topics..." : "Search topics..."}
+                                    disabled={isLoadingTopics}
+                                    className="w-full pl-11 pr-4 py-3 bg-white/[0.06] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/30 outline-none transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed text-sm"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {filteredTechs.length === 0 ? (
-                                    <div className="col-span-1 sm:col-span-2 border border-slate-700/50 bg-slate-800/20 p-8 rounded-xl text-slate-400 text-center flex flex-col items-center justify-center">
-                                        <BookOpen className="w-8 h-8 opacity-20 mb-3" />
-                                        No matching topics found
-                                    </div>
-                                ) : (
-                                    paginatedTechs.map((topic, i) => {
-                                        const topicDisplayName = topic.path.replace('/question-bank-v1.md', '').replace('.md', '');
-                                        return (
-                                            <div
-                                                key={i}
-                                                onClick={() => {
-                                                    if (!isConfirming) toggleTopic(topic.path);
-                                                }}
-                                                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${isConfirming && !selectedTopics.includes(topic.path) ? 'opacity-50 cursor-not-allowed' : ''} ${selectedTopics.includes(topic.path) ? 'border-indigo-500 bg-indigo-900/40 shadow-lg shadow-indigo-500/20' : 'border-slate-700 bg-slate-800/50 hover:border-indigo-400 hover:bg-slate-800'}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <BookOpen className={`w-5 h-5 ${selectedTopics.includes(topic.path) ? 'text-indigo-400' : 'text-slate-400'}`} />
-                                                    <span className="font-medium text-slate-200">{topicDisplayName}</span>
-                                                </div>
+                            {isLoadingTopics ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {Array.from({ length: 6 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.05] shimmer-bg"
+                                            style={{ animationDelay: `${i * 0.15}s` }}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-5 h-5 rounded bg-white/[0.06]" />
+                                                <div className="h-4 rounded bg-white/[0.06] flex-1" />
                                             </div>
-                                        );
-                                    })
-                                )}
-                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {filteredTechs.length === 0 ? (
+                                        <div className="col-span-1 sm:col-span-2 glass-card p-10 text-slate-500 text-center flex flex-col items-center justify-center">
+                                            <BookOpen className="w-8 h-8 opacity-20 mb-3" />
+                                            <span className="text-sm">No matching topics found</span>
+                                        </div>
+                                    ) : (
+                                        paginatedTechs.map((topic, i) => {
+                                            const topicDisplayName = topic.path.replace('/question-bank-v1.md', '').replace('.md', '');
+                                            const isSelected = selectedTopics.includes(topic.path);
+                                            return (
+                                                <div
+                                                    key={i}
+                                                    onClick={() => {
+                                                        if (!isConfirming) toggleTopic(topic.path);
+                                                    }}
+                                                    className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 hover-lift ${isConfirming && !isSelected ? 'opacity-30 cursor-not-allowed' : ''} ${isSelected
+                                                        ? 'border-cyan-500/40 bg-cyan-500/[0.06] shadow-lg shadow-cyan-500/10 glow-border-cyan'
+                                                        : 'border-white/[0.06] bg-white/[0.05] hover:border-white/[0.15] hover:bg-white/[0.07]'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <BookOpen className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`} />
+                                                        <span className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-white' : 'text-slate-300'}`}>{topicDisplayName}</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            )}
 
-                            {/* Pagination Controls */}
+                            {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-center gap-4 pt-2">
+                                <div className="flex items-center justify-center gap-4 pt-1">
                                     <button
                                         onClick={() => setTechPage(p => Math.max(1, p - 1))}
                                         disabled={techPage === 1}
-                                        className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                        className="p-2 rounded-lg bg-white/[0.07] border border-white/[0.06] hover:bg-white/[0.08] disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
                                     >
-                                        <ChevronLeft className="w-5 h-5 text-slate-300" />
+                                        <ChevronLeft className="w-4 h-4 text-slate-400" />
                                     </button>
-                                    <span className="text-sm font-medium text-slate-400">
-                                        Page {techPage} of {totalPages}
+                                    <span className="text-xs font-medium text-slate-500">
+                                        {techPage} / {totalPages}
                                     </span>
                                     <button
                                         onClick={() => setTechPage(p => Math.min(totalPages, p + 1))}
                                         disabled={techPage === totalPages}
-                                        className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                        className="p-2 rounded-lg bg-white/[0.07] border border-white/[0.06] hover:bg-white/[0.08] disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
                                     >
-                                        <ChevronRight className="w-5 h-5 text-slate-300" />
+                                        <ChevronRight className="w-4 h-4 text-slate-400" />
                                     </button>
                                 </div>
                             )}
                         </div>
 
-                        {/* Right Side: Floating Panel */}
-                        <div className="w-full lg:w-80 flex-shrink-0 sticky top-8">
-                            <div className="bg-slate-800/80 rounded-2xl border border-slate-700 p-6 flex flex-col gap-4">
+                        {/* Right Side: Action Panel */}
+                        <div className="w-full lg:w-80 flex-shrink-0 sticky top-20">
+                            <div className="glass-card-strong p-6 flex flex-col gap-5">
                                 {rateInfo && (
-                                    <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700 text-center">
-                                        <p className="text-sm text-slate-400 mb-1">Interviews remaining today</p>
-                                        <p className="text-3xl font-bold text-indigo-400">{rateInfo.remaining}</p>
+                                    <div className="glass-card p-4 text-center">
+                                        <p className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Sessions remaining</p>
+                                        <p className="text-3xl font-bold gradient-text-static">{rateInfo.remaining}</p>
                                     </div>
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-300">Candidate Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         required
                                         value={candidateNameInput}
                                         onChange={(e) => setCandidateNameInput(e.target.value)}
                                         placeholder="Enter your full name"
-                                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full px-4 py-3 bg-white/[0.06] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/30 outline-none transition-all duration-300 text-sm"
                                     />
                                 </div>
 
                                 {!isConfirming ? (
                                     <button
-                                        disabled={selectedTopics.length === 0 || isLoadingQuestions || !candidateNameInput.trim()}
+                                        disabled={selectedTopics.length === 0 || isLoadingQuestions || isLoadingTopics || !candidateNameInput.trim()}
                                         onClick={handleReviewTopics}
-                                        className="mt-2 w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:bg-slate-700 hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all"
+                                        className="mt-1 w-full flex items-center justify-center gap-2 px-6 py-4 btn-primary text-sm"
                                     >
                                         {isLoadingQuestions ? (
                                             <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-4 h-4 animate-spin" />
                                                 Loading Questions...
                                             </>
                                         ) : (
                                             <>
-                                                Review Topics {selectedTopics.length > 0 && `(${selectedTopics.length})`} <ArrowRight className="w-5 h-5" />
+                                                Review Topics {selectedTopics.length > 0 && `(${selectedTopics.length})`} <ArrowRight className="w-4 h-4" />
                                             </>
                                         )}
                                     </button>
                                 ) : (
-                                    <div className="mt-2 space-y-4 animate-in fade-in slide-in-from-top-4">
-                                        <div className="space-y-4">
-                                            <h3 className="text-white font-medium">Selected Topics ({selectedTopics.length}/3)</h3>
+                                    <div className="mt-1 space-y-4 animate-slide-up">
+                                        <div className="space-y-3">
+                                            <h3 className="text-white font-semibold text-sm">Selected ({selectedTopics.length}/3)</h3>
                                             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                                                 {selectedTopics.map((t, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between text-sm text-indigo-300 bg-indigo-900/20 px-3 py-2 rounded-lg border border-indigo-500/20">
+                                                    <div key={idx} className="flex items-center text-sm text-cyan-300 glass-card px-3 py-2.5 glow-border-cyan">
                                                         <div className="flex items-center gap-2 truncate">
-                                                            <BookOpen className="w-4 h-4 flex-shrink-0" />
+                                                            <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
                                                             <span className="truncate">{t.replace('.md', '')}</span>
                                                         </div>
                                                     </div>
@@ -547,26 +704,26 @@ export default function PublicInterviewPage() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl mt-4">
+                                        <div className="glass-card p-4 border-amber-500/20">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <AlertTriangle className="w-5 h-5 text-amber-500" />
-                                                <span className="font-bold text-amber-500 text-sm">Warning</span>
+                                                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                                                <span className="font-semibold text-amber-400 text-xs uppercase tracking-wide">Heads Up</span>
                                             </div>
-                                            <p className="text-xs text-slate-300 leading-relaxed">
-                                                Once you start this cannot be changed and will consume <strong>1</strong> of your attempts for the day.
+                                            <p className="text-xs text-slate-400 leading-relaxed">
+                                                Once you start this cannot be changed and will consume <strong className="text-slate-300">1</strong> of your sessions for the day.
                                             </p>
                                         </div>
                                         <button
                                             onClick={handleStartInterview}
-                                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all"
+                                            className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
                                         >
-                                            Confirm & Start <Play className="w-4 h-4" fill="currentColor" />
+                                            Start Interview <Play className="w-4 h-4" fill="currentColor" />
                                         </button>
                                         <button
                                             onClick={() => setIsConfirming(false)}
-                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all text-sm font-medium"
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-500 hover:text-white hover:bg-white/[0.07] rounded-xl transition-all duration-200 text-xs font-medium"
                                         >
-                                            <ChevronLeft className="w-4 h-4" /> Go Back
+                                            <ChevronLeft className="w-3.5 h-3.5" /> Go Back
                                         </button>
                                     </div>
                                 )}
@@ -583,67 +740,80 @@ export default function PublicInterviewPage() {
         const questionIds = questions.map(q => q.id);
 
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+            <div className="nlm-bg">
                 <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col min-h-screen">
                     {/* Header */}
-                    <header className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700">
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-indigo-400 uppercase tracking-wide">Public Interview Simulator</span>
-                            <span className="text-slate-400 text-sm">Topic: {selectedTopics.join(', ').replace(/\.md/g, '')}</span>
+                    <header className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs font-bold gradient-text-static uppercase tracking-widest">Next Level Mock</span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {selectedTopics.map((t, i) => (
+                                    <span key={i} className="text-xs font-medium text-slate-300 bg-white/[0.07] px-2.5 py-1 rounded-md border border-white/[0.06]">
+                                        {formatTopicName(t)}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </header>
 
-                    {/* Progress Bar styled for dark mode using a modified wrapper or relying on component internal if possible, 
-                        progressBar has hardcoded white bg internally, so we use a dark wrapper locally or let it be high contrast */}
-                    <div className="mb-6">
-                        <ProgressBar
-                            currentIndex={currentIndex}
-                            totalQuestions={questions.length}
-                            assessments={sessionData.assessments}
-                            questionIds={questionIds}
-                            onNavigate={(idx) => {
-                                // Only allow navigating to previously seen questions or the current one
-                                if (idx <= currentIndex) setCurrentIndex(idx);
-                            }}
-                        />
-                    </div>
+                    {/* Progress */}
+                    <ProgressBar
+                        currentIndex={currentIndex}
+                        totalQuestions={questions.length}
+                        assessments={sessionData.assessments}
+                        questionIds={questionIds}
+                        onNavigate={(idx) => {
+                            // Allow navigating to any question up to the active (highest reached) question
+                            if (idx <= activeQuestionIndex) setCurrentIndex(idx);
+                        }}
+                    />
 
-                    {/* Content */}
-                    <div className="flex flex-col mb-8 p-6 bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl transition-all h-fit">
-                        <h2 className="text-2xl font-bold text-white mb-6 leading-relaxed">
-                            {currentQ.question}
-                        </h2>
+                    {/* Question Card */}
+                    <div className="glass-card-strong p-6 md:p-8 mb-6 animate-fade-in relative overflow-hidden">
+                        {/* Question Number Badge */}
+                        <div className="absolute top-0 right-0 bg-gradient-to-bl from-cyan-500/10 to-transparent w-32 h-32 pointer-events-none" />
+                        <div className="flex items-start gap-4 mb-6">
+                            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/20">
+                                <span className="text-white font-bold text-sm">{currentIndex + 1}</span>
+                            </div>
+                            <h2 className="text-xl md:text-2xl font-bold text-white leading-relaxed flex-1">
+                                {currentQ.question}
+                            </h2>
+                        </div>
 
+                        {/* Follow-up prompt */}
                         {isFollowUp && followUpPrompt && !isSkipped && (
-                            <div className="mb-6 p-4 bg-indigo-900/40 border-l-4 border-indigo-500 rounded-r-lg">
-                                <p className="text-sm font-bold text-indigo-300 mb-1">Follow-up Agent:</p>
-                                <p className="text-indigo-100">{followUpPrompt}</p>
+                            <div className="mb-6 p-4 glass-card glow-border-cyan rounded-xl animate-slide-up">
+                                <p className="text-xs font-bold text-cyan-400 mb-1.5 uppercase tracking-wider">Follow-up</p>
+                                <p className="text-slate-200 text-sm leading-relaxed">{followUpPrompt}</p>
                             </div>
                         )}
 
+                        {/* Agent loading phase */}
                         {agentLoading && agentPhase && !isSkipped && (
-                            <div className="mb-6 p-4 bg-slate-700/30 border border-slate-600 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-                                <Loader2 className="w-5 h-5 text-indigo-400 animate-spin flex-shrink-0" />
-                                <span className="text-slate-300 font-medium">{agentPhase}</span>
+                            <div className="mb-6 p-4 glass-card rounded-xl flex items-center gap-3 animate-fade-in">
+                                <Loader2 className="w-4 h-4 text-cyan-400 animate-spin flex-shrink-0" />
+                                <span className="text-slate-400 text-sm font-medium">{agentPhase}</span>
                             </div>
                         )}
 
+                        {/* Skipped: show model answer */}
                         {isSkipped ? (
-                            <div className="mb-6 p-6 bg-slate-800/80 border border-emerald-500/30 rounded-xl relative overflow-hidden animate-in fade-in zoom-in-95">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-                                <h3 className="text-lg font-semibold text-emerald-400 mb-3 flex items-center gap-2">
-                                    <CheckCircle2 className="w-5 h-5" />
+                            <div className="mb-4 p-6 glass-card relative overflow-hidden animate-slide-up border-emerald-500/20">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500" />
+                                <h3 className="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                                    <CheckCircle2 className="w-4 h-4" />
                                     Ideal Response
                                 </h3>
                                 <div className="text-slate-300 leading-relaxed text-sm whitespace-pre-wrap">
                                     {currentQ.modelAnswer || "No ideal response provided for this question."}
                                 </div>
                                 {currentQ.keywords && currentQ.keywords.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-slate-700/50">
-                                        <p className="text-sm font-medium text-slate-400 mb-2">Key points to mention:</p>
+                                    <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                                        <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Key Concepts</p>
                                         <div className="flex flex-wrap gap-2">
                                             {currentQ.keywords.map((kw: string, i: number) => (
-                                                <span key={i} className="px-2 py-1 text-xs rounded-md bg-slate-700 text-slate-300 border border-slate-600">
+                                                <span key={i} className="px-2.5 py-1 text-xs rounded-lg bg-white/[0.07] text-slate-400 border border-white/[0.06]">
                                                     {kw}
                                                 </span>
                                             ))}
@@ -651,14 +821,28 @@ export default function PublicInterviewPage() {
                                     </div>
                                 )}
                             </div>
+                        ) : sessionData.assessments[currentQ.id] && ['scoring', 'validated', 'ready'].includes(sessionData.assessments[currentQ.id]?.status) ? (
+                            /* Locked: question already submitted */
+                            <div className="mt-2 p-4 glass-card rounded-xl text-center">
+                                <p className="text-slate-400 text-sm font-medium">Response submitted. {sessionData.assessments[currentQ.id]?.status === 'validated' ? 'Scored.' : 'Scoring in progress...'}</p>
+                                {currentIndex < activeQuestionIndex && (
+                                    <button
+                                        onClick={() => setCurrentIndex(activeQuestionIndex)}
+                                        className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 btn-primary text-xs"
+                                    >
+                                        Return to Current Question <ArrowRight className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                            </div>
                         ) : (
-                            <div className="mt-6">
+                            <div className="mt-2">
                                 <SpeechToText
                                     key={`speech-${currentIndex}-${isFollowUp ? 'followup' : 'main'}`}
                                     onTranscriptChange={setTranscript}
+                                    onAutoSubmit={() => handleSubmitAnswer()}
                                     disabled={agentLoading}
-                                    charLimit={1000}
-                                    warningLimit={800}
+                                    charLimit={isFollowUp ? Math.max(0, 1600 - cumulativeTranscript.length) : 1000}
+                                    warningLimit={isFollowUp ? Math.max(0, 1300 - cumulativeTranscript.length) : 800}
                                     hideTranscript={true}
                                     isFollowUp={isFollowUp && !isSkipped}
                                 />
@@ -666,13 +850,13 @@ export default function PublicInterviewPage() {
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 mt-2">
+                    {/* Footer Actions */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
                         <button
                             onClick={handleFinish}
-                            className="text-slate-400 hover:text-slate-200 text-sm font-medium transition-colors"
+                            className="text-slate-600 hover:text-slate-300 text-xs font-medium transition-colors duration-200"
                         >
-                            Finish Interview Early
+                            Finish Early
                         </button>
 
                         <div className="flex items-center gap-3">
@@ -680,16 +864,16 @@ export default function PublicInterviewPage() {
                                 <button
                                     onClick={handleSkip}
                                     disabled={agentLoading}
-                                    className="px-4 py-3 bg-slate-700 text-slate-200 font-medium rounded-xl hover:bg-slate-600 transition-colors disabled:opacity-50"
+                                    className="px-4 py-3 bg-white/[0.07] border border-white/[0.06] text-slate-400 font-medium rounded-xl hover:bg-white/[0.08] hover:text-white transition-all duration-200 disabled:opacity-30 text-sm"
                                 >
-                                    Skip Question (1 left)
+                                    Skip (1 left)
                                 </button>
                             )}
 
                             {isSkipped ? (
                                 <button
                                     onClick={handleNextAfterSkip}
-                                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all"
+                                    className="flex items-center gap-2 px-6 py-3 btn-accent text-sm"
                                 >
                                     {currentIndex === questions.length - 1 ? 'Finish Interview' : 'Next Question'}
                                     <ArrowRight className="w-4 h-4" />
@@ -698,11 +882,11 @@ export default function PublicInterviewPage() {
                                 <button
                                     onClick={handleSubmitAnswer}
                                     disabled={agentLoading || !transcript.trim()}
-                                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.3)] disabled:opacity-50 disabled:shadow-none transition-all"
+                                    className="flex items-center gap-2 px-6 py-3 btn-primary text-sm"
                                 >
                                     {agentLoading ? (
                                         <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            <Loader2 className="w-4 h-4 animate-spin" />
                                             Analyzing...
                                         </>
                                     ) : (
@@ -722,17 +906,19 @@ export default function PublicInterviewPage() {
 
     if (step === 'done') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-2xl border border-slate-700 p-8 text-center border-t-4 border-t-emerald-500">
-                    <Download className="w-12 h-12 text-emerald-400 mx-auto mb-4 animate-bounce" />
-                    <h2 className="text-2xl font-bold text-white mb-2">Interview Complete!</h2>
-                    <p className="text-slate-300 mb-6">
-                        Great job completing your practice interview. If your download was blocked, click below to retrieve your PDF feedback report.
+            <div className="nlm-bg flex items-center justify-center p-4">
+                <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+                        <CheckCircle2 className="w-8 h-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Interview Complete</h2>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                        Great work. If your download was blocked, click below to retrieve your feedback report.
                     </p>
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={handleDownloadPDF}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-500 transition-all shadow-lg"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
                         >
                             Download Report <Download className="w-4 h-4" />
                         </button>
@@ -740,9 +926,9 @@ export default function PublicInterviewPage() {
                             onClick={() => {
                                 if (typeof window !== 'undefined') window.location.reload();
                             }}
-                            className="w-full px-6 py-3 text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 font-medium rounded-xl transition-all"
+                            className="w-full px-6 py-3 text-slate-500 hover:text-white bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] font-medium rounded-xl transition-all duration-200 text-sm"
                         >
-                            Return to Topics
+                            Start New Session
                         </button>
                     </div>
                 </div>
@@ -752,3 +938,4 @@ export default function PublicInterviewPage() {
 
     return null;
 }
+

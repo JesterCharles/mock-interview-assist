@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
 
 const SUMMARY_PROMPT = ChatPromptTemplate.fromMessages([
     ['system', `You are an expert technical interviewer creating a high-level summary of a candidate's performance.
@@ -77,18 +78,42 @@ Specific Feedback: ${assessment.llmFeedback || assessment.finalFeedback}
             openAIApiKey: apiKey,
         });
 
-        const chain = SUMMARY_PROMPT.pipe(model);
-        const response = await chain.invoke({
-            sessionData: sessionSummary
+        // LANGGRAPH WORKFLOW SETUP
+        const SummaryState = Annotation.Root({
+            sessionData: Annotation<string>(),
+            questionCount: Annotation<number>(),
+            responseContent: Annotation<string>()
+        });
+
+        const generateSummaryNode = async (state: typeof SummaryState.State) => {
+            const response = await SUMMARY_PROMPT.pipe(model).invoke({
+                sessionData: state.sessionData
+            }, {
+                tags: ["summary-agent"],
+                metadata: {
+                    question_count: state.questionCount
+                }
+            });
+            return { responseContent: typeof response.content === 'string' ? response.content : JSON.stringify(response.content) };
+        };
+
+        const workflow = new StateGraph(SummaryState)
+            .addNode("generateSummary", generateSummaryNode)
+            .addEdge(START, "generateSummary")
+            .addEdge("generateSummary", END)
+            .compile();
+
+        const finalState = await workflow.invoke({
+            sessionData: sessionSummary,
+            questionCount: questions.length,
+            responseContent: ''
         }, {
-            tags: ["summary-agent"],
-            metadata: {
-                question_count: questions.length
-            }
+            runName: "Summary_Generator_Agent",
+            tags: ["summary-workflow"]
         });
 
         // Parse JSON output
-        let content = response.content as string;
+        let content = finalState.responseContent;
         // Clean markdown code blocks if present
         content = content.replace(/```json\n?|\n?```/g, '').trim();
 
