@@ -34,7 +34,7 @@ export default function PublicInterviewPage() {
     const TECHS_PER_PAGE = 6;
 
     const filteredTechs = availableTopics.filter(t =>
-        t.name.toLowerCase().includes(techSearch.toLowerCase())
+        t.path.toLowerCase().includes(techSearch.toLowerCase())
     );
     const totalPages = Math.ceil(filteredTechs.length / TECHS_PER_PAGE);
     const paginatedTechs = filteredTechs.slice(
