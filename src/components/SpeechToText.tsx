@@ -167,8 +167,6 @@ export default function SpeechToText({
     };
 
     const stopRecording = () => {
-        // Save current transcript so it persists for next session
-        savedTextRef.current = latestTranscriptRef.current;
         intentionalStopRef.current = true;
         isRecordingRef.current = false;
         recognitionRef.current?.stop();

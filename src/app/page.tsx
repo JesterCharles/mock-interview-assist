@@ -232,30 +232,81 @@ export default function PublicInterviewPage() {
                 }
             }));
 
-            // Score in background
-            fetch('/api/score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    isPublic: true,
-                    candidateName: sessionData.candidateName,
-                    question: {
-                        question: currentQ.question,
-                        modelAnswer: currentQ.modelAnswer,
-                        type: 'technical'
-                    },
-                    assessment: {
-                        keywordsHit: [],
-                        keywordsMissed: [],
-                        softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
-                        interviewerNotes: `Candidate Transcript:\n${fullTranscript}\n\nAgent Reasoning: Follow-up completed.`
-                    }
-                })
-            }).then(r => r.json()).then(scoreResult => {
-                setSessionData((prev: any) => ({
-                    ...prev,
-                    assessments: {
-                        ...prev.assessments,
+            if (currentIndex < questions.length - 1) {
+                // Score in background
+                fetch('/api/score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        isPublic: true,
+                        candidateName: sessionData.candidateName,
+                        question: {
+                            question: currentQ.question,
+                            modelAnswer: currentQ.modelAnswer,
+                            type: 'technical'
+                        },
+                        assessment: {
+                            keywordsHit: [],
+                            keywordsMissed: [],
+                            softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
+                            interviewerNotes: `Candidate Transcript:\n${fullTranscript}\n\nAgent Reasoning: Follow-up completed.`
+                        }
+                    })
+                }).then(r => r.json()).then(scoreResult => {
+                    setSessionData((prev: any) => ({
+                        ...prev,
+                        assessments: {
+                            ...prev.assessments,
+                            [questionId]: {
+                                status: 'validated',
+                                didNotGetTo: false,
+                                llmScore: scoreResult.score || 3,
+                                llmFeedback: scoreResult.feedback || 'Follow-up completed.',
+                                finalScore: scoreResult.score || 3,
+                                finalFeedback: scoreResult.feedback || 'Follow-up completed.',
+                                keywordsHit: [],
+                                keywordsMissed: currentQ.keywords || []
+                            }
+                        }
+                    }));
+                }).catch(err => {
+                    console.error('Background scoring error for question', questionId, err);
+                });
+
+                // Advance immediately
+                setCurrentIndex((prev: number) => prev + 1);
+                setIsFollowUp(false);
+                setFollowUpPrompt(null);
+                setTranscript('');
+                setCumulativeTranscript('');
+            } else {
+                setAgentLoading(true);
+                setAgentPhase('Finalizing interview results...');
+                // Await scoring for the final question
+                try {
+                    const r = await fetch('/api/score', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            isPublic: true,
+                            candidateName: sessionData.candidateName,
+                            question: {
+                                question: currentQ.question,
+                                modelAnswer: currentQ.modelAnswer,
+                                type: 'technical'
+                            },
+                            assessment: {
+                                keywordsHit: [],
+                                keywordsMissed: [],
+                                softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
+                                interviewerNotes: `Candidate Transcript:\n${fullTranscript}\n\nAgent Reasoning: Follow-up completed.`
+                            }
+                        })
+                    });
+                    const scoreResult = await r.json();
+                    
+                    const updatedAssessments = {
+                        ...sessionData.assessments,
                         [questionId]: {
                             status: 'validated',
                             didNotGetTo: false,
@@ -266,21 +317,20 @@ export default function PublicInterviewPage() {
                             keywordsHit: [],
                             keywordsMissed: currentQ.keywords || []
                         }
-                    }
-                }));
-            }).catch(err => {
-                console.error('Background scoring error for question', questionId, err);
-            });
-
-            // Advance immediately
-            if (currentIndex < questions.length - 1) {
-                setCurrentIndex((prev: number) => prev + 1);
-                setIsFollowUp(false);
-                setFollowUpPrompt(null);
-                setTranscript('');
-                setCumulativeTranscript('');
-            } else {
-                handleFinish();
+                    };
+                    const finalSessionData = {
+                        ...sessionData,
+                        assessments: updatedAssessments
+                    };
+                    setSessionData(finalSessionData);
+                    await handleFinish(finalSessionData);
+                } catch (err) {
+                    console.error('Final scoring error', err);
+                    await handleFinish();
+                } finally {
+                    setAgentLoading(false);
+                    setAgentPhase('');
+                }
             }
             return;
         }
@@ -349,31 +399,82 @@ export default function PublicInterviewPage() {
                     }
                 }));
 
-                // Fix 3: Score in the background - do NOT await this
                 const agentReasoning = result.reasoning || 'Completed answering.';
-                fetch('/api/score', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        isPublic: true,
-                        candidateName: sessionData.candidateName,
-                        question: {
-                            question: currentQ.question,
-                            modelAnswer: currentQ.modelAnswer,
-                            type: 'technical'
-                        },
-                        assessment: {
-                            keywordsHit: [],
-                            keywordsMissed: [],
-                            softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
-                            interviewerNotes: `Candidate Transcript:\n${transcriptForScoring}\n\nAgent Reasoning: ${agentReasoning}`
-                        }
-                    })
-                }).then(scoreRes => scoreRes.json()).then(scoreResult => {
-                    setSessionData((prev: any) => ({
-                        ...prev,
-                        assessments: {
-                            ...prev.assessments,
+                if (currentIndex < questions.length - 1) {
+                    // Fix 3: Score in the background - do NOT await this
+                    fetch('/api/score', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            isPublic: true,
+                            candidateName: sessionData.candidateName,
+                            question: {
+                                question: currentQ.question,
+                                modelAnswer: currentQ.modelAnswer,
+                                type: 'technical'
+                            },
+                            assessment: {
+                                keywordsHit: [],
+                                keywordsMissed: [],
+                                softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
+                                interviewerNotes: `Candidate Transcript:\n${transcriptForScoring}\n\nAgent Reasoning: ${agentReasoning}`
+                            }
+                        })
+                    }).then(scoreRes => scoreRes.json()).then(scoreResult => {
+                        setSessionData((prev: any) => ({
+                            ...prev,
+                            assessments: {
+                                ...prev.assessments,
+                                [questionId]: {
+                                    status: 'validated',
+                                    didNotGetTo: false,
+                                    llmScore: scoreResult.score || 3,
+                                    llmFeedback: scoreResult.feedback || `Agent observed: ${agentReasoning}`,
+                                    finalScore: scoreResult.score || 3,
+                                    finalFeedback: scoreResult.feedback || `Agent observed: ${agentReasoning}`,
+                                    keywordsHit: [],
+                                    keywordsMissed: currentQ.keywords || []
+                                }
+                            }
+                        }));
+                    }).catch(err => {
+                        console.error('Background scoring error for question', questionId, err);
+                        // Leave the placeholder in place; PDF will show 'Scoring in progress' for that question
+                    });
+
+                    // Fix 3: Advance immediately without waiting for scoring
+                    setCurrentIndex((prev: number) => prev + 1);
+                    setIsFollowUp(false);
+                    setFollowUpPrompt(null);
+                    setTranscript('');
+                    setCumulativeTranscript('');
+                } else {
+                    setAgentPhase('Finalizing interview results...');
+                    // Await scoring for the final question
+                    try {
+                        const scoreRes = await fetch('/api/score', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                isPublic: true,
+                                candidateName: sessionData.candidateName,
+                                question: {
+                                    question: currentQ.question,
+                                    modelAnswer: currentQ.modelAnswer,
+                                    type: 'technical'
+                                },
+                                assessment: {
+                                    keywordsHit: [],
+                                    keywordsMissed: [],
+                                    softSkills: { clearlySpoken: false, eyeContact: false, confidence: false, structuredThinking: false },
+                                    interviewerNotes: `Candidate Transcript:\n${transcriptForScoring}\n\nAgent Reasoning: ${agentReasoning}`
+                                }
+                            })
+                        });
+                        const scoreResult = await scoreRes.json();
+                        
+                        const updatedAssessments = {
+                            ...sessionData.assessments,
                             [questionId]: {
                                 status: 'validated',
                                 didNotGetTo: false,
@@ -384,22 +485,17 @@ export default function PublicInterviewPage() {
                                 keywordsHit: [],
                                 keywordsMissed: currentQ.keywords || []
                             }
-                        }
-                    }));
-                }).catch(err => {
-                    console.error('Background scoring error for question', questionId, err);
-                    // Leave the placeholder in place; PDF will show 'Scoring in progress' for that question
-                });
-
-                // Fix 3: Advance immediately without waiting for scoring
-                if (currentIndex < questions.length - 1) {
-                    setCurrentIndex((prev: number) => prev + 1);
-                    setIsFollowUp(false);
-                    setFollowUpPrompt(null);
-                    setTranscript('');
-                    setCumulativeTranscript('');
-                } else {
-                    handleFinish();
+                        };
+                        const finalSessionData = {
+                            ...sessionData,
+                            assessments: updatedAssessments
+                        };
+                        setSessionData(finalSessionData);
+                        await handleFinish(finalSessionData);
+                    } catch (err) {
+                        console.error('Final scoring error', err);
+                        await handleFinish();
+                    }
                 }
             }
         } catch (e) {
@@ -412,7 +508,7 @@ export default function PublicInterviewPage() {
                 setTranscript('');
                 setCumulativeTranscript('');
             } else {
-                handleFinish();
+                await handleFinish();
             }
         } finally {
             clearInterval(phaseInterval);
@@ -456,16 +552,17 @@ export default function PublicInterviewPage() {
         }
     };
 
-    const handleDownloadPDF = async () => {
+    const handleDownloadPDF = async (overrideSessionData?: any) => {
         try {
+            const dataToUse = overrideSessionData || sessionData;
             // Drop any completely untouched questions from the PDF report by filtering the sessionData assessments
             // (Pending state means they never reached it before finishing early)
             const validAssessments = Object.fromEntries(
-                Object.entries(sessionData.assessments).filter(([_, a]: [string, any]) => a.status === 'validated')
+                Object.entries(dataToUse.assessments).filter(([_, a]: [string, any]) => a.status === 'validated')
             );
 
             const finalSessionData = {
-                ...sessionData,
+                ...dataToUse,
                 assessments: validAssessments
             };
 
@@ -499,10 +596,10 @@ export default function PublicInterviewPage() {
         }
     };
 
-    const handleFinish = async () => {
+    const handleFinish = async (overrideSessionData?: any) => {
         setStep('done');
         // Auto Generate PDF
-        await handleDownloadPDF();
+        await handleDownloadPDF(overrideSessionData);
     };
 
     if (step === 'loading') {
