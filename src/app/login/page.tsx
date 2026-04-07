@@ -38,18 +38,18 @@ export default function LoginPage() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+            <main className="min-h-screen nlm-bg flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
             </main>
         );
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center p-4">
+        <main className="min-h-screen nlm-bg flex flex-col items-center justify-center p-4">
             {/* Decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl opacity-50" />
             </div>
 
             {/* Login Card */}
@@ -66,7 +66,7 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
+                <div className="glass-card-strong rounded-2xl p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">

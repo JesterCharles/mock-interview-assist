@@ -52,51 +52,44 @@ export default function InterviewPage() {
         ? getAssessment(currentQuestion.id)
         : undefined;
 
-    const handleComplete = useCallback(async () => {
+    const handleComplete = useCallback(() => {
         if (!currentQuestion || !currentAssessment) return;
 
-        setIsProcessing(true);
         completeQuestion(currentQuestion.id);
 
-        // Start LLM scoring via server-side API (uses env variable)
-        try {
-            // Determine if this is a starter question
-            const isStarter = 'type' in currentQuestion;
+        const currentQId = currentQuestion.id;
+        const isStarter = 'type' in currentQuestion;
 
-            const response = await fetch('/api/score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    question: {
-                        question: currentQuestion.question,
-                        modelAnswer: 'modelAnswer' in currentQuestion ? (currentQuestion as ParsedQuestion).modelAnswer : undefined,
-                        // Include type and guidelines for starter questions
-                        type: isStarter ? (currentQuestion as StarterQuestion).type : undefined,
-                        guidelines: isStarter ? (currentQuestion as StarterQuestion).guidelines : undefined,
-                    },
-                    assessment: currentAssessment,
-                }),
-            });
-
+        // Start LLM scoring via server-side API in the background
+        fetch('/api/score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: {
+                    question: currentQuestion.question,
+                    modelAnswer: 'modelAnswer' in currentQuestion ? (currentQuestion as ParsedQuestion).modelAnswer : undefined,
+                    type: isStarter ? (currentQuestion as StarterQuestion).type : undefined,
+                    guidelines: isStarter ? (currentQuestion as StarterQuestion).guidelines : undefined,
+                },
+                assessment: currentAssessment,
+            }),
+        }).then(response => {
             if (response.ok) {
-                const result = await response.json();
-                setLLMResult(currentQuestion.id, result.score, result.feedback);
-            } else {
-                setLLMResult(currentQuestion.id, 3, 'Scoring temporarily unavailable. Please review manually.');
+                return response.json();
             }
-        } catch (error) {
+            throw new Error('Network response was not ok');
+        }).then(result => {
+            setLLMResult(currentQId, result.score, result.feedback);
+        }).catch(error => {
             console.error('LLM scoring failed:', error);
-            setLLMResult(currentQuestion.id, 3, 'Scoring temporarily unavailable. Please review manually.');
-        }
+            setLLMResult(currentQId, 3, 'Scoring temporarily unavailable. Please review manually.');
+        });
 
-        setIsProcessing(false);
-
-        // Move to next question
+        // Move to next question immediately
         if (progress.current < progress.total) {
             nextQuestion();
         }
     }, [currentQuestion, currentAssessment, progress, completeQuestion, setLLMResult, nextQuestion]);
-
     const handleSkip = useCallback(() => {
         if (progress.current < progress.total) {
             nextQuestion();
@@ -116,8 +109,12 @@ export default function InterviewPage() {
 
     if (!session || !currentQuestion || !currentAssessment) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="nlm-bg flex flex-col items-center justify-center p-4 min-h-screen">
+                <div className="flex flex-col items-center animate-fade-in">
+                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
+                        <Loader2 className="w-7 h-7 animate-spin text-white" />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -126,25 +123,27 @@ export default function InterviewPage() {
     const isLastQuestion = progress.current === progress.total;
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <main className="nlm-bg min-h-screen">
+            <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <header className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <ArrowLeft className="w-4 h-4" />
                         Exit Interview
                     </button>
 
                     {session.candidateName && (
-                        <div className="text-right">
-                            <p className="text-sm text-gray-500">Interviewing</p>
-                            <p className="font-semibold text-gray-900">{session.candidateName}</p>
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="text-xs font-bold gradient-text-static uppercase tracking-widest">Interviewing</span>
+                            <span className="text-sm font-medium text-slate-300 bg-white/[0.07] px-3 py-1.5 rounded-md border border-white/[0.06]">
+                                {session.candidateName}
+                            </span>
                         </div>
                     )}
-                </div>
+                </header>
 
                 {/* Progress Bar */}
                 <ProgressBar
@@ -167,7 +166,7 @@ export default function InterviewPage() {
                     onComplete={handleComplete}
                     onSkip={handleSkip}
                     onDidNotGetTo={(value) => markDidNotGetTo(currentQuestion.id, value)}
-                    isProcessing={isProcessing}
+                    isProcessing={false}
                 />
 
                 {/* Navigation */}
@@ -175,7 +174,7 @@ export default function InterviewPage() {
                     <button
                         onClick={previousQuestion}
                         disabled={session.currentQuestionIndex === 0}
-                        className="px-4 py-2 flex items-center gap-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2.5 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Previous
@@ -185,7 +184,7 @@ export default function InterviewPage() {
                         {!isLastQuestion ? (
                             <button
                                 onClick={nextQuestion}
-                                className="px-4 py-2 flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                className="px-4 py-2.5 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all text-sm font-medium"
                             >
                                 Next
                                 <ArrowRight className="w-4 h-4" />
@@ -193,9 +192,9 @@ export default function InterviewPage() {
                         ) : (
                             <button
                                 onClick={handleFinishInterview}
-                                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+                                className="btn-accent px-6 py-2.5 text-sm"
                             >
-                                <Flag className="w-5 h-5" />
+                                <Flag className="w-4 h-4" />
                                 Finish Interview
                             </button>
                         )}

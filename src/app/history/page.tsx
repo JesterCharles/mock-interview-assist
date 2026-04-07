@@ -101,27 +101,27 @@ export default function HistoryPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen nlm-bg flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
             </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+        <main className="min-h-screen nlm-bg">
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         Back to Home
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <HistoryIcon className="w-6 h-6 text-indigo-600" />
+                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                        <HistoryIcon className="w-6 h-6 text-indigo-400" />
                         Interview History
                     </h1>
 
@@ -130,10 +130,10 @@ export default function HistoryPage() {
 
                 {/* Empty State */}
                 {history.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-                        <HistoryIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-gray-700 mb-2">No Interview History</h2>
-                        <p className="text-gray-500 mb-6">
+                    <div className="glass-card-strong rounded-xl p-12 text-center">
+                        <HistoryIcon className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                        <h2 className="text-xl font-semibold text-white mb-2">No Interview History</h2>
+                        <p className="text-slate-400 mb-6">
                             Completed interviews will appear here after generating a PDF report.
                         </p>
                         <button
@@ -153,36 +153,36 @@ export default function HistoryPage() {
                             return (
                                 <div
                                     key={session.id}
-                                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                                    className="glass-card-strong rounded-xl overflow-hidden mb-4"
                                 >
                                     {/* Header Row */}
                                     <div
-                                        className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                                        className="p-6 cursor-pointer hover:bg-white/[0.04] transition-colors"
                                         onClick={() => setExpandedId(isExpanded ? null : session.id)}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-6">
                                                 {/* Candidate Info */}
                                                 <div>
-                                                    <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                                                    <div className="flex items-center gap-2 text-slate-300 text-sm mb-1">
                                                         <User className="w-4 h-4" />
                                                         {session.candidateName || 'Unnamed Candidate'}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-gray-400 text-xs">
+                                                    <div className="flex items-center gap-2 text-slate-400 text-xs">
                                                         <Calendar className="w-3 h-3" />
                                                         {formatDate(session.date)}
                                                     </div>
                                                 </div>
 
                                                 {/* Score */}
-                                                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+                                                <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.06] border border-white/[0.08] rounded-lg">
                                                     <div className="flex items-center gap-1">
                                                         {[1, 2, 3, 4, 5].map((star) => (
                                                             <Star
                                                                 key={star}
-                                                                className={`w-4 h-4 ${star <= scores.averageScore
+                                                                className={`w-4 h-4 flex-shrink-0 ${star <= scores.averageScore
                                                                     ? 'text-amber-400 fill-amber-400'
-                                                                    : 'text-gray-300'
+                                                                    : 'text-slate-600'
                                                                     }`}
                                                             />
                                                         ))}
@@ -193,10 +193,10 @@ export default function HistoryPage() {
                                                 </div>
 
                                                 {/* Stats */}
-                                                <div className="text-sm text-gray-500">
+                                                <div className="text-sm text-slate-400">
                                                     {scores.completedCount}/{allQuestions.length} questions
                                                     {scores.skippedCount > 0 && (
-                                                        <span className="text-gray-400">
+                                                        <span className="text-slate-500">
                                                             , {scores.skippedCount} skipped
                                                         </span>
                                                     )}
@@ -210,7 +210,7 @@ export default function HistoryPage() {
                                                         e.stopPropagation();
                                                         handleViewPDF(session);
                                                     }}
-                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                                                    className="px-4 py-2 bg-indigo-600/80 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2 border border-indigo-500/30"
                                                 >
                                                     <FileDown className="w-4 h-4" />
                                                     View PDF
@@ -221,7 +221,7 @@ export default function HistoryPage() {
                                                         handleDelete(session.id);
                                                     }}
                                                     disabled={deletingId === session.id}
-                                                    className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                                                    className="p-2 text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
                                                 >
                                                     {deletingId === session.id ? (
                                                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -230,9 +230,9 @@ export default function HistoryPage() {
                                                     )}
                                                 </button>
                                                 {isExpanded ? (
-                                                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                                                    <ChevronUp className="w-5 h-5 text-slate-400" />
                                                 ) : (
-                                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
                                                 )}
                                             </div>
                                         </div>
@@ -240,31 +240,31 @@ export default function HistoryPage() {
 
                                     {/* Expanded Details */}
                                     {isExpanded && (
-                                        <div className="border-t border-gray-100 p-6 bg-gray-50">
+                                        <div className="border-t border-white/10 p-6 bg-black/20">
                                             <div className="grid grid-cols-3 gap-4 mb-6">
-                                                <div className="bg-white p-4 rounded-lg">
-                                                    <p className="text-sm text-gray-500 mb-1">Technical Score</p>
+                                                <div className="glass-card p-4 rounded-lg">
+                                                    <p className="text-sm text-slate-400 mb-1">Technical Score</p>
                                                     <p className={`text-2xl font-bold ${getScoreColor(scores.technicalScore)}`}>
                                                         {scores.technicalScore}/5
                                                     </p>
                                                 </div>
-                                                <div className="bg-white p-4 rounded-lg">
-                                                    <p className="text-sm text-gray-500 mb-1">Soft Skills Score</p>
+                                                <div className="glass-card p-4 rounded-lg">
+                                                    <p className="text-sm text-slate-400 mb-1">Soft Skills Score</p>
                                                     <p className={`text-2xl font-bold ${getScoreColor(scores.softSkillScore)}`}>
                                                         {scores.softSkillScore}/5
                                                     </p>
                                                 </div>
-                                                <div className="bg-white p-4 rounded-lg">
-                                                    <p className="text-sm text-gray-500 mb-1">Weeks Covered</p>
-                                                    <p className="text-2xl font-bold text-gray-700">
+                                                <div className="glass-card p-4 rounded-lg">
+                                                    <p className="text-sm text-slate-400 mb-1">Weeks Covered</p>
+                                                    <p className="text-2xl font-bold text-white">
                                                         {session.selectedWeeks.join(', ')}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Question List */}
-                                            <h4 className="font-semibold text-gray-700 mb-3">Question Feedback</h4>
-                                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                                            <h4 className="font-semibold text-white mb-3">Question Feedback</h4>
+                                            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                                                 {allQuestions.map((question, index) => {
                                                     const assessment = session.assessments[question.id];
                                                     if (!assessment || assessment.didNotGetTo) return null;
@@ -272,14 +272,14 @@ export default function HistoryPage() {
                                                     return (
                                                         <div
                                                             key={question.id}
-                                                            className="bg-white p-4 rounded-lg border border-gray-100"
+                                                            className="glass-card p-4 rounded-lg"
                                                         >
                                                             <div className="flex items-start gap-3">
-                                                                <span className="text-sm font-medium text-gray-400 mt-0.5">
+                                                                <span className="text-sm font-medium text-slate-400 mt-0.5">
                                                                     Q{index + 1}
                                                                 </span>
                                                                 <div className="flex-1">
-                                                                    <p className="font-medium text-gray-800 text-sm mb-2">
+                                                                    <p className="font-medium text-slate-200 text-sm mb-2">
                                                                         {question.question}
                                                                     </p>
                                                                     <div className="flex items-center gap-2 mb-2">
@@ -288,12 +288,12 @@ export default function HistoryPage() {
                                                                                 key={star}
                                                                                 className={`w-3 h-3 ${star <= (assessment.finalScore || 0)
                                                                                     ? 'text-amber-400 fill-amber-400'
-                                                                                    : 'text-gray-300'
+                                                                                    : 'text-slate-600'
                                                                                     }`}
                                                                             />
                                                                         ))}
                                                                     </div>
-                                                                    <p className="text-gray-600 text-sm">
+                                                                    <p className="text-slate-400 text-sm leading-relaxed">
                                                                         {assessment.finalFeedback || assessment.llmFeedback || 'No feedback'}
                                                                     </p>
                                                                 </div>

@@ -229,7 +229,7 @@ export default function QuestionBanksPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <main className="min-h-screen nlm-bg">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
@@ -277,7 +277,7 @@ export default function QuestionBanksPage() {
                                 {builtInBanks.map(bank => (
                                     <div
                                         key={bank.id}
-                                        className="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-5 hover:bg-white/15 transition-colors"
+                                        className="glass-card rounded-xl p-5 hover:bg-white/[0.08] transition-colors border border-white/10"
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
@@ -310,7 +310,7 @@ export default function QuestionBanksPage() {
                             </h2>
 
                             {customBanks.length === 0 ? (
-                                <div className="bg-white/5 border border-dashed border-white/20 rounded-xl p-8 text-center">
+                                <div className="glass-card border border-dashed border-white/20 rounded-xl p-8 text-center">
                                     <Upload className="w-12 h-12 text-gray-500 mx-auto mb-3" />
                                     <p className="text-gray-400 mb-2">No custom question banks uploaded yet</p>
                                     <p className="text-sm text-gray-500">
@@ -322,7 +322,7 @@ export default function QuestionBanksPage() {
                                     {customBanks.map(bank => (
                                         <div
                                             key={bank.id}
-                                            className="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-5 hover:bg-white/15 transition-colors"
+                                            className="glass-card rounded-xl p-5 hover:bg-white/[0.08] transition-colors border border-white/10"
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
@@ -367,8 +367,8 @@ export default function QuestionBanksPage() {
                 {/* Preview Modal */}
                 {previewBank && (
                     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                        <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
-                            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                        <div className="glass-card-strong rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden border border-white/10">
+                            <div className="flex items-center justify-between p-4 border-b border-white/10">
                                 <h3 className="text-lg font-semibold text-white">{previewBank.name}</h3>
                                 <button
                                     onClick={() => setPreviewBank(null)}
@@ -387,7 +387,7 @@ export default function QuestionBanksPage() {
                                 ) : (
                                     <div className="space-y-4">
                                         {previewQuestions.map((q, index) => (
-                                            <div key={q.id} className="bg-slate-700/50 rounded-lg p-4">
+                                            <div key={q.id} className="glass-card rounded-lg p-4 border border-white/5">
                                                 <div className="flex items-start gap-3">
                                                     <span className="bg-indigo-600 text-white text-sm font-bold w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                                                         {index + 1}

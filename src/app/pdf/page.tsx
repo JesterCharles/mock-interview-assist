@@ -66,8 +66,8 @@ export default function PDFGenerationPage() {
 
     if (!session || !isClient) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen nlm-bg flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
             </div>
         );
     }
@@ -106,31 +106,31 @@ export default function PDFGenerationPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+        <main className="min-h-screen nlm-bg">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         {isFromHistory ? 'Back to History' : 'Back to Review'}
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900">PDF Report</h1>
+                    <h1 className="text-2xl font-bold text-white">PDF Report</h1>
 
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleRepeatInterview}
-                            className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+                            className="px-4 py-2 text-indigo-300 hover:text-indigo-200 font-medium flex items-center gap-2 border border-indigo-500/30 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors"
                         >
                             <RefreshCw className="w-4 h-4" />
                             Repeat Interview
                         </button>
                         <button
                             onClick={handleNewInterview}
-                            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium flex items-center gap-2"
+                            className="px-4 py-2 text-slate-400 hover:text-white font-medium flex items-center gap-2"
                         >
                             New Setup
                         </button>
@@ -163,9 +163,9 @@ export default function PDFGenerationPage() {
                 </div>
 
                 {/* PDF Preview */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div className="bg-gray-100 px-4 py-2 border-b border-gray-200">
-                        <span className="text-sm font-medium text-gray-600">Preview</span>
+                <div className="glass-card-strong rounded-xl overflow-hidden border border-white/10">
+                    <div className="bg-black/20 px-4 py-2 border-b border-white/10">
+                        <span className="text-sm font-medium text-slate-400">Preview</span>
                     </div>
                     <div className="h-[800px]">
                         <PDFViewer width="100%" height="100%" showToolbar={false}>

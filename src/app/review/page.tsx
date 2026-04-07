@@ -128,8 +128,8 @@ export default function ReviewPage() {
 
     if (!session) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen nlm-bg flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
             </div>
         );
     }
@@ -259,19 +259,19 @@ export default function ReviewPage() {
     });
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+        <main className="min-h-screen nlm-bg">
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
                         onClick={() => router.push('/interview')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         Back to Interview
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900">Review & Validate Scores</h1>
+                    <h1 className="text-2xl font-bold text-white">Review & Validate Scores</h1>
 
                     <div className="flex items-center gap-3">
                         <button
@@ -297,25 +297,25 @@ export default function ReviewPage() {
 
                 {/* Summary Cards - Editable */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <p className="text-sm text-gray-500 mb-1">Overall Score</p>
+                    <div className="glass-card-strong rounded-xl p-6 border border-white/10">
+                        <p className="text-sm text-slate-400 mb-1">Overall Score</p>
                         {editingOverall ? (
                             <>
-                                <p className="text-3xl font-bold text-indigo-600">
+                                <p className="text-3xl font-bold text-indigo-400">
                                     {(
                                         (overallTechnical * (100 - softSkillWeight) + overallSoftSkill * softSkillWeight) / 100
                                     ).toFixed(1)}/5
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-slate-500 mt-1">
                                     Tech {100 - softSkillWeight}% / Soft {softSkillWeight}%
                                 </p>
                             </>
                         ) : (
-                            <p className="text-3xl font-bold text-indigo-600">{aggregateScores.averageScore}/5</p>
+                            <p className="text-3xl font-bold text-indigo-400">{aggregateScores.averageScore}/5</p>
                         )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative group">
-                        <p className="text-sm text-gray-500 mb-1">Technical Score</p>
+                    <div className="glass-card-strong rounded-xl p-6 border border-white/10 relative group">
+                        <p className="text-sm text-slate-400 mb-1">Technical Score</p>
                         {editingOverall ? (
                             <input
                                 type="number"
@@ -324,16 +324,16 @@ export default function ReviewPage() {
                                 step="0.1"
                                 value={overallTechnical}
                                 onChange={(e) => setOverallTechnical(parseFloat(e.target.value) || 0)}
-                                className="w-20 text-2xl font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded px-2 py-1"
+                                className="w-20 text-2xl font-bold text-blue-400 bg-white/10 border border-white/20 rounded px-2 py-1 outline-none"
                             />
                         ) : (
-                            <p className="text-3xl font-bold text-blue-600">
+                            <p className="text-3xl font-bold text-blue-400">
                                 {(session?.overallTechnicalScore ?? aggregateScores.technicalScore).toFixed(1)}/5
                             </p>
                         )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative group">
-                        <p className="text-sm text-gray-500 mb-1">Soft Skills Score</p>
+                    <div className="glass-card-strong rounded-xl p-6 border border-white/10 relative group">
+                        <p className="text-sm text-slate-400 mb-1">Soft Skills Score</p>
                         {editingOverall ? (
                             <>
                                 <input
@@ -343,10 +343,10 @@ export default function ReviewPage() {
                                     step="0.1"
                                     value={overallSoftSkill}
                                     onChange={(e) => setOverallSoftSkill(parseFloat(e.target.value) || 0)}
-                                    className="w-20 text-2xl font-bold text-purple-600 bg-purple-50 border border-purple-200 rounded px-2 py-1"
+                                    className="w-20 text-2xl font-bold text-purple-400 bg-white/10 border border-white/20 rounded px-2 py-1 outline-none"
                                 />
                                 <div className="mt-3">
-                                    <label className="text-xs text-gray-500 block mb-1">
+                                    <label className="text-xs text-slate-400 block mb-1">
                                         Soft Skills Weight: {softSkillWeight}%
                                     </label>
                                     <input
@@ -356,21 +356,21 @@ export default function ReviewPage() {
                                         step="5"
                                         value={softSkillWeight}
                                         onChange={(e) => setSoftSkillWeight(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                        className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-purple-500"
                                     />
                                 </div>
                             </>
                         ) : (
-                            <p className="text-3xl font-bold text-purple-600">
+                            <p className="text-3xl font-bold text-purple-400">
                                 {(session?.overallSoftSkillScore ?? aggregateScores.softSkillScore).toFixed(1)}/5
                             </p>
                         )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <p className="text-sm text-gray-500 mb-1">Questions</p>
-                        <p className="text-3xl font-bold text-gray-700">
+                    <div className="glass-card-strong rounded-xl p-6 border border-white/10">
+                        <p className="text-sm text-slate-400 mb-1">Questions</p>
+                        <p className="text-3xl font-bold text-white">
                             {aggregateScores.completedCount}
-                            <span className="text-lg text-gray-400">/{allQuestions.length}</span>
+                            <span className="text-lg text-slate-500">/{allQuestions.length}</span>
                         </p>
                     </div>
                 </div>
@@ -425,32 +425,32 @@ export default function ReviewPage() {
 
                 {/* Overall Feedback Sections */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-blue-50 rounded-xl shadow-sm border border-blue-200 p-6">
-                        <h3 className="text-sm font-semibold text-blue-700 mb-2">Overall Technical Feedback</h3>
+                    <div className="bg-blue-500/10 rounded-xl shadow-sm border border-blue-500/20 p-6">
+                        <h3 className="text-sm font-semibold text-blue-300 mb-2">Overall Technical Feedback</h3>
                         {editingOverall ? (
                             <textarea
                                 value={technicalFeedbackText}
                                 onChange={(e) => setTechnicalFeedbackText(e.target.value)}
                                 placeholder="Summarize the candidate's technical strengths and areas for improvement..."
-                                className="w-full h-32 p-3 border border-blue-300 rounded-lg text-sm text-gray-900 bg-white resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full h-32 p-3 border border-white/[0.08] rounded-lg text-sm text-white bg-white/[0.06] resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         ) : (
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-blue-100 text-sm">
                                 {session?.technicalFeedback || 'No overall technical feedback provided yet. Click "Edit Overall Scores" to add.'}
                             </p>
                         )}
                     </div>
-                    <div className="bg-purple-50 rounded-xl shadow-sm border border-purple-200 p-6">
-                        <h3 className="text-sm font-semibold text-purple-700 mb-2">Overall Soft Skills Feedback</h3>
+                    <div className="bg-purple-500/10 rounded-xl shadow-sm border border-purple-500/20 p-6">
+                        <h3 className="text-sm font-semibold text-purple-300 mb-2">Overall Soft Skills Feedback</h3>
                         {editingOverall ? (
                             <textarea
                                 value={softSkillFeedbackText}
                                 onChange={(e) => setSoftSkillFeedbackText(e.target.value)}
                                 placeholder="Summarize the candidate's communication, confidence, and presentation..."
-                                className="w-full h-32 p-3 border border-purple-300 rounded-lg text-sm text-gray-900 bg-white resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full h-32 p-3 border border-white/[0.08] rounded-lg text-sm text-white bg-white/[0.06] resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                         ) : (
-                            <p className="text-gray-600 text-sm">
+                            <p className="text-purple-100 text-sm">
                                 {session?.softSkillFeedback || 'No overall soft skills feedback provided yet. Click "Edit Overall Scores" to add.'}
                             </p>
                         )}
@@ -471,14 +471,14 @@ export default function ReviewPage() {
                         return (
                             <div
                                 key={question.id}
-                                className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${assessment.didNotGetTo ? 'opacity-60' : ''
+                                className={`glass-card rounded-xl overflow-hidden border border-white/10 ${assessment.didNotGetTo ? 'opacity-60' : ''
                                     }`}
                             >
                                 <div className="p-6">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <span className="text-sm font-medium text-gray-500">
+                                                <span className="text-sm font-medium text-slate-400">
                                                     Q{index + 1}
                                                 </span>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}>
@@ -486,7 +486,7 @@ export default function ReviewPage() {
                                                     {statusInfo.label}
                                                 </span>
                                             </div>
-                                            <h3 className="text-lg font-medium text-gray-900 mb-3">
+                                            <h3 className="text-lg font-medium text-white mb-3">
                                                 {isParsedQuestion ? (question as ParsedQuestion).question : (question as StarterQuestion).question}
                                             </h3>
 
@@ -494,9 +494,9 @@ export default function ReviewPage() {
                                                 <>
                                                     {/* Score Display/Edit */}
                                                     {isEditing ? (
-                                                        <div className="space-y-4 bg-gray-50 rounded-lg p-4">
+                                                        <div className="space-y-4 bg-black/20 rounded-lg p-4 border border-white/5">
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                <label className="block text-sm font-medium text-slate-300 mb-2">
                                                                     Score (1-5)
                                                                 </label>
                                                                 <div className="flex items-center gap-2">
@@ -505,8 +505,8 @@ export default function ReviewPage() {
                                                                             key={score}
                                                                             onClick={() => setEditScore(score)}
                                                                             className={`w-10 h-10 rounded-lg font-medium transition-all ${editScore === score
-                                                                                ? 'bg-indigo-600 text-white shadow-md'
-                                                                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                                                ? 'bg-indigo-600 text-white shadow-md border border-indigo-500/50'
+                                                                                : 'bg-white/10 text-slate-300 hover:bg-white/20'
                                                                                 }`}
                                                                         >
                                                                             {score}
@@ -515,19 +515,19 @@ export default function ReviewPage() {
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                <label className="block text-sm font-medium text-slate-300 mb-2">
                                                                     Feedback
                                                                 </label>
                                                                 <textarea
                                                                     value={editFeedback}
                                                                     onChange={(e) => setEditFeedback(e.target.value)}
-                                                                    className="w-full h-24 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
+                                                                    className="w-full h-24 p-3 border border-white/[0.08] bg-white/[0.06] rounded-lg resize-none text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                                                 />
                                                             </div>
                                                             <div className="flex justify-end gap-3">
                                                                 <button
                                                                     onClick={() => setEditingId(null)}
-                                                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                                                    className="px-4 py-2 text-slate-400 hover:text-white"
                                                                 >
                                                                     Cancel
                                                                 </button>
@@ -548,12 +548,12 @@ export default function ReviewPage() {
                                                                         key={star}
                                                                         className={`w-5 h-5 ${star <= (assessment.finalScore || assessment.llmScore || 0)
                                                                             ? 'text-amber-400 fill-amber-400'
-                                                                            : 'text-gray-300'
+                                                                            : 'text-slate-600'
                                                                             }`}
                                                                     />
                                                                 ))}
                                                             </div>
-                                                            <p className="flex-1 text-gray-600 text-sm">
+                                                            <p className="flex-1 text-slate-300 text-sm">
                                                                 {assessment.finalFeedback || assessment.llmFeedback || 'Awaiting feedback...'}
                                                             </p>
                                                         </div>
@@ -581,7 +581,7 @@ export default function ReviewPage() {
                                                     )}
                                                 <button
                                                     onClick={() => handleStartEdit(question.id)}
-                                                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                                                    className="p-2 text-slate-400 hover:text-white transition-colors"
                                                     title="Edit score"
                                                 >
                                                     <Edit3 className="w-5 h-5" />

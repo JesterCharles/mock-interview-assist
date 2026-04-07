@@ -204,7 +204,7 @@ export default function DashboardPage() {
             <Clock className="w-6 h-6 text-indigo-400" />
             Questions
           </h3>
-          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+          <div className="glass-card rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="text-gray-300">Number of Questions</span>
               <input
@@ -290,7 +290,7 @@ export default function DashboardPage() {
                     onClick={() => toggleTech(tech)}
                     className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all duration-200 text-left ${isSelected
                       ? 'border-indigo-500 bg-indigo-500/20 text-white rounded-b-none'
-                      : 'border-white/5 bg-white/5 text-gray-300 hover:bg-white/10'
+                      : 'border-white/5 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08]'
                       }`}
                   >
                     <span className="truncate mr-2" title={tech.path}>
@@ -474,7 +474,7 @@ export default function DashboardPage() {
 
   const renderPhase3 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-right duration-500">
-      <div className="bg-white/5 rounded-2xl p-8 border border-white/10 space-y-6">
+      <div className="glass-card rounded-2xl p-8 space-y-6">
         <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
           <Check className="w-6 h-6 text-green-400" />
           Ready to Start?
@@ -541,7 +541,7 @@ export default function DashboardPage() {
   // --- Main Render ---
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col">
+    <main className="min-h-screen nlm-bg flex flex-col">
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col max-w-4xl">
 
         {/* Header */}
@@ -608,7 +608,7 @@ export default function DashboardPage() {
         )}
 
         {/* Wizard Card */}
-        <div className="bg-white/5 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/10 overflow-hidden flex-1 flex flex-col">
+        <div className="glass-card-strong rounded-3xl overflow-hidden flex-1 flex flex-col border border-white/10">
           <div className="p-8 flex-1">
             {setupPhase === 1 && renderPhase1()}
             {setupPhase === 2 && renderPhase2()}
