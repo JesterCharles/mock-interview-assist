@@ -15,7 +15,17 @@ export async function POST(request: Request) {
         }
 
         if (password === correctPassword) {
-            return NextResponse.json({ success: true });
+            const response = NextResponse.json({ success: true });
+            
+            // Set HttpOnly cookie for backend security
+            response.cookies.set('nlm_session', 'authenticated', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 60 * 60 * 24 // 24 hours
+            });
+            
+            return response;
         } else {
             return NextResponse.json(
                 { error: 'Invalid password' },

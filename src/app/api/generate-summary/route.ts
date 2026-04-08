@@ -45,8 +45,13 @@ Ensure the output is valid JSON.`],
 `]
 ]);
 
+import { isAuthenticatedSession } from '@/lib/auth-server';
+
 export async function POST(request: NextRequest) {
     try {
+        if (!(await isAuthenticatedSession())) {
+            return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
+        }
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey || !apiKey.startsWith('sk-')) {
             return NextResponse.json({

@@ -65,6 +65,41 @@ export default function PublicInterviewPage() {
         date: new Date().toISOString(),
         assessments: {}
     });
+    const [hasDownloadedPDF, setHasDownloadedPDF] = useState(false);
+    const [showExitModal, setShowExitModal] = useState(false);
+
+    // Navigation blocker
+    useEffect(() => {
+        if (step !== 'done' || hasDownloadedPDF) return;
+
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+
+        // Internal navigation blocker (intercepts clicks on <a> tags)
+        const handleInternalClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            const anchor = target.closest('a');
+            
+            if (anchor && anchor.href && anchor.href.startsWith(window.location.origin)) {
+                // Ignore clicks that are meant to be handled by local buttons (like Download)
+                if (anchor.getAttribute('download')) return;
+                
+                // If the link is internal and not already handled by a modal or local action
+                e.preventDefault();
+                setShowExitModal(true);
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        document.addEventListener('click', handleInternalClick, true);
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            document.removeEventListener('click', handleInternalClick, true);
+        };
+    }, [step, hasDownloadedPDF]);
 
     // Initialize Fingerprint & Check Rate Limits
     useEffect(() => {
@@ -590,6 +625,8 @@ export default function PublicInterviewPage() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+            setHasDownloadedPDF(true);
 
         } catch (e) {
             console.error("PDF gen error", e);
@@ -598,8 +635,6 @@ export default function PublicInterviewPage() {
 
     const handleFinish = async (overrideSessionData?: any) => {
         setStep('done');
-        // Auto Generate PDF
-        await handleDownloadPDF(overrideSessionData);
     };
 
     if (step === 'loading') {
@@ -1002,31 +1037,158 @@ export default function PublicInterviewPage() {
     }
 
     if (step === 'done') {
+        const validAssessments = Object.fromEntries(
+            Object.entries(sessionData.assessments).filter(([_, a]: [string, any]) => a.status === 'validated')
+        );
+        const aggregateScores = calculateAggregateScores(validAssessments as any);
+        const answeredQs = questions.filter(q => validAssessments[q.id]);
+
         return (
-            <div className="nlm-bg flex items-center justify-center p-4">
-                <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
-                        <CheckCircle2 className="w-8 h-8 text-white" />
+            <div className="nlm-bg p-4 md:p-8 min-h-screen">
+                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">
+                    <div className="glass-card-strong p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-gradient-to-bl from-emerald-500/10 to-transparent w-24 h-24 pointer-events-none" />
+                        
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-2 gap-6">
+                            {/* Left Section: Icon & Status */}
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                                    <CheckCircle2 className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <h2 className="text-xl font-bold text-white leading-tight">Interview Complete</h2>
+                                    <p className="text-slate-400 text-xs font-medium">
+                                        Great work, {sessionData.candidateName}. {aggregateScores.completedCount} questions analyzed.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Right Section: Actions */}
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <button
+                                    onClick={() => handleDownloadPDF(sessionData)}
+                                    className="flex-1 md:flex-none h-10 px-5 bg-cyan-600 hover:bg-cyan-500 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200 text-sm shadow-lg shadow-cyan-500/20"
+                                >
+                                    <Download className="w-4 h-4" /> Download
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!hasDownloadedPDF) {
+                                            setShowExitModal(true);
+                                        } else {
+                                            if (typeof window !== 'undefined') window.location.reload();
+                                        }
+                                    }}
+                                    className="flex-1 md:flex-none h-10 px-5 text-slate-300 hover:text-white bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] font-medium rounded-xl transition-all duration-200 text-sm"
+                                >
+                                    New Session
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Bottom Section: Score Summary */}
+                        <div className="mt-8 pt-6 border-t border-white/[0.05] flex justify-center">
+                            <div className="glass-card px-6 py-3 border-emerald-500/20 flex items-center gap-4">
+                                <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Aggregate Score</span>
+                                <div className="h-4 w-[1px] bg-white/10" />
+                                <span className="text-2xl font-bold text-white">{aggregateScores.averageScore.toFixed(1)} <span className="text-xs text-slate-400 font-normal">/ 5.0</span></span>
+                            </div>
+                        </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Interview Complete</h2>
-                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                        Great work. If your download was blocked, click below to retrieve your feedback report.
-                    </p>
-                    <div className="flex flex-col gap-3">
-                        <button
-                            onClick={handleDownloadPDF}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
-                        >
-                            Download Report <Download className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (typeof window !== 'undefined') window.location.reload();
-                            }}
-                            className="w-full px-6 py-3 text-slate-500 hover:text-white bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] font-medium rounded-xl transition-all duration-200 text-sm"
-                        >
-                            Start New Session
-                        </button>
+
+                    {/* Custom Confirmation Modal */}
+                    {showExitModal && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up relative border-amber-500/20 shadow-2xl shadow-amber-500/10">
+                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
+                                    <AlertTriangle className="w-8 h-8 text-amber-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">Unsaved Results</h3>
+                                <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                                    You have not downloaded your PDF report yet. If you start a new session, you will <span className="text-amber-400 font-semibold">permanently lose</span> this feedback.
+                                </p>
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowExitModal(false);
+                                            handleDownloadPDF(sessionData);
+                                        }}
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
+                                    >
+                                        <Download className="w-4 h-4" /> Download Now
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined') window.location.reload();
+                                        }}
+                                        className="w-full px-6 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 font-medium rounded-xl transition-all duration-200 text-sm"
+                                    >
+                                        Discard and Exit
+                                    </button>
+                                    <button
+                                        onClick={() => setShowExitModal(false)}
+                                        className="w-full px-6 py-3 text-slate-500 hover:text-white font-medium text-xs transition-all duration-200"
+                                    >
+                                        Go Back
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="space-y-6">
+                        <h3 className="text-xl font-bold text-white mb-4">Detailed Question Breakdown</h3>
+                        {answeredQs.map((q, idx) => {
+                            const evalData: any = validAssessments[q.id];
+                            return (
+                                <div key={idx} className="glass-card-strong p-4 md:p-6 relative overflow-hidden border-indigo-500/10">
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-cyan-400" />
+                                    
+                                    {/* Score at top right */}
+                                    <div className="absolute top-4 right-4 px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded-lg">
+                                        <span className="text-[10px] uppercase tracking-wider text-indigo-300 font-semibold mr-1.5">Score</span>
+                                        <span className="text-white font-bold text-sm">{evalData.finalScore || evalData.llmScore || 'N/A'}/5</span>
+                                    </div>
+
+                                    <h4 className="text-base font-bold text-white mb-3 pr-20 leading-relaxed">
+                                        <span className="text-cyan-400 mr-2 border border-cyan-500/30 bg-cyan-500/10 px-1.5 py-0.5 rounded text-xs uppercase tracking-tighter">Q{idx + 1}</span> 
+                                        {q.question}
+                                    </h4>
+
+                                    {evalData.interviewerNotes && (
+                                        <div className="mb-4">
+                                            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Your Transcript</p>
+                                            <div className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.04]">
+                                                <p className="text-xs text-slate-400 italic leading-relaxed">
+                                                    {evalData.interviewerNotes.includes('Candidate Transcript:\n') 
+                                                        ? evalData.interviewerNotes.split('Agent Reasoning:')[0].replace('Candidate Transcript:\n', '').trim() 
+                                                        : evalData.interviewerNotes}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="pl-0">
+                                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">AI Feedback</p>
+                                        <p className="text-sm text-slate-300 leading-relaxed">
+                                            {evalData.finalFeedback || evalData.llmFeedback || 'No feedback available.'}
+                                        </p>
+                                    </div>
+                                    
+                                    {evalData.keywordsHit?.length > 0 && (
+                                        <div className="mt-4 pt-4 border-t border-white/[0.05]">
+                                            <div className="flex flex-wrap gap-2">
+                                                {evalData.keywordsHit.map((kw: string, i: number) => (
+                                                    <span key={i} className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/5 text-emerald-400/70 border border-emerald-500/10">
+                                                        ✓ {kw}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

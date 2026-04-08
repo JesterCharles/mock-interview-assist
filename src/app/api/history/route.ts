@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { InterviewSession } from '@/lib/types';
+import { isAuthenticatedSession } from '@/lib/auth-server';
 
 // Store history in a JSON file in the project's data directory
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -40,6 +41,9 @@ function writeHistory(history: InterviewSession[]): void {
 // GET - Retrieve all interview history
 export async function GET() {
     try {
+        if (!(await isAuthenticatedSession())) {
+            return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
+        }
         const history = readHistory();
         return NextResponse.json({ history });
     } catch (error) {
@@ -51,6 +55,9 @@ export async function GET() {
 // POST - Save a completed interview to history
 export async function POST(request: NextRequest) {
     try {
+        if (!(await isAuthenticatedSession())) {
+            return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
+        }
         const session: InterviewSession = await request.json();
 
         const history = readHistory();
@@ -78,6 +85,9 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove a session from history
 export async function DELETE(request: NextRequest) {
     try {
+        if (!(await isAuthenticatedSession())) {
+            return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
+        }
         const { sessionId } = await request.json();
 
         const history = readHistory();
