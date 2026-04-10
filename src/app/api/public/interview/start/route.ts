@@ -19,7 +19,7 @@ export async function POST(request: Request) {
             if (!rateLimit.allowed) {
                 return NextResponse.json(
                     {
-                        error: 'Rate limit exceeded. You have reached the maximum number of interviews for today.',
+                        error: rateLimit.error || 'Rate limit exceeded. You have reached the maximum number of interviews for this period.',
                         nextReset: rateLimit.nextReset.toISOString()
                     },
                     { status: 429 }

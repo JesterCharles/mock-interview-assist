@@ -19,8 +19,11 @@ export function cleanRateLimits(): void {
         
         const now = new Date();
         const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+        const GLOBAL_STATS_KEY = '_GLOBAL_STATS_';
         
         for (const fingerprint in store) {
+            if (fingerprint === GLOBAL_STATS_KEY) continue;
+            
             const userData = store[fingerprint];
             const lastResetDate = new Date(userData.lastReset);
             
