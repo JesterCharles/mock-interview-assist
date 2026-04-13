@@ -173,6 +173,14 @@ export default function DashboardPage() {
       return;
     }
 
+    if (associateSlug) {
+      const result = validateSlug(associateSlug);
+      if (!result.success) {
+        setSlugError(result.error);
+        return;
+      }
+    }
+
     createSession(
       loadedQuestions,
       Math.min(questionCount, loadedQuestions.length),
@@ -571,7 +579,7 @@ export default function DashboardPage() {
         </button>
         <button
           onClick={handleStartInterview}
-          disabled={loadingQuestions || loadedQuestions.length === 0}
+          disabled={loadingQuestions || loadedQuestions.length === 0 || !!slugError}
           className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-2"
         >
           {loadingQuestions ? 'Please Wait...' : 'Start Interview Now'}
