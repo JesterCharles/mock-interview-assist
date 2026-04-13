@@ -32,6 +32,10 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code (excluding files in .dockerignore)
 COPY . .
 
+# Generate Prisma client before building (schema must be present)
+# prisma/schema.prisma is included via COPY . . above
+RUN npx prisma generate
+
 # Build the Next.js application
 # Note: We build without secrets - they will be provided at runtime
 RUN npm run build
@@ -81,9 +85,10 @@ ENV HOSTNAME="0.0.0.0"
 #   - GITHUB_TOKEN:   GitHub personal access token (optional, for GitHub features)
 # =============================================================================
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+# Health check — uses /api/health which verifies DB connectivity (D-02)
+# start-period=15s allows time for Prisma's first Supabase connection on cold start
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Start the application
 CMD ["node", "server.js"]
