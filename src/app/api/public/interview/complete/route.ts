@@ -18,6 +18,24 @@ export async function POST(request: Request) {
       );
     }
 
+    // Cap payload size — reject oversized sessions
+    const payloadSize = JSON.stringify(session).length;
+    if (payloadSize > 500_000) {
+      return NextResponse.json(
+        { error: 'Payload too large' },
+        { status: 413 }
+      );
+    }
+
+    // Basic shape validation — must have expected fields, not arbitrary data
+    if (typeof session.id !== 'string' || typeof session.status !== 'string' ||
+        !Array.isArray(session.questions) || typeof session.questionCount !== 'number') {
+      return NextResponse.json(
+        { error: 'Invalid session shape' },
+        { status: 400 }
+      );
+    }
+
     // Fingerprint-based auth — same gate as /api/public/interview/start
     const rateLimit = checkRateLimit(fingerprint);
     if (!rateLimit.allowed) {

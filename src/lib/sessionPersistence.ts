@@ -29,7 +29,10 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
       update: {
         candidateName: session.candidateName ?? null,
         interviewerName: session.interviewerName ?? null,
+        date: session.date,
         status: session.status,
+        questionCount: session.questionCount,
+        selectedWeeks: session.selectedWeeks as unknown as Prisma.InputJsonValue,
         overallTechnicalScore: session.overallTechnicalScore ?? null,
         overallSoftSkillScore: session.overallSoftSkillScore ?? null,
         technicalFeedback: session.technicalFeedback ?? null,

@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ status: 'ok', db: 'connected' })
   } catch (error) {
     return NextResponse.json(
-      { status: 'error', db: 'disconnected', detail: error instanceof Error ? error.message : String(error) },
+      { status: 'error', db: 'disconnected' },
       { status: 503 }
     )
   }

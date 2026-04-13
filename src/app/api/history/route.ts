@@ -5,6 +5,7 @@ import { InterviewSession } from '@/lib/types';
 import { isAuthenticatedSession } from '@/lib/auth-server';
 import { readHistory, writeHistory } from '@/lib/historyService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
+import { prisma } from '@/lib/prisma';
 
 // GET - Retrieve all interview history
 export async function GET() {
@@ -64,6 +65,13 @@ export async function DELETE(request: NextRequest) {
         const history = readHistory();
         const filteredHistory = history.filter(h => h.id !== sessionId);
         writeHistory(filteredHistory);
+
+        // Dual-delete from Supabase (log-and-continue on failure)
+        try {
+            await prisma.session.deleteMany({ where: { id: sessionId } });
+        } catch (error) {
+            console.error('[history] DB delete failed:', error);
+        }
 
         return NextResponse.json({ success: true, totalSessions: filteredHistory.length });
     } catch (error) {
