@@ -48,7 +48,7 @@ Plans:
 **Plans:** 2 plans
 Plans:
 - [x] 02-01-PLAN.md — Session model, historyService extraction, dual-write in /api/history POST
-- [ ] 02-02-PLAN.md — Public interview complete endpoint, sync-check endpoint
+- [x] 02-02-PLAN.md — Public interview complete endpoint, sync-check endpoint
 
 ### Phase 3: Associate Profiles
 **Goal**: Associates have persistent identities that link across sessions, assigned by trainers without requiring any login
