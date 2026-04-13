@@ -31,7 +31,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `npx prisma migrate deploy` succeeds against the Supabase pooler URL without error
   3. Docker production image starts and the app can query Supabase (health endpoint returns 200)
   4. Prisma binary is present inside the Docker image (no missing-binary crash on startup)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — Prisma setup, schema, singleton client, health endpoint, schema push
+- [ ] 01-02-PLAN.md — Docker + Next.js build integration for Prisma binaries
 
 ### Phase 2: Session Persistence
 **Goal**: Every completed mock session is saved to Supabase with full scoring data, while file-based storage continues to work unchanged
@@ -107,7 +110,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB Foundation | 0/TBD | Not started | - |
+| 1. DB Foundation | 0/2 | Planning complete | - |
 | 2. Session Persistence | 0/TBD | Not started | - |
 | 3. Associate Profiles | 0/TBD | Not started | - |
 | 4. Gap Service | 0/TBD | Not started | - |
