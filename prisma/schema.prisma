@@ -13,8 +13,17 @@ model HealthCheck {
   createdAt DateTime @default(now())
 }
 
+model Associate {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  displayName String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sessions    Session[]
+}
+
 model Session {
-  id                    String   @id
+  id                    String     @id
   candidateName         String?
   interviewerName       String?
   date                  String
@@ -28,6 +37,8 @@ model Session {
   questions             Json
   starterQuestions      Json
   assessments           Json
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  associateId           Int?
+  associate             Associate? @relation(fields: [associateId], references: [id])
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 }

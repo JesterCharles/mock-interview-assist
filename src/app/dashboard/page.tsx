@@ -13,6 +13,7 @@ import { parseInterviewQuestions } from '@/lib/markdownParser';
 import { ParsedQuestion } from '@/lib/types';
 import { GitHubService, GitHubFile } from '@/lib/github-service';
 import { useAuth } from '@/lib/auth-context';
+import { validateSlug } from '@/lib/slug-validation';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -56,6 +57,8 @@ export default function DashboardPage() {
   // Local state for Phase 2
   const [candidateName, setCandidateName] = useState('');
   const [interviewerName, setInterviewerName] = useState('');
+  const [associateSlug, setAssociateSlug] = useState('');
+  const [slugError, setSlugError] = useState<string | null>(null);
 
   // Pagination state for tech list
   const [techPage, setTechPage] = useState(1);
@@ -148,6 +151,22 @@ export default function DashboardPage() {
     setTechPage(1);
   }, [techSearch]);
 
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const normalized = raw.toLowerCase().trim();
+    setAssociateSlug(normalized);
+    if (normalized) {
+      const result = validateSlug(normalized);
+      if (!result.success) {
+        setSlugError(result.error);
+      } else {
+        setSlugError(null);
+      }
+    } else {
+      setSlugError(null);
+    }
+  };
+
   const handleStartInterview = () => {
     if (loadedQuestions.length === 0) {
       alert('Questions are not loaded yet. Please wait.');
@@ -160,7 +179,8 @@ export default function DashboardPage() {
       [1], // Placeholder for weeks
       candidateName || undefined,
       interviewerName || undefined,
-      interviewLevel
+      interviewLevel,
+      associateSlug || undefined
     );
 
     router.push('/interview');
@@ -417,6 +437,22 @@ export default function DashboardPage() {
             />
           </div>
         </div>
+
+        {/* Associate ID (optional) */}
+        <div className="mt-6 space-y-2">
+          <label className="text-sm text-gray-300">
+            Associate ID <span className="text-gray-500">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={associateSlug}
+            onChange={handleSlugChange}
+            placeholder="e.g. jane-doe"
+            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white outline-none focus:border-indigo-500 transition-colors"
+          />
+          {slugError && <p className="text-xs text-red-400">{slugError}</p>}
+          <p className="text-xs text-gray-500">Links this session to an associate&apos;s history</p>
+        </div>
       </div>
 
       <div>
@@ -489,6 +525,13 @@ export default function DashboardPage() {
 
           <span className="text-gray-400">Candidate</span>
           <span className="text-white font-medium">{candidateName || 'Not specified'}</span>
+
+          {associateSlug && (
+            <>
+              <span className="text-gray-400">Associate ID</span>
+              <span className="text-white font-medium">{associateSlug}</span>
+            </>
+          )}
 
           <span className="text-gray-400">Questions</span>
           <span className="text-white font-medium">{questionCount} (~{questionCount * 2} min)</span>

@@ -44,7 +44,8 @@ interface InterviewStore {
         selectedWeeks: number[], // Kept for backward compat, though we might use selectedTechs now
         candidateName?: string,
         interviewerName?: string,
-        interviewLevel?: 'entry' | 'experienced'
+        interviewLevel?: 'entry' | 'experienced',
+        associateSlug?: string
     ) => void;
 
     resetSession: () => void;
@@ -107,7 +108,7 @@ export const useInterviewStore = create<InterviewStore>()(
             })),
             setLoadingQuestions: (loading) => set({ loadingQuestions: loading }),
 
-            createSession: (questions, questionCount, selectedWeeks, candidateName, interviewerName, interviewLevel = 'entry') => {
+            createSession: (questions, questionCount, selectedWeeks, candidateName, interviewerName, interviewLevel = 'entry', associateSlug) => {
                 // Build weights mapping: weekNumber -> weight
                 // Note: weekNumber corresponds to the index+1 of selectedTechs (matching how questions are parsed)
                 const state = get();
@@ -155,6 +156,7 @@ export const useInterviewStore = create<InterviewStore>()(
                         id: generateSessionId(),
                         candidateName,
                         interviewerName,
+                        associateSlug,
                         date: new Date().toISOString(),
                         selectedWeeks,
                         questionCount,

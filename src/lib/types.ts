@@ -42,6 +42,7 @@ export interface InterviewSession {
     id: string;
     candidateName?: string;
     interviewerName?: string;
+    associateSlug?: string;  // Trainer-assigned identifier linking sessions to associate profile
     date: string;
     selectedWeeks: number[];
     questionCount: number;
