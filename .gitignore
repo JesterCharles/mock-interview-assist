@@ -42,6 +42,3 @@ next-env.d.ts
 
 # interview history data
 /data
-
-# prisma generated client (regenerated via postinstall)
-/src/generated/prisma
