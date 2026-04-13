@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Prisma binary is present inside the Docker image (no missing-binary crash on startup)
 **Plans:** 2 plans
 Plans:
-- [ ] 01-01-PLAN.md — Prisma setup, schema, singleton client, health endpoint, schema push
-- [ ] 01-02-PLAN.md — Docker + Next.js build integration for Prisma binaries
+- [x] 01-01-PLAN.md — Prisma setup, schema, singleton client, health endpoint, schema push
+- [x] 01-02-PLAN.md — Docker + Next.js build integration for Prisma binaries
 
 ### Phase 2: Session Persistence
 **Goal**: Every completed mock session is saved to Supabase with full scoring data, while file-based storage continues to work unchanged
