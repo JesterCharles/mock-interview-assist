@@ -27,7 +27,7 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 ### Active
 
 - [ ] **PERSIST-01**: Session persistence in Supabase (every mock stored with full scoring data)
-- [ ] **PERSIST-02**: Associate profiles with trainer-assigned slug/ID (persistent identity)
+- [x] **PERSIST-02**: Associate profiles with trainer-assigned slug/ID (persistent identity) — Validated in Phase 3: Associate Profiles
 - [ ] **GAP-01**: Two-level gap tracking (skill → topic) with recency-weighted scoring
 - [ ] **GAP-02**: Adaptive mock setup (pre-select technologies/weights based on gap history)
 - [ ] **DASH-01**: Trainer dashboard — roster view with readiness status badges
@@ -70,7 +70,7 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 |----------|-----------|---------|
 | Supabase (hosted Postgres) over SQLite | Avoid migration headache when scaling to multi-tenant. Concurrent writes handled natively. Auth/RLS available for future segments. | — Pending |
 | Prisma as ORM | Type-safe queries, works identically with Postgres and SQLite if needed to switch | — Pending |
-| Trainer-assigned associate IDs (no login) | Simplest identity model for MVP. No auth complexity. | — Pending |
+| Trainer-assigned associate IDs (no login) | Simplest identity model for MVP. No auth complexity. | Validated Phase 3 |
 | 0.8 recency decay for gap algorithm | Recent sessions weighted more. Simple starting point, autoresearch optimizes later. | — Pending |
 | 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate based on experience. | — Pending |
 | Interview format only for MVP | Validate core loop before expanding to other formats | — Pending |
@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 after initialization*
+*Last updated: 2026-04-13 after Phase 3 (Associate Profiles) completion*
