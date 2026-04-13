@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Connectivity test table — proves the pipeline works
+model HealthCheck {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
+
+model Associate {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  displayName String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sessions    Session[]
+}
+
+model Session {
+  id                    String     @id
+  candidateName         String?
+  interviewerName       String?
+  date                  String
+  status                String
+  questionCount         Int
+  selectedWeeks         Json
+  overallTechnicalScore Float?
+  overallSoftSkillScore Float?
+  technicalFeedback     String?
+  softSkillFeedback     String?
+  questions             Json
+  starterQuestions      Json
+  assessments           Json
+  associateId           Int?
+  associate             Associate? @relation(fields: [associateId], references: [id])
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+}
