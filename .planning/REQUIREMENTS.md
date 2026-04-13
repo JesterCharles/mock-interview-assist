@@ -82,13 +82,34 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| PERSIST-01 | Phase 2 | Pending |
+| PERSIST-02 | Phase 3 | Pending |
+| PERSIST-03 | Phase 1 | Pending |
+| PERSIST-04 | Phase 2 | Pending |
+| PERSIST-05 | Phase 2 | Pending |
+| PERSIST-06 | Phase 1 | Pending |
+| PERSIST-07 | Phase 1 | Pending |
+| GAP-01 | Phase 4 | Pending |
+| GAP-02 | Phase 4 | Pending |
+| GAP-03 | Phase 4 | Pending |
+| GAP-04 | Phase 4 | Pending |
+| GAP-05 | Phase 7 | Pending |
+| DASH-01 | Phase 6 | Pending |
+| DASH-02 | Phase 6 | Pending |
+| DASH-03 | Phase 6 | Pending |
+| DASH-04 | Phase 6 | Pending |
+| DASH-05 | Phase 6 | Pending |
+| DASH-06 | Phase 6 | Pending |
+| DASH-07 | Phase 6 | Pending |
+| READY-01 | Phase 5 | Pending |
+| READY-02 | Phase 5 | Pending |
+| READY-03 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 20
+- v1 requirements: 22 total
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-13 after research synthesis*
+*Last updated: 2026-04-13 after roadmap creation*
