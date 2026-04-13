@@ -13,9 +13,21 @@ model HealthCheck {
   createdAt DateTime @default(now())
 }
 
-// Session skeleton — expanded in Phase 2
 model Session {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id
+  candidateName         String?
+  interviewerName       String?
+  date                  String
+  status                String
+  questionCount         Int
+  selectedWeeks         Json
+  overallTechnicalScore Float?
+  overallSoftSkillScore Float?
+  technicalFeedback     String?
+  softSkillFeedback     String?
+  questions             Json
+  starterQuestions      Json
+  assessments           Json
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

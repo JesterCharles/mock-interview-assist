@@ -1,42 +1,9 @@
 // API route to manage interview history stored on the file system
 
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import { InterviewSession } from '@/lib/types';
 import { isAuthenticatedSession } from '@/lib/auth-server';
-
-// Store history in a JSON file in the project's data directory
-const DATA_DIR = path.join(process.cwd(), 'data');
-const HISTORY_FILE = path.join(DATA_DIR, 'interview-history.json');
-
-// Ensure data directory exists
-function ensureDataDir() {
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-}
-
-// Read history from file
-function readHistory(): InterviewSession[] {
-    ensureDataDir();
-    if (!fs.existsSync(HISTORY_FILE)) {
-        return [];
-    }
-    try {
-        const content = fs.readFileSync(HISTORY_FILE, 'utf-8');
-        return JSON.parse(content);
-    } catch (error) {
-        console.error('Error reading history file:', error);
-        return [];
-    }
-}
-
-// Write history to file
-function writeHistory(history: InterviewSession[]): void {
-    ensureDataDir();
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
-}
+import { readHistory, writeHistory } from '@/lib/historyService';
 
 // GET - Retrieve all interview history
 export async function GET() {
