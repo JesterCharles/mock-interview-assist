@@ -60,8 +60,8 @@ Plans:
   3. Associate profile page shows all sessions belonging to that slug
 **Plans:** 2 plans
 Plans:
-- [ ] 03-01-PLAN.md — Associate model, slug validation, store + dashboard + API wiring, schema push
-- [ ] 03-02-PLAN.md — Associate profile page at /associate/[slug]
+- [x] 03-01-PLAN.md — Associate model, slug validation, store + dashboard + API wiring, schema push
+- [x] 03-02-PLAN.md — Associate profile page at /associate/[slug]
 
 ### Phase 4: Gap Service
 **Goal**: The system computes meaningful skill and topic gaps per associate using recency-weighted scoring derived from actual question bank metadata
