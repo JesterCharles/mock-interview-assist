@@ -2,7 +2,7 @@
 
 ## Current Run
 - Started: 2026-04-13
-- Current stage: plan (taste gate)
+- Current stage: execute
 - Mode: resume
 
 ## Stages
@@ -11,8 +11,8 @@
 | discover | done | 2026-04-13 | 2026-04-13 | Office hours complete. Design doc APPROVED. Startup mode, Approach A (Readiness Loop MVP). |
 | init | done | 2026-04-13 | 2026-04-13 | PROJECT.md, REQUIREMENTS.md (22 reqs), ROADMAP.md (7 phases), 4 research agents |
 | design | done | 2026-04-13 | 2026-04-13 | DESIGN.md created. Editorial/utilitarian aesthetic. 3 AI voices converged. Outside voices (Codex+subagent) approved. Preview shipped. |
-| plan | in_progress | 2026-04-13 | | 15 plans across 7 phases. 7 researchers + 7 planners + 1 checker. Taste gate pending. |
-| execute | pending | | | |
+| plan | done | 2026-04-13 | 2026-04-13 | 15 plans across 7 phases. 7 researchers + 7 planners + 1 checker. No taste decisions — all auto-approved. |
+| execute | in_progress | 2026-04-13 | | Starting Phase 1: DB Foundation |
 | review | pending | | | |
 | test | pending | | | |
 | debug | pending | | | |
@@ -25,7 +25,7 @@
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
 | Design selection | design | sync | passed | Approved editorial/utilitarian direction. Warm parchment + burnt orange accent. |
-| Taste decisions | plan | async | pending | |
+| Taste decisions | plan | async | passed | No taste decisions surfaced — all auto-defaults aligned with CLAUDE.md stack decisions |
 | Review findings | review | async | pending | |
 | Merge approval | ship | sync | pending | |
 | Milestone closure | ship | async | pending | |
