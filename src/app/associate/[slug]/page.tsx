@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { isAuthenticatedSession } from '@/lib/auth-server';
+import { validateSlug } from '@/lib/slug-validation';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -106,12 +107,16 @@ export default async function AssociateProfilePage({ params }: PageProps) {
     redirect('/login');
   }
 
-  /* ---- Extract slug (Next.js 16 async params) ---- */
+  /* ---- Extract and validate slug (Next.js 16 async params) ---- */
   const { slug } = await params;
+  const slugValidation = validateSlug(slug);
+  if (!slugValidation.success) {
+    notFound();
+  }
 
   /* ---- Data query ---- */
   const associate = await prisma.associate.findUnique({
-    where: { slug },
+    where: { slug: slugValidation.slug },
     include: {
       sessions: {
         orderBy: { createdAt: 'desc' },
