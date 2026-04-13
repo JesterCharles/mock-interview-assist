@@ -44,8 +44,7 @@ interface InterviewStore {
         selectedWeeks: number[], // Kept for backward compat, though we might use selectedTechs now
         candidateName?: string,
         interviewerName?: string,
-        interviewLevel?: 'entry' | 'experienced',
-        associateSlug?: string
+        interviewLevel?: 'entry' | 'experienced'
     ) => void;
 
     resetSession: () => void;
@@ -108,7 +107,7 @@ export const useInterviewStore = create<InterviewStore>()(
             })),
             setLoadingQuestions: (loading) => set({ loadingQuestions: loading }),
 
-            createSession: (questions, questionCount, selectedWeeks, candidateName, interviewerName, interviewLevel = 'entry', associateSlug) => {
+            createSession: (questions, questionCount, selectedWeeks, candidateName, interviewerName, interviewLevel = 'entry') => {
                 // Build weights mapping: weekNumber -> weight
                 // Note: weekNumber corresponds to the index+1 of selectedTechs (matching how questions are parsed)
                 const state = get();
@@ -116,6 +115,13 @@ export const useInterviewStore = create<InterviewStore>()(
                 state.selectedTechs.forEach((tech, index) => {
                     const weekNumber = index + 1;
                     weekWeights[weekNumber] = state.techWeights[tech.path] ?? 1;
+                });
+
+                const techMap: Record<number, string> = {};
+                state.selectedTechs.forEach((tech, index) => {
+                    const weekNumber = index + 1;
+                    // Strip .md extension for clean skill name: "react.md" -> "react"
+                    techMap[weekNumber] = tech.name.replace(/\.md$/i, '').toLowerCase();
                 });
 
                 const selectedQuestions = selectRandomQuestions(questions, questionCount, interviewLevel, weekWeights);
@@ -156,7 +162,6 @@ export const useInterviewStore = create<InterviewStore>()(
                         id: generateSessionId(),
                         candidateName,
                         interviewerName,
-                        associateSlug,
                         date: new Date().toISOString(),
                         selectedWeeks,
                         questionCount,
@@ -165,6 +170,7 @@ export const useInterviewStore = create<InterviewStore>()(
                         assessments,
                         currentQuestionIndex: 0,
                         status: 'in-progress',
+                        techMap,
                     },
                 });
             },
