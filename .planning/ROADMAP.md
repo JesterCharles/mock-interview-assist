@@ -55,7 +55,10 @@ Plans:
   1. A trainer can assign a slug/ID to an associate and sessions from that associate are linked under one profile
   2. Re-running an interview with the same associate slug attaches the new session to the existing profile
   3. Associate profile page shows all sessions belonging to that slug
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 03-01-PLAN.md — Associate model, slug validation, store + dashboard + API wiring, schema push
+- [ ] 03-02-PLAN.md — Associate profile page at /associate/[slug]
 
 ### Phase 4: Gap Service
 **Goal**: The system computes meaningful skill and topic gaps per associate using recency-weighted scoring derived from actual question bank metadata
@@ -66,7 +69,11 @@ Plans:
   2. A newer session contributes more to the gap score than an older one (0.8 decay factor visible in score changes)
   3. Gap scores do not display for an associate with fewer than 3 completed sessions — a placeholder is shown instead
   4. Topic tags come from the question bank Markdown metadata, not hard-coded values
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Install vitest/zod, add GapScore model + techMap to schema, push to Supabase
+- [ ] 04-02-PLAN.md — TDD gap algorithm: recency-weighted average, score extraction, two-level tracking
+- [ ] 04-03-PLAN.md — Wire gap persistence into session save, create read API with 3-session gate
 
 ### Phase 5: Readiness Signals
 **Goal**: Each associate has a computed readiness signal and a specific recommended next practice area, updated on every session save
@@ -76,7 +83,10 @@ Plans:
   1. An associate with 3+ sessions averaging 75% or above with a non-negative score trend is marked "ready"
   2. Each associate's profile shows their single highest-priority practice recommendation (lowest weighted gap score)
   3. A trainer can change the readiness threshold in settings and the badges on all associate profiles update accordingly
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 05-01-PLAN.md — Readiness service, classification logic, Associate schema extension, session save integration
+- [ ] 05-02-PLAN.md — Settings model, threshold API, bulk recompute on threshold change
 
 ### Phase 6: Trainer Dashboard
 **Goal**: Trainers can view their entire associate roster at a glance and drill into any associate's history, gaps, and score calibration
@@ -89,7 +99,10 @@ Plans:
   4. The calibration view shows AI score vs trainer override side-by-side for any dimension
   5. Associates with fewer than 3 sessions display a meaningful empty state (no broken charts or blank panels)
   6. The /trainer route is protected by the existing single-password auth — unauthenticated users are redirected
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 06-01-PLAN.md — Install recharts, design tokens, roster page with auth guard and sortable table
+- [ ] 06-02-PLAN.md — Associate detail page with session history, gap trend chart, and calibration view
 **UI hint**: yes
 
 ### Phase 7: Adaptive Setup
@@ -100,20 +113,23 @@ Plans:
   1. Opening the mock setup wizard for an associate with gap history shows technologies pre-selected and weighted by gap scores
   2. A trainer can change any pre-selected technology or weight before starting the interview
   3. Starting a mock for an associate with no gap history (fewer than 3 sessions) falls back to the existing manual setup without error
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 07-01-PLAN.md — Gap scores API endpoint and weight interpolation utility with tests
+- [ ] 07-02-PLAN.md — Dashboard wizard pre-population integration and visual verification
 **UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DB Foundation | 0/2 | Planning complete | - |
 | 2. Session Persistence | 0/TBD | Not started | - |
-| 3. Associate Profiles | 0/TBD | Not started | - |
-| 4. Gap Service | 0/TBD | Not started | - |
-| 5. Readiness Signals | 0/TBD | Not started | - |
-| 6. Trainer Dashboard | 0/TBD | Not started | - |
-| 7. Adaptive Setup | 0/TBD | Not started | - |
+| 3. Associate Profiles | 0/2 | Planning complete | - |
+| 4. Gap Service | 0/3 | Planning complete | - |
+| 5. Readiness Signals | 0/2 | Planning complete | - |
+| 6. Trainer Dashboard | 0/2 | Planning complete | - |
+| 7. Adaptive Setup | 0/2 | Planning complete | - |
