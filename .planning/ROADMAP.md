@@ -45,7 +45,10 @@ Plans:
   2. The same session also writes to the existing JSON file — existing interview history page still works
   3. A trainer can hit the sync-check endpoint and see matching session counts between file storage and DB
   4. Existing interview flows (trainer-led, public automated) complete without regression
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 02-01-PLAN.md — Session model, historyService extraction, dual-write in /api/history POST
+- [ ] 02-02-PLAN.md — Public interview complete endpoint, sync-check endpoint
 
 ### Phase 3: Associate Profiles
 **Goal**: Associates have persistent identities that link across sessions, assigned by trainers without requiring any login
@@ -127,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DB Foundation | 0/2 | Planning complete | - |
-| 2. Session Persistence | 0/TBD | Not started | - |
+| 2. Session Persistence | 0/2 | Planning complete | - |
 | 3. Associate Profiles | 0/2 | Planning complete | - |
 | 4. Gap Service | 0/3 | Planning complete | - |
 | 5. Readiness Signals | 0/2 | Planning complete | - |
