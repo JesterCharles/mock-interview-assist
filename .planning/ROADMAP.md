@@ -47,7 +47,7 @@ Plans:
   4. Existing interview flows (trainer-led, public automated) complete without regression
 **Plans:** 2 plans
 Plans:
-- [ ] 02-01-PLAN.md — Session model, historyService extraction, dual-write in /api/history POST
+- [x] 02-01-PLAN.md — Session model, historyService extraction, dual-write in /api/history POST
 - [ ] 02-02-PLAN.md — Public interview complete endpoint, sync-check endpoint
 
 ### Phase 3: Associate Profiles
