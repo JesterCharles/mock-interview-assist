@@ -71,7 +71,7 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
         questions: session.questions as unknown as Prisma.InputJsonValue,
         starterQuestions: session.starterQuestions as unknown as Prisma.InputJsonValue,
         assessments: session.assessments as unknown as Prisma.InputJsonValue,
-        associateId,
+        ...(associateId !== null ? { associateId } : {}),
       },
     });
     return true;
