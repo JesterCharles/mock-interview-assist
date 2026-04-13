@@ -634,6 +634,15 @@ export default function PublicInterviewPage() {
     };
 
     const handleFinish = async (overrideSessionData?: any) => {
+        // Persist public session to Supabase (fire-and-forget)
+        const finalData = overrideSessionData || sessionData;
+        if (finalData?.id && fingerprint) {
+            fetch('/api/public/interview/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fingerprint, session: finalData }),
+            }).catch(err => console.error('[public-interview] persist failed:', err));
+        }
         setStep('done');
     };
 
