@@ -20,6 +20,7 @@ model Associate {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   sessions    Session[]
+  gapScores   GapScore[]
 }
 
 model Session {
@@ -37,8 +38,24 @@ model Session {
   questions             Json
   starterQuestions      Json
   assessments           Json
+  techMap               Json?      // Record<number, string> mapping weekNumber -> skill name
   associateId           Int?
   associate             Associate? @relation(fields: [associateId], references: [id])
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
+}
+
+model GapScore {
+  id            String    @id @default(cuid())
+  associateId   Int
+  skill         String
+  topic         String    @default("")
+  weightedScore Float
+  sessionCount  Int
+  lastUpdated   DateTime  @updatedAt
+
+  associate     Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
+
+  @@unique([associateId, skill, topic])
+  @@index([associateId])
 }

@@ -42,7 +42,6 @@ export interface InterviewSession {
     id: string;
     candidateName?: string;
     interviewerName?: string;
-    associateSlug?: string;  // Trainer-assigned identifier linking sessions to associate profile
     date: string;
     selectedWeeks: number[];
     questionCount: number;
@@ -51,6 +50,7 @@ export interface InterviewSession {
     assessments: Record<string, QuestionAssessment>;
     currentQuestionIndex: number;
     status: 'setup' | 'in-progress' | 'review' | 'completed';
+    techMap?: Record<number, string>;  // weekNumber -> skill name (e.g., {1: "react", 2: "typescript"})
     // Editable overall scores and feedback
     overallTechnicalScore?: number;
     overallSoftSkillScore?: number;
