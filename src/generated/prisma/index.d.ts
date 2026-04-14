@@ -2199,6 +2199,9 @@ export namespace Prisma {
     displayName: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    readinessStatus: string | null
+    recommendedArea: string | null
+    lastComputedAt: Date | null
   }
 
   export type AssociateMaxAggregateOutputType = {
@@ -2207,6 +2210,9 @@ export namespace Prisma {
     displayName: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    readinessStatus: string | null
+    recommendedArea: string | null
+    lastComputedAt: Date | null
   }
 
   export type AssociateCountAggregateOutputType = {
@@ -2215,6 +2221,9 @@ export namespace Prisma {
     displayName: number
     createdAt: number
     updatedAt: number
+    readinessStatus: number
+    recommendedArea: number
+    lastComputedAt: number
     _all: number
   }
 
@@ -2233,6 +2242,9 @@ export namespace Prisma {
     displayName?: true
     createdAt?: true
     updatedAt?: true
+    readinessStatus?: true
+    recommendedArea?: true
+    lastComputedAt?: true
   }
 
   export type AssociateMaxAggregateInputType = {
@@ -2241,6 +2253,9 @@ export namespace Prisma {
     displayName?: true
     createdAt?: true
     updatedAt?: true
+    readinessStatus?: true
+    recommendedArea?: true
+    lastComputedAt?: true
   }
 
   export type AssociateCountAggregateInputType = {
@@ -2249,6 +2264,9 @@ export namespace Prisma {
     displayName?: true
     createdAt?: true
     updatedAt?: true
+    readinessStatus?: true
+    recommendedArea?: true
+    lastComputedAt?: true
     _all?: true
   }
 
@@ -2344,6 +2362,9 @@ export namespace Prisma {
     displayName: string | null
     createdAt: Date
     updatedAt: Date
+    readinessStatus: string | null
+    recommendedArea: string | null
+    lastComputedAt: Date | null
     _count: AssociateCountAggregateOutputType | null
     _avg: AssociateAvgAggregateOutputType | null
     _sum: AssociateSumAggregateOutputType | null
@@ -2371,6 +2392,9 @@ export namespace Prisma {
     displayName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    readinessStatus?: boolean
+    recommendedArea?: boolean
+    lastComputedAt?: boolean
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
@@ -2382,6 +2406,9 @@ export namespace Prisma {
     displayName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    readinessStatus?: boolean
+    recommendedArea?: boolean
+    lastComputedAt?: boolean
   }, ExtArgs["result"]["associate"]>
 
   export type AssociateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2390,6 +2417,9 @@ export namespace Prisma {
     displayName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    readinessStatus?: boolean
+    recommendedArea?: boolean
+    lastComputedAt?: boolean
   }, ExtArgs["result"]["associate"]>
 
   export type AssociateSelectScalar = {
@@ -2398,9 +2428,12 @@ export namespace Prisma {
     displayName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    readinessStatus?: boolean
+    recommendedArea?: boolean
+    lastComputedAt?: boolean
   }
 
-  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt", ExtArgs["result"]["associate"]>
+  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt" | "readinessStatus" | "recommendedArea" | "lastComputedAt", ExtArgs["result"]["associate"]>
   export type AssociateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
@@ -2421,6 +2454,9 @@ export namespace Prisma {
       displayName: string | null
       createdAt: Date
       updatedAt: Date
+      readinessStatus: string | null
+      recommendedArea: string | null
+      lastComputedAt: Date | null
     }, ExtArgs["result"]["associate"]>
     composites: {}
   }
@@ -2851,6 +2887,9 @@ export namespace Prisma {
     readonly displayName: FieldRef<"Associate", 'String'>
     readonly createdAt: FieldRef<"Associate", 'DateTime'>
     readonly updatedAt: FieldRef<"Associate", 'DateTime'>
+    readonly readinessStatus: FieldRef<"Associate", 'String'>
+    readonly recommendedArea: FieldRef<"Associate", 'String'>
+    readonly lastComputedAt: FieldRef<"Associate", 'DateTime'>
   }
     
 
@@ -5745,7 +5784,10 @@ export namespace Prisma {
     slug: 'slug',
     displayName: 'displayName',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    readinessStatus: 'readinessStatus',
+    recommendedArea: 'recommendedArea',
+    lastComputedAt: 'lastComputedAt'
   };
 
   export type AssociateScalarFieldEnum = (typeof AssociateScalarFieldEnum)[keyof typeof AssociateScalarFieldEnum]
@@ -5962,6 +6004,9 @@ export namespace Prisma {
     displayName?: StringNullableFilter<"Associate"> | string | null
     createdAt?: DateTimeFilter<"Associate"> | Date | string
     updatedAt?: DateTimeFilter<"Associate"> | Date | string
+    readinessStatus?: StringNullableFilter<"Associate"> | string | null
+    recommendedArea?: StringNullableFilter<"Associate"> | string | null
+    lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
   }
@@ -5972,6 +6017,9 @@ export namespace Prisma {
     displayName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    readinessStatus?: SortOrderInput | SortOrder
+    recommendedArea?: SortOrderInput | SortOrder
+    lastComputedAt?: SortOrderInput | SortOrder
     sessions?: SessionOrderByRelationAggregateInput
     gapScores?: GapScoreOrderByRelationAggregateInput
   }
@@ -5985,6 +6033,9 @@ export namespace Prisma {
     displayName?: StringNullableFilter<"Associate"> | string | null
     createdAt?: DateTimeFilter<"Associate"> | Date | string
     updatedAt?: DateTimeFilter<"Associate"> | Date | string
+    readinessStatus?: StringNullableFilter<"Associate"> | string | null
+    recommendedArea?: StringNullableFilter<"Associate"> | string | null
+    lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
   }, "id" | "slug">
@@ -5995,6 +6046,9 @@ export namespace Prisma {
     displayName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    readinessStatus?: SortOrderInput | SortOrder
+    recommendedArea?: SortOrderInput | SortOrder
+    lastComputedAt?: SortOrderInput | SortOrder
     _count?: AssociateCountOrderByAggregateInput
     _avg?: AssociateAvgOrderByAggregateInput
     _max?: AssociateMaxOrderByAggregateInput
@@ -6011,6 +6065,9 @@ export namespace Prisma {
     displayName?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Associate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Associate"> | Date | string
+    readinessStatus?: StringNullableWithAggregatesFilter<"Associate"> | string | null
+    recommendedArea?: StringNullableWithAggregatesFilter<"Associate"> | string | null
+    lastComputedAt?: DateTimeNullableWithAggregatesFilter<"Associate"> | Date | string | null
   }
 
   export type SessionWhereInput = {
@@ -6240,6 +6297,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     sessions?: SessionCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
@@ -6250,6 +6310,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
@@ -6259,6 +6322,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
@@ -6269,6 +6335,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
   }
@@ -6279,6 +6348,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
   }
 
   export type AssociateUpdateManyMutationInput = {
@@ -6286,6 +6358,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AssociateUncheckedUpdateManyInput = {
@@ -6294,6 +6369,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionCreateInput = {
@@ -6616,6 +6694,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type SessionListRelationFilter = {
     every?: SessionWhereInput
     some?: SessionWhereInput
@@ -6647,6 +6736,9 @@ export namespace Prisma {
     displayName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    readinessStatus?: SortOrder
+    recommendedArea?: SortOrder
+    lastComputedAt?: SortOrder
   }
 
   export type AssociateAvgOrderByAggregateInput = {
@@ -6659,6 +6751,9 @@ export namespace Prisma {
     displayName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    readinessStatus?: SortOrder
+    recommendedArea?: SortOrder
+    lastComputedAt?: SortOrder
   }
 
   export type AssociateMinOrderByAggregateInput = {
@@ -6667,6 +6762,9 @@ export namespace Prisma {
     displayName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    readinessStatus?: SortOrder
+    recommendedArea?: SortOrder
+    lastComputedAt?: SortOrder
   }
 
   export type AssociateSumOrderByAggregateInput = {
@@ -6707,6 +6805,20 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -7061,6 +7173,10 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type SessionUpdateManyWithoutAssociateNestedInput = {
     create?: XOR<SessionCreateWithoutAssociateInput, SessionUncheckedCreateWithoutAssociateInput> | SessionCreateWithoutAssociateInput[] | SessionUncheckedCreateWithoutAssociateInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutAssociateInput | SessionCreateOrConnectWithoutAssociateInput[]
@@ -7262,6 +7378,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -7305,6 +7432,20 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -7564,6 +7705,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
 
@@ -7573,6 +7717,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
 
@@ -7597,6 +7744,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
 
@@ -7606,6 +7756,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
@@ -7614,6 +7767,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     sessions?: SessionCreateNestedManyWithoutAssociateInput
   }
 
@@ -7623,6 +7779,9 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
   }
 
@@ -7647,6 +7806,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
   }
 
@@ -7656,6 +7818,9 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
   }
 

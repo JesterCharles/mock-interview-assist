@@ -7,6 +7,7 @@ import { readHistory, writeHistory } from '@/lib/historyService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { prisma } from '@/lib/prisma';
 import { saveGapScores } from '@/lib/gapPersistence';
+import { updateAssociateReadiness } from '@/lib/readinessService';
 
 // GET - Retrieve all interview history
 export async function GET() {
@@ -48,17 +49,24 @@ export async function POST(request: NextRequest) {
         // Dual-write to Supabase (D-01: log-and-continue on failure)
         await persistSessionToDb(session);
 
-        // Fire-and-forget gap score computation (D-04: never block session save)
+        // Fire-and-forget gap score + readiness computation (D-04: never block session save)
+        // Pipeline: computeGapScores → updateAssociateReadiness (sequential per Pitfall 3)
         if (session.associateSlug) {
             prisma.associate
                 .findUnique({ where: { slug: session.associateSlug }, select: { id: true } })
-                .then((associate) => {
+                .then(async (associate) => {
                     if (associate) {
-                        return saveGapScores(associate.id);
+                        await saveGapScores(associate.id);
+                        // Fetch current threshold from Settings table (Plan 02 adds Settings model).
+                        // Until then, fall back to default threshold of 75.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const settings = await (prisma as any).settings?.findFirst?.({ where: { id: 1 } }).catch?.(() => null);
+                        const threshold: number = (settings as { readinessThreshold?: number } | null)?.readinessThreshold ?? 75;
+                        await updateAssociateReadiness(associate.id, threshold);
                     }
                 })
                 .catch((err) => {
-                    console.error('[gap-service] Failed to update gap scores:', err);
+                    console.error('[gap-service] Failed to update gap scores or readiness:', err);
                 });
         }
 

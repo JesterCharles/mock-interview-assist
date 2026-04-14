@@ -130,7 +130,10 @@ exports.Prisma.AssociateScalarFieldEnum = {
   slug: 'slug',
   displayName: 'displayName',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  readinessStatus: 'readinessStatus',
+  recommendedArea: 'recommendedArea',
+  lastComputedAt: 'lastComputedAt'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {

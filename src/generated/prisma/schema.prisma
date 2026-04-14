@@ -14,13 +14,16 @@ model HealthCheck {
 }
 
 model Associate {
-  id          Int        @id @default(autoincrement())
-  slug        String     @unique
-  displayName String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  sessions    Session[]
-  gapScores   GapScore[]
+  id              Int        @id @default(autoincrement())
+  slug            String     @unique
+  displayName     String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  readinessStatus String? // 'ready' | 'improving' | 'not_ready'
+  recommendedArea String? // topic or skill name — lowest gap score
+  lastComputedAt  DateTime? // when readiness was last computed
+  sessions        Session[]
+  gapScores       GapScore[]
 }
 
 model Session {
