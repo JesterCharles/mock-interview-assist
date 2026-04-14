@@ -65,11 +65,32 @@ export default function DashboardPage() {
   const [isLoadingGapScores, setIsLoadingGapScores] = useState(false);
   const [prePopulatedPaths, setPrePopulatedPaths] = useState<Set<string>>(new Set());
   const [pendingGapScores, setPendingGapScores] = useState<GapScoreResponse['scores'] | null>(null);
+  const [prePopulatedWeights, setPrePopulatedWeights] = useState<Record<string, number>>({});
+
+  // Associate typeahead state
+  const [associateList, setAssociateList] = useState<{ slug: string; displayName: string }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [slugInputFocused, setSlugInputFocused] = useState(false);
 
   // Pagination state for tech list
   const [techPage, setTechPage] = useState(1);
   const TECHS_PER_PAGE = 5;
 
+  // Fetch associate list for typeahead on mount
+  useEffect(() => {
+    fetch('/api/trainer')
+      .then(res => res.ok ? res.json() : [])
+      .then((data: { slug: string; displayName: string }[]) => setAssociateList(data))
+      .catch(() => setAssociateList([]));
+  }, []);
+
+  // Filtered suggestions for typeahead
+  const filteredSuggestions = associateSlug.trim()
+    ? associateList.filter(a =>
+        a.slug.includes(associateSlug.toLowerCase()) ||
+        a.displayName.toLowerCase().includes(associateSlug.toLowerCase())
+      )
+    : [];
 
   // Fetch available techs from GitHub when config changes or on mount
   const fetchTechs = useCallback(async () => {
@@ -160,11 +181,28 @@ export default function DashboardPage() {
   // applyGapScores: cross-references gap scores against availableTechs and pre-populates
   const applyGapScores = useCallback((scores: GapScoreResponse['scores']) => {
     const weights = mapGapScoresToWeights(scores);
-    const matchedTechs = availableTechs.filter(t => weights[t.path] !== undefined);
+    // Build a case-insensitive lookup from gap skill name → weight
+    // Gap scores use skill names like "React", tech paths are like "react/question-bank-v1.md"
+    const skillWeightMap = new Map<string, 1 | 2 | 3 | 4 | 5>();
+    for (const [skill, weight] of Object.entries(weights)) {
+      skillWeightMap.set(skill.toLowerCase(), weight as 1 | 2 | 3 | 4 | 5);
+    }
+    // Match tech path against gap skill: extract directory name from path, compare lowercase
+    const matchedTechs: typeof availableTechs = [];
+    const matchedWeights: Record<string, number> = {};
+    for (const tech of availableTechs) {
+      const techName = tech.path.replace(/\/question-bank-v1\.md$/, '').replace(/\.md$/, '').toLowerCase();
+      const weight = skillWeightMap.get(techName);
+      if (weight !== undefined) {
+        matchedTechs.push(tech);
+        matchedWeights[tech.path] = weight;
+      }
+    }
     if (matchedTechs.length === 0) return; // no matching techs — stay manual
     setSelectedTechs(matchedTechs);
-    matchedTechs.forEach(t => setTechWeight(t.path, weights[t.path]));
+    matchedTechs.forEach(t => setTechWeight(t.path, matchedWeights[t.path]));
     setPrePopulatedPaths(new Set(matchedTechs.map(t => t.path)));
+    setPrePopulatedWeights(matchedWeights);
     setPendingGapScores(null);
   }, [availableTechs, setSelectedTechs, setTechWeight]);
 
@@ -252,28 +290,85 @@ export default function DashboardPage() {
 
   const renderPhase1 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Adaptive Setup — Load Associate History (per D-05) */}
+      {/* Adaptive Setup — Associate Search + Gap History */}
       <div className="space-y-2">
         <label className="text-sm font-medium" style={{ color: 'var(--muted)' }}>
-          Associate Slug
+          Associate <span className="text-gray-500 font-normal">(optional — pre-fills from gap history)</span>
         </label>
-        <div className="flex items-center gap-3">
-          <input
-            type="text"
-            value={associateSlug}
-            onChange={(e) => setAssociateSlug(e.target.value)}
-            onBlur={() => handleSlugLookup(associateSlug)}
-            placeholder="e.g. john-doe (optional — loads gap history)"
-            className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 text-sm outline-none focus:border-indigo-500 transition-colors"
-          />
-          {isLoadingGapScores && (
-            <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                value={associateSlug}
+                onChange={(e) => {
+                  setAssociateSlug(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => {
+                  setSlugInputFocused(true);
+                  if (associateSlug.trim()) setShowSuggestions(true);
+                }}
+                onBlur={() => {
+                  setSlugInputFocused(false);
+                  // Delay hiding so click on suggestion registers
+                  setTimeout(() => setShowSuggestions(false), 150);
+                  handleSlugLookup(associateSlug);
+                }}
+                placeholder="Search by name or slug..."
+                className="w-full pl-9 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 text-sm outline-none focus:border-indigo-500 transition-colors"
+              />
+            </div>
+            {isLoadingGapScores && (
+              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+            )}
+          </div>
+
+          {/* Typeahead suggestions dropdown */}
+          {showSuggestions && slugInputFocused && filteredSuggestions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              {filteredSuggestions.slice(0, 8).map((a) => (
+                <button
+                  key={a.slug}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setAssociateSlug(a.slug);
+                    setShowSuggestions(false);
+                    handleSlugLookup(a.slug);
+                  }}
+                  className="w-full px-3 py-2 text-left hover:bg-white/10 transition-colors flex items-center justify-between"
+                >
+                  <span className="text-white text-sm">{a.displayName}</span>
+                  <span className="text-xs text-gray-500">{a.slug}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
+
+        {/* Pre-population summary */}
         {prePopulatedPaths.size > 0 && (
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
-            {prePopulatedPaths.size} technologies pre-selected from gap history
-          </p>
+          <div className="mt-3 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+            <p className="text-xs font-medium text-indigo-300 mb-2">
+              {prePopulatedPaths.size} technologies pre-selected from gap history
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {Array.from(prePopulatedPaths).map(path => {
+                const name = path.replace(/\/question-bank-v1\.md$/, '').replace(/\.md$/, '');
+                const weight = prePopulatedWeights[path] ?? techWeights[path] ?? 1;
+                return (
+                  <span key={path} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md bg-white/10">
+                    <span className="text-white">{name}</span>
+                    <span className={`font-bold ${weight >= 4 ? 'text-orange-400' : weight >= 3 ? 'text-yellow-400' : 'text-green-400'}`}>
+                      {weight}x
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
 
