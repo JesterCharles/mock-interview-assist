@@ -12,8 +12,8 @@
 
 ### Auth (PIN-based, lightweight)
 
-- [ ] **AUTH-01**: Trainer generates a 6-digit PIN when adding an associate to a cohort. PIN is unique per associate and displayed to trainer for manual communication.
-- [ ] **AUTH-02**: Associate enters PIN at the start of an automated interview. System validates PIN and creates an associate session (HttpOnly cookie) that links the interview to their identity.
+- [x] **AUTH-01**: Trainer generates a 6-digit PIN when adding an associate to a cohort. PIN is unique per associate and displayed to trainer for manual communication.
+- [x] **AUTH-02**: Associate enters PIN at the start of an automated interview. System validates PIN and creates an associate session (HttpOnly cookie) that links the interview to their identity.
 - [ ] **AUTH-03**: Associate auth coexists with trainer auth. Middleware uses identity enumeration (`trainer | associate | anonymous`) with separate cookie names. No cross-contamination between `/trainer` routes and associate-protected routes.
 - [ ] **AUTH-04**: Associate profile page `/associate/[slug]` requires auth. Either the matching associate session OR an active trainer session grants access. Mismatched associates (different slug) return 403. Unauthenticated requests redirect to PIN entry.
 

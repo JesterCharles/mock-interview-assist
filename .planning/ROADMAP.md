@@ -65,7 +65,7 @@
   6. `/associate/[slug]` requires auth — matching associate (fresh ver) OR trainer grants access; mismatch → 403; stale ver → redirect to login
   7. NEW authenticated automated-interview entry `/associate/[slug]/interview` exists and enforces the same identity matrix — this is the explicit entry Phase 10 consumes (Codex finding #2)
 **Plans**: 3 plans
-- [ ] 09-01-PLAN.md — Schema fields + pinService + PIN generate/verify/logout endpoints (dedicated ASSOCIATE_SESSION_SECRET + pinGeneratedAt-as-version)
+- [x] 09-01-PLAN.md — Schema fields + pinService + PIN generate/verify/logout endpoints (dedicated ASSOCIATE_SESSION_SECRET + pinGeneratedAt-as-version)
 - [ ] 09-02-PLAN.md — Identity enum helpers (cookie-only) + middleware refactor + version-checking associate helpers
 - [ ] 09-03-PLAN.md — PIN entry UI + /associate/[slug] guard + NEW /associate/[slug]/interview authenticated entry + trainer Generate-PIN control
 **UI hint**: yes

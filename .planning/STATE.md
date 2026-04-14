@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 08-02-PLAN.md (human-verify approved)
-last_updated: "2026-04-14T18:00:00.000Z"
-last_activity: 2026-04-14 — Plan 08-02 complete (schema migration applied + Dockerfile wired)
+status: Schema migration applied to dev DB, Dockerfile wired for runtime migrate deploy
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-14T18:23:40.364Z"
+last_activity: 2026-04-14 — Plan 08-02 human-verify approved
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 18
-  completed_plans: 2
-  percent: 11
+  completed_plans: 3
+  percent: 17
 ---
 
 # Project State
@@ -68,6 +68,8 @@ Recent decisions affecting current work:
 - v1.1: Curriculum fetch and GitHub question bank fetch must be parallel (`Promise.all`) in setup wizard — serial fetch degrades perceived performance (Pitfall 5 mitigation).
 - v1.1: Design cohesion (Phase 14) applied last — after all new UIs exist. Does NOT touch `/interview` or `/review` pages to avoid mid-session visual regressions.
 - [Phase 08]: Hand-wrote migration SQL: Supabase DB lacks _prisma_migrations history; --create-only required destructive reset
+- [Phase 09-associate-pin-auth]: Dedicated ASSOCIATE_SESSION_SECRET decoupled from APP_PASSWORD; token version = pinGeneratedAt for DB-backed revocation (Codex #4 mitigation)
+- [Phase 09-associate-pin-auth]: bcryptjs chosen over native bcrypt for node:22-alpine Docker compatibility
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:00:00.000Z
-Stopped at: Completed 08-02-PLAN.md (human-verify approved)
+Last session: 2026-04-14T18:22:29.898Z
+Stopped at: Completed 09-01-PLAN.md
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
