@@ -37,6 +37,9 @@ export async function getSettings(): Promise<AppSettings> {
  * @param newThreshold - New readiness threshold (0-100), validated by caller
  */
 export async function updateThreshold(newThreshold: number): Promise<void> {
+  if (!Number.isFinite(newThreshold) || newThreshold < 0 || newThreshold > 100) {
+    throw new Error(`Invalid threshold: ${newThreshold}. Must be a finite number between 0 and 100.`);
+  }
   await prisma.settings.upsert({
     where: { id: 1 },
     create: { id: 1, readinessThreshold: newThreshold },
