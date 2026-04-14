@@ -15,6 +15,10 @@ export interface RosterAssociate {
 export interface AssociateDetail extends RosterAssociate {
   /** Numeric DB id — required for trainer-only actions like PIN generation (Plan 09-03) */
   id: number
+  /** Current cohort id, null when unassigned (Plan 11-03 / D-05) */
+  cohortId: number | null
+  /** Current cohort name for display, null when unassigned (Plan 11-03 / D-05) */
+  cohortName: string | null
   sessions: SessionSummary[]
   gapScores: GapScoreEntry[]
 }
