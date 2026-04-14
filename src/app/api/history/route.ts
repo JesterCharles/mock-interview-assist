@@ -59,7 +59,10 @@ export async function POST(request: NextRequest) {
                     if (associate) {
                         await saveGapScores(associate.id);
                         // Fetch current threshold from Settings table (added in Plan 02)
-                        const { readinessThreshold: threshold } = await getSettings().catch(() => ({ readinessThreshold: 75 }));
+                        const { readinessThreshold: threshold } = await getSettings().catch((err) => {
+                          console.error('[gap-service] Failed to fetch settings, using default threshold:', err);
+                          return { readinessThreshold: 75 };
+                        });
                         await updateAssociateReadiness(associate.id, threshold);
                     }
                 })
