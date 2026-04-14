@@ -153,7 +153,7 @@
   4. DESIGN.md tokens ADDED alongside --nlm-* tokens; new button classes (.btn-accent-flat, .btn-secondary-flat) added without overwriting legacy .btn-primary / .btn-accent
 **Plans**: 2 plans
 - [x] 14-01-PLAN.md — Additive token/font loading + PublicShell + ReadinessSignal + restyle NEW public routes (legacy preserved)
-- [ ] 14-02-PLAN.md — Cohort + curriculum UI components on DESIGN.md tokens
+- [x] 14-02-PLAN.md — Cohort + curriculum UI components on DESIGN.md tokens
 **UI hint**: yes
 
 ---
@@ -175,4 +175,4 @@
 | 11. Cohort Management | v1.1 | 0/3 | Planned | - |
 | 12. Cohort Dashboard Views | v1.1 | 0/2 | Planned | - |
 | 13. Curriculum Schedule | v1.1 | 0/3 | Planned | - |
-| 14. Design Cohesion | v1.1 | 1/2 | In Progress|  |
+| 14. Design Cohesion | v1.1 | 2/2 | Complete   | 2026-04-14 |
