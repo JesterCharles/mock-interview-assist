@@ -104,8 +104,8 @@ Plans:
   6. The /trainer route is protected by the existing single-password auth — unauthenticated users are redirected
 **Plans:** 2 plans
 Plans:
-- [ ] 06-01-PLAN.md — Install recharts, design tokens, roster page with auth guard and sortable table
-- [ ] 06-02-PLAN.md — Associate detail page with session history, gap trend chart, and calibration view
+- [x] 06-01-PLAN.md — Install recharts, design tokens, roster page with auth guard and sortable table
+- [x] 06-02-PLAN.md — Associate detail page with session history, gap trend chart, and calibration view
 **UI hint**: yes
 
 ### Phase 7: Adaptive Setup
