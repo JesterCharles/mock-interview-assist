@@ -28,7 +28,7 @@
 - [x] **Phase 10: Automated Interview Pipeline** - Split endpoints (public strips identity / authenticated cookie-only); DB-backed readiness recompute marker + sweep endpoint
 - [x] **Phase 11: Cohort Management** - Trainer can create cohorts and assign associates via dashboard
 - [x] **Phase 12: Cohort Dashboard Views** - Trainer can filter roster by cohort + opt-in summary (default /api/trainer response shape preserved)
-- [ ] **Phase 13: Curriculum Schedule** - Trainer defines curriculum weeks with canonical skillSlug; setup wizard exact-match filters to taught slugs
+- [x] **Phase 13: Curriculum Schedule** - Trainer defines curriculum weeks with canonical skillSlug; setup wizard exact-match filters to taught slugs
 - [ ] **Phase 14: Design Cohesion** - NEW v1.1 UIs styled per DESIGN.md; legacy utilities preserved for /, /interview, /review
 
 </details>
@@ -135,9 +135,9 @@
   4. If cohort has no curriculum or associate has no cohort, wizard behaves identically to v1.0
   5. Adaptive gap-based weight pre-population composes on top of curriculum filter
 **Plans**: 3 plans
-- [ ] 13-01-PLAN.md — Curriculum CRUD API + service layer with skillSlug validation + 409 on unique violation
-- [ ] 13-02-PLAN.md — Trainer curriculum UI
-- [ ] 13-03-PLAN.md — Setup wizard filter integration (exact skillSlug match) + Playwright advisory perf test (<2000ms ceiling, <400ms logged not gated)
+- [x] 13-01-PLAN.md — Curriculum CRUD API + service layer with skillSlug validation + 409 on unique violation
+- [x] 13-02-PLAN.md — Trainer curriculum UI
+- [x] 13-03-PLAN.md — Setup wizard filter integration (exact skillSlug match) + Playwright advisory perf test (<2000ms ceiling, <400ms logged not gated)
 **UI hint**: yes
 
 ---
