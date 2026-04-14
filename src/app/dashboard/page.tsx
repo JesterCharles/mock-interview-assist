@@ -14,6 +14,7 @@ import { ParsedQuestion } from '@/lib/types';
 import { GitHubService, GitHubFile } from '@/lib/github-service';
 import { useAuth } from '@/lib/auth-context';
 import { validateSlug } from '@/lib/slug-validation';
+import { mapGapScoresToWeights, GapScoreResponse } from '@/lib/adaptiveSetup';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -59,6 +60,11 @@ export default function DashboardPage() {
   const [interviewerName, setInterviewerName] = useState('');
   const [associateSlug, setAssociateSlug] = useState('');
   const [slugError, setSlugError] = useState<string | null>(null);
+
+  // Adaptive pre-population state
+  const [isLoadingGapScores, setIsLoadingGapScores] = useState(false);
+  const [prePopulatedPaths, setPrePopulatedPaths] = useState<Set<string>>(new Set());
+  const [pendingGapScores, setPendingGapScores] = useState<GapScoreResponse['scores'] | null>(null);
 
   // Pagination state for tech list
   const [techPage, setTechPage] = useState(1);
@@ -151,6 +157,54 @@ export default function DashboardPage() {
     setTechPage(1);
   }, [techSearch]);
 
+  // applyGapScores: cross-references gap scores against availableTechs and pre-populates
+  const applyGapScores = useCallback((scores: GapScoreResponse['scores']) => {
+    const weights = mapGapScoresToWeights(scores);
+    const matchedTechs = availableTechs.filter(t => weights[t.path] !== undefined);
+    if (matchedTechs.length === 0) return; // no matching techs — stay manual
+    setSelectedTechs(matchedTechs);
+    matchedTechs.forEach(t => setTechWeight(t.path, weights[t.path]));
+    setPrePopulatedPaths(new Set(matchedTechs.map(t => t.path)));
+    setPendingGapScores(null);
+  }, [availableTechs, setSelectedTechs, setTechWeight]);
+
+  // handleSlugLookup: fetches gap scores on slug blur, applies pre-population per D-05
+  const handleSlugLookup = useCallback(async (slug: string) => {
+    const trimmed = slug.trim().toLowerCase();
+    if (!trimmed) return;
+    setIsLoadingGapScores(true);
+    try {
+      const res = await fetch(`/api/associates/${encodeURIComponent(trimmed)}/gap-scores`);
+      if (!res.ok) return; // network error — fail silently, stay manual
+      const data: GapScoreResponse = await res.json();
+      if (!data.found || data.sessionCount < 3) return; // cold start fallback per D-04
+      if (availableTechs.length === 0) {
+        setPendingGapScores(data.scores); // defer until techs load
+        return;
+      }
+      applyGapScores(data.scores);
+    } finally {
+      setIsLoadingGapScores(false);
+    }
+  }, [availableTechs, applyGapScores]);
+
+  // Deferred gap score application: fires when pendingGapScores exists and availableTechs loads
+  useEffect(() => {
+    if (pendingGapScores && availableTechs.length > 0) {
+      applyGapScores(pendingGapScores);
+    }
+  }, [pendingGapScores, availableTechs, applyGapScores]);
+
+  // handleWeightChange: wraps setTechWeight and removes the "auto" badge for that tech
+  const handleWeightChange = (path: string, weight: number) => {
+    setTechWeight(path, weight);
+    setPrePopulatedPaths(prev => {
+      const next = new Set(prev);
+      next.delete(path);
+      return next;
+    });
+  };
+
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     const normalized = raw.toLowerCase().trim();
@@ -198,6 +252,31 @@ export default function DashboardPage() {
 
   const renderPhase1 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Adaptive Setup — Load Associate History (per D-05) */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium" style={{ color: 'var(--muted)' }}>
+          Associate Slug
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            value={associateSlug}
+            onChange={(e) => setAssociateSlug(e.target.value)}
+            onBlur={() => handleSlugLookup(associateSlug)}
+            placeholder="e.g. john-doe (optional — loads gap history)"
+            className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 text-sm outline-none focus:border-indigo-500 transition-colors"
+          />
+          {isLoadingGapScores && (
+            <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+          )}
+        </div>
+        {prePopulatedPaths.size > 0 && (
+          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            {prePopulatedPaths.size} technologies pre-selected from gap history
+          </p>
+        )}
+      </div>
+
       {/* Assessment Focus & Question Count - Side by Side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -350,14 +429,14 @@ export default function DashboardPage() {
                           max="5"
                           step="1"
                           value={weight}
-                          onChange={(e) => setTechWeight(tech.path, parseInt(e.target.value))}
+                          onChange={(e) => handleWeightChange(tech.path, parseInt(e.target.value))}
                           className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                         />
                         <div className="flex gap-1 text-xs text-gray-500">
                           {[1, 2, 3, 4, 5].map((w) => (
                             <button
                               key={w}
-                              onClick={() => setTechWeight(tech.path, w)}
+                              onClick={() => handleWeightChange(tech.path, w)}
                               className={`w-5 h-5 rounded text-center transition-all ${weight === w
                                 ? 'bg-indigo-500 text-white font-bold'
                                 : 'bg-white/10 text-gray-400 hover:bg-white/20'
@@ -367,6 +446,11 @@ export default function DashboardPage() {
                             </button>
                           ))}
                         </div>
+                        {prePopulatedPaths.has(tech.path) && (
+                          <span className="text-xs font-medium ml-2" style={{ color: 'var(--muted)' }}>
+                            auto
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
