@@ -31,7 +31,6 @@ function getSecret(): string {
   }
 
   // Non-prod dev fallback — deterministic so tests still work.
-  // eslint-disable-next-line no-console
   console.warn(
     '[associateSession] WARNING: ASSOCIATE_SESSION_SECRET unset — using insecure development fallback'
   );
