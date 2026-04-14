@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Cohort Readiness System
-status: roadmap_complete
-stopped_at: Roadmap written — 7 phases (8-14), 13 requirements mapped, ready for phase planning
-last_updated: "2026-04-14T00:00:00.000Z"
-last_activity: 2026-04-14
+milestone: v1.0
+milestone_name: milestone
+status: planning
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-14T17:35:36.081Z"
+last_activity: 2026-04-14 — Roadmap created for v1.1
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 18
+  completed_plans: 1
+  percent: 6
 ---
 
 # Project State
@@ -67,6 +67,7 @@ Recent decisions affecting current work:
 - v1.1: cohortId is nullable on Associate — unassigned associates remain fully functional (Pitfall 4 mitigation).
 - v1.1: Curriculum fetch and GitHub question bank fetch must be parallel (`Promise.all`) in setup wizard — serial fetch degrades perceived performance (Pitfall 5 mitigation).
 - v1.1: Design cohesion (Phase 14) applied last — after all new UIs exist. Does NOT touch `/interview` or `/review` pages to avoid mid-session visual regressions.
+- [Phase 08]: Hand-wrote migration SQL: Supabase DB lacks _prisma_migrations history; --create-only required destructive reset
 
 ### Pending Todos
 
@@ -79,6 +80,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14
-Stopped at: Roadmap created for v1.1 Cohort Readiness System (7 phases, 13 requirements)
+Last session: 2026-04-14T17:35:36.079Z
+Stopped at: Completed 08-01-PLAN.md
 Resume with: `/gsd-plan-phase 8`

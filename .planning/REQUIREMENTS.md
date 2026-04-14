@@ -25,7 +25,7 @@
 ### Cohort Management
 
 - [ ] **COHORT-01**: Trainer can create, edit, and delete cohorts via trainer dashboard. Cohort fields: name, start date, end date, description.
-- [ ] **COHORT-02**: Trainer can assign an associate to one cohort via nullable FK (`Associate.cohortId`). Associates without a cohort remain functional (backward compatible with v1.0 data).
+- [x] **COHORT-02**: Trainer can assign an associate to one cohort via nullable FK (`Associate.cohortId`). Associates without a cohort remain functional (backward compatible with v1.0 data).
 - [ ] **COHORT-03**: Trainer dashboard roster page supports filtering by cohort via dropdown selector. Roster table and readiness badges unchanged.
 - [ ] **COHORT-04**: Cohort view displays aggregate readiness summary: count of ready / improving / not_ready associates in the selected cohort. Displayed as summary bar above roster.
 

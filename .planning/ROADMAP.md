@@ -47,7 +47,7 @@
   5. `Session.readinessRecomputeStatus` defaults to `"not_applicable"` on all existing rows (Codex finding #5 — supports readiness sweep)
   6. `CurriculumWeek` has `skillSlug` column and DB-enforced `@@unique([cohortId, weekNumber])` (Codex finding #9)
 **Plans**: 2 plans
-- [ ] 08-01-PLAN.md — Prisma schema additions (Cohort, CurriculumWeek with skillSlug + unique, FK columns, Session.mode, Session.readinessRecomputeStatus) + migration SQL with backfills
+- [x] 08-01-PLAN.md — Prisma schema additions (Cohort, CurriculumWeek with skillSlug + unique, FK columns, Session.mode, Session.readinessRecomputeStatus) + migration SQL with backfills
 - [ ] 08-02-PLAN.md — Apply migration, verify success criteria, wire prisma migrate deploy into Dockerfile
 
 ---
