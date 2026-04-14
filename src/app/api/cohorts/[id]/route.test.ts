@@ -38,8 +38,6 @@ import { GET, PATCH, DELETE } from '@/app/api/cohorts/[id]/route';
 
 const mockFindUnique = prisma.cohort.findUnique as ReturnType<typeof vi.fn>;
 const mockUpdate = prisma.cohort.update as ReturnType<typeof vi.fn>;
-const mockDelete = prisma.cohort.delete as ReturnType<typeof vi.fn>;
-const mockUpdateMany = prisma.associate.updateMany as ReturnType<typeof vi.fn>;
 const mockTransaction = prisma.$transaction as ReturnType<typeof vi.fn>;
 const mockAuth = isAuthenticatedSession as ReturnType<typeof vi.fn>;
 
@@ -294,13 +292,5 @@ describe('DELETE /api/cohorts/[id]', () => {
     const res = await DELETE(makeRequest('DELETE'), makeCtx('abc'));
     expect(res.status).toBe(400);
     expect(mockTransaction).not.toHaveBeenCalled();
-  });
-
-  // Reference unused top-level mocks to satisfy lint without affecting behavior.
-  it('exposes top-level prisma mocks for completeness', () => {
-    expect(typeof mockFindUnique).toBe('function');
-    expect(typeof mockUpdate).toBe('function');
-    expect(typeof mockDelete).toBe('function');
-    expect(typeof mockUpdateMany).toBe('function');
   });
 });
