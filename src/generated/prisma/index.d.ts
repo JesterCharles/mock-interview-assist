@@ -28,6 +28,11 @@ export type Associate = $Result.DefaultSelection<Prisma.$AssociatePayload>
  * 
  */
 export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
+/**
+ * Model GapScore
+ * 
+ */
+export type GapScore = $Result.DefaultSelection<Prisma.$GapScorePayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -179,6 +184,16 @@ export class PrismaClient<
     * ```
     */
   get session(): Prisma.SessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.gapScore`: Exposes CRUD operations for the **GapScore** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GapScores
+    * const gapScores = await prisma.gapScore.findMany()
+    * ```
+    */
+  get gapScore(): Prisma.GapScoreDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -615,7 +630,8 @@ export namespace Prisma {
   export const ModelName: {
     HealthCheck: 'HealthCheck',
     Associate: 'Associate',
-    Session: 'Session'
+    Session: 'Session',
+    GapScore: 'GapScore'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -631,7 +647,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "healthCheck" | "associate" | "session"
+      modelProps: "healthCheck" | "associate" | "session" | "gapScore"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -857,6 +873,80 @@ export namespace Prisma {
           }
         }
       }
+      GapScore: {
+        payload: Prisma.$GapScorePayload<ExtArgs>
+        fields: Prisma.GapScoreFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GapScoreFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GapScoreFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          findFirst: {
+            args: Prisma.GapScoreFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GapScoreFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          findMany: {
+            args: Prisma.GapScoreFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>[]
+          }
+          create: {
+            args: Prisma.GapScoreCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          createMany: {
+            args: Prisma.GapScoreCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GapScoreCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>[]
+          }
+          delete: {
+            args: Prisma.GapScoreDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          update: {
+            args: Prisma.GapScoreUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          deleteMany: {
+            args: Prisma.GapScoreDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GapScoreUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GapScoreUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>[]
+          }
+          upsert: {
+            args: Prisma.GapScoreUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GapScorePayload>
+          }
+          aggregate: {
+            args: Prisma.GapScoreAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGapScore>
+          }
+          groupBy: {
+            args: Prisma.GapScoreGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GapScoreGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GapScoreCountArgs<ExtArgs>
+            result: $Utils.Optional<GapScoreCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -968,6 +1058,7 @@ export namespace Prisma {
     healthCheck?: HealthCheckOmit
     associate?: AssociateOmit
     session?: SessionOmit
+    gapScore?: GapScoreOmit
   }
 
   /* Types for Logging */
@@ -1049,10 +1140,12 @@ export namespace Prisma {
 
   export type AssociateCountOutputType = {
     sessions: number
+    gapScores: number
   }
 
   export type AssociateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | AssociateCountOutputTypeCountSessionsArgs
+    gapScores?: boolean | AssociateCountOutputTypeCountGapScoresArgs
   }
 
   // Custom InputTypes
@@ -1071,6 +1164,13 @@ export namespace Prisma {
    */
   export type AssociateCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SessionWhereInput
+  }
+
+  /**
+   * AssociateCountOutputType without action
+   */
+  export type AssociateCountOutputTypeCountGapScoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GapScoreWhereInput
   }
 
 
@@ -2272,6 +2372,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
+    gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["associate"]>
 
@@ -2302,6 +2403,7 @@ export namespace Prisma {
   export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt", ExtArgs["result"]["associate"]>
   export type AssociateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
+    gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AssociateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2311,6 +2413,7 @@ export namespace Prisma {
     name: "Associate"
     objects: {
       sessions: Prisma.$SessionPayload<ExtArgs>[]
+      gapScores: Prisma.$GapScorePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2713,6 +2816,7 @@ export namespace Prisma {
   export interface Prisma__AssociateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     sessions<T extends Associate$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Associate$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    gapScores<T extends Associate$gapScoresArgs<ExtArgs> = {}>(args?: Subset<T, Associate$gapScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3164,6 +3268,30 @@ export namespace Prisma {
   }
 
   /**
+   * Associate.gapScores
+   */
+  export type Associate$gapScoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    where?: GapScoreWhereInput
+    orderBy?: GapScoreOrderByWithRelationInput | GapScoreOrderByWithRelationInput[]
+    cursor?: GapScoreWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GapScoreScalarFieldEnum | GapScoreScalarFieldEnum[]
+  }
+
+  /**
    * Associate without action
    */
   export type AssociateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3255,6 +3383,7 @@ export namespace Prisma {
     questions: number
     starterQuestions: number
     assessments: number
+    techMap: number
     associateId: number
     createdAt: number
     updatedAt: number
@@ -3323,6 +3452,7 @@ export namespace Prisma {
     questions?: true
     starterQuestions?: true
     assessments?: true
+    techMap?: true
     associateId?: true
     createdAt?: true
     updatedAt?: true
@@ -3430,6 +3560,7 @@ export namespace Prisma {
     questions: JsonValue
     starterQuestions: JsonValue
     assessments: JsonValue
+    techMap: JsonValue | null
     associateId: number | null
     createdAt: Date
     updatedAt: Date
@@ -3469,6 +3600,7 @@ export namespace Prisma {
     questions?: boolean
     starterQuestions?: boolean
     assessments?: boolean
+    techMap?: boolean
     associateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3490,6 +3622,7 @@ export namespace Prisma {
     questions?: boolean
     starterQuestions?: boolean
     assessments?: boolean
+    techMap?: boolean
     associateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3511,6 +3644,7 @@ export namespace Prisma {
     questions?: boolean
     starterQuestions?: boolean
     assessments?: boolean
+    techMap?: boolean
     associateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3532,12 +3666,13 @@ export namespace Prisma {
     questions?: boolean
     starterQuestions?: boolean
     assessments?: boolean
+    techMap?: boolean
     associateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "associateId" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "techMap" | "associateId" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associate?: boolean | Session$associateArgs<ExtArgs>
   }
@@ -3568,6 +3703,7 @@ export namespace Prisma {
       questions: Prisma.JsonValue
       starterQuestions: Prisma.JsonValue
       assessments: Prisma.JsonValue
+      techMap: Prisma.JsonValue | null
       associateId: number | null
       createdAt: Date
       updatedAt: Date
@@ -4009,6 +4145,7 @@ export namespace Prisma {
     readonly questions: FieldRef<"Session", 'Json'>
     readonly starterQuestions: FieldRef<"Session", 'Json'>
     readonly assessments: FieldRef<"Session", 'Json'>
+    readonly techMap: FieldRef<"Session", 'Json'>
     readonly associateId: FieldRef<"Session", 'Int'>
     readonly createdAt: FieldRef<"Session", 'DateTime'>
     readonly updatedAt: FieldRef<"Session", 'DateTime'>
@@ -4451,6 +4588,1137 @@ export namespace Prisma {
 
 
   /**
+   * Model GapScore
+   */
+
+  export type AggregateGapScore = {
+    _count: GapScoreCountAggregateOutputType | null
+    _avg: GapScoreAvgAggregateOutputType | null
+    _sum: GapScoreSumAggregateOutputType | null
+    _min: GapScoreMinAggregateOutputType | null
+    _max: GapScoreMaxAggregateOutputType | null
+  }
+
+  export type GapScoreAvgAggregateOutputType = {
+    associateId: number | null
+    weightedScore: number | null
+    sessionCount: number | null
+  }
+
+  export type GapScoreSumAggregateOutputType = {
+    associateId: number | null
+    weightedScore: number | null
+    sessionCount: number | null
+  }
+
+  export type GapScoreMinAggregateOutputType = {
+    id: string | null
+    associateId: number | null
+    skill: string | null
+    topic: string | null
+    weightedScore: number | null
+    sessionCount: number | null
+    lastUpdated: Date | null
+  }
+
+  export type GapScoreMaxAggregateOutputType = {
+    id: string | null
+    associateId: number | null
+    skill: string | null
+    topic: string | null
+    weightedScore: number | null
+    sessionCount: number | null
+    lastUpdated: Date | null
+  }
+
+  export type GapScoreCountAggregateOutputType = {
+    id: number
+    associateId: number
+    skill: number
+    topic: number
+    weightedScore: number
+    sessionCount: number
+    lastUpdated: number
+    _all: number
+  }
+
+
+  export type GapScoreAvgAggregateInputType = {
+    associateId?: true
+    weightedScore?: true
+    sessionCount?: true
+  }
+
+  export type GapScoreSumAggregateInputType = {
+    associateId?: true
+    weightedScore?: true
+    sessionCount?: true
+  }
+
+  export type GapScoreMinAggregateInputType = {
+    id?: true
+    associateId?: true
+    skill?: true
+    topic?: true
+    weightedScore?: true
+    sessionCount?: true
+    lastUpdated?: true
+  }
+
+  export type GapScoreMaxAggregateInputType = {
+    id?: true
+    associateId?: true
+    skill?: true
+    topic?: true
+    weightedScore?: true
+    sessionCount?: true
+    lastUpdated?: true
+  }
+
+  export type GapScoreCountAggregateInputType = {
+    id?: true
+    associateId?: true
+    skill?: true
+    topic?: true
+    weightedScore?: true
+    sessionCount?: true
+    lastUpdated?: true
+    _all?: true
+  }
+
+  export type GapScoreAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GapScore to aggregate.
+     */
+    where?: GapScoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GapScores to fetch.
+     */
+    orderBy?: GapScoreOrderByWithRelationInput | GapScoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GapScoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GapScores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GapScores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GapScores
+    **/
+    _count?: true | GapScoreCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GapScoreAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GapScoreSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GapScoreMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GapScoreMaxAggregateInputType
+  }
+
+  export type GetGapScoreAggregateType<T extends GapScoreAggregateArgs> = {
+        [P in keyof T & keyof AggregateGapScore]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGapScore[P]>
+      : GetScalarType<T[P], AggregateGapScore[P]>
+  }
+
+
+
+
+  export type GapScoreGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GapScoreWhereInput
+    orderBy?: GapScoreOrderByWithAggregationInput | GapScoreOrderByWithAggregationInput[]
+    by: GapScoreScalarFieldEnum[] | GapScoreScalarFieldEnum
+    having?: GapScoreScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GapScoreCountAggregateInputType | true
+    _avg?: GapScoreAvgAggregateInputType
+    _sum?: GapScoreSumAggregateInputType
+    _min?: GapScoreMinAggregateInputType
+    _max?: GapScoreMaxAggregateInputType
+  }
+
+  export type GapScoreGroupByOutputType = {
+    id: string
+    associateId: number
+    skill: string
+    topic: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated: Date
+    _count: GapScoreCountAggregateOutputType | null
+    _avg: GapScoreAvgAggregateOutputType | null
+    _sum: GapScoreSumAggregateOutputType | null
+    _min: GapScoreMinAggregateOutputType | null
+    _max: GapScoreMaxAggregateOutputType | null
+  }
+
+  type GetGapScoreGroupByPayload<T extends GapScoreGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GapScoreGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GapScoreGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GapScoreGroupByOutputType[P]>
+            : GetScalarType<T[P], GapScoreGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GapScoreSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    skill?: boolean
+    topic?: boolean
+    weightedScore?: boolean
+    sessionCount?: boolean
+    lastUpdated?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gapScore"]>
+
+  export type GapScoreSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    skill?: boolean
+    topic?: boolean
+    weightedScore?: boolean
+    sessionCount?: boolean
+    lastUpdated?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gapScore"]>
+
+  export type GapScoreSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    skill?: boolean
+    topic?: boolean
+    weightedScore?: boolean
+    sessionCount?: boolean
+    lastUpdated?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gapScore"]>
+
+  export type GapScoreSelectScalar = {
+    id?: boolean
+    associateId?: boolean
+    skill?: boolean
+    topic?: boolean
+    weightedScore?: boolean
+    sessionCount?: boolean
+    lastUpdated?: boolean
+  }
+
+  export type GapScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "associateId" | "skill" | "topic" | "weightedScore" | "sessionCount" | "lastUpdated", ExtArgs["result"]["gapScore"]>
+  export type GapScoreInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }
+  export type GapScoreIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }
+  export type GapScoreIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+  }
+
+  export type $GapScorePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GapScore"
+    objects: {
+      associate: Prisma.$AssociatePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      associateId: number
+      skill: string
+      topic: string
+      weightedScore: number
+      sessionCount: number
+      lastUpdated: Date
+    }, ExtArgs["result"]["gapScore"]>
+    composites: {}
+  }
+
+  type GapScoreGetPayload<S extends boolean | null | undefined | GapScoreDefaultArgs> = $Result.GetResult<Prisma.$GapScorePayload, S>
+
+  type GapScoreCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GapScoreFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GapScoreCountAggregateInputType | true
+    }
+
+  export interface GapScoreDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GapScore'], meta: { name: 'GapScore' } }
+    /**
+     * Find zero or one GapScore that matches the filter.
+     * @param {GapScoreFindUniqueArgs} args - Arguments to find a GapScore
+     * @example
+     * // Get one GapScore
+     * const gapScore = await prisma.gapScore.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GapScoreFindUniqueArgs>(args: SelectSubset<T, GapScoreFindUniqueArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GapScore that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GapScoreFindUniqueOrThrowArgs} args - Arguments to find a GapScore
+     * @example
+     * // Get one GapScore
+     * const gapScore = await prisma.gapScore.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GapScoreFindUniqueOrThrowArgs>(args: SelectSubset<T, GapScoreFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GapScore that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreFindFirstArgs} args - Arguments to find a GapScore
+     * @example
+     * // Get one GapScore
+     * const gapScore = await prisma.gapScore.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GapScoreFindFirstArgs>(args?: SelectSubset<T, GapScoreFindFirstArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GapScore that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreFindFirstOrThrowArgs} args - Arguments to find a GapScore
+     * @example
+     * // Get one GapScore
+     * const gapScore = await prisma.gapScore.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GapScoreFindFirstOrThrowArgs>(args?: SelectSubset<T, GapScoreFindFirstOrThrowArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GapScores that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GapScores
+     * const gapScores = await prisma.gapScore.findMany()
+     * 
+     * // Get first 10 GapScores
+     * const gapScores = await prisma.gapScore.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gapScoreWithIdOnly = await prisma.gapScore.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GapScoreFindManyArgs>(args?: SelectSubset<T, GapScoreFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GapScore.
+     * @param {GapScoreCreateArgs} args - Arguments to create a GapScore.
+     * @example
+     * // Create one GapScore
+     * const GapScore = await prisma.gapScore.create({
+     *   data: {
+     *     // ... data to create a GapScore
+     *   }
+     * })
+     * 
+     */
+    create<T extends GapScoreCreateArgs>(args: SelectSubset<T, GapScoreCreateArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GapScores.
+     * @param {GapScoreCreateManyArgs} args - Arguments to create many GapScores.
+     * @example
+     * // Create many GapScores
+     * const gapScore = await prisma.gapScore.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GapScoreCreateManyArgs>(args?: SelectSubset<T, GapScoreCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GapScores and returns the data saved in the database.
+     * @param {GapScoreCreateManyAndReturnArgs} args - Arguments to create many GapScores.
+     * @example
+     * // Create many GapScores
+     * const gapScore = await prisma.gapScore.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GapScores and only return the `id`
+     * const gapScoreWithIdOnly = await prisma.gapScore.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GapScoreCreateManyAndReturnArgs>(args?: SelectSubset<T, GapScoreCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GapScore.
+     * @param {GapScoreDeleteArgs} args - Arguments to delete one GapScore.
+     * @example
+     * // Delete one GapScore
+     * const GapScore = await prisma.gapScore.delete({
+     *   where: {
+     *     // ... filter to delete one GapScore
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GapScoreDeleteArgs>(args: SelectSubset<T, GapScoreDeleteArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GapScore.
+     * @param {GapScoreUpdateArgs} args - Arguments to update one GapScore.
+     * @example
+     * // Update one GapScore
+     * const gapScore = await prisma.gapScore.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GapScoreUpdateArgs>(args: SelectSubset<T, GapScoreUpdateArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GapScores.
+     * @param {GapScoreDeleteManyArgs} args - Arguments to filter GapScores to delete.
+     * @example
+     * // Delete a few GapScores
+     * const { count } = await prisma.gapScore.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GapScoreDeleteManyArgs>(args?: SelectSubset<T, GapScoreDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GapScores.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GapScores
+     * const gapScore = await prisma.gapScore.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GapScoreUpdateManyArgs>(args: SelectSubset<T, GapScoreUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GapScores and returns the data updated in the database.
+     * @param {GapScoreUpdateManyAndReturnArgs} args - Arguments to update many GapScores.
+     * @example
+     * // Update many GapScores
+     * const gapScore = await prisma.gapScore.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GapScores and only return the `id`
+     * const gapScoreWithIdOnly = await prisma.gapScore.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GapScoreUpdateManyAndReturnArgs>(args: SelectSubset<T, GapScoreUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GapScore.
+     * @param {GapScoreUpsertArgs} args - Arguments to update or create a GapScore.
+     * @example
+     * // Update or create a GapScore
+     * const gapScore = await prisma.gapScore.upsert({
+     *   create: {
+     *     // ... data to create a GapScore
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GapScore we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GapScoreUpsertArgs>(args: SelectSubset<T, GapScoreUpsertArgs<ExtArgs>>): Prisma__GapScoreClient<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GapScores.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreCountArgs} args - Arguments to filter GapScores to count.
+     * @example
+     * // Count the number of GapScores
+     * const count = await prisma.gapScore.count({
+     *   where: {
+     *     // ... the filter for the GapScores we want to count
+     *   }
+     * })
+    **/
+    count<T extends GapScoreCountArgs>(
+      args?: Subset<T, GapScoreCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GapScoreCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GapScore.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GapScoreAggregateArgs>(args: Subset<T, GapScoreAggregateArgs>): Prisma.PrismaPromise<GetGapScoreAggregateType<T>>
+
+    /**
+     * Group by GapScore.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GapScoreGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GapScoreGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GapScoreGroupByArgs['orderBy'] }
+        : { orderBy?: GapScoreGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GapScoreGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGapScoreGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GapScore model
+   */
+  readonly fields: GapScoreFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GapScore.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GapScoreClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    associate<T extends AssociateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AssociateDefaultArgs<ExtArgs>>): Prisma__AssociateClient<$Result.GetResult<Prisma.$AssociatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GapScore model
+   */
+  interface GapScoreFieldRefs {
+    readonly id: FieldRef<"GapScore", 'String'>
+    readonly associateId: FieldRef<"GapScore", 'Int'>
+    readonly skill: FieldRef<"GapScore", 'String'>
+    readonly topic: FieldRef<"GapScore", 'String'>
+    readonly weightedScore: FieldRef<"GapScore", 'Float'>
+    readonly sessionCount: FieldRef<"GapScore", 'Int'>
+    readonly lastUpdated: FieldRef<"GapScore", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GapScore findUnique
+   */
+  export type GapScoreFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter, which GapScore to fetch.
+     */
+    where: GapScoreWhereUniqueInput
+  }
+
+  /**
+   * GapScore findUniqueOrThrow
+   */
+  export type GapScoreFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter, which GapScore to fetch.
+     */
+    where: GapScoreWhereUniqueInput
+  }
+
+  /**
+   * GapScore findFirst
+   */
+  export type GapScoreFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter, which GapScore to fetch.
+     */
+    where?: GapScoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GapScores to fetch.
+     */
+    orderBy?: GapScoreOrderByWithRelationInput | GapScoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GapScores.
+     */
+    cursor?: GapScoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GapScores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GapScores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GapScores.
+     */
+    distinct?: GapScoreScalarFieldEnum | GapScoreScalarFieldEnum[]
+  }
+
+  /**
+   * GapScore findFirstOrThrow
+   */
+  export type GapScoreFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter, which GapScore to fetch.
+     */
+    where?: GapScoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GapScores to fetch.
+     */
+    orderBy?: GapScoreOrderByWithRelationInput | GapScoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GapScores.
+     */
+    cursor?: GapScoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GapScores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GapScores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GapScores.
+     */
+    distinct?: GapScoreScalarFieldEnum | GapScoreScalarFieldEnum[]
+  }
+
+  /**
+   * GapScore findMany
+   */
+  export type GapScoreFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter, which GapScores to fetch.
+     */
+    where?: GapScoreWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GapScores to fetch.
+     */
+    orderBy?: GapScoreOrderByWithRelationInput | GapScoreOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GapScores.
+     */
+    cursor?: GapScoreWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GapScores from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GapScores.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GapScores.
+     */
+    distinct?: GapScoreScalarFieldEnum | GapScoreScalarFieldEnum[]
+  }
+
+  /**
+   * GapScore create
+   */
+  export type GapScoreCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GapScore.
+     */
+    data: XOR<GapScoreCreateInput, GapScoreUncheckedCreateInput>
+  }
+
+  /**
+   * GapScore createMany
+   */
+  export type GapScoreCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GapScores.
+     */
+    data: GapScoreCreateManyInput | GapScoreCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GapScore createManyAndReturn
+   */
+  export type GapScoreCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * The data used to create many GapScores.
+     */
+    data: GapScoreCreateManyInput | GapScoreCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GapScore update
+   */
+  export type GapScoreUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GapScore.
+     */
+    data: XOR<GapScoreUpdateInput, GapScoreUncheckedUpdateInput>
+    /**
+     * Choose, which GapScore to update.
+     */
+    where: GapScoreWhereUniqueInput
+  }
+
+  /**
+   * GapScore updateMany
+   */
+  export type GapScoreUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GapScores.
+     */
+    data: XOR<GapScoreUpdateManyMutationInput, GapScoreUncheckedUpdateManyInput>
+    /**
+     * Filter which GapScores to update
+     */
+    where?: GapScoreWhereInput
+    /**
+     * Limit how many GapScores to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GapScore updateManyAndReturn
+   */
+  export type GapScoreUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * The data used to update GapScores.
+     */
+    data: XOR<GapScoreUpdateManyMutationInput, GapScoreUncheckedUpdateManyInput>
+    /**
+     * Filter which GapScores to update
+     */
+    where?: GapScoreWhereInput
+    /**
+     * Limit how many GapScores to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GapScore upsert
+   */
+  export type GapScoreUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GapScore to update in case it exists.
+     */
+    where: GapScoreWhereUniqueInput
+    /**
+     * In case the GapScore found by the `where` argument doesn't exist, create a new GapScore with this data.
+     */
+    create: XOR<GapScoreCreateInput, GapScoreUncheckedCreateInput>
+    /**
+     * In case the GapScore was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GapScoreUpdateInput, GapScoreUncheckedUpdateInput>
+  }
+
+  /**
+   * GapScore delete
+   */
+  export type GapScoreDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+    /**
+     * Filter which GapScore to delete.
+     */
+    where: GapScoreWhereUniqueInput
+  }
+
+  /**
+   * GapScore deleteMany
+   */
+  export type GapScoreDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GapScores to delete
+     */
+    where?: GapScoreWhereInput
+    /**
+     * Limit how many GapScores to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GapScore without action
+   */
+  export type GapScoreDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GapScore
+     */
+    select?: GapScoreSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GapScore
+     */
+    omit?: GapScoreOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GapScoreInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -4498,12 +5766,26 @@ export namespace Prisma {
     questions: 'questions',
     starterQuestions: 'starterQuestions',
     assessments: 'assessments',
+    techMap: 'techMap',
     associateId: 'associateId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+  export const GapScoreScalarFieldEnum: {
+    id: 'id',
+    associateId: 'associateId',
+    skill: 'skill',
+    topic: 'topic',
+    weightedScore: 'weightedScore',
+    sessionCount: 'sessionCount',
+    lastUpdated: 'lastUpdated'
+  };
+
+  export type GapScoreScalarFieldEnum = (typeof GapScoreScalarFieldEnum)[keyof typeof GapScoreScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -4519,6 +5801,14 @@ export namespace Prisma {
   };
 
   export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -4673,6 +5963,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Associate"> | Date | string
     updatedAt?: DateTimeFilter<"Associate"> | Date | string
     sessions?: SessionListRelationFilter
+    gapScores?: GapScoreListRelationFilter
   }
 
   export type AssociateOrderByWithRelationInput = {
@@ -4682,6 +5973,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sessions?: SessionOrderByRelationAggregateInput
+    gapScores?: GapScoreOrderByRelationAggregateInput
   }
 
   export type AssociateWhereUniqueInput = Prisma.AtLeast<{
@@ -4694,6 +5986,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Associate"> | Date | string
     updatedAt?: DateTimeFilter<"Associate"> | Date | string
     sessions?: SessionListRelationFilter
+    gapScores?: GapScoreListRelationFilter
   }, "id" | "slug">
 
   export type AssociateOrderByWithAggregationInput = {
@@ -4738,6 +6031,7 @@ export namespace Prisma {
     questions?: JsonFilter<"Session">
     starterQuestions?: JsonFilter<"Session">
     assessments?: JsonFilter<"Session">
+    techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
@@ -4759,6 +6053,7 @@ export namespace Prisma {
     questions?: SortOrder
     starterQuestions?: SortOrder
     assessments?: SortOrder
+    techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4783,6 +6078,7 @@ export namespace Prisma {
     questions?: JsonFilter<"Session">
     starterQuestions?: JsonFilter<"Session">
     assessments?: JsonFilter<"Session">
+    techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
@@ -4804,6 +6100,7 @@ export namespace Prisma {
     questions?: SortOrder
     starterQuestions?: SortOrder
     assessments?: SortOrder
+    techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4832,9 +6129,78 @@ export namespace Prisma {
     questions?: JsonWithAggregatesFilter<"Session">
     starterQuestions?: JsonWithAggregatesFilter<"Session">
     assessments?: JsonWithAggregatesFilter<"Session">
+    techMap?: JsonNullableWithAggregatesFilter<"Session">
     associateId?: IntNullableWithAggregatesFilter<"Session"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+  }
+
+  export type GapScoreWhereInput = {
+    AND?: GapScoreWhereInput | GapScoreWhereInput[]
+    OR?: GapScoreWhereInput[]
+    NOT?: GapScoreWhereInput | GapScoreWhereInput[]
+    id?: StringFilter<"GapScore"> | string
+    associateId?: IntFilter<"GapScore"> | number
+    skill?: StringFilter<"GapScore"> | string
+    topic?: StringFilter<"GapScore"> | string
+    weightedScore?: FloatFilter<"GapScore"> | number
+    sessionCount?: IntFilter<"GapScore"> | number
+    lastUpdated?: DateTimeFilter<"GapScore"> | Date | string
+    associate?: XOR<AssociateScalarRelationFilter, AssociateWhereInput>
+  }
+
+  export type GapScoreOrderByWithRelationInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    skill?: SortOrder
+    topic?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+    lastUpdated?: SortOrder
+    associate?: AssociateOrderByWithRelationInput
+  }
+
+  export type GapScoreWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    associateId_skill_topic?: GapScoreAssociateIdSkillTopicCompoundUniqueInput
+    AND?: GapScoreWhereInput | GapScoreWhereInput[]
+    OR?: GapScoreWhereInput[]
+    NOT?: GapScoreWhereInput | GapScoreWhereInput[]
+    associateId?: IntFilter<"GapScore"> | number
+    skill?: StringFilter<"GapScore"> | string
+    topic?: StringFilter<"GapScore"> | string
+    weightedScore?: FloatFilter<"GapScore"> | number
+    sessionCount?: IntFilter<"GapScore"> | number
+    lastUpdated?: DateTimeFilter<"GapScore"> | Date | string
+    associate?: XOR<AssociateScalarRelationFilter, AssociateWhereInput>
+  }, "id" | "associateId_skill_topic">
+
+  export type GapScoreOrderByWithAggregationInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    skill?: SortOrder
+    topic?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+    lastUpdated?: SortOrder
+    _count?: GapScoreCountOrderByAggregateInput
+    _avg?: GapScoreAvgOrderByAggregateInput
+    _max?: GapScoreMaxOrderByAggregateInput
+    _min?: GapScoreMinOrderByAggregateInput
+    _sum?: GapScoreSumOrderByAggregateInput
+  }
+
+  export type GapScoreScalarWhereWithAggregatesInput = {
+    AND?: GapScoreScalarWhereWithAggregatesInput | GapScoreScalarWhereWithAggregatesInput[]
+    OR?: GapScoreScalarWhereWithAggregatesInput[]
+    NOT?: GapScoreScalarWhereWithAggregatesInput | GapScoreScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GapScore"> | string
+    associateId?: IntWithAggregatesFilter<"GapScore"> | number
+    skill?: StringWithAggregatesFilter<"GapScore"> | string
+    topic?: StringWithAggregatesFilter<"GapScore"> | string
+    weightedScore?: FloatWithAggregatesFilter<"GapScore"> | number
+    sessionCount?: IntWithAggregatesFilter<"GapScore"> | number
+    lastUpdated?: DateTimeWithAggregatesFilter<"GapScore"> | Date | string
   }
 
   export type HealthCheckCreateInput = {
@@ -4875,6 +6241,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateInput = {
@@ -4884,6 +6251,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUpdateInput = {
@@ -4892,6 +6260,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateInput = {
@@ -4901,6 +6270,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateCreateManyInput = {
@@ -4941,6 +6311,7 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     associate?: AssociateCreateNestedOneWithoutSessionsInput
@@ -4961,6 +6332,7 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4981,6 +6353,7 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associate?: AssociateUpdateOneWithoutSessionsNestedInput
@@ -5001,6 +6374,7 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5021,6 +6395,7 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -5041,6 +6416,7 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5060,9 +6436,79 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreCreateInput = {
+    id?: string
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
+    associate: AssociateCreateNestedOneWithoutGapScoresInput
+  }
+
+  export type GapScoreUncheckedCreateInput = {
+    id?: string
+    associateId: number
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
+  }
+
+  export type GapScoreUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    associate?: AssociateUpdateOneRequiredWithoutGapScoresNestedInput
+  }
+
+  export type GapScoreUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreCreateManyInput = {
+    id?: string
+    associateId: number
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
+  }
+
+  export type GapScoreUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -5176,12 +6622,22 @@ export namespace Prisma {
     none?: SessionWhereInput
   }
 
+  export type GapScoreListRelationFilter = {
+    every?: GapScoreWhereInput
+    some?: GapScoreWhereInput
+    none?: GapScoreWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type SessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GapScoreOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -5286,6 +6742,29 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type IntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
@@ -5318,6 +6797,7 @@ export namespace Prisma {
     questions?: SortOrder
     starterQuestions?: SortOrder
     assessments?: SortOrder
+    techMap?: SortOrder
     associateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -5410,6 +6890,32 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
@@ -5425,6 +6931,86 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type AssociateScalarRelationFilter = {
+    is?: AssociateWhereInput
+    isNot?: AssociateWhereInput
+  }
+
+  export type GapScoreAssociateIdSkillTopicCompoundUniqueInput = {
+    associateId: number
+    skill: string
+    topic: string
+  }
+
+  export type GapScoreCountOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    skill?: SortOrder
+    topic?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+    lastUpdated?: SortOrder
+  }
+
+  export type GapScoreAvgOrderByAggregateInput = {
+    associateId?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+  }
+
+  export type GapScoreMaxOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    skill?: SortOrder
+    topic?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+    lastUpdated?: SortOrder
+  }
+
+  export type GapScoreMinOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    skill?: SortOrder
+    topic?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+    lastUpdated?: SortOrder
+  }
+
+  export type GapScoreSumOrderByAggregateInput = {
+    associateId?: SortOrder
+    weightedScore?: SortOrder
+    sessionCount?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -5446,11 +7032,25 @@ export namespace Prisma {
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
   }
 
+  export type GapScoreCreateNestedManyWithoutAssociateInput = {
+    create?: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput> | GapScoreCreateWithoutAssociateInput[] | GapScoreUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: GapScoreCreateOrConnectWithoutAssociateInput | GapScoreCreateOrConnectWithoutAssociateInput[]
+    createMany?: GapScoreCreateManyAssociateInputEnvelope
+    connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutAssociateInput = {
     create?: XOR<SessionCreateWithoutAssociateInput, SessionUncheckedCreateWithoutAssociateInput> | SessionCreateWithoutAssociateInput[] | SessionUncheckedCreateWithoutAssociateInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutAssociateInput | SessionCreateOrConnectWithoutAssociateInput[]
     createMany?: SessionCreateManyAssociateInputEnvelope
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type GapScoreUncheckedCreateNestedManyWithoutAssociateInput = {
+    create?: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput> | GapScoreCreateWithoutAssociateInput[] | GapScoreUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: GapScoreCreateOrConnectWithoutAssociateInput | GapScoreCreateOrConnectWithoutAssociateInput[]
+    createMany?: GapScoreCreateManyAssociateInputEnvelope
+    connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -5475,6 +7075,20 @@ export namespace Prisma {
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
   }
 
+  export type GapScoreUpdateManyWithoutAssociateNestedInput = {
+    create?: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput> | GapScoreCreateWithoutAssociateInput[] | GapScoreUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: GapScoreCreateOrConnectWithoutAssociateInput | GapScoreCreateOrConnectWithoutAssociateInput[]
+    upsert?: GapScoreUpsertWithWhereUniqueWithoutAssociateInput | GapScoreUpsertWithWhereUniqueWithoutAssociateInput[]
+    createMany?: GapScoreCreateManyAssociateInputEnvelope
+    set?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    disconnect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    delete?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    update?: GapScoreUpdateWithWhereUniqueWithoutAssociateInput | GapScoreUpdateWithWhereUniqueWithoutAssociateInput[]
+    updateMany?: GapScoreUpdateManyWithWhereWithoutAssociateInput | GapScoreUpdateManyWithWhereWithoutAssociateInput[]
+    deleteMany?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutAssociateNestedInput = {
     create?: XOR<SessionCreateWithoutAssociateInput, SessionUncheckedCreateWithoutAssociateInput> | SessionCreateWithoutAssociateInput[] | SessionUncheckedCreateWithoutAssociateInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutAssociateInput | SessionCreateOrConnectWithoutAssociateInput[]
@@ -5487,6 +7101,20 @@ export namespace Prisma {
     update?: SessionUpdateWithWhereUniqueWithoutAssociateInput | SessionUpdateWithWhereUniqueWithoutAssociateInput[]
     updateMany?: SessionUpdateManyWithWhereWithoutAssociateInput | SessionUpdateManyWithWhereWithoutAssociateInput[]
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type GapScoreUncheckedUpdateManyWithoutAssociateNestedInput = {
+    create?: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput> | GapScoreCreateWithoutAssociateInput[] | GapScoreUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: GapScoreCreateOrConnectWithoutAssociateInput | GapScoreCreateOrConnectWithoutAssociateInput[]
+    upsert?: GapScoreUpsertWithWhereUniqueWithoutAssociateInput | GapScoreUpsertWithWhereUniqueWithoutAssociateInput[]
+    createMany?: GapScoreCreateManyAssociateInputEnvelope
+    set?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    disconnect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    delete?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+    update?: GapScoreUpdateWithWhereUniqueWithoutAssociateInput | GapScoreUpdateWithWhereUniqueWithoutAssociateInput[]
+    updateMany?: GapScoreUpdateManyWithWhereWithoutAssociateInput | GapScoreUpdateManyWithWhereWithoutAssociateInput[]
+    deleteMany?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
   }
 
   export type AssociateCreateNestedOneWithoutSessionsInput = {
@@ -5519,6 +7147,28 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type AssociateCreateNestedOneWithoutGapScoresInput = {
+    create?: XOR<AssociateCreateWithoutGapScoresInput, AssociateUncheckedCreateWithoutGapScoresInput>
+    connectOrCreate?: AssociateCreateOrConnectWithoutGapScoresInput
+    connect?: AssociateWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type AssociateUpdateOneRequiredWithoutGapScoresNestedInput = {
+    create?: XOR<AssociateCreateWithoutGapScoresInput, AssociateUncheckedCreateWithoutGapScoresInput>
+    connectOrCreate?: AssociateCreateOrConnectWithoutGapScoresInput
+    upsert?: AssociateUpsertWithoutGapScoresInput
+    connect?: AssociateWhereUniqueInput
+    update?: XOR<XOR<AssociateUpdateToOneWithWhereWithoutGapScoresInput, AssociateUpdateWithoutGapScoresInput>, AssociateUncheckedUpdateWithoutGapScoresInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -5706,6 +7356,29 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
@@ -5723,6 +7396,22 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type SessionCreateWithoutAssociateInput = {
     id: string
     candidateName?: string | null
@@ -5738,6 +7427,7 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -5757,6 +7447,7 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -5768,6 +7459,34 @@ export namespace Prisma {
 
   export type SessionCreateManyAssociateInputEnvelope = {
     data: SessionCreateManyAssociateInput | SessionCreateManyAssociateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GapScoreCreateWithoutAssociateInput = {
+    id?: string
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
+  }
+
+  export type GapScoreUncheckedCreateWithoutAssociateInput = {
+    id?: string
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
+  }
+
+  export type GapScoreCreateOrConnectWithoutAssociateInput = {
+    where: GapScoreWhereUniqueInput
+    create: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput>
+  }
+
+  export type GapScoreCreateManyAssociateInputEnvelope = {
+    data: GapScoreCreateManyAssociateInput | GapScoreCreateManyAssociateInput[]
     skipDuplicates?: boolean
   }
 
@@ -5805,9 +7524,39 @@ export namespace Prisma {
     questions?: JsonFilter<"Session">
     starterQuestions?: JsonFilter<"Session">
     assessments?: JsonFilter<"Session">
+    techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
+  }
+
+  export type GapScoreUpsertWithWhereUniqueWithoutAssociateInput = {
+    where: GapScoreWhereUniqueInput
+    update: XOR<GapScoreUpdateWithoutAssociateInput, GapScoreUncheckedUpdateWithoutAssociateInput>
+    create: XOR<GapScoreCreateWithoutAssociateInput, GapScoreUncheckedCreateWithoutAssociateInput>
+  }
+
+  export type GapScoreUpdateWithWhereUniqueWithoutAssociateInput = {
+    where: GapScoreWhereUniqueInput
+    data: XOR<GapScoreUpdateWithoutAssociateInput, GapScoreUncheckedUpdateWithoutAssociateInput>
+  }
+
+  export type GapScoreUpdateManyWithWhereWithoutAssociateInput = {
+    where: GapScoreScalarWhereInput
+    data: XOR<GapScoreUpdateManyMutationInput, GapScoreUncheckedUpdateManyWithoutAssociateInput>
+  }
+
+  export type GapScoreScalarWhereInput = {
+    AND?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
+    OR?: GapScoreScalarWhereInput[]
+    NOT?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
+    id?: StringFilter<"GapScore"> | string
+    associateId?: IntFilter<"GapScore"> | number
+    skill?: StringFilter<"GapScore"> | string
+    topic?: StringFilter<"GapScore"> | string
+    weightedScore?: FloatFilter<"GapScore"> | number
+    sessionCount?: IntFilter<"GapScore"> | number
+    lastUpdated?: DateTimeFilter<"GapScore"> | Date | string
   }
 
   export type AssociateCreateWithoutSessionsInput = {
@@ -5815,6 +7564,7 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateWithoutSessionsInput = {
@@ -5823,6 +7573,7 @@ export namespace Prisma {
     displayName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateCreateOrConnectWithoutSessionsInput = {
@@ -5846,6 +7597,7 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateWithoutSessionsInput = {
@@ -5854,6 +7606,57 @@ export namespace Prisma {
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateCreateWithoutGapScoresInput = {
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateUncheckedCreateWithoutGapScoresInput = {
+    id?: number
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateCreateOrConnectWithoutGapScoresInput = {
+    where: AssociateWhereUniqueInput
+    create: XOR<AssociateCreateWithoutGapScoresInput, AssociateUncheckedCreateWithoutGapScoresInput>
+  }
+
+  export type AssociateUpsertWithoutGapScoresInput = {
+    update: XOR<AssociateUpdateWithoutGapScoresInput, AssociateUncheckedUpdateWithoutGapScoresInput>
+    create: XOR<AssociateCreateWithoutGapScoresInput, AssociateUncheckedCreateWithoutGapScoresInput>
+    where?: AssociateWhereInput
+  }
+
+  export type AssociateUpdateToOneWithWhereWithoutGapScoresInput = {
+    where?: AssociateWhereInput
+    data: XOR<AssociateUpdateWithoutGapScoresInput, AssociateUncheckedUpdateWithoutGapScoresInput>
+  }
+
+  export type AssociateUpdateWithoutGapScoresInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateUncheckedUpdateWithoutGapScoresInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type SessionCreateManyAssociateInput = {
@@ -5871,8 +7674,18 @@ export namespace Prisma {
     questions: JsonNullValueInput | InputJsonValue
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type GapScoreCreateManyAssociateInput = {
+    id?: string
+    skill: string
+    topic?: string
+    weightedScore: number
+    sessionCount: number
+    lastUpdated?: Date | string
   }
 
   export type SessionUpdateWithoutAssociateInput = {
@@ -5890,6 +7703,7 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5909,6 +7723,7 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5928,8 +7743,36 @@ export namespace Prisma {
     questions?: JsonNullValueInput | InputJsonValue
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreUpdateWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreUncheckedUpdateWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GapScoreUncheckedUpdateManyWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skill?: StringFieldUpdateOperationsInput | string
+    topic?: StringFieldUpdateOperationsInput | string
+    weightedScore?: FloatFieldUpdateOperationsInput | number
+    sessionCount?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

@@ -55,9 +55,9 @@ export async function saveGapScores(associateId: number): Promise<void> {
     overallSoftSkillScore: s.overallSoftSkillScore ?? undefined,
     technicalFeedback: s.technicalFeedback ?? undefined,
     softSkillFeedback: s.softSkillFeedback ?? undefined,
-    questions: s.questions as InterviewSession['questions'],
-    starterQuestions: s.starterQuestions as InterviewSession['starterQuestions'],
-    assessments: s.assessments as Record<string, QuestionAssessment>,
+    questions: s.questions as unknown as InterviewSession['questions'],
+    starterQuestions: s.starterQuestions as unknown as InterviewSession['starterQuestions'],
+    assessments: s.assessments as unknown as Record<string, QuestionAssessment>,
     techMap: s.techMap as Record<number, string> | undefined,
     currentQuestionIndex: 0, // Not needed for gap computation
   }));

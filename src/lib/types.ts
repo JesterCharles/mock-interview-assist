@@ -51,6 +51,7 @@ export interface InterviewSession {
     currentQuestionIndex: number;
     status: 'setup' | 'in-progress' | 'review' | 'completed';
     techMap?: Record<number, string>;  // weekNumber -> skill name (e.g., {1: "react", 2: "typescript"})
+    associateSlug?: string;
     // Editable overall scores and feedback
     overallTechnicalScore?: number;
     overallSoftSkillScore?: number;

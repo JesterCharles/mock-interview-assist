@@ -148,9 +148,20 @@ exports.Prisma.SessionScalarFieldEnum = {
   questions: 'questions',
   starterQuestions: 'starterQuestions',
   assessments: 'assessments',
+  techMap: 'techMap',
   associateId: 'associateId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GapScoreScalarFieldEnum = {
+  id: 'id',
+  associateId: 'associateId',
+  skill: 'skill',
+  topic: 'topic',
+  weightedScore: 'weightedScore',
+  sessionCount: 'sessionCount',
+  lastUpdated: 'lastUpdated'
 };
 
 exports.Prisma.SortOrder = {
@@ -159,6 +170,11 @@ exports.Prisma.SortOrder = {
 };
 
 exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -182,7 +198,8 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.ModelName = {
   HealthCheck: 'HealthCheck',
   Associate: 'Associate',
-  Session: 'Session'
+  Session: 'Session',
+  GapScore: 'GapScore'
 };
 
 /**
