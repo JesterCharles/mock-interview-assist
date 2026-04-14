@@ -43,6 +43,7 @@ function formatDate(iso: string | null): string {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'UTC',
     }).format(d)
   } catch {
     return iso
