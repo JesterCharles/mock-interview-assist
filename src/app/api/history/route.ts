@@ -6,6 +6,7 @@ import { isAuthenticatedSession } from '@/lib/auth-server';
 import { readHistory, writeHistory } from '@/lib/historyService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { prisma } from '@/lib/prisma';
+import { saveGapScores } from '@/lib/gapPersistence';
 
 // GET - Retrieve all interview history
 export async function GET() {
@@ -46,6 +47,20 @@ export async function POST(request: NextRequest) {
 
         // Dual-write to Supabase (D-01: log-and-continue on failure)
         await persistSessionToDb(session);
+
+        // Fire-and-forget gap score computation (D-04: never block session save)
+        if (session.associateSlug) {
+            prisma.associate
+                .findUnique({ where: { slug: session.associateSlug }, select: { id: true } })
+                .then((associate) => {
+                    if (associate) {
+                        return saveGapScores(associate.id);
+                    }
+                })
+                .catch((err) => {
+                    console.error('[gap-service] Failed to update gap scores:', err);
+                });
+        }
 
         return NextResponse.json({ success: true, totalSessions: trimmedHistory.length });
     } catch (error) {
