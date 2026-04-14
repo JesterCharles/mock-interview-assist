@@ -13,6 +13,9 @@ const UpdateCohortSchema = z
     endDate: z.coerce.date().nullable().optional(),
     description: z.string().max(500).nullable().optional(),
   })
+  .refine((d) => Object.keys(d).length > 0, {
+    message: 'At least one field required',
+  })
   .refine(
     (d) =>
       !d.startDate || d.endDate === null || d.endDate === undefined
@@ -132,6 +135,41 @@ export async function PATCH(
   if (parsed.data.description !== undefined) data.description = parsed.data.description;
 
   try {
+    // MD-01: cross-field validation against merged state. Schema refine only
+    // catches cases where startDate is in the payload; a client patching only
+    // { endDate } against a cohort with an earlier stored startDate would
+    // otherwise bypass the check. Fetch existing row and merge before update.
+    if (parsed.data.endDate !== undefined && parsed.data.endDate !== null) {
+      const existing = await prisma.cohort.findUnique({
+        where: { id: idNum },
+        select: { startDate: true },
+      });
+      if (!existing) {
+        return NextResponse.json(
+          { error: 'Cohort not found' },
+          { status: 404 }
+        );
+      }
+      const mergedStart =
+        parsed.data.startDate !== undefined
+          ? parsed.data.startDate
+          : existing.startDate;
+      if (parsed.data.endDate < mergedStart) {
+        return NextResponse.json(
+          {
+            error: 'Invalid input',
+            issues: [
+              {
+                path: ['endDate'],
+                message: 'endDate must be >= startDate',
+              },
+            ],
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const updated = await prisma.cohort.update({
       where: { id: idNum },
       data,

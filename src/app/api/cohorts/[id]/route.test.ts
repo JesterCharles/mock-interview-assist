@@ -180,6 +180,39 @@ describe('PATCH /api/cohorts/[id]', () => {
     expect(res.status).toBe(400);
   });
 
+  it('returns 400 when endDate alone is earlier than stored startDate (MD-01)', async () => {
+    mockFindUnique.mockResolvedValue({
+      id: 3,
+      startDate: new Date('2026-05-01T00:00:00.000Z'),
+    });
+
+    const res = await PATCH(
+      makeRequest('PATCH', { endDate: '2026-02-01' }),
+      makeCtx('3')
+    );
+    expect(res.status).toBe(400);
+    expect(mockUpdate).not.toHaveBeenCalled();
+    const body = await res.json();
+    expect(body.error).toBe('Invalid input');
+  });
+
+  it('returns 404 when endDate-only patch targets missing cohort (MD-01)', async () => {
+    mockFindUnique.mockResolvedValue(null);
+
+    const res = await PATCH(
+      makeRequest('PATCH', { endDate: '2026-02-01' }),
+      makeCtx('999')
+    );
+    expect(res.status).toBe(404);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for empty body (LO-07)', async () => {
+    const res = await PATCH(makeRequest('PATCH', {}), makeCtx('3'));
+    expect(res.status).toBe(400);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
   it('returns 400 for empty name', async () => {
     const res = await PATCH(
       makeRequest('PATCH', { name: '' }),
