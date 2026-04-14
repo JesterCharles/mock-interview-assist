@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 process.env.ASSOCIATE_SESSION_SECRET = 'test-secret-for-auth-server';
 
