@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { RosterAssociate } from '@/lib/trainer-types'
 import RosterTable from '@/components/trainer/RosterTable'
@@ -66,6 +67,42 @@ export default function TrainerPage() {
           padding: '48px 24px',
         }}
       >
+        {/* Sub-nav — links to sibling trainer views (D-12) */}
+        <nav
+          aria-label="Trainer sections"
+          style={{
+            display: 'flex',
+            gap: '16px',
+            marginBottom: '24px',
+            fontSize: '13px',
+            fontFamily: 'DM Sans, sans-serif',
+            fontWeight: 500,
+          }}
+        >
+          <span
+            aria-current="page"
+            style={{
+              color: '#1A1A1A',
+              backgroundColor: '#F0EBE2',
+              padding: '6px 10px',
+              borderRadius: '6px',
+            }}
+          >
+            Dashboard
+          </span>
+          <Link
+            href="/trainer/cohorts"
+            style={{
+              color: '#7A7267',
+              textDecoration: 'none',
+              padding: '6px 10px',
+              borderRadius: '6px',
+            }}
+          >
+            Cohorts
+          </Link>
+        </nav>
+
         {/* Page title — 48px Clash Display 600 per DESIGN.md Typography */}
         <h1
           style={{
