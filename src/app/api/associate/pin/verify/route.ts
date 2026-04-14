@@ -60,7 +60,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   // Success — reset counter, mint token.
   resetAttempts(fingerprint);
-  const token = signAssociateToken(associate.id, associate.pinGeneratedAt);
+  const token = await signAssociateToken(associate.id, associate.pinGeneratedAt);
 
   const response = NextResponse.json({ ok: true, slug: associate.slug }, { status: 200 });
   response.cookies.set('associate_session', token, {

@@ -30,7 +30,7 @@ async function resolveAssociate(): Promise<{ associateId: number; slug: string }
     const raw = cookieStore.get('associate_session')?.value;
     if (!raw) return null;
 
-    const parsed = verifyAssociateToken(raw);
+    const parsed = await verifyAssociateToken(raw);
     if (!parsed) return null;
 
     const associate = await getAssociateById(parsed.associateId);

@@ -23,7 +23,7 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Public associate paths — allow unconditionally.
@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const identity = getCallerIdentity(request);
+  const identity = await getCallerIdentity(request);
 
   // 2. Trainer-only paths.
   if (TRAINER_PATHS.some((p) => matchesPrefix(pathname, p))) {

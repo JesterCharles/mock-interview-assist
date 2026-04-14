@@ -57,32 +57,32 @@ describe('associateSession', () => {
     process.env = { ...originalEnv };
   });
 
-  it('signs and verifies a token, roundtripping associateId + ver', () => {
+  it('signs and verifies a token, roundtripping associateId + ver', async () => {
     const now = new Date('2026-04-14T12:00:00.000Z');
-    const token = signAssociateToken(42, now);
-    const decoded = verifyAssociateToken(token);
+    const token = await signAssociateToken(42, now);
+    const decoded = await verifyAssociateToken(token);
     expect(decoded).not.toBeNull();
     expect(decoded!.associateId).toBe(42);
     expect(decoded!.ver).toBe(now.toISOString());
   });
 
-  it('returns null for tampered payload', () => {
-    const token = signAssociateToken(42, new Date('2026-04-14T12:00:00.000Z'));
+  it('returns null for tampered payload', async () => {
+    const token = await signAssociateToken(42, new Date('2026-04-14T12:00:00.000Z'));
     const [payload, sig] = token.split('.');
     // flip one character in payload
     const tamperedPayload = payload.slice(0, -1) + (payload.slice(-1) === 'A' ? 'B' : 'A');
     const tampered = `${tamperedPayload}.${sig}`;
-    expect(verifyAssociateToken(tampered)).toBeNull();
+    expect(await verifyAssociateToken(tampered)).toBeNull();
   });
 
-  it('returns null for empty or garbage input', () => {
-    expect(verifyAssociateToken('')).toBeNull();
-    expect(verifyAssociateToken('not-a-token')).toBeNull();
-    expect(verifyAssociateToken('a.b.c')).toBeNull();
-    expect(verifyAssociateToken('garbage.garbage')).toBeNull();
+  it('returns null for empty or garbage input', async () => {
+    expect(await verifyAssociateToken('')).toBeNull();
+    expect(await verifyAssociateToken('not-a-token')).toBeNull();
+    expect(await verifyAssociateToken('a.b.c')).toBeNull();
+    expect(await verifyAssociateToken('garbage.garbage')).toBeNull();
   });
 
-  it('does NOT verify a token signed with APP_PASSWORD (secrets are distinct)', () => {
+  it('does NOT verify a token signed with APP_PASSWORD (secrets are distinct)', async () => {
     // Forge a token using APP_PASSWORD as the secret — must fail.
     const payload = { aid: 42, iat: Date.now(), ver: new Date().toISOString() };
     const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -91,12 +91,12 @@ describe('associateSession', () => {
       .update(payloadB64)
       .digest('base64url');
     const forged = `${payloadB64}.${sig}`;
-    expect(verifyAssociateToken(forged)).toBeNull();
+    expect(await verifyAssociateToken(forged)).toBeNull();
   });
 
-  it('rejects token when a different ASSOCIATE_SESSION_SECRET was used at sign time', () => {
-    const token = signAssociateToken(1, new Date());
+  it('rejects token when a different ASSOCIATE_SESSION_SECRET was used at sign time', async () => {
+    const token = await signAssociateToken(1, new Date());
     process.env.ASSOCIATE_SESSION_SECRET = 'a-completely-different-secret-value';
-    expect(verifyAssociateToken(token)).toBeNull();
+    expect(await verifyAssociateToken(token)).toBeNull();
   });
 });

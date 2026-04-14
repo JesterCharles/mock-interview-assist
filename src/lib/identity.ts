@@ -18,7 +18,7 @@ export type CallerIdentity =
   | { type: 'associate'; associateId: number; ver: string }
   | { type: 'anonymous' };
 
-export function getCallerIdentity(request: NextRequest): CallerIdentity {
+export async function getCallerIdentity(request: NextRequest): Promise<CallerIdentity> {
   // Trainer precedence (D-10): nlm_session wins over associate_session.
   const trainer = request.cookies.get('nlm_session');
   if (trainer?.value === 'authenticated') {
@@ -27,7 +27,7 @@ export function getCallerIdentity(request: NextRequest): CallerIdentity {
 
   const associate = request.cookies.get('associate_session');
   if (associate?.value) {
-    const parsed = verifyAssociateToken(associate.value);
+    const parsed = await verifyAssociateToken(associate.value);
     if (parsed) {
       return { type: 'associate', associateId: parsed.associateId, ver: parsed.ver };
     }

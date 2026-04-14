@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 /**
  * Associate session token — HMAC-SHA256 signed opaque token embedding
  * { aid, iat, ver } where ver = pinGeneratedAt.toISOString().
@@ -12,6 +10,9 @@ import crypto from 'crypto';
  *
  * Version check (ver vs current Associate.pinGeneratedAt) happens in the consumer
  * auth helpers (Plan 09-02) — not here. This module has no DB dependency.
+ *
+ * Edge-Runtime compatible: uses Web Crypto (`crypto.subtle`) exclusively — NO Node
+ * `crypto` / `Buffer` imports. Safe to import from middleware.
  */
 
 interface TokenPayload {
@@ -37,24 +38,73 @@ function getSecret(): string {
   return 'dev-insecure-associate-session-secret-do-not-use-in-prod';
 }
 
-function sign(payloadB64: string, secret: string): string {
-  return crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url');
+// --- base64url helpers (Edge-safe, no Buffer) ---
+
+function bytesToBase64Url(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-export function signAssociateToken(associateId: number, pinGeneratedAt: Date): string {
+function base64UrlToBytes(input: string): Uint8Array {
+  const pad = input.length % 4 === 0 ? '' : '='.repeat(4 - (input.length % 4));
+  const b64 = input.replace(/-/g, '+').replace(/_/g, '/') + pad;
+  const binary = atob(b64);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+function stringToBase64Url(s: string): string {
+  return bytesToBase64Url(new TextEncoder().encode(s));
+}
+
+function base64UrlToString(s: string): string {
+  return new TextDecoder().decode(base64UrlToBytes(s));
+}
+
+// --- HMAC via Web Crypto ---
+
+async function importHmacKey(
+  secret: string,
+  usages: KeyUsage[]
+): Promise<CryptoKey> {
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    usages
+  );
+}
+
+async function signPayload(payloadB64: string, secret: string): Promise<string> {
+  const key = await importHmacKey(secret, ['sign']);
+  const sigBuf = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(payloadB64)
+  );
+  return bytesToBase64Url(new Uint8Array(sigBuf));
+}
+
+export async function signAssociateToken(
+  associateId: number,
+  pinGeneratedAt: Date
+): Promise<string> {
   const payload: TokenPayload = {
     aid: associateId,
     iat: Date.now(),
     ver: pinGeneratedAt.toISOString(),
   };
-  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const sig = sign(payloadB64, getSecret());
+  const payloadB64 = stringToBase64Url(JSON.stringify(payload));
+  const sig = await signPayload(payloadB64, getSecret());
   return `${payloadB64}.${sig}`;
 }
 
-export function verifyAssociateToken(
+export async function verifyAssociateToken(
   token: string | undefined | null
-): { associateId: number; ver: string } | null {
+): Promise<{ associateId: number; ver: string } | null> {
   if (!token || typeof token !== 'string') return null;
 
   const parts = token.split('.');
@@ -62,29 +112,34 @@ export function verifyAssociateToken(
   const [payloadB64, sig] = parts;
   if (!payloadB64 || !sig) return null;
 
-  let expectedSig: string;
+  // Constant-time verification via Web Crypto subtle.verify.
+  let sigBytes: Uint8Array;
   try {
-    expectedSig = sign(payloadB64, getSecret());
+    sigBytes = base64UrlToBytes(sig);
   } catch {
     return null;
   }
 
-  // Constant-time signature comparison.
-  let sigBuf: Buffer;
-  let expectedBuf: Buffer;
+  let verified = false;
   try {
-    sigBuf = Buffer.from(sig, 'base64url');
-    expectedBuf = Buffer.from(expectedSig, 'base64url');
+    const key = await importHmacKey(getSecret(), ['verify']);
+    // Copy into fresh ArrayBuffers so the `BufferSource` type widens cleanly
+    // (Uint8Array<ArrayBufferLike> vs ArrayBuffer typing mismatch under TS strict).
+    const sigBuf = new ArrayBuffer(sigBytes.byteLength);
+    new Uint8Array(sigBuf).set(sigBytes);
+    const msgBytes = new TextEncoder().encode(payloadB64);
+    const msgBuf = new ArrayBuffer(msgBytes.byteLength);
+    new Uint8Array(msgBuf).set(msgBytes);
+    verified = await crypto.subtle.verify('HMAC', key, sigBuf, msgBuf);
   } catch {
     return null;
   }
-  if (sigBuf.length !== expectedBuf.length) return null;
-  if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
+  if (!verified) return null;
 
   // Signature OK — safe to parse payload.
   let payload: unknown;
   try {
-    const json = Buffer.from(payloadB64, 'base64url').toString('utf8');
+    const json = base64UrlToString(payloadB64);
     payload = JSON.parse(json);
   } catch {
     return null;

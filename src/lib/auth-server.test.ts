@@ -56,7 +56,7 @@ describe('isAuthenticatedSession (trainer-only, unchanged)', () => {
   });
 
   it('returns false when only associate_session is present (D-13: stays trainer-only)', async () => {
-    const token = signAssociateToken(1, new Date('2026-04-14T10:00:00.000Z'));
+    const token = await signAssociateToken(1, new Date('2026-04-14T10:00:00.000Z'));
     setCookies({ associate_session: token });
     expect(await isAuthenticatedSession()).toBe(false);
   });
@@ -75,7 +75,7 @@ describe('isAssociateAuthenticated (ver vs pinGeneratedAt)', () => {
   });
 
   it('returns true when cookie ver matches current Associate.pinGeneratedAt', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({
       id: 42,
@@ -86,7 +86,7 @@ describe('isAssociateAuthenticated (ver vs pinGeneratedAt)', () => {
   });
 
   it('returns false when cookie ver is STALE (pinGeneratedAt advanced in DB) — revocation proof', async () => {
-    const tokenOld = signAssociateToken(42, pinGeneratedAt);
+    const tokenOld = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: tokenOld });
     const advanced = new Date('2026-04-15T10:00:00.000Z');
     mockFindUnique.mockResolvedValueOnce({
@@ -98,7 +98,7 @@ describe('isAssociateAuthenticated (ver vs pinGeneratedAt)', () => {
   });
 
   it('returns false when associate not found', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce(null);
     expect(await isAssociateAuthenticated()).toBe(false);
@@ -109,13 +109,13 @@ describe('isAssociateAuthenticated (ver vs pinGeneratedAt)', () => {
   });
 
   it('returns false when cookie is tampered', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token.slice(0, -4) + 'AAAA' });
     expect(await isAssociateAuthenticated()).toBe(false);
   });
 
   it('returns false when associate has null pinGeneratedAt', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({
       id: 42,
@@ -135,14 +135,14 @@ describe('getAssociateIdentity', () => {
   });
 
   it('returns { associateId } on valid+fresh ver', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({ id: 42, slug: 'alice', pinGeneratedAt });
     expect(await getAssociateIdentity()).toEqual({ associateId: 42 });
   });
 
   it('returns null on stale ver', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({
       id: 42,
@@ -166,14 +166,14 @@ describe('getAssociateSession', () => {
   });
 
   it('returns { associateId, slug } on valid+fresh ver', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({ id: 42, slug: 'alice', pinGeneratedAt });
     expect(await getAssociateSession()).toEqual({ associateId: 42, slug: 'alice' });
   });
 
   it('returns null on stale ver', async () => {
-    const token = signAssociateToken(42, pinGeneratedAt);
+    const token = await signAssociateToken(42, pinGeneratedAt);
     setCookies({ associate_session: token });
     mockFindUnique.mockResolvedValueOnce({
       id: 42,

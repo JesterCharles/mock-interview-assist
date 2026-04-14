@@ -57,7 +57,7 @@ describe('POST /api/associate/pin/verify', () => {
 
     const tokenMatch = setCookie.match(/associate_session=([^;]+)/);
     expect(tokenMatch).not.toBeNull();
-    const decoded = verifyAssociateToken(tokenMatch![1]);
+    const decoded = await verifyAssociateToken(tokenMatch![1]);
     expect(decoded).not.toBeNull();
     expect(decoded!.associateId).toBe(42);
     expect(decoded!.ver).toBe(pinGeneratedAt.toISOString());

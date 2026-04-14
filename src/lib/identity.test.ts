@@ -20,18 +20,18 @@ describe('getCallerIdentity (cookie-only)', () => {
   const pinGeneratedAt = new Date('2026-04-14T10:00:00.000Z');
   let validAssociateToken: string;
 
-  beforeAll(() => {
-    validAssociateToken = signAssociateToken(42, pinGeneratedAt);
+  beforeAll(async () => {
+    validAssociateToken = await signAssociateToken(42, pinGeneratedAt);
   });
 
-  it("returns { type: 'trainer' } when only nlm_session=authenticated", () => {
+  it("returns { type: 'trainer' } when only nlm_session=authenticated", async () => {
     const req = makeRequest({ nlm_session: 'authenticated' });
-    expect(getCallerIdentity(req)).toEqual({ type: 'trainer' });
+    expect(await getCallerIdentity(req)).toEqual({ type: 'trainer' });
   });
 
-  it("returns { type: 'associate', associateId, ver } for syntactically-valid associate_session", () => {
+  it("returns { type: 'associate', associateId, ver } for syntactically-valid associate_session", async () => {
     const req = makeRequest({ associate_session: validAssociateToken });
-    const ident = getCallerIdentity(req);
+    const ident = await getCallerIdentity(req);
     expect(ident).toEqual({
       type: 'associate',
       associateId: 42,
@@ -39,27 +39,27 @@ describe('getCallerIdentity (cookie-only)', () => {
     });
   });
 
-  it("returns { type: 'trainer' } when BOTH cookies present (trainer precedence)", () => {
+  it("returns { type: 'trainer' } when BOTH cookies present (trainer precedence)", async () => {
     const req = makeRequest({
       nlm_session: 'authenticated',
       associate_session: validAssociateToken,
     });
-    expect(getCallerIdentity(req)).toEqual({ type: 'trainer' });
+    expect(await getCallerIdentity(req)).toEqual({ type: 'trainer' });
   });
 
-  it("returns { type: 'anonymous' } for tampered associate_session", () => {
+  it("returns { type: 'anonymous' } for tampered associate_session", async () => {
     const tampered = validAssociateToken.slice(0, -4) + 'AAAA';
     const req = makeRequest({ associate_session: tampered });
-    expect(getCallerIdentity(req)).toEqual({ type: 'anonymous' });
+    expect(await getCallerIdentity(req)).toEqual({ type: 'anonymous' });
   });
 
-  it("returns { type: 'anonymous' } when no cookies", () => {
+  it("returns { type: 'anonymous' } when no cookies", async () => {
     const req = makeRequest({});
-    expect(getCallerIdentity(req)).toEqual({ type: 'anonymous' });
+    expect(await getCallerIdentity(req)).toEqual({ type: 'anonymous' });
   });
 
-  it("returns { type: 'anonymous' } when nlm_session is non-authenticated value and no associate cookie", () => {
+  it("returns { type: 'anonymous' } when nlm_session is non-authenticated value and no associate cookie", async () => {
     const req = makeRequest({ nlm_session: 'not-authenticated' });
-    expect(getCallerIdentity(req)).toEqual({ type: 'anonymous' });
+    expect(await getCallerIdentity(req)).toEqual({ type: 'anonymous' });
   });
 });
