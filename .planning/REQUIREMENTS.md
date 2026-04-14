@@ -15,6 +15,7 @@
 - [ ] **AUTH-01**: Trainer generates a 6-digit PIN when adding an associate to a cohort. PIN is unique per associate and displayed to trainer for manual communication.
 - [ ] **AUTH-02**: Associate enters PIN at the start of an automated interview. System validates PIN and creates an associate session (HttpOnly cookie) that links the interview to their identity.
 - [ ] **AUTH-03**: Associate auth coexists with trainer auth. Middleware uses identity enumeration (`trainer | associate | anonymous`) with separate cookie names. No cross-contamination between `/trainer` routes and associate-protected routes.
+- [ ] **AUTH-04**: Associate profile page `/associate/[slug]` requires auth. Either the matching associate session OR an active trainer session grants access. Mismatched associates (different slug) return 403. Unauthenticated requests redirect to PIN entry.
 
 ### Pipeline Integration
 
@@ -68,23 +69,22 @@
 
 ## Traceability
 
-*This section is populated by the roadmapper after phases are defined.*
-
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| AUTH-01 | TBD | TBD | Pending |
-| AUTH-02 | TBD | TBD | Pending |
-| AUTH-03 | TBD | TBD | Pending |
-| PIPE-01 | TBD | TBD | Pending |
-| PIPE-02 | TBD | TBD | Pending |
-| COHORT-01 | TBD | TBD | Pending |
-| COHORT-02 | TBD | TBD | Pending |
-| COHORT-03 | TBD | TBD | Pending |
-| COHORT-04 | TBD | TBD | Pending |
-| CURRIC-01 | TBD | TBD | Pending |
-| CURRIC-02 | TBD | TBD | Pending |
-| DESIGN-01 | TBD | TBD | Pending |
-| DESIGN-02 | TBD | TBD | Pending |
+| AUTH-01 | Phase 9 | TBD | Pending |
+| AUTH-02 | Phase 9 | TBD | Pending |
+| AUTH-03 | Phase 9 | TBD | Pending |
+| AUTH-04 | Phase 9 | TBD | Pending |
+| PIPE-01 | Phase 10 | TBD | Pending |
+| PIPE-02 | Phase 10 | TBD | Pending |
+| COHORT-01 | Phase 11 | TBD | Pending |
+| COHORT-02 | Phase 11 | TBD | Pending |
+| COHORT-03 | Phase 12 | TBD | Pending |
+| COHORT-04 | Phase 12 | TBD | Pending |
+| CURRIC-01 | Phase 13 | TBD | Pending |
+| CURRIC-02 | Phase 13 | TBD | Pending |
+| DESIGN-01 | Phase 14 | TBD | Pending |
+| DESIGN-02 | Phase 14 | TBD | Pending |
 
 ---
 *Created: 2026-04-14 for milestone v1.1 Cohort Readiness System*

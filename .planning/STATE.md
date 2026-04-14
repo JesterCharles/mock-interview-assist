@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Cohort Readiness System
-status: defining_requirements
-stopped_at: Milestone started, defining requirements
-last_updated: "2026-04-14T15:45:00.000Z"
+status: roadmap_complete
+stopped_at: Roadmap written — 7 phases (8-14), 13 requirements mapped, ready for phase planning
+last_updated: "2026-04-14T00:00:00.000Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,28 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** v1.1 Cohort Readiness System — defining requirements
+**Current focus:** v1.1 Cohort Readiness System — roadmap complete, ready for phase planning
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 8 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-14 — Milestone v1.1 started
+Status: Roadmap written, awaiting phase planning
+Last activity: 2026-04-14 — Roadmap created for v1.1
 
 Progress: [░░░░░░░░░░] 0%
+
+## Phase Map (v1.1)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 8 | Schema Migration | (enabling foundation) | Not started |
+| 9 | Associate PIN Auth | AUTH-01, AUTH-02, AUTH-03 | Not started |
+| 10 | Automated Interview Pipeline | PIPE-01, PIPE-02 | Not started |
+| 11 | Cohort Management | COHORT-01, COHORT-02 | Not started |
+| 12 | Cohort Dashboard Views | COHORT-03, COHORT-04 | Not started |
+| 13 | Curriculum Schedule | CURRIC-01, CURRIC-02 | Not started |
+| 14 | Design Cohesion | DESIGN-01, DESIGN-02 | Not started |
 
 ## Performance Metrics
 
@@ -40,7 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Average duration: -
 - Total execution time: -
 
-*Updated after milestone start*
+*Updated after first plan completes*
 
 ## Accumulated Context
 
@@ -49,26 +61,24 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Pre-roadmap: Supabase (hosted Postgres) chosen over SQLite — avoids migration headache at scale
-- Pre-roadmap: Prisma as ORM — type-safe, works with Postgres and SQLite
-- Pre-roadmap: Dual-write migration (file + DB) — preserves existing flows, no data migration needed
-- Pre-roadmap: 0.8 recency decay for gap algorithm — simple starting point, autoresearch optimizes later
-- Pre-roadmap: 75% / 3 sessions / non-negative trend = "ready" — configurable default
-- v1.1: Approach B (Cohort Readiness System) chosen over Pipeline Bridge (A) and Multi-Evidence Engine (C)
-- v1.1: Associate auth needed for automated interviews → identity → readiness record
-- v1.1: Readiness record IS the product; interviews are an input mechanism
+- v1.1: Associate auth is PIN-based (6-digit, trainer-generated) — NOT Supabase Auth OTP. Research suggested OTP but requirements specify PIN. Simpler, no email infrastructure needed for auth.
+- v1.1: Phase 8 is schema-only (Cohort, CurriculumWeek, nullable cohortId on Associate + Session, mode on Session) — no application logic. All other phases depend on it.
+- v1.1: Automated interview pipeline (Phase 10) uses new authenticated endpoint — existing `/api/public/interview/complete` stays anonymous to avoid breaking anonymous users (Pitfall 3 from research).
+- v1.1: cohortId is nullable on Associate — unassigned associates remain fully functional (Pitfall 4 mitigation).
+- v1.1: Curriculum fetch and GitHub question bank fetch must be parallel (`Promise.all`) in setup wizard — serial fetch degrades perceived performance (Pitfall 5 mitigation).
+- v1.1: Design cohesion (Phase 14) applied last — after all new UIs exist. Does NOT touch `/interview` or `/review` pages to avoid mid-session visual regressions.
 
 ### Pending Todos
 
-None yet.
+- Run `/gsd-plan-phase 8` to begin schema migration planning
 
 ### Blockers/Concerns
 
-- Auth approach for associates TBD during phase planning (simple magic link vs Supabase Auth)
-- Design cohesion scope: DESIGN.md exists but not applied consistently across all pages
+- PIN storage approach: must decide between hashing (bcrypt) vs. plain PIN with short TTL. PIN is low-sensitivity internal credential but should still be hashed. Resolve during Phase 9 planning.
+- `CurriculumWeek.weekNumber` must align with existing techMap week number convention from GitHub question bank file paths — naming contract, not enforced by code. Document explicitly in Phase 13.
 
 ## Session Continuity
 
 Last session: 2026-04-14
-Stopped at: Milestone v1.1 started, defining requirements
-Resume file: N/A — active session
+Stopped at: Roadmap created for v1.1 Cohort Readiness System (7 phases, 13 requirements)
+Resume with: `/gsd-plan-phase 8`
