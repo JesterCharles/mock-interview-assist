@@ -19,8 +19,8 @@
 
 ### Pipeline Integration
 
-- [ ] **PIPE-01**: Automated interview sessions link to the authenticated associate via PIN session. No associate slug input required from the user — identity comes from the session.
-- [ ] **PIPE-02**: Automated interview sessions trigger gap score computation and readiness classification update on completion, using the same pipeline as trainer-led sessions (`gapService` → `gapPersistence` → `readinessService`).
+- [x] **PIPE-01**: Automated interview sessions link to the authenticated associate via PIN session. No associate slug input required from the user — identity comes from the session.
+- [x] **PIPE-02**: Automated interview sessions trigger gap score computation and readiness classification update on completion, using the same pipeline as trainer-led sessions (`gapService` → `gapPersistence` → `readinessService`).
 
 ### Cohort Management
 

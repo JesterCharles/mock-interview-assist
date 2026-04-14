@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Schema migration applied to dev DB, Dockerfile wired for runtime migrate deploy
-stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-04-14T19:10:02.049Z"
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-04-14T19:17:51.488Z"
 last_activity: 2026-04-14 — Plan 08-02 human-verify approved
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 18
-  completed_plans: 5
-  percent: 28
+  completed_plans: 6
+  percent: 33
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: Phase 8 (executing)
-Plan: 08-02 complete; next up 08-03 (or phase complete — check ROADMAP)
-Status: Schema migration applied to dev DB, Dockerfile wired for runtime migrate deploy
-Last activity: 2026-04-14 — Plan 08-02 human-verify approved
+Phase: Phase 10 (executing)
+Plan: 10-01 complete; next up 10-02
+Status: Hardened public/complete + new authenticated /api/associate/interview/complete + shared runReadinessPipeline w/ DB marker
+Last activity: 2026-04-14 — Plan 10-01 complete (PIPE-01/PIPE-02 mitigations landed)
 
-Progress: [█░░░░░░░░░] 11%
+Progress: [███░░░░░░░] 33%
 
 ## Phase Map (v1.1)
 
@@ -74,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 09]: isAuthenticatedSession() stays trainer-only (D-13) — associate auth uses sibling helpers to prevent Pitfall 1
 - [Phase 09]: [Phase 09-03]: Server components return JSX-wrapped 403 (data-http-status marker) since Next.js cannot return a raw Response from a page component
 - [Phase 09]: [Phase 09-03]: Authenticated interview shell intentionally minimal — Phase 10 owns the runtime integration
+- [Phase 10]: Session.id is cuid string — runReadinessPipeline sessionId typed as string; no persistSessionToDb contract change needed
+- [Phase 10]: Anonymous /api/public/interview/complete unconditionally nulls associateSlug; authenticated callers routed to /api/associate/interview/complete (Codex #3 closure)
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14T19:10:02.046Z
-Stopped at: Completed 09-03-PLAN.md
+Last session: 2026-04-14T19:17:51.485Z
+Stopped at: Completed 10-01-PLAN.md
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
