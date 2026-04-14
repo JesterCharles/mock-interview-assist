@@ -17,6 +17,19 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - Adaptive mock setup pre-populates from associate gap history
 - 11 tech debt items tracked (see milestones/v1.0-MILESTONE-AUDIT.md)
 
+## Current Milestone: v1.1 Cohort Readiness System
+
+**Goal:** Build a trusted readiness record that any evidence source can feed — starting with connecting automated interviews to the readiness pipeline, adding associate auth, cohort management, and curriculum-driven question selection.
+
+**Target features:**
+- Associate authentication (automated interviews link to identity and readiness record)
+- Cohort management (groups with curriculum schedules, trainer assignment)
+- Curriculum-driven question selection (auto-filter based on what's been taught)
+- Automated interviews feeding readiness pipeline (sessions persist, gap scores compute)
+- Cohort-level trainer dashboard views (roster filtered by cohort, aggregate readiness)
+- Design cohesion across all pages (apply DESIGN.md consistently)
+- Email notifications on readiness changes
+
 ## Requirements
 
 ### Validated
@@ -51,16 +64,17 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ### Active
 
-(No active requirements — define next milestone with `/gsd-new-milestone`)
+(Defining in REQUIREMENTS.md for v1.1)
 
 ### Out of Scope
 
 - Multi-format assessments (Feynman method, architecture diagrams, code review) — validate interview format first
 - Independent job seeker subscription — MVP serves training org only
 - Client-facing talent pipeline portal — deferred to post-MVP
-- Multi-tenancy / role-based access — single training org for now
+- Multi-tenancy / role-based access — single training org for now, cohorts within one org
 - Billing / payments — no revenue model in MVP
-- Supabase Auth — trainer-assigned IDs for MVP, auth upgrade later
+- Multi-evidence readiness engine (QC audits, trainer observations as evidence sources) — architecture should accommodate but not build yet
+- Real-time dashboard updates via Supabase Realtime — read-heavy dashboard sufficient for v1.1
 
 ## Context
 
@@ -92,5 +106,22 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 | Dual-write migration (file + DB) | Preserve existing flows. No data migration. | ✓ Validated P2 |
 | Interview format only for MVP | Validate core loop before expanding | ✓ Good |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-14 after v1.0 milestone completion*
+*Last updated: 2026-04-14 — v1.1 Cohort Readiness System milestone started*

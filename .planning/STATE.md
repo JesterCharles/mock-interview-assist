@@ -1,63 +1,46 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: All 7 phases complete. Milestone ready to ship.
-last_updated: "2026-04-14T11:51:47.623Z"
+milestone: v1.1
+milestone_name: Cohort Readiness System
+status: defining_requirements
+stopped_at: Milestone started, defining requirements
+last_updated: "2026-04-14T15:45:00.000Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-13)
+See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Milestone complete — all 7 phases shipped
+**Current focus:** v1.1 Cohort Readiness System — defining requirements
 
 ## Current Position
 
-Phase: 7 of 7 (adaptive setup)
-Plan: All complete
-Status: Milestone complete
-Last activity: 2026-04-14
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-14 — Milestone v1.1 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 15
+- Total plans completed: 0
 - Average duration: -
-- Total execution time: ~24 hours (2026-04-13 to 2026-04-14)
+- Total execution time: -
 
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01 | 2 | - | - |
-| 02 | 2 | - | - |
-| 03 | 2 | - | - |
-| 04 | 3 | - | - |
-| 05 | 2 | - | - |
-| 06 | 2 | - | - |
-| 07 | 2 | - | - |
-
-**Recent Trend:**
-
-- All 15 plans complete across 7 phases
-- Trend: Milestone shipped
-
-*Updated after milestone completion*
+*Updated after milestone start*
 
 ## Accumulated Context
 
@@ -68,10 +51,12 @@ Recent decisions affecting current work:
 
 - Pre-roadmap: Supabase (hosted Postgres) chosen over SQLite — avoids migration headache at scale
 - Pre-roadmap: Prisma as ORM — type-safe, works with Postgres and SQLite
-- Pre-roadmap: Trainer-assigned associate IDs (no login) — simplest identity model for MVP
 - Pre-roadmap: Dual-write migration (file + DB) — preserves existing flows, no data migration needed
 - Pre-roadmap: 0.8 recency decay for gap algorithm — simple starting point, autoresearch optimizes later
 - Pre-roadmap: 75% / 3 sessions / non-negative trend = "ready" — configurable default
+- v1.1: Approach B (Cohort Readiness System) chosen over Pipeline Bridge (A) and Multi-Evidence Engine (C)
+- v1.1: Associate auth needed for automated interviews → identity → readiness record
+- v1.1: Readiness record IS the product; interviews are an input mechanism
 
 ### Pending Todos
 
@@ -79,11 +64,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Tag consistency in question bank Markdown must be validated before GAP-04 can proceed (Phase 4 dependency)
-- Docker Prisma binary inclusion (PERSIST-06) is a known sharp edge — verify outputFileTracingIncludes in next.config early
+- Auth approach for associates TBD during phase planning (simple magic link vs Supabase Auth)
+- Design cohesion scope: DESIGN.md exists but not applied consistently across all pages
 
 ## Session Continuity
 
 Last session: 2026-04-14
-Stopped at: All 7 phases complete. Milestone ready to ship.
-Resume file: N/A — milestone complete
+Stopped at: Milestone v1.1 started, defining requirements
+Resume file: N/A — active session
