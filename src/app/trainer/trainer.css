@@ -1,0 +1,123 @@
+/* Scoped design tokens for /trainer route — warm parchment editorial theme */
+
+.trainer-shell {
+  --bg: #F5F0E8;
+  --surface: #FFFFFF;
+  --surface-muted: #F0EBE2;
+  --ink: #1A1A1A;
+  --muted: #7A7267;
+  --accent: #C85A2E;
+  --accent-hover: #B04E27;
+  --success: #2D6A4F;
+  --warning: #B7791F;
+  --danger: #B83B2E;
+  --border: #DDD5C8;
+  --border-subtle: #E8E2D9;
+  --highlight: #FFF8F0;
+
+  background-color: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Card surface */
+.trainer-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* Muted card (KPI background, sidebar) */
+.trainer-card-muted {
+  background-color: var(--surface-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Data table base */
+.trainer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.trainer-table th {
+  text-align: left;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+}
+
+.trainer-table th button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trainer-table th button:hover {
+  color: var(--ink);
+}
+
+.trainer-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.trainer-table tr {
+  cursor: pointer;
+  transition: background-color 100ms ease-out;
+}
+
+.trainer-table tbody tr:hover {
+  background-color: var(--highlight);
+}
+
+/* Readiness badge colors */
+.readiness-ready {
+  color: var(--success);
+}
+
+.readiness-improving {
+  color: var(--accent);
+}
+
+.readiness-not-ready {
+  color: var(--danger);
+}
+
+/* Section mono label */
+.trainer-section-label {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+/* Muted metadata */
+.trainer-meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+}
