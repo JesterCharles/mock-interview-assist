@@ -134,6 +134,8 @@ exports.Prisma.AssociateScalarFieldEnum = {
   readinessStatus: 'readinessStatus',
   recommendedArea: 'recommendedArea',
   lastComputedAt: 'lastComputedAt',
+  pinHash: 'pinHash',
+  pinGeneratedAt: 'pinGeneratedAt',
   cohortId: 'cohortId'
 };
 

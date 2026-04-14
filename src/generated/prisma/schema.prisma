@@ -22,6 +22,8 @@ model Associate {
   readinessStatus String? // 'ready' | 'improving' | 'not_ready'
   recommendedArea String? // topic or skill name — lowest gap score
   lastComputedAt  DateTime? // when readiness was last computed
+  pinHash         String? // bcrypt hash of 6-digit PIN; null until trainer generates
+  pinGeneratedAt  DateTime? // when current PIN was issued; also the token-version for cookie revocation
   cohortId        Int?
   cohort          Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   sessions        Session[]
