@@ -121,3 +121,10 @@
   color: var(--muted);
   font-family: 'DM Sans', sans-serif;
 }
+
+/* Responsive detail grid — collapse to single column on mobile (BUG-02) */
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

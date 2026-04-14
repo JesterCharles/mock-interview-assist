@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { isAuthenticatedSession } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { AssociateDetail, SessionSummary, GapScoreEntry } from '@/lib/trainer-types'
 
@@ -18,18 +18,16 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  // Auth check first — prevent slug probing by unauthenticated users (CR-04)
+  if (!(await isAuthenticatedSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { slug } = await params
 
   // Input validation — reject invalid slugs before querying DB (T-06-04)
   if (!slug || !SLUG_RE.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 })
-  }
-
-  // Auth check — validate nlm_session cookie before returning data (T-06-05)
-  const cookieStore = await cookies()
-  const session = cookieStore.get('nlm_session')
-  if (!session || session.value !== 'authenticated') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {

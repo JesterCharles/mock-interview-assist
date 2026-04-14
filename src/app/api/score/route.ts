@@ -298,9 +298,6 @@ export async function POST(request: NextRequest) {
 
         const content = finalState.responseContent;
 
-        // Log for debugging
-        console.log('LLM Response:', content.slice(0, 500));
-
         // Try to extract score with various patterns
         let score = 3;
         const scorePatterns = [
