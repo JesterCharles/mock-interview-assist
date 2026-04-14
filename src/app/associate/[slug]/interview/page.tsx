@@ -3,26 +3,18 @@ import { isAuthenticatedSession, getAssociateIdentity } from '@/lib/auth-server'
 import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
 import { AuthenticatedInterviewClient } from '@/components/interview/AuthenticatedInterviewClient';
+import { PublicShell } from '@/components/layout/PublicShell';
 
 /**
  * Authenticated automated-interview entry (Plan 09-03, D-26).
  *
- * Guard matrix identical to /associate/[slug]:
- *   - trainer              → allow
- *   - associate match      → allow
- *   - associate mismatch   → 403 element
- *   - associate stale ver  → redirect to /associate/login (getAssociateIdentity returns null)
- *   - anonymous            → redirect to /associate/login?next=…
+ * Phase 14 restyle: wrapped in PublicShell, all hex literals replaced with
+ * DESIGN.md CSS vars (Codex finding #8 scope). Surfaces a "Signed in as {name}"
+ * tag at the top so the user can confirm server-resolved identity.
  *
- * Identity is resolved server-side and passed as props to the client component.
- * The client NEVER re-derives identity from cookies (Codex #2 mitigation).
+ * Guard matrix identical to /associate/[slug] — identity resolved server-side
+ * and passed to the client as props. The client NEVER re-derives identity.
  */
-
-const tokens = {
-  bg: '#F5F0E8',
-  ink: '#1A1A1A',
-  muted: '#7A7267',
-} as const;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,37 +22,37 @@ interface PageProps {
 
 function renderForbidden() {
   return (
-    <div
+    <PublicShell
+      title="Access denied"
       data-testid="associate-interview-forbidden"
       data-http-status="403"
-      style={{
-        minHeight: '100vh',
-        backgroundColor: tokens.bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: "'DM Sans', sans-serif",
-        color: tokens.ink,
-        padding: '24px',
-      }}
     >
-      <div style={{ maxWidth: '420px', textAlign: 'center' }}>
+      <div
+        style={{
+          maxWidth: '480px',
+          margin: '0 auto',
+          textAlign: 'center',
+          padding: '48px 0',
+        }}
+      >
         <h1
           style={{
-            fontFamily: "'Clash Display', sans-serif",
+            fontFamily:
+              "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
             fontSize: '28px',
             fontWeight: 600,
             margin: '0 0 8px 0',
+            color: 'var(--ink)',
           }}
         >
           Access denied
         </h1>
-        <p style={{ fontSize: '14px', color: tokens.muted, margin: 0 }}>
+        <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
           You are signed in as a different associate. You cannot start an
           interview on someone else&apos;s profile.
         </p>
       </div>
-    </div>
+    </PublicShell>
   );
 }
 
@@ -77,7 +69,7 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
   if (!trainer && !associateIdentity) {
     redirect(
       '/associate/login?next=' +
-        encodeURIComponent('/associate/' + slugValidation.slug + '/interview')
+        encodeURIComponent('/associate/' + slugValidation.slug + '/interview'),
     );
   }
 
@@ -90,11 +82,33 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
     return renderForbidden();
   }
 
-  // Server-resolved identity passed as props — NEVER trusted from client.
+  // Identity tag uses the resolved slug (no extra DB query needed —
+  // displayName lookup deferred to keep server work minimal here).
+  const associateName = slugValidation.slug;
+
   return (
-    <AuthenticatedInterviewClient
-      associateSlug={slugValidation.slug}
-      associateId={targetId}
-    />
+    <PublicShell title="Automated Interview">
+      <div
+        style={{
+          fontSize: '11px',
+          fontWeight: 600,
+          color: 'var(--muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          fontFamily:
+            "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
+          marginBottom: '24px',
+        }}
+      >
+        Signed in as {associateName}
+      </div>
+
+      {/* The inner client component still uses legacy classes internally —
+          PublicShell only owns the chrome (Phase 14 D-06a). */}
+      <AuthenticatedInterviewClient
+        associateSlug={slugValidation.slug}
+        associateId={targetId}
+      />
+    </PublicShell>
   );
 }

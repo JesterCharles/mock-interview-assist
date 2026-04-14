@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { PublicShell } from '@/components/layout/PublicShell';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -12,7 +12,6 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated && !isLoading) {
             router.push('/dashboard');
@@ -38,82 +37,130 @@ export default function LoginPage() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen nlm-bg flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
-            </main>
+            <PublicShell title="Trainer Sign In">
+                <div
+                    style={{
+                        textAlign: 'center',
+                        color: 'var(--muted)',
+                        fontSize: '14px',
+                        padding: '48px 0',
+                    }}
+                >
+                    Loading…
+                </div>
+            </PublicShell>
         );
     }
 
     return (
-        <main className="min-h-screen nlm-bg flex flex-col items-center justify-center p-4">
-            {/* Decorative elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl opacity-50" />
-            </div>
-
-            {/* Login Card */}
-            <div className="relative z-10 w-full max-w-md">
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-500/20 rounded-2xl mb-4">
-                        <Sparkles className="w-8 h-8 text-indigo-400" />
-                    </div>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                        Interview Assessment Tool
-                    </h1>
-                    <p className="text-gray-400">
-                        Enter the team password to continue
-                    </p>
-                </div>
-
-                <div className="glass-card-strong rounded-2xl p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Team Password
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter password"
-                                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                                    autoFocus
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {error && (
-                            <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || !password}
-                            className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Verifying...
-                                </>
-                            ) : (
-                                'Access Dashboard'
-                            )}
-                        </button>
-                    </form>
-                </div>
-
-                <p className="text-center text-gray-500 text-sm mt-6">
-                    Contact your team lead if you need access
+        <PublicShell title="Trainer Sign In">
+            <div
+                style={{
+                    maxWidth: '420px',
+                    margin: '0 auto',
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '12px',
+                    padding: '32px',
+                }}
+            >
+                <h1
+                    style={{
+                        fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+                        fontSize: '28px',
+                        fontWeight: 600,
+                        color: 'var(--ink)',
+                        margin: '0 0 8px 0',
+                        letterSpacing: '-0.01em',
+                    }}
+                >
+                    Sign in
+                </h1>
+                <p
+                    style={{
+                        fontSize: '14px',
+                        color: 'var(--muted)',
+                        margin: '0 0 24px 0',
+                        lineHeight: 1.5,
+                    }}
+                >
+                    Trainer access. Enter the team password to continue.
                 </p>
+
+                <form onSubmit={handleSubmit}>
+                    <label
+                        htmlFor="password"
+                        style={{
+                            display: 'block',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            color: 'var(--ink)',
+                            marginBottom: '6px',
+                        }}
+                    >
+                        Team password
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoFocus
+                        required
+                        style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            fontSize: '14px',
+                            color: 'var(--ink)',
+                            backgroundColor: 'var(--bg)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                            marginBottom: '16px',
+                        }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--accent)';
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--border)';
+                        }}
+                    />
+
+                    {error && (
+                        <div
+                            role="alert"
+                            style={{
+                                color: 'var(--danger)',
+                                fontSize: '13px',
+                                marginBottom: '16px',
+                            }}
+                        >
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitting || !password}
+                        className="btn-accent-flat"
+                        style={{ width: '100%' }}
+                    >
+                        {isSubmitting ? 'Verifying…' : 'Access dashboard'}
+                    </button>
+                </form>
             </div>
-        </main>
+
+            <p
+                style={{
+                    textAlign: 'center',
+                    color: 'var(--muted)',
+                    fontSize: '12px',
+                    marginTop: '24px',
+                }}
+            >
+                Contact your team lead if you need access.
+            </p>
+        </PublicShell>
     );
 }

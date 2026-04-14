@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { isAuthenticatedSession, isAssociateAuthenticated } from '@/lib/auth-server';
 import { PinEntryForm } from './PinEntryForm';
+import { PublicShell } from '@/components/layout/PublicShell';
 
 /**
  * Dedicated associate PIN entry route (D-18). Separate namespace from trainer
@@ -8,16 +9,9 @@ import { PinEntryForm } from './PinEntryForm';
  * associate with a valid non-revoked cookie), skip the form and forward to
  * `next` (or `/`).
  *
- * Styling is utilitarian per D-20 — full DESIGN.md cohesion lands in Phase 14.
+ * Phase 14 restyle: wrapped in PublicShell, all hex literals replaced with
+ * DESIGN.md CSS vars (Codex finding #8 scope).
  */
-
-const tokens = {
-  bg: '#F5F0E8',
-  surface: '#FFFFFF',
-  ink: '#1A1A1A',
-  muted: '#7A7267',
-  border: '#DDD5C8',
-} as const;
 
 interface PageProps {
   searchParams: Promise<{ next?: string }>;
@@ -25,8 +19,6 @@ interface PageProps {
 
 function safeNext(raw: string | undefined): string | null {
   if (!raw) return null;
-  // Only allow internal same-origin redirects — defense in depth against
-  // open-redirect via the ?next= param.
   if (!raw.startsWith('/') || raw.startsWith('//')) return null;
   return raw;
 }
@@ -45,51 +37,43 @@ export default async function AssociateLoginPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: tokens.bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        fontFamily: "'DM Sans', sans-serif",
-        color: tokens.ink,
-      }}
-    >
+    <PublicShell title="Associate sign-in">
       <div
         style={{
           width: '100%',
-          maxWidth: '400px',
-          backgroundColor: tokens.surface,
-          border: `1px solid ${tokens.border}`,
+          maxWidth: '460px',
+          margin: '0 auto',
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
-          padding: '32px',
+          padding: '40px',
         }}
       >
         <h1
           style={{
-            fontFamily: "'Clash Display', sans-serif",
-            fontSize: '28px',
+            fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+            fontSize: '48px',
             fontWeight: 600,
-            margin: '0 0 8px 0',
-            letterSpacing: '-0.01em',
+            margin: '0 0 12px 0',
+            letterSpacing: '-0.02em',
+            color: 'var(--ink)',
+            lineHeight: 1.1,
           }}
         >
-          Associate sign-in
+          Enter your PIN
         </h1>
         <p
           style={{
-            fontSize: '14px',
-            color: tokens.muted,
-            margin: '0 0 24px 0',
+            fontSize: '18px',
+            color: 'var(--muted)',
+            margin: '0 0 28px 0',
             lineHeight: 1.5,
           }}
         >
-          Enter the slug and 6-digit PIN your trainer provided.
+          Use the slug and 6-digit PIN your trainer provided.
         </p>
         <PinEntryForm nextPath={nextPath} />
       </div>
-    </div>
+    </PublicShell>
   );
 }

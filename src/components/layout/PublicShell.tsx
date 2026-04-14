@@ -18,12 +18,22 @@ import type { ReactNode } from 'react';
 interface PublicShellProps {
   children: ReactNode;
   title?: string;
+  /**
+   * Optional data-* passthrough surfaced on the root element. Used by the
+   * 403/404 render paths so guard-matrix tests can inspect the returned
+   * React element's `props['data-http-status']` directly.
+   */
+  ['data-http-status']?: string;
+  ['data-testid']?: string;
 }
 
-export function PublicShell({ children }: PublicShellProps) {
+export function PublicShell(props: PublicShellProps) {
+  const { children } = props;
   return (
     <div
       className="min-h-screen flex flex-col"
+      data-http-status={props['data-http-status']}
+      data-testid={props['data-testid']}
       style={{
         backgroundColor: 'var(--bg)',
         color: 'var(--ink)',

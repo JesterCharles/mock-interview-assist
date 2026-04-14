@@ -8,16 +8,11 @@ interface PinEntryFormProps {
   nextPath: string | null;
 }
 
-const tokens = {
-  ink: '#1A1A1A',
-  muted: '#7A7267',
-  accent: '#C85A2E',
-  accentHover: '#B04E27',
-  border: '#DDD5C8',
-  danger: '#B83B2E',
-  dangerBg: '#FDECEB',
-  surface: '#FFFFFF',
-} as const;
+/**
+ * Phase 14 restyle: all hex literals replaced with DESIGN.md CSS vars
+ * (Codex finding #8 scope). PIN input uses 32px JetBrains Mono with wide
+ * tracking per DESIGN.md PIN entry spec.
+ */
 
 export function PinEntryForm({ nextPath }: PinEntryFormProps) {
   const router = useRouter();
@@ -27,7 +22,6 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load fingerprint on mount (same pattern as public interview flow).
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,9 +67,7 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
 
       if (res.ok) {
         const dest = nextPath ?? `/associate/${trimmedSlug}`;
-        // Use replace so the login page isn't in history.
         router.replace(dest);
-        // Force a server-side re-render so guarded routes pick up the cookie.
         router.refresh();
         return;
       }
@@ -97,14 +89,14 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <label
           htmlFor="associate-slug"
           style={{
             display: 'block',
             fontSize: '13px',
             fontWeight: 500,
-            color: tokens.ink,
+            color: 'var(--ink)',
             marginBottom: '6px',
           }}
         >
@@ -122,12 +114,12 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
           required
           style={{
             width: '100%',
-            padding: '10px 12px',
+            padding: '10px 14px',
             fontSize: '14px',
-            fontFamily: "'DM Sans', sans-serif",
-            color: tokens.ink,
-            backgroundColor: tokens.surface,
-            border: `1px solid ${tokens.border}`,
+            fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
+            color: 'var(--ink)',
+            backgroundColor: 'var(--bg)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
             outline: 'none',
             boxSizing: 'border-box',
@@ -135,15 +127,15 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
         />
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '24px' }}>
         <label
           htmlFor="associate-pin"
           style={{
             display: 'block',
             fontSize: '13px',
             fontWeight: 500,
-            color: tokens.ink,
-            marginBottom: '6px',
+            color: 'var(--ink)',
+            marginBottom: '8px',
           }}
         >
           PIN
@@ -160,14 +152,16 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
           disabled={submitting}
           required
           style={{
-            width: '100%',
-            padding: '10px 12px',
-            fontSize: '18px',
-            letterSpacing: '0.3em',
-            fontFamily: "'JetBrains Mono', monospace",
-            color: tokens.ink,
-            backgroundColor: tokens.surface,
-            border: `1px solid ${tokens.border}`,
+            width: '12rem',
+            padding: '12px 14px',
+            fontSize: '32px',
+            letterSpacing: '0.4em',
+            fontVariantNumeric: 'tabular-nums',
+            textAlign: 'center',
+            fontFamily: "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
+            color: 'var(--ink)',
+            backgroundColor: 'var(--bg)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
             outline: 'none',
             boxSizing: 'border-box',
@@ -179,12 +173,8 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
         <div
           role="alert"
           style={{
-            backgroundColor: tokens.dangerBg,
-            border: `1px solid ${tokens.danger}`,
-            color: tokens.danger,
+            color: 'var(--danger)',
             fontSize: '13px',
-            padding: '10px 12px',
-            borderRadius: '8px',
             marginBottom: '16px',
           }}
         >
@@ -195,25 +185,8 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          fontSize: '14px',
-          fontWeight: 600,
-          fontFamily: "'DM Sans', sans-serif",
-          color: '#FFFFFF',
-          backgroundColor: submitting ? tokens.muted : tokens.accent,
-          border: 'none',
-          borderRadius: '8px',
-          cursor: submitting ? 'not-allowed' : 'pointer',
-          transition: 'background-color 150ms ease-out',
-        }}
-        onMouseEnter={(e) => {
-          if (!submitting) e.currentTarget.style.backgroundColor = tokens.accentHover;
-        }}
-        onMouseLeave={(e) => {
-          if (!submitting) e.currentTarget.style.backgroundColor = tokens.accent;
-        }}
+        className="btn-accent-flat"
+        style={{ width: '100%' }}
       >
         {submitting ? 'Verifying…' : 'Sign in'}
       </button>
