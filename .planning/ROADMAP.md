@@ -44,7 +44,9 @@
   2. Existing trainer-led sessions persist to DB without change — `/api/sync-check` shows no new divergence after migration
   3. `Associate.cohortId` is nullable — existing associates (cohortId = null) are visible in `/trainer` roster unchanged
   4. `Session.mode` defaults to `"trainer-led"` on all existing rows — no null values in mode column
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 08-01-PLAN.md — Prisma schema additions (Cohort, CurriculumWeek, FK columns, Session.mode) + migration SQL with backfill
+- [ ] 08-02-PLAN.md — Apply migration, verify success criteria, wire prisma migrate deploy into Dockerfile
 
 ---
 
@@ -59,7 +61,10 @@
   4. An associate session cookie does not grant access to `/trainer` routes — navigating to `/trainer` while holding only an associate cookie returns 403 or redirects to trainer login
   5. Trainer session cookie continues to work unchanged — existing `/dashboard`, `/interview`, `/review`, `/trainer` routes unaffected
   6. `/associate/[slug]` requires auth — either matching associate session OR active trainer session grants access; mismatched associate slugs return 403; unauthenticated requests redirect to PIN entry
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 09-01-PLAN.md — Schema fields + pinService + PIN generate/verify/logout endpoints
+- [ ] 09-02-PLAN.md — Identity enum helpers + middleware refactor (trainer/associate separation)
+- [ ] 09-03-PLAN.md — PIN entry UI + /associate/[slug] auth guard + trainer Generate-PIN control
 **UI hint**: yes
 
 ---
@@ -73,7 +78,9 @@
   2. Gap scores for the associate's skills are recomputed after session completion — `GapScore` rows reflect the new session
   3. `Associate.readinessStatus` is updated after session completion using the same threshold logic as trainer-led sessions
   4. Anonymous (non-PIN) users can still complete a public interview — the existing `/api/public/interview/complete` endpoint returns 200 without requiring auth
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 10-01-PLAN.md — Wire /api/public/interview/complete to associate session + gap/readiness pipeline (extract readinessPipeline helper)
+- [ ] 10-02-PLAN.md — Integration tests (authenticated + anonymous + spoofing), sync-check parity, human verification
 
 ---
 
@@ -87,7 +94,10 @@
   3. Trainer can assign an associate to a cohort via the trainer dashboard — the associate's `cohortId` FK is updated
   4. Associates with no cohort assigned remain fully functional — their sessions persist, gap scores compute, and readiness updates without error
   5. A trainer-led session for an associate without a cohort persists to DB successfully — `/api/sync-check` shows no divergence
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 11-01-PLAN.md — /api/cohorts CRUD routes (GET list, POST create, GET/PATCH/DELETE by id) with zod validation + non-cascading delete
+- [ ] 11-02-PLAN.md — Trainer /trainer/cohorts UI for cohort CRUD with inline form + nav link
+- [ ] 11-03-PLAN.md — Associate cohort assignment via PATCH /api/trainer/[slug] + dropdown on /trainer/[slug]
 **UI hint**: yes
 
 ---
@@ -101,7 +111,9 @@
   2. Selecting "All Associates" (default) restores the full roster — the existing unfiltered view is unchanged
   3. When a cohort is selected, a summary bar above the roster shows count of ready / improving / not_ready associates in that cohort
   4. Associates with no cohort remain visible under "All Associates" and are not lost from the roster
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 12-01-PLAN.md — Extend /api/trainer with cohortId filter + aggregate summary
+- [ ] 12-02-PLAN.md — Trainer roster UI: cohort dropdown + summary bar
 **UI hint**: yes
 
 ---
@@ -116,7 +128,10 @@
   3. The setup wizard loads in under 400ms when curriculum filter is active — curriculum fetch and GitHub question bank fetch run in parallel
   4. If a cohort has no curriculum defined, or the associate has no cohort, the setup wizard behaves identically to v1.0 — no regression
   5. Adaptive gap-based weight pre-population still applies on top of curriculum filtering — the two features compose correctly
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 13-01-PLAN.md — Curriculum CRUD API + service layer (GET list, GET ?taught=true, POST, PATCH, DELETE) with Vitest coverage
+- [ ] 13-02-PLAN.md — Trainer curriculum UI (table with inline add/edit/delete per cohort) using DESIGN.md tokens
+- [ ] 13-03-PLAN.md — Setup wizard filter integration (parallel fetch, compose with adaptiveSetup) + Playwright <400ms perf E2E
 **UI hint**: yes
 
 ---
@@ -146,10 +161,10 @@
 | 5. Readiness Signals | v1.0 | 2/2 | Complete | 2026-04-14 |
 | 6. Trainer Dashboard | v1.0 | 2/2 | Complete | 2026-04-14 |
 | 7. Adaptive Setup | v1.0 | 2/2 | Complete | 2026-04-14 |
-| 8. Schema Migration | v1.1 | 0/? | Not started | - |
-| 9. Associate PIN Auth | v1.1 | 0/? | Not started | - |
-| 10. Automated Interview Pipeline | v1.1 | 0/? | Not started | - |
-| 11. Cohort Management | v1.1 | 0/? | Not started | - |
-| 12. Cohort Dashboard Views | v1.1 | 0/? | Not started | - |
-| 13. Curriculum Schedule | v1.1 | 0/? | Not started | - |
+| 8. Schema Migration | v1.1 | 0/2 | Planned | - |
+| 9. Associate PIN Auth | v1.1 | 0/3 | Planned | - |
+| 10. Automated Interview Pipeline | v1.1 | 0/2 | Planned | - |
+| 11. Cohort Management | v1.1 | 0/3 | Planned | - |
+| 12. Cohort Dashboard Views | v1.1 | 0/2 | Planned | - |
+| 13. Curriculum Schedule | v1.1 | 0/3 | Planned | - |
 | 14. Design Cohesion | v1.1 | 0/? | Not started | - |
