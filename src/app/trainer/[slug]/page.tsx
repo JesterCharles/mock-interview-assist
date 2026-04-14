@@ -8,6 +8,8 @@ import { AssociateDetail } from '@/lib/trainer-types'
 import ReadinessDisplay from '@/components/trainer/ReadinessDisplay'
 import SessionHistoryList from '@/components/trainer/SessionHistoryList'
 import EmptyGapState from '@/components/trainer/EmptyGapState'
+import GapTrendChart from '@/components/trainer/GapTrendChart'
+import CalibrationView from '@/components/trainer/CalibrationView'
 import '../trainer.css'
 
 export default function AssociateDetailPage() {
@@ -198,16 +200,10 @@ export default function AssociateDetailPage() {
                     gap trends
                   </p>
                   {hasGapData ? (
-                    // GapTrendChart will be inserted here in Task 2
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        fontFamily: 'DM Sans, sans-serif',
-                        color: '#7A7267',
-                      }}
-                    >
-                      Gap chart loading...
-                    </div>
+                    <GapTrendChart
+                      gapScores={detail.gapScores}
+                      sessions={detail.sessions}
+                    />
                   ) : (
                     <EmptyGapState sessionCount={detail.sessionCount} />
                   )}
@@ -219,16 +215,7 @@ export default function AssociateDetailPage() {
                     score calibration
                   </p>
                   {hasCalibrationData ? (
-                    // CalibrationView will be inserted here in Task 2
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        fontFamily: 'DM Sans, sans-serif',
-                        color: '#7A7267',
-                      }}
-                    >
-                      Calibration loading...
-                    </div>
+                    <CalibrationView sessions={detail.sessions} />
                   ) : (
                     <p
                       style={{
