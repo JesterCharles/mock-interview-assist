@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   }),
   isAuthenticatedSessionMock: vi.fn(),
   findManyMock: vi.fn(),
-  cohortsClientMock: vi.fn(() => null),
+  cohortsClientMock: vi.fn((_props: unknown) => null),
 }))
 
 vi.mock('next/navigation', () => ({
