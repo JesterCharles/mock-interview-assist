@@ -43,3 +43,19 @@ export interface GapDataPoint {
   session: string
   score: number
 }
+
+// Aggregate readiness counts returned alongside a cohort-scoped roster.
+// Opt-in: returned only when callers pass `?includeSummary=true` on /api/trainer.
+export interface CohortSummary {
+  ready: number
+  improving: number
+  notReady: number
+}
+
+// Wrapped response shape used ONLY by callers that explicitly set
+// `includeSummary=true`. Default /api/trainer callers continue to receive
+// a raw `RosterAssociate[]` array (v1.0 contract).
+export interface RosterResponse {
+  associates: RosterAssociate[]
+  summary: CohortSummary
+}
