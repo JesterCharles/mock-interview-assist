@@ -118,8 +118,8 @@ Plans:
   3. Starting a mock for an associate with no gap history (fewer than 3 sessions) falls back to the existing manual setup without error
 **Plans:** 2 plans
 Plans:
-- [ ] 07-01-PLAN.md — Gap scores API endpoint and weight interpolation utility with tests
-- [ ] 07-02-PLAN.md — Dashboard wizard pre-population integration and visual verification
+- [x] 07-01-PLAN.md — Gap scores API endpoint and weight interpolation utility with tests
+- [x] 07-02-PLAN.md — Dashboard wizard pre-population integration and visual verification
 **UI hint**: yes
 
 ## Progress
