@@ -8,6 +8,7 @@ import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { prisma } from '@/lib/prisma';
 import { saveGapScores } from '@/lib/gapPersistence';
 import { updateAssociateReadiness } from '@/lib/readinessService';
+import { getSettings } from '@/lib/settingsService';
 
 // GET - Retrieve all interview history
 export async function GET() {
@@ -57,11 +58,8 @@ export async function POST(request: NextRequest) {
                 .then(async (associate) => {
                     if (associate) {
                         await saveGapScores(associate.id);
-                        // Fetch current threshold from Settings table (Plan 02 adds Settings model).
-                        // Until then, fall back to default threshold of 75.
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const settings = await (prisma as any).settings?.findFirst?.({ where: { id: 1 } }).catch?.(() => null);
-                        const threshold: number = (settings as { readinessThreshold?: number } | null)?.readinessThreshold ?? 75;
+                        // Fetch current threshold from Settings table (added in Plan 02)
+                        const { readinessThreshold: threshold } = await getSettings().catch(() => ({ readinessThreshold: 75 }));
                         await updateAssociateReadiness(associate.id, threshold);
                     }
                 })
