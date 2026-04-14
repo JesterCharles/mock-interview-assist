@@ -100,14 +100,15 @@ describe('/associate/[slug] guard matrix', () => {
     expect(mocks.redirectMock).not.toHaveBeenCalled();
   });
 
-  it('associate with mismatched slug → 403 Response', async () => {
+  it('associate with mismatched slug → 403 element (data-http-status="403")', async () => {
     mocks.isAuthenticatedSessionMock.mockResolvedValue(false);
     mocks.getAssociateIdentityMock.mockResolvedValue({ associateId: 99 });
     mocks.getAssociateIdBySlugMock.mockResolvedValue(42);
 
-    const result = await AssociateProfilePage(makeParams('alice'));
-    expect(result).toBeInstanceOf(Response);
-    expect((result as Response).status).toBe(403);
+    const result = (await AssociateProfilePage(makeParams('alice'))) as {
+      props: { ['data-http-status']?: string };
+    };
+    expect(result?.props?.['data-http-status']).toBe('403');
     expect(mocks.redirectMock).not.toHaveBeenCalled();
   });
 
