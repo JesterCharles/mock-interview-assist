@@ -15,6 +15,8 @@ import { GitHubService, GitHubFile } from '@/lib/github-service';
 import { useAuth } from '@/lib/auth-context';
 import { validateSlug } from '@/lib/slug-validation';
 import { mapGapScoresToWeights, GapScoreResponse } from '@/lib/adaptiveSetup';
+import { filterTechsByCurriculum, filterGapScoresByCurriculum } from '@/lib/curriculumFilter';
+import { CurriculumFilterBadge, TaughtWeek } from '@/components/dashboard/CurriculumFilterBadge';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -67,6 +69,10 @@ export default function DashboardPage() {
   const [pendingGapScores, setPendingGapScores] = useState<GapScoreResponse['scores'] | null>(null);
   const [prePopulatedWeights, setPrePopulatedWeights] = useState<Record<string, number>>({});
 
+  // Curriculum filter state (D-14, D-17, D-18)
+  const [taughtWeeks, setTaughtWeeks] = useState<TaughtWeek[]>([]);
+  const [pendingTaughtSlugs, setPendingTaughtSlugs] = useState<string[] | null>(null);
+
   // Associate typeahead state
   const [associateList, setAssociateList] = useState<{ slug: string; displayName: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -114,6 +120,12 @@ export default function DashboardPage() {
       setIsFetchingTechs(false);
     }
   }, [repoConfig]);
+
+  // applyCurriculumFilter: filters availableTechs to taught slugs and updates state (D-15)
+  const applyCurriculumFilter = useCallback((files: GitHubFile[], taughtSlugs: string[]) => {
+    const filtered = filterTechsByCurriculum(files, taughtSlugs);
+    setAvailableTechs(filtered);
+  }, []);
 
   // Initial fetch
   useEffect(() => {
@@ -179,6 +191,7 @@ export default function DashboardPage() {
   }, [techSearch]);
 
   // applyGapScores: cross-references gap scores against availableTechs and pre-populates
+  // D-22: scores should already be filtered to taught slugs before calling this
   const applyGapScores = useCallback((scores: GapScoreResponse['scores']) => {
     const weights = mapGapScoresToWeights(scores);
     // Build a case-insensitive lookup from gap skill name → weight
@@ -206,7 +219,8 @@ export default function DashboardPage() {
     setPendingGapScores(null);
   }, [availableTechs, setSelectedTechs, setTechWeight]);
 
-  // handleSlugLookup: fetches gap scores on slug blur, applies pre-population per D-05
+  // handleSlugLookup: fetches gap scores (+ curriculum if cohort present) on slug blur
+  // D-14: curriculum fetched in parallel with gap scores via Promise.all when cohortId present
   const handleSlugLookup = useCallback(async (slug: string) => {
     const trimmed = slug.trim().toLowerCase();
     if (!trimmed) return;
@@ -215,18 +229,57 @@ export default function DashboardPage() {
       const res = await fetch(`/api/associates/${encodeURIComponent(trimmed)}/gap-scores`);
       if (!res.ok) return; // network error — fail silently, stay manual
       const data: GapScoreResponse = await res.json();
+
+      // Fetch curriculum in parallel when associate has a cohort (D-14)
+      let weeks: TaughtWeek[] = [];
+      if (data.cohortId) {
+        try {
+          const [curriculumRes] = await Promise.all([
+            fetch(`/api/cohorts/${data.cohortId}/curriculum?taught=true`),
+          ]);
+          if (curriculumRes.ok) {
+            const curriculumData: TaughtWeek[] = await curriculumRes.json();
+            weeks = curriculumData;
+          }
+        } catch {
+          // D-17: curriculum fetch failure → log warn, do NOT filter (show full list)
+          console.warn('[curriculum-filter] Failed to fetch curriculum — showing full tech list');
+        }
+        setTaughtWeeks(weeks);
+      } else {
+        // No cohort → reset filter state (D-17 fallback)
+        setTaughtWeeks([]);
+      }
+
+      // Extract taught slugs for filtering
+      const taughtSlugs = weeks.map(w => w.skillSlug);
+
+      // Apply curriculum filter to availableTechs if we have them (D-15)
+      if (taughtSlugs.length > 0) {
+        if (availableTechs.length > 0) {
+          applyCurriculumFilter(availableTechs, taughtSlugs);
+        } else {
+          // Defer filter until techs load
+          setPendingTaughtSlugs(taughtSlugs);
+        }
+      }
+
+      // Apply gap-score pre-population (D-22: filter scores to taught slugs first)
       if (!data.found || data.sessionCount < 3) return; // cold start fallback per D-04
+      const filteredScores = taughtSlugs.length > 0
+        ? filterGapScoresByCurriculum(data.scores, taughtSlugs)
+        : data.scores;
       if (availableTechs.length === 0) {
-        setPendingGapScores(data.scores); // defer until techs load
+        setPendingGapScores(filteredScores); // defer until techs load
         return;
       }
-      applyGapScores(data.scores);
+      applyGapScores(filteredScores);
     } catch {
       // Fail silently — stay in manual mode on any fetch/parse error
     } finally {
       setIsLoadingGapScores(false);
     }
-  }, [availableTechs, applyGapScores]);
+  }, [availableTechs, applyGapScores, applyCurriculumFilter]);
 
   // Deferred gap score application: fires when pendingGapScores exists and availableTechs loads
   useEffect(() => {
@@ -234,6 +287,14 @@ export default function DashboardPage() {
       applyGapScores(pendingGapScores);
     }
   }, [pendingGapScores, availableTechs, applyGapScores]);
+
+  // Deferred curriculum filter: fires when pendingTaughtSlugs exists and availableTechs loads
+  useEffect(() => {
+    if (pendingTaughtSlugs && pendingTaughtSlugs.length > 0 && availableTechs.length > 0) {
+      applyCurriculumFilter(availableTechs, pendingTaughtSlugs);
+      setPendingTaughtSlugs(null);
+    }
+  }, [pendingTaughtSlugs, availableTechs, applyCurriculumFilter]);
 
   // handleWeightChange: wraps setTechWeight and removes the "auto" badge for that tech
   const handleWeightChange = (path: string, weight: number) => {
@@ -448,6 +509,9 @@ export default function DashboardPage() {
           <Github className="w-6 h-6 text-indigo-400" />
           Technology Selection
         </h3>
+
+        {/* Curriculum filter badge — visible when associate has cohort with taught weeks */}
+        <CurriculumFilterBadge taughtWeeks={taughtWeeks} />
 
         {/* Repo Config is now obscured/server-side managed */}
         <div className="flex justify-end mb-2">

@@ -50,7 +50,7 @@ export async function GET(
     // Unknown slug → return found:false (same shape as new associate)
     // Anti-enumeration: never distinguish "not found" from "new associate" (T-07-03, D-04)
     if (!associate) {
-      const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [] };
+      const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [], cohortId: null };
       return NextResponse.json(response);
     }
 
@@ -66,12 +66,13 @@ export async function GET(
         skill: g.skill,
         weightedScore: g.weightedScore,
       })),
+      cohortId: associate.cohortId ?? null,
     };
 
     return NextResponse.json(response);
   } catch {
     // Return same shape as "not found" to preserve anti-enumeration (T-07-03)
-    const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [] };
+    const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [], cohortId: null };
     return NextResponse.json(response);
   }
 }
