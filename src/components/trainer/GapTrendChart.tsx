@@ -135,6 +135,33 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
     )
   }
 
+  // When there is only a single aggregate data point, show it as a KPI value
+  // rather than rendering a misleading single-point trend line (WR-01)
+  if (main.length <= 1 && topicNames.length === 0) {
+    const skillLevelScores = gapScores.filter(
+      (g) => g.skill === selectedSkill && g.topic === null
+    )
+    return (
+      <div>
+        <div style={{ marginBottom: '16px' }}>
+          <SkillFilterDropdown
+            skills={skills}
+            selectedSkill={selectedSkill}
+            onSelect={setSelectedSkill}
+          />
+        </div>
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'DM Sans, sans-serif', color: '#1A1A1A' }}>
+            {main[0]?.score ?? '—'}
+          </span>
+          <p style={{ color: '#7A7267', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', marginTop: '4px' }}>
+            Current weighted score (aggregate across {skillLevelScores[0]?.sessionCount ?? 0} sessions)
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div style={{ marginBottom: '16px' }}>
