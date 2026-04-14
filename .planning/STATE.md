@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Schema migration applied to dev DB, Dockerfile wired for runtime migrate deploy
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-04-14T18:23:40.364Z"
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-04-14T18:41:39.097Z"
 last_activity: 2026-04-14 — Plan 08-02 human-verify approved
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 18
-  completed_plans: 3
-  percent: 17
+  completed_plans: 4
+  percent: 22
 ---
 
 # Project State
@@ -70,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Hand-wrote migration SQL: Supabase DB lacks _prisma_migrations history; --create-only required destructive reset
 - [Phase 09-associate-pin-auth]: Dedicated ASSOCIATE_SESSION_SECRET decoupled from APP_PASSWORD; token version = pinGeneratedAt for DB-backed revocation (Codex #4 mitigation)
 - [Phase 09-associate-pin-auth]: bcryptjs chosen over native bcrypt for node:22-alpine Docker compatibility
+- [Phase 09]: Middleware uses cookie-only identity enum (no DB) for Edge-runtime safety; revocation check lives in server-component helpers
+- [Phase 09]: isAuthenticatedSession() stays trainer-only (D-13) — associate auth uses sibling helpers to prevent Pitfall 1
 
 ### Pending Todos
 
@@ -82,6 +84,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:22:29.898Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-04-14T18:41:39.095Z
+Stopped at: Completed 09-02-PLAN.md
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
