@@ -219,13 +219,17 @@ export async function DELETE(
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.associate.updateMany({
-        where: { cohortId: idNum },
-        data: { cohortId: null },
-      });
-      await tx.cohort.delete({ where: { id: idNum } });
-    });
+    // interactive tx: requires session-scoped connection (Supabase transaction pooler handles this)
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.associate.updateMany({
+          where: { cohortId: idNum },
+          data: { cohortId: null },
+        });
+        await tx.cohort.delete({ where: { id: idNum } });
+      },
+      { timeout: 10_000 }
+    );
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     if (isPrismaError(error, 'P2025')) {
