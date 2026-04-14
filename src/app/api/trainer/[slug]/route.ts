@@ -3,6 +3,14 @@ import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { AssociateDetail, SessionSummary, GapScoreEntry } from '@/lib/trainer-types'
 
+// Validate readinessStatus from DB before casting to union type (WR-03)
+const VALID_READINESS_STATUSES = new Set(['ready', 'improving', 'not_ready'])
+function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_ready' {
+  return typeof raw === 'string' && VALID_READINESS_STATUSES.has(raw)
+    ? (raw as 'ready' | 'improving' | 'not_ready')
+    : 'not_ready'
+}
+
 // Slug validation — alphanumeric + hyphens only (T-06-04 defense-in-depth)
 const SLUG_RE = /^[a-z0-9-]+$/
 
@@ -91,7 +99,7 @@ export async function GET(
     const detail: AssociateDetail = {
       slug: associate.slug,
       displayName: associate.displayName ?? associate.slug,
-      readinessStatus: (associate.readinessStatus as 'ready' | 'improving' | 'not_ready') ?? 'not_ready',
+      readinessStatus: validatedReadinessStatus(associate.readinessStatus),
       readinessScore: null, // numeric score computed from GapScore aggregation — null until computed
       recommendedArea: associate.recommendedArea ?? null,
       sessionCount: associate._count.sessions,

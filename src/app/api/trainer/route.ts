@@ -3,6 +3,14 @@ import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { RosterAssociate } from '@/lib/trainer-types'
 
+// Validate readinessStatus from DB before casting to union type (WR-03)
+const VALID_READINESS_STATUSES = new Set(['ready', 'improving', 'not_ready'])
+function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_ready' {
+  return typeof raw === 'string' && VALID_READINESS_STATUSES.has(raw)
+    ? (raw as 'ready' | 'improving' | 'not_ready')
+    : 'not_ready'
+}
+
 export async function GET() {
   // Auth check — validate nlm_session cookie before returning data (T-06-01)
   const cookieStore = await cookies()
@@ -30,7 +38,7 @@ export async function GET() {
       slug: a.slug,
       displayName: a.displayName ?? a.slug,
       // Pre-computed values from Associate model — DASH-05 (no gap recomputation on load)
-      readinessStatus: (a.readinessStatus as 'ready' | 'improving' | 'not_ready') ?? 'not_ready',
+      readinessStatus: validatedReadinessStatus(a.readinessStatus),
       readinessScore: null, // score stored as part of readiness computation — null until computed
       recommendedArea: a.recommendedArea ?? null,
       sessionCount: a._count.sessions,
