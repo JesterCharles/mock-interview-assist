@@ -34,39 +34,44 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid slug format' }, { status: 400 });
   }
 
-  // Query associate with skill-level gap scores.
-  // Per Phase 4 schema: topic is a non-nullable String with @default("").
-  // Skill-level GapScore rows use topic = "" (empty string); topic-level rows have a non-empty value.
-  // The plan spec says "topic: null" but the actual schema stores skill-level rows with topic = "".
-  const associate = await prisma.associate.findUnique({
-    where: { slug: parsed.data },
-    include: {
-      gapScores: {
-        where: { topic: '' }, // skill-level scores only (empty string = no topic)
+  try {
+    // Query associate with skill-level gap scores.
+    // Per Phase 4 schema: topic is a non-nullable String with @default("").
+    // Skill-level GapScore rows use topic = "" (empty string); topic-level rows have a non-empty value.
+    const associate = await prisma.associate.findUnique({
+      where: { slug: parsed.data },
+      include: {
+        gapScores: {
+          where: { topic: '' }, // skill-level scores only (empty string = no topic)
+        },
       },
-    },
-  });
+    });
 
-  // Unknown slug → return found:false (same shape as new associate)
-  // Anti-enumeration: never distinguish "not found" from "new associate" (T-07-03, D-04)
-  if (!associate) {
+    // Unknown slug → return found:false (same shape as new associate)
+    // Anti-enumeration: never distinguish "not found" from "new associate" (T-07-03, D-04)
+    if (!associate) {
+      const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [] };
+      return NextResponse.json(response);
+    }
+
+    // Count completed sessions for this associate
+    const sessionCount = await prisma.session.count({
+      where: { associateId: associate.id, status: 'completed' },
+    });
+
+    const response: GapScoreResponse = {
+      found: true,
+      sessionCount,
+      scores: associate.gapScores.map((g) => ({
+        skill: g.skill,
+        weightedScore: g.weightedScore,
+      })),
+    };
+
+    return NextResponse.json(response);
+  } catch {
+    // Return same shape as "not found" to preserve anti-enumeration (T-07-03)
     const response: GapScoreResponse = { found: false, sessionCount: 0, scores: [] };
     return NextResponse.json(response);
   }
-
-  // Count completed sessions for this associate
-  const sessionCount = await prisma.session.count({
-    where: { associateId: associate.id, status: 'completed' },
-  });
-
-  const response: GapScoreResponse = {
-    found: true,
-    sessionCount,
-    scores: associate.gapScores.map((g) => ({
-      skill: g.skill,
-      weightedScore: g.weightedScore,
-    })),
-  };
-
-  return NextResponse.json(response);
 }

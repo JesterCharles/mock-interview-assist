@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  FileText, Users, Settings, ArrowRight, Check, X,
+  FileText, Users, Settings, ArrowRight, Check,
   Search, Github, Loader2, Clock, Brain, UserCheck, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useInterviewStore } from '@/store/interviewStore';
@@ -221,6 +221,8 @@ export default function DashboardPage() {
         return;
       }
       applyGapScores(data.scores);
+    } catch {
+      // Fail silently — stay in manual mode on any fetch/parse error
     } finally {
       setIsLoadingGapScores(false);
     }
@@ -303,7 +305,7 @@ export default function DashboardPage() {
                 type="text"
                 value={associateSlug}
                 onChange={(e) => {
-                  setAssociateSlug(e.target.value);
+                  handleSlugChange(e);
                   setShowSuggestions(true);
                 }}
                 onFocus={() => {
@@ -625,21 +627,16 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Associate ID (optional) */}
-        <div className="mt-6 space-y-2">
-          <label className="text-sm text-gray-300">
-            Associate ID <span className="text-gray-500">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={associateSlug}
-            onChange={handleSlugChange}
-            placeholder="e.g. jane-doe"
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white outline-none focus:border-indigo-500 transition-colors"
-          />
-          {slugError && <p className="text-xs text-red-400">{slugError}</p>}
-          <p className="text-xs text-gray-500">Links this session to an associate&apos;s history</p>
-        </div>
+        {/* Associate ID — read-only, set from Phase 1 search */}
+        {associateSlug && (
+          <div className="mt-6 space-y-2">
+            <label className="text-sm text-gray-300">Associate ID</label>
+            <div className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 text-sm">
+              {associateSlug}
+            </div>
+            <p className="text-xs text-gray-500">Set in Focus step — go back to change</p>
+          </div>
+        )}
       </div>
 
       <div>
