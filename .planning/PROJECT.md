@@ -2,11 +2,20 @@
 
 ## What This Is
 
-An adaptive technical skills development platform that gives associates repeated mock experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers. Currently deployed as a mock interview tool with trainer-led and AI-automated modes. Evolving into a multi-format readiness engine with persistent gap tracking and a trainer dashboard.
+An adaptive technical skills development platform that gives associates repeated mock interview experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers. Features trainer-led and AI-automated mock interviews, persistent session storage (Prisma + Supabase), two-level gap scoring, readiness classification, a trainer dashboard with gap charts, and adaptive mock setup that pre-populates from gap history.
 
 ## Core Value
 
 Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories that trainers and clients can trust.
+
+## Current State (v1.0 shipped 2026-04-14)
+
+- 7 phases, 15 plans, 22 requirements — all complete
+- Prisma 7 + Supabase with dual-write migration (file + DB)
+- 60 unit tests passing, TypeScript clean
+- Trainer dashboard at /trainer with gap trend charts (recharts)
+- Adaptive mock setup pre-populates from associate gap history
+- 11 tech debt items tracked (see milestones/v1.0-MILESTONE-AUDIT.md)
 
 ## Requirements
 
@@ -23,18 +32,26 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - ✓ Single-password auth with session management — existing
 - ✓ Docker Compose deployment on GCE — existing
 - ✓ Voice input via Web Speech API — existing
+- ✓ PERSIST-01: Session persistence in Supabase — v1.0
+- ✓ PERSIST-02: Associate profiles with trainer-assigned slugs — v1.0
+- ✓ PERSIST-03: Prisma singleton connection pooling — v1.0
+- ✓ PERSIST-04: Dual-write file + Supabase — v1.0
+- ✓ PERSIST-05: Sync-check endpoint — v1.0
+- ✓ PERSIST-06: Docker Prisma binary support — v1.0
+- ✓ PERSIST-07: Supabase pooler URL pattern — v1.0
+- ✓ GAP-01: Two-level gap tracking (skill + topic) — v1.0
+- ✓ GAP-02: Recency-weighted scoring (0.8 decay) — v1.0
+- ✓ GAP-03: 3-session minimum gate — v1.0
+- ✓ GAP-04: Topic tags from question bank metadata — v1.0
+- ✓ GAP-05: Adaptive mock setup from gap history — v1.0
+- ✓ READY-01: Computed readiness signal — v1.0
+- ✓ READY-02: Recommended practice area — v1.0
+- ✓ READY-03: Configurable readiness threshold — v1.0
+- ✓ DASH-01 through DASH-07: Trainer dashboard — v1.0
 
 ### Active
 
-- [x] **PERSIST-01**: Session persistence in Supabase (every mock stored with full scoring data) — Validated in Phase 2: Session Persistence
-- [x] **PERSIST-02**: Associate profiles with trainer-assigned slug/ID (persistent identity) — Validated in Phase 3: Associate Profiles
-- [x] **GAP-01**: Two-level gap tracking (skill → topic) with recency-weighted scoring — Validated in Phase 4: Gap Service
-- [x] **GAP-02**: Adaptive mock setup (pre-select technologies/weights based on gap history) — Validated in Phase 7: Adaptive Setup
-- [x] **DASH-01**: Trainer dashboard — roster view with readiness status badges — Validated in Phase 6: Trainer Dashboard
-- [x] **DASH-02**: Per-associate detail — session history, gap trend charts, skill/topic selector — Validated in Phase 6: Trainer Dashboard
-- [x] **DASH-03**: AI vs trainer score calibration view — Validated in Phase 6: Trainer Dashboard
-- [x] **READY-01**: Computed readiness signal (75% avg / 3 sessions / non-negative trend) — Validated in Phase 5: Readiness Signals
-- [x] **READY-02**: Next recommended practice area per associate — Validated in Phase 5: Readiness Signals
+(No active requirements — define next milestone with `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -48,50 +65,32 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 ## Context
 
 - Founder runs the training operation directly — builds and trains associates for client placements
-- Current QC audits are broken: definition recall, "4/5 good job" with no feedback, cumulative doesn't test cumulative
-- Trainers are stretched thin — primarily content delivery, mocks are ad-hoc
-- Trainers have validated AI scoring as "relatively in place" — fine-tuning planned via autoresearch
-- No persistence currently — sessions are live logs only, blocking all adaptive features
+- v1.0 shipped in ~26 hours (solo dev + Claude AI assistance)
+- Trainers validated AI scoring as "relatively in place" — fine-tuning planned via autoresearch
 - Three eventual buyer segments: training org (platform license), job seekers (subscription), clients (pipeline visibility)
-- Design doc approved: `~/.gstack/projects/JesterCharles-mock-interview-assist/jestercharles-main-design-20260413-115201.md`
+- Design system: editorial/utilitarian aesthetic (warm parchment + burnt orange) documented in DESIGN.md
 
 ## Constraints
 
-- **Solo developer**: Founder is the engineer — scope must be achievable in 3-5 weeks
+- **Solo developer**: Founder is the engineer
 - **Existing codebase**: Next.js 16, App Router, Zustand, LangGraph — must preserve working flows
-- **Backwards compatible**: Trainer-led and public interview modes must keep working during migration
-- **Supabase (Postgres)**: Hosted database — free tier for MVP, scales to multi-user later
-- **Dual-write migration**: File storage (backward compat) + Supabase until migration validated
+- **Backwards compatible**: Trainer-led and public interview modes must keep working
+- **Supabase (Postgres)**: Hosted database — free tier, scales to multi-user later
+- **Dual-write active**: File storage (backward compat) + Supabase until migration fully validated
 - **Docker deployment**: GCE via Docker Compose, port 80
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Supabase (hosted Postgres) over SQLite | Avoid migration headache when scaling to multi-tenant. Concurrent writes handled natively. Auth/RLS available for future segments. | Validated Phase 1 |
-| Prisma as ORM | Type-safe queries, works identically with Postgres and SQLite if needed to switch | Validated Phase 1 |
-| Trainer-assigned associate IDs (no login) | Simplest identity model for MVP. No auth complexity. | Validated Phase 3 |
-| 0.8 recency decay for gap algorithm | Recent sessions weighted more. Simple starting point, autoresearch optimizes later. | Validated Phase 4 |
-| 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate based on experience. | Validated Phase 5 |
-| Interview format only for MVP | Validate core loop before expanding to other formats | Validated — all phases shipped |
-| Dual-write migration (file + DB) | Preserve existing flows while adding persistence. No data migration needed. | Validated Phase 2 |
-
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
+| Supabase (hosted Postgres) over SQLite | Avoid migration headache at scale. Concurrent writes. Auth/RLS for future. | ✓ Validated P1 |
+| Prisma 7 as ORM | Type-safe queries, portable across DB engines | ✓ Validated P1 |
+| Trainer-assigned associate IDs (no login) | Simplest identity model for MVP | ✓ Validated P3 |
+| 0.8 recency decay for gap algorithm | Recent sessions weighted more. Autoresearch optimizes later. | ✓ Validated P4 |
+| 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate. | ✓ Validated P5 |
+| recharts 3.8.1 (not Tremor) | React 19 compatible. Tremor requires React 18. | ✓ Validated P6 |
+| Dual-write migration (file + DB) | Preserve existing flows. No data migration. | ✓ Validated P2 |
+| Interview format only for MVP | Validate core loop before expanding | ✓ Good |
 
 ---
-*Last updated: 2026-04-14 after Phase 7 (Adaptive Setup) completion — all 7 phases shipped, milestone complete*
+*Last updated: 2026-04-14 after v1.0 milestone completion*
