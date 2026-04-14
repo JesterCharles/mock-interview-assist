@@ -14,50 +14,61 @@ model HealthCheck {
 }
 
 model Associate {
-  id                Int        @id @default(autoincrement())
-  slug              String     @unique
-  displayName       String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  readinessStatus   String?    // 'ready' | 'improving' | 'not_ready'
-  recommendedArea   String?    // topic or skill name — lowest gap score
-  lastComputedAt    DateTime?  // when readiness was last computed
-  sessions          Session[]
-  gapScores         GapScore[]
+  id              Int        @id @default(autoincrement())
+  slug            String     @unique
+  displayName     String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  readinessStatus String? // 'ready' | 'improving' | 'not_ready'
+  recommendedArea String? // topic or skill name — lowest gap score
+  lastComputedAt  DateTime? // when readiness was last computed
+  cohortId        Int?
+  cohort          Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  sessions        Session[]
+  gapScores       GapScore[]
+
+  @@index([cohortId])
 }
 
 model Session {
-  id                    String     @id
-  candidateName         String?
-  interviewerName       String?
-  date                  String
-  status                String
-  questionCount         Int
-  selectedWeeks         Json
-  overallTechnicalScore Float?
-  overallSoftSkillScore Float?
-  technicalFeedback     String?
-  softSkillFeedback     String?
-  questions             Json
-  starterQuestions      Json
-  assessments           Json
-  techMap               Json?      // Record<number, string> mapping weekNumber -> skill name
-  associateId           Int?
-  associate             Associate? @relation(fields: [associateId], references: [id])
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
+  id                       String     @id
+  candidateName            String?
+  interviewerName          String?
+  date                     String
+  status                   String
+  questionCount            Int
+  selectedWeeks            Json
+  overallTechnicalScore    Float?
+  overallSoftSkillScore    Float?
+  technicalFeedback        String?
+  softSkillFeedback        String?
+  questions                Json
+  starterQuestions         Json
+  assessments              Json
+  techMap                  Json? // Record<number, string> mapping weekNumber -> skill name
+  associateId              Int?
+  associate                Associate? @relation(fields: [associateId], references: [id])
+  cohortId                 Int?
+  cohort                   Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  mode                     String     @default("trainer-led")
+  readinessRecomputeStatus String     @default("not_applicable") // not_applicable | pending | done | failed
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+
+  @@index([cohortId])
+  @@index([readinessRecomputeStatus])
 }
 
 model GapScore {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   associateId   Int
   skill         String
-  topic         String    @default("")
+  topic         String   @default("")
   weightedScore Float
   sessionCount  Int
-  lastUpdated   DateTime  @updatedAt
+  lastUpdated   DateTime @updatedAt
 
-  associate     Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
+  associate Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
 
   @@unique([associateId, skill, topic])
   @@index([associateId])
@@ -69,4 +80,32 @@ model Settings {
   id                 Int      @id @default(1)
   readinessThreshold Float    @default(75)
   updatedAt          DateTime @updatedAt
+}
+
+model Cohort {
+  id              Int              @id @default(autoincrement())
+  name            String
+  startDate       DateTime
+  endDate         DateTime?
+  description     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  associates      Associate[]
+  sessions        Session[]
+  curriculumWeeks CurriculumWeek[]
+}
+
+model CurriculumWeek {
+  id         Int      @id @default(autoincrement())
+  cohortId   Int
+  weekNumber Int
+  skillName  String // display text only
+  skillSlug  String // canonical matcher value (e.g. "react", "node")
+  topicTags  String[] // Postgres native array
+  startDate  DateTime
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, weekNumber])
+  @@index([cohortId])
 }
