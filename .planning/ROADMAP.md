@@ -23,11 +23,11 @@
 <details open>
 <summary>v1.1 Cohort Readiness System (Phases 8-14) -- IN PROGRESS</summary>
 
-- [ ] **Phase 8: Schema Migration** - Add Cohort, CurriculumWeek (with skillSlug + unique(cohortId, weekNumber)) models and nullable FKs to Associate + Session + Session.readinessRecomputeStatus
-- [ ] **Phase 9: Associate PIN Auth** - Trainer-generated PIN validates associate identity; dedicated ASSOCIATE_SESSION_SECRET; cookie version tied to pinGeneratedAt; adds authenticated /associate/[slug]/interview entry route
-- [ ] **Phase 10: Automated Interview Pipeline** - Split endpoints (public strips identity / authenticated cookie-only); DB-backed readiness recompute marker + sweep endpoint
-- [ ] **Phase 11: Cohort Management** - Trainer can create cohorts and assign associates via dashboard
-- [ ] **Phase 12: Cohort Dashboard Views** - Trainer can filter roster by cohort + opt-in summary (default /api/trainer response shape preserved)
+- [x] **Phase 8: Schema Migration** - Add Cohort, CurriculumWeek (with skillSlug + unique(cohortId, weekNumber)) models and nullable FKs to Associate + Session + Session.readinessRecomputeStatus
+- [x] **Phase 9: Associate PIN Auth** - Trainer-generated PIN validates associate identity; dedicated ASSOCIATE_SESSION_SECRET; cookie version tied to pinGeneratedAt; adds authenticated /associate/[slug]/interview entry route
+- [x] **Phase 10: Automated Interview Pipeline** - Split endpoints (public strips identity / authenticated cookie-only); DB-backed readiness recompute marker + sweep endpoint
+- [x] **Phase 11: Cohort Management** - Trainer can create cohorts and assign associates via dashboard
+- [x] **Phase 12: Cohort Dashboard Views** - Trainer can filter roster by cohort + opt-in summary (default /api/trainer response shape preserved)
 - [ ] **Phase 13: Curriculum Schedule** - Trainer defines curriculum weeks with canonical skillSlug; setup wizard exact-match filters to taught slugs
 - [ ] **Phase 14: Design Cohesion** - NEW v1.1 UIs styled per DESIGN.md; legacy utilities preserved for /, /interview, /review
 
