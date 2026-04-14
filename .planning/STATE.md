@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 13-03-PLAN.md + VERIFICATION
-last_updated: "2026-04-14T21:55:00.000Z"
-last_activity: 2026-04-14 -- Phase 13 complete (5/5 SC verified; human browser QA deferred)
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-04-14T23:13:15.638Z"
+last_activity: 2026-04-14
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Phase 14 — design-cohesion (next)
+**Current focus:** Phase 14 — design-cohesion
 
 ## Current Position
 
-Phase: 13 (curriculum-schedule) — COMPLETE (5/5 SC verified)
-Plan: 3 of 3
-Status: Phase 13 done; next Phase 14
-Last activity: 2026-04-14 -- Phase 13 complete
+Phase: 14 (design-cohesion) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-14
 
 Progress: [████████░░] 89%
 
@@ -77,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 10]: Session.id is cuid string — runReadinessPipeline sessionId typed as string; no persistSessionToDb contract change needed
 - [Phase 10]: Anonymous /api/public/interview/complete unconditionally nulls associateSlug; authenticated callers routed to /api/associate/interview/complete (Codex #3 closure)
 - [Phase 10]: [Phase 10-03]: Readiness sweep uses most-recent session as pipeline marker; sweeps other outstanding markers via updateMany — one recompute covers all of an associate's outstanding state
+- [Phase 14]: Phase 14-01: PublicShell exposes data-* passthrough so guard-matrix tests inspect returned element props directly
 
 ### Pending Todos
 
@@ -89,6 +90,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14T20:08:14.623Z
-Stopped at: Completed 10-03-PLAN.md
+Last session: 2026-04-14T23:13:15.635Z
+Stopped at: Completed 14-01-PLAN.md
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9

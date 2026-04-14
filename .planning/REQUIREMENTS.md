@@ -36,7 +36,7 @@
 
 ### Design
 
-- [ ] **DESIGN-01**: Public interview flow (landing, PIN entry, automated interview), associate profile page, and auth pages are styled per DESIGN.md tokens (warm parchment backgrounds, Clash Display headings, DM Sans body, burnt orange accent).
+- [x] **DESIGN-01**: Public interview flow (landing, PIN entry, automated interview), associate profile page, and auth pages are styled per DESIGN.md tokens (warm parchment backgrounds, Clash Display headings, DM Sans body, burnt orange accent).
 - [ ] **DESIGN-02**: New cohort management UI and curriculum UI follow DESIGN.md from initial build. No retrofit debt.
 
 ---
