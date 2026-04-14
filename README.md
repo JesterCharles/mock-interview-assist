@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next Level Mock
+
+An adaptive technical skills development platform that gives associates repeated mock experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers.
+
+## Features
+
+- **Trainer-led interviews** — Setup wizard configures GitHub-sourced question banks with weighted technologies, voice input via Web Speech API, keyword tracking, soft skills assessment, LLM scoring (GPT-4o-mini via LangGraph)
+- **AI-automated interviews** — Public mode where an AI agent conducts the interview without a trainer
+- **PDF reports** — Generated via `@react-pdf/renderer` and emailed via Resend
+- **Associate profiles** — Persistent identity via slug, session history, readiness status
+- **Gap tracking** — Recency-weighted scoring per skill (0.8 decay factor), computed after each session
+- **Readiness signals** — Three-state classification (ready / improving / not_ready) based on threshold, trend, and session count
+- **Trainer dashboard** — Roster with readiness badges, associate detail with gap trend charts, skill filtering, score calibration
+- **Adaptive setup** — Tech weights pre-populated from gap scores for returning associates (3+ sessions)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` and configure:
 
-## Learn More
+- `DATABASE_URL` — Supabase Transaction Pooler connection string
+- `DIRECT_URL` — Direct Supabase connection for Prisma migrations
+- `OPENAI_API_KEY` — Required for LLM scoring
+- `GITHUB_TOKEN` — GitHub API access for question banks
+- `RESEND_API_KEY` — Email delivery
+- `APP_PASSWORD` — Authentication password
 
-To learn more about Next.js, take a look at the following resources:
+### Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx prisma db push        # Push schema to Supabase
+npx prisma generate       # Generate Prisma client
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commands
 
-## Deploy on Vercel
+```bash
+npm run dev          # Start dev server (localhost:3000)
+npm run build        # Production build (standalone output for Docker)
+npm run start        # Start production server
+npm run lint         # ESLint
+npm run test         # Run Vitest tests
+npm run test:watch   # Vitest in watch mode
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose up    # Uses .env.docker, maps port 80 -> 3000
+```
+
+## Tech Stack
+
+- **Framework**: Next.js 16, React 19, TypeScript 5
+- **Database**: Supabase (Postgres) via Prisma 7
+- **Styling**: Tailwind CSS 4
+- **State**: Zustand 5 with localStorage persistence
+- **LLM**: LangChain/LangGraph with OpenAI (GPT-4o-mini)
+- **Charts**: Recharts 3
+- **Validation**: Zod 4
+- **Testing**: Vitest 4
+- **PDF**: @react-pdf/renderer
+- **Email**: Resend

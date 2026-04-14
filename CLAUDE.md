@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Next Level Mock — an AI-powered platform for simulating developer and technical role job experiences, built with Next.js 16 (App Router). Beyond mock interviews, the platform aims to replicate real-world job scenarios that developers encounter in technical roles. Currently features trainer-led and automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email.
+Next Level Mock — an adaptive technical skills development platform built with Next.js 16 (App Router). Features trainer-led and AI-automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email. The Readiness Loop MVP adds persistent gap tracking per associate, readiness classification (ready/improving/not_ready), a trainer dashboard with roster and trend charts, and adaptive interview setup that pre-populates tech weights based on past performance.
 
 ## Commands
 
@@ -13,6 +13,8 @@ npm run dev      # Start dev server (localhost:3000)
 npm run build    # Production build (standalone output for Docker)
 npm run start    # Start production server
 npm run lint     # ESLint
+npm run test     # Run Vitest tests
+npm run test:watch  # Run Vitest in watch mode
 ```
 
 Docker: `docker compose up` (uses `.env.docker`, maps port 80 → 3000).
@@ -21,16 +23,18 @@ Docker: `docker compose up` (uses `.env.docker`, maps port 80 → 3000).
 
 ### Interview Flow
 
-1. **Dashboard** (`/dashboard`) — Setup wizard (3 phases): configure GitHub repo → select technologies with weights → set question count and candidate info
+1. **Dashboard** (`/dashboard`) — Setup wizard (3 phases): configure GitHub repo → select technologies with weights → set question count and candidate info. Includes associate slug input for identity tracking. When an associate has 3+ sessions, tech weights are adaptively pre-populated from gap scores (weakest skills get highest weights).
 2. **Interview** (`/interview`) — Trainer conducts interview: 2 starter/behavioral questions → N technical questions with voice input (Web Speech API), keyword tracking, soft skills assessment
 3. **Review** (`/review`) — Validate/override LLM scores, edit assessments
-4. **Completion** — Generate PDF report (`@react-pdf/renderer`), send via Resend email
+4. **Completion** — Generate PDF report (`@react-pdf/renderer`), send via Resend email. Session is dual-written to file storage and Supabase, gap scores are computed, and readiness status is recomputed for the associate.
+5. **Trainer Dashboard** (`/trainer`) — Roster view of all associates with readiness badges, sortable table, search. Drill into `/trainer/[slug]` for session history, gap trend charts (recharts), skill filtering, and score calibration view.
+6. **Associate Profile** (`/associate/[slug]`) — Server-rendered public profile showing session history and readiness status.
 
 There is also a public automated interview mode (`/api/public/interview/*`) that uses an AI agent to conduct interviews without a trainer.
 
 ### State Management
 
-Zustand store (`src/store/interviewStore.ts`) with `persist` middleware (localStorage). This is the central nervous system — holds the full interview session, setup wizard state, per-question assessments, tech weights, and navigation. Most components read/write through this store.
+Zustand store (`src/store/interviewStore.ts`) with `persist` middleware (localStorage). This is the central nervous system — holds the full interview session, setup wizard state, per-question assessments, tech weights, associate slug, and navigation. Most components read/write through this store. The session now includes `associateSlug` and `techMap` (maps week numbers to skill names) for gap scoring.
 
 ### Scoring System (LangGraph)
 
@@ -51,14 +55,33 @@ Questions are parsed from Markdown files fetched from a configurable GitHub repo
 
 ### Data Persistence
 
-File-based JSON storage in `data/` directory:
+**Dual-write**: Sessions are written to both file storage (backward compat) and Supabase (Postgres via Prisma). The file layer remains the source of truth for the existing interview flow; Supabase is the source of truth for the trainer dashboard, gap scores, and readiness signals.
+
+**File storage** (`data/` directory):
 - `data/interview-history.json` — Past sessions (72-hour retention)
 - `data/rate-limits.json` — Rate limit tracking (24-hour cleanup)
 - Cleanup runs on boot + every 12 hours via `src/lib/instrumentation.ts`
 
+**Supabase (Postgres via Prisma)**:
+- `Session` — Full interview session data, linked to Associate via `associateId`
+- `Associate` — Identity (slug, displayName), readiness fields (status, recommendedArea, lastComputedAt)
+- `GapScore` — Per-skill recency-weighted scores, unique per (associateId, skill, topic)
+- `Settings` — Singleton trainer config (readiness threshold, default 75%)
+- `HealthCheck` — Connectivity test table
+
+**Key services**:
+- `src/lib/sessionPersistence.ts` — Dual-write orchestrator (upserts Associate, writes Session)
+- `src/lib/gapService.ts` — Pure-function gap scoring (0.8 decay factor, recency-weighted averages)
+- `src/lib/gapPersistence.ts` — Persists gap scores to DB, fire-and-forget from session save
+- `src/lib/readinessService.ts` — Classifies associates as ready/improving/not_ready based on threshold + trend + session count
+- `src/lib/settingsService.ts` — Read/write trainer settings, triggers bulk readiness recompute on threshold change
+- `src/lib/adaptiveSetup.ts` — Maps gap scores to tech weights (1-5) for setup wizard pre-population
+- `src/lib/prisma.ts` — Prisma singleton client
+- `src/lib/historyService.ts` — File-based history read/write (extracted from route handler)
+
 ### Authentication
 
-Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`. Middleware protects `/dashboard`, `/interview`, `/review` routes.
+Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`. Middleware (`src/middleware.ts`) protects `/dashboard`, `/interview`, `/review`, and `/trainer` routes.
 
 ### Key API Routes
 
@@ -68,9 +91,16 @@ Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth con
 | `/api/github` | GitHub content proxy (hides token) |
 | `/api/generate-summary` | AI-generated interview summaries |
 | `/api/send-email` | Email delivery via Resend |
-| `/api/history` | Interview history CRUD |
+| `/api/history` | Interview history CRUD (file + dual-write to Supabase) |
+| `/api/health` | DB connectivity check via Prisma |
+| `/api/settings` | GET/PUT trainer settings (readiness threshold) |
+| `/api/sync-check` | Compare file vs DB session parity |
+| `/api/trainer` | GET roster of all associates with readiness data |
+| `/api/trainer/[slug]` | GET associate detail: sessions, gap scores, trend data |
+| `/api/associates/[slug]/gap-scores` | GET gap scores for adaptive setup pre-population |
 | `/api/public/interview/start` | Start public automated interview |
 | `/api/public/interview/agent` | Process public interview responses |
+| `/api/public/interview/complete` | Persist public interview session to Supabase |
 
 ## Environment Variables
 
@@ -78,12 +108,18 @@ Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth con
 - `GITHUB_TOKEN` — GitHub API access for question banks
 - `RESEND_API_KEY` — Email delivery
 - `APP_PASSWORD` — Authentication password
+- `DATABASE_URL` — Supabase Transaction Pooler connection string (port 6543, `?connection_limit=5&pool_timeout=10`)
+- `DIRECT_URL` — Direct Supabase connection for Prisma migrations (port 5432)
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.1.1 with React 19, TypeScript 5
+- **Framework**: Next.js 16 with React 19, TypeScript 5
 - **Styling**: Tailwind CSS 4
 - **State**: Zustand 5 with persistence
+- **Database**: Supabase (Postgres) via Prisma 7 ORM (`@prisma/adapter-pg` + `pg` driver)
+- **Charts**: Recharts 3 (trainer dashboard trend lines, gap charts)
+- **Validation**: Zod 4 (API route input validation)
+- **Testing**: Vitest 4 with `@vitest/coverage-v8`
 - **LLM**: LangChain/LangGraph with OpenAI
 - **PDF**: @react-pdf/renderer
 - **Email**: Resend
@@ -304,7 +340,33 @@ Conventions not yet established. Will populate as patterns emerge during develop
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+### Prisma Schema (`prisma/schema.prisma`)
+
+Four models: `Associate` (identity + readiness fields), `Session` (full interview data linked to Associate), `GapScore` (per-skill recency-weighted scores, unique per associate+skill+topic), `Settings` (singleton trainer config). Generated client output: `src/generated/prisma/`.
+
+### Session Save Pipeline
+
+On interview completion: file-based history write (backward compat) + `persistSessionToDb()` dual-write to Supabase. After DB write, gap scores are computed via `gapService.ts` (pure functions, 0.8 decay factor) and persisted via `gapPersistence.ts`. Then `readinessService.ts` recomputes the associate's readiness classification and updates the Associate record.
+
+### Gap Scoring Algorithm
+
+Recency-weighted average per skill: `score_n * 0.8^0 + score_(n-1) * 0.8^1 + ...` normalized. Scores extracted from per-question assessments mapped through `techMap` (week number to skill name). Stored in `GapScore` table.
+
+### Readiness Classification
+
+Three-state cascade (order matters): **ready** (avg >= threshold AND trend >= 0 AND sessions >= 3), **improving** (sessions >= 3 AND trend > 0 AND avg < threshold), **not_ready** (everything else). Trend is linear regression slope over last 3 session overall scores. Threshold is configurable via `/api/settings` (default 75%).
+
+### Trainer Dashboard
+
+`/trainer` — Roster page with sortable table, readiness badges, search. `/trainer/[slug]` — Associate detail with session history list, gap trend chart (recharts `LineChart`), skill filter dropdown, and calibration view. Auth-guarded via middleware + client-side `useAuth()`.
+
+### Adaptive Setup
+
+When an associate with 3+ sessions starts a new interview, the dashboard setup wizard fetches gap scores from `/api/associates/[slug]/gap-scores` and pre-populates tech weights via `adaptiveSetup.ts` (weakest skills get weight 5, strongest get weight 1, linear interpolation).
+
+### Prisma + Docker
+
+Dockerfile copies `prisma/schema.prisma` and runs `prisma generate` during build. `next.config.ts` includes `transpilePackages: ['@prisma/client']` and `outputFileTracingRoot` for standalone build compatibility.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->

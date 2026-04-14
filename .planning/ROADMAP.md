@@ -12,13 +12,13 @@ Seven phases building the continuous improvement engine: a Prisma/Supabase found
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: DB Foundation** - Prisma schema, Supabase connection patterns, and Docker build support
-- [ ] **Phase 2: Session Persistence** - Dual-write every mock to Supabase alongside file storage with sync verification
-- [ ] **Phase 3: Associate Profiles** - Persistent associate identity via trainer-assigned slugs
-- [ ] **Phase 4: Gap Service** - Recency-weighted two-level gap scoring with 3-session gate
-- [ ] **Phase 5: Readiness Signals** - Computed readiness signal and next recommended practice area
-- [ ] **Phase 6: Trainer Dashboard** - Roster view, per-associate detail, gap charts, and calibration view
-- [ ] **Phase 7: Adaptive Setup** - Mock setup pre-populated from gap history with trainer override
+- [x] **Phase 1: DB Foundation** - Prisma schema, Supabase connection patterns, and Docker build support
+- [x] **Phase 2: Session Persistence** - Dual-write every mock to Supabase alongside file storage with sync verification
+- [x] **Phase 3: Associate Profiles** - Persistent associate identity via trainer-assigned slugs
+- [x] **Phase 4: Gap Service** - Recency-weighted two-level gap scoring with 3-session gate
+- [x] **Phase 5: Readiness Signals** - Computed readiness signal and next recommended practice area
+- [x] **Phase 6: Trainer Dashboard** - Roster view, per-associate detail, gap charts, and calibration view
+- [x] **Phase 7: Adaptive Setup** - Mock setup pre-populated from gap history with trainer override
 
 ## Phase Details
 
@@ -74,9 +74,9 @@ Plans:
   4. Topic tags come from the question bank Markdown metadata, not hard-coded values
 **Plans:** 3 plans
 Plans:
-- [ ] 04-01-PLAN.md — Install vitest/zod, add GapScore model + techMap to schema, push to Supabase
-- [ ] 04-02-PLAN.md — TDD gap algorithm: recency-weighted average, score extraction, two-level tracking
-- [ ] 04-03-PLAN.md — Wire gap persistence into session save, create read API with 3-session gate
+- [x] 04-01-PLAN.md — Install vitest/zod, add GapScore model + techMap to schema, push to Supabase
+- [x] 04-02-PLAN.md — TDD gap algorithm: recency-weighted average, score extraction, two-level tracking
+- [x] 04-03-PLAN.md — Wire gap persistence into session save, create read API with 3-session gate
 
 ### Phase 5: Readiness Signals
 **Goal**: Each associate has a computed readiness signal and a specific recommended next practice area, updated on every session save
@@ -129,10 +129,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB Foundation | 0/2 | Planning complete | - |
-| 2. Session Persistence | 0/2 | Planning complete | - |
-| 3. Associate Profiles | 0/2 | Planning complete | - |
-| 4. Gap Service | 0/3 | Planning complete | - |
-| 5. Readiness Signals | 0/2 | Planning complete | - |
-| 6. Trainer Dashboard | 0/2 | Planning complete | - |
-| 7. Adaptive Setup | 0/2 | Planning complete | - |
+| 1. DB Foundation | 2/2 | Complete | 2026-04-13 |
+| 2. Session Persistence | 2/2 | Complete | 2026-04-13 |
+| 3. Associate Profiles | 2/2 | Complete | 2026-04-13 |
+| 4. Gap Service | 3/3 | Complete | 2026-04-14 |
+| 5. Readiness Signals | 2/2 | Complete | 2026-04-14 |
+| 6. Trainer Dashboard | 2/2 | Complete | 2026-04-14 |
+| 7. Adaptive Setup | 2/2 | Complete | 2026-04-14 |

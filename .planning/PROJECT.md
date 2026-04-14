@@ -26,13 +26,13 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ### Active
 
-- [ ] **PERSIST-01**: Session persistence in Supabase (every mock stored with full scoring data)
+- [x] **PERSIST-01**: Session persistence in Supabase (every mock stored with full scoring data) — Validated in Phase 2: Session Persistence
 - [x] **PERSIST-02**: Associate profiles with trainer-assigned slug/ID (persistent identity) — Validated in Phase 3: Associate Profiles
-- [ ] **GAP-01**: Two-level gap tracking (skill → topic) with recency-weighted scoring
-- [ ] **GAP-02**: Adaptive mock setup (pre-select technologies/weights based on gap history)
-- [ ] **DASH-01**: Trainer dashboard — roster view with readiness status badges
-- [ ] **DASH-02**: Per-associate detail — session history, gap trend charts, skill/topic selector
-- [ ] **DASH-03**: AI vs trainer score calibration view
+- [x] **GAP-01**: Two-level gap tracking (skill → topic) with recency-weighted scoring — Validated in Phase 4: Gap Service
+- [x] **GAP-02**: Adaptive mock setup (pre-select technologies/weights based on gap history) — Validated in Phase 7: Adaptive Setup
+- [x] **DASH-01**: Trainer dashboard — roster view with readiness status badges — Validated in Phase 6: Trainer Dashboard
+- [x] **DASH-02**: Per-associate detail — session history, gap trend charts, skill/topic selector — Validated in Phase 6: Trainer Dashboard
+- [x] **DASH-03**: AI vs trainer score calibration view — Validated in Phase 6: Trainer Dashboard
 - [x] **READY-01**: Computed readiness signal (75% avg / 3 sessions / non-negative trend) — Validated in Phase 5: Readiness Signals
 - [x] **READY-02**: Next recommended practice area per associate — Validated in Phase 5: Readiness Signals
 
@@ -68,13 +68,13 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Supabase (hosted Postgres) over SQLite | Avoid migration headache when scaling to multi-tenant. Concurrent writes handled natively. Auth/RLS available for future segments. | — Pending |
-| Prisma as ORM | Type-safe queries, works identically with Postgres and SQLite if needed to switch | — Pending |
+| Supabase (hosted Postgres) over SQLite | Avoid migration headache when scaling to multi-tenant. Concurrent writes handled natively. Auth/RLS available for future segments. | Validated Phase 1 |
+| Prisma as ORM | Type-safe queries, works identically with Postgres and SQLite if needed to switch | Validated Phase 1 |
 | Trainer-assigned associate IDs (no login) | Simplest identity model for MVP. No auth complexity. | Validated Phase 3 |
-| 0.8 recency decay for gap algorithm | Recent sessions weighted more. Simple starting point, autoresearch optimizes later. | — Pending |
-| 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate based on experience. | — Pending |
-| Interview format only for MVP | Validate core loop before expanding to other formats | — Pending |
-| Dual-write migration (file + DB) | Preserve existing flows while adding persistence. No data migration needed. | — Pending |
+| 0.8 recency decay for gap algorithm | Recent sessions weighted more. Simple starting point, autoresearch optimizes later. | Validated Phase 4 |
+| 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate based on experience. | Validated Phase 5 |
+| Interview format only for MVP | Validate core loop before expanding to other formats | Validated — all phases shipped |
+| Dual-write migration (file + DB) | Preserve existing flows while adding persistence. No data migration needed. | Validated Phase 2 |
 
 ## Evolution
 
@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 after Phase 3 (Associate Profiles) completion*
+*Last updated: 2026-04-14 after Phase 7 (Adaptive Setup) completion — all 7 phases shipped, milestone complete*

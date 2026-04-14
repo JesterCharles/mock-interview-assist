@@ -7,37 +7,37 @@
 
 ### Persistence
 
-- [ ] **PERSIST-01**: Every mock session is stored in Supabase with full scoring data (questions, scores by dimension, trainer overrides, timestamps)
-- [ ] **PERSIST-02**: Associate profiles persist with trainer-assigned slug/ID (no login required)
-- [ ] **PERSIST-03**: Prisma singleton pattern prevents connection exhaustion on Supabase free tier
-- [ ] **PERSIST-04**: Dual-write to both file storage and Supabase during migration period
-- [ ] **PERSIST-05**: Sync check endpoint compares session counts between file and DB to detect divergence
-- [ ] **PERSIST-06**: Docker production build includes Prisma binary via outputFileTracingIncludes
-- [ ] **PERSIST-07**: Supabase connection uses pooler URL (port 6543) for runtime, direct URL (port 5432) for migrations
+- [x] **PERSIST-01**: Every mock session is stored in Supabase with full scoring data (questions, scores by dimension, trainer overrides, timestamps)
+- [x] **PERSIST-02**: Associate profiles persist with trainer-assigned slug/ID (no login required)
+- [x] **PERSIST-03**: Prisma singleton pattern prevents connection exhaustion on Supabase free tier
+- [x] **PERSIST-04**: Dual-write to both file storage and Supabase during migration period
+- [x] **PERSIST-05**: Sync check endpoint compares session counts between file and DB to detect divergence
+- [x] **PERSIST-06**: Docker production build includes Prisma binary via outputFileTracingIncludes
+- [x] **PERSIST-07**: Supabase connection uses pooler URL (port 6543) for runtime, direct URL (port 5432) for migrations
 
 ### Gap Tracking
 
-- [ ] **GAP-01**: Two-level gap tracking: skill level and topic level within each skill
-- [ ] **GAP-02**: Recency-weighted scoring with 0.8 decay factor per session
-- [ ] **GAP-03**: Minimum 3 sessions gate before gap scores display (prevents false signals on cold start)
-- [ ] **GAP-04**: Topic tags derived from question bank Markdown metadata (validate tag consistency first)
-- [ ] **GAP-05**: Adaptive mock setup pre-selects technologies/weights based on gap history; trainer can override
+- [x] **GAP-01**: Two-level gap tracking: skill level and topic level within each skill
+- [x] **GAP-02**: Recency-weighted scoring with 0.8 decay factor per session
+- [x] **GAP-03**: Minimum 3 sessions gate before gap scores display (prevents false signals on cold start)
+- [x] **GAP-04**: Topic tags derived from question bank Markdown metadata (validate tag consistency first)
+- [x] **GAP-05**: Adaptive mock setup pre-selects technologies/weights based on gap history; trainer can override
 
 ### Trainer Dashboard
 
-- [ ] **DASH-01**: Roster view at /trainer showing all associates with readiness status badges (ready/improving/not ready)
-- [ ] **DASH-02**: Per-associate detail with session history (last 5+ sessions with scores)
-- [ ] **DASH-03**: Gap trend charts with skill/topic selector using recharts
-- [ ] **DASH-04**: AI vs trainer score calibration view (side-by-side per dimension)
-- [ ] **DASH-05**: Readiness badges pre-computed on session save (not recalculated on every dashboard load)
-- [ ] **DASH-06**: Dashboard protected by existing single-password auth
-- [ ] **DASH-07**: Graceful empty states for associates with < 3 sessions
+- [x] **DASH-01**: Roster view at /trainer showing all associates with readiness status badges (ready/improving/not ready)
+- [x] **DASH-02**: Per-associate detail with session history (last 5+ sessions with scores)
+- [x] **DASH-03**: Gap trend charts with skill/topic selector using recharts
+- [x] **DASH-04**: AI vs trainer score calibration view (side-by-side per dimension)
+- [x] **DASH-05**: Readiness badges pre-computed on session save (not recalculated on every dashboard load)
+- [x] **DASH-06**: Dashboard protected by existing single-password auth
+- [x] **DASH-07**: Graceful empty states for associates with < 3 sessions
 
 ### Readiness Signal
 
-- [ ] **READY-01**: Computed readiness signal: 75% avg score across last 3 sessions with non-negative trend
-- [ ] **READY-02**: Next recommended practice area per associate (lowest weighted gap score)
-- [ ] **READY-03**: Readiness threshold configurable per trainer via settings
+- [x] **READY-01**: Computed readiness signal: 75% avg score across last 3 sessions with non-negative trend
+- [x] **READY-02**: Next recommended practice area per associate (lowest weighted gap score)
+- [x] **READY-03**: Readiness threshold configurable per trainer via settings
 
 ## v2 Requirements
 
@@ -82,34 +82,35 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERSIST-01 | Phase 2 | Pending |
-| PERSIST-02 | Phase 3 | Pending |
-| PERSIST-03 | Phase 1 | Pending |
-| PERSIST-04 | Phase 2 | Pending |
-| PERSIST-05 | Phase 2 | Pending |
-| PERSIST-06 | Phase 1 | Pending |
-| PERSIST-07 | Phase 1 | Pending |
-| GAP-01 | Phase 4 | Pending |
-| GAP-02 | Phase 4 | Pending |
-| GAP-03 | Phase 4 | Pending |
-| GAP-04 | Phase 4 | Pending |
-| GAP-05 | Phase 7 | Pending |
-| DASH-01 | Phase 6 | Pending |
-| DASH-02 | Phase 6 | Pending |
-| DASH-03 | Phase 6 | Pending |
-| DASH-04 | Phase 6 | Pending |
-| DASH-05 | Phase 6 | Pending |
-| DASH-06 | Phase 6 | Pending |
-| DASH-07 | Phase 6 | Pending |
-| READY-01 | Phase 5 | Pending |
-| READY-02 | Phase 5 | Pending |
-| READY-03 | Phase 5 | Pending |
+| PERSIST-01 | Phase 2 | Complete |
+| PERSIST-02 | Phase 3 | Complete |
+| PERSIST-03 | Phase 1 | Complete |
+| PERSIST-04 | Phase 2 | Complete |
+| PERSIST-05 | Phase 2 | Complete |
+| PERSIST-06 | Phase 1 | Complete |
+| PERSIST-07 | Phase 1 | Complete |
+| GAP-01 | Phase 4 | Complete |
+| GAP-02 | Phase 4 | Complete |
+| GAP-03 | Phase 4 | Complete |
+| GAP-04 | Phase 4 | Complete |
+| GAP-05 | Phase 7 | Complete |
+| DASH-01 | Phase 6 | Complete |
+| DASH-02 | Phase 6 | Complete |
+| DASH-03 | Phase 6 | Complete |
+| DASH-04 | Phase 6 | Complete |
+| DASH-05 | Phase 6 | Complete |
+| DASH-06 | Phase 6 | Complete |
+| DASH-07 | Phase 6 | Complete |
+| READY-01 | Phase 5 | Complete |
+| READY-02 | Phase 5 | Complete |
+| READY-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total
 - Mapped to phases: 22
+- Complete: 22
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-13*
-*Last updated: 2026-04-13 after roadmap creation*
+*Last updated: 2026-04-14 — all 22 requirements complete across 7 phases*
