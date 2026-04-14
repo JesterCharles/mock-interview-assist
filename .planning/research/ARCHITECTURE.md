@@ -1,560 +1,482 @@
 # Architecture Patterns
 
-**Domain:** Adaptive technical skills assessment platform — adding Supabase persistence, gap tracking, and trainer dashboard to an existing Next.js 16 App Router + Zustand + LangGraph system.
-**Researched:** 2026-04-13
-**Confidence:** HIGH (based on direct codebase analysis + established Prisma/Supabase/Next.js patterns)
+**Domain:** Adaptive technical skills assessment platform — v1.1 Cohort Readiness System layered onto existing Next.js 16 App Router + Prisma 7 + Supabase system
+**Researched:** 2026-04-14
+**Confidence:** HIGH (direct codebase analysis — existing source files read verbatim; v1.1 integration points derived from actual code, not assumptions)
 
 ---
 
-## Existing Architecture (Baseline)
+## Baseline: What v1.0 Established
 
-Understanding what exists is prerequisite to knowing what integrates cleanly versus what requires surgery.
+Understanding the existing architecture is prerequisite to knowing what integrates cleanly vs. what requires schema surgery.
 
-### Current Data Flow
+### v1.0 Data Flow (Trainer-Led)
 
 ```
 Browser (Zustand localStorage)
-  → /interview page (trainer inputs assessments)
-  → /api/score (LangGraph: route → evaluate → return score+feedback)
-  → Zustand store (holds finalScore, llmScore, status per question)
-  → /review page (trainer overrides)
-  → /api/history POST (writes to data/interview-history.json)
-  → /api/send-email (Resend PDF delivery)
+  → /interview (trainer conducts, Web Speech API, per-question scoring)
+  → /api/score (LangGraph: stateless per-question scoring, returns score+feedback)
+  → Zustand store (holds assessments, scores, status per question)
+  → /review (trainer validates/overrides)
+  → /api/history POST (dual-write: data/interview-history.json + persistSessionToDb())
+  → gapPersistence → readinessService → Associate.readinessStatus updated
+  → /api/send-email (Resend PDF)
 ```
 
-### Current Persistence Layer
+### v1.0 Data Flow (Automated Public Interview — The Gap)
 
-All persistence is file-based on the Docker container filesystem:
-- `data/interview-history.json` — completed sessions (100-session cap, 72hr retention)
-- `data/rate-limits.json` — device fingerprint rate limiting
+```
+/api/public/interview/start (fingerprint rate limit)
+  → /api/public/interview/agent (LangGraph agent, stateless per turn)
+  → /api/public/interview/complete POST
+    → checkRateLimit(fingerprint) — this is the only auth
+    → persistSessionToDb(session) — DB-only write
+    → *** gap scoring NEVER fires ***
+    → *** readiness NEVER updates ***
+    → *** associateId is null (no slug collected) ***
+```
 
-**Critical implication:** The `data/` directory is container-local. Any replica or redeploy loses history. This is a known constraint and is why Supabase is being added.
+This is the core v1.1 problem: automated sessions land in the DB orphaned and never feed the readiness pipeline.
 
-### Key Structural Facts
+### Existing Schema (Relevant to v1.1)
 
-1. `InterviewSession` in `src/lib/types.ts` is the canonical data shape — it is the unit stored in `data/interview-history.json` and the unit the Zustand store holds in memory.
-2. `/api/score` is a pure function: receives question + assessment, returns `{score, feedback}`. It does NOT write to storage. Storage happens separately in `/api/history`.
-3. `/api/history` POST is the single write point for completed sessions — it is called from the frontend after review completion.
-4. LangGraph runs entirely server-side inside the `/api/score` route handler. No persistent state graph — each scoring call is a fresh stateless invocation.
-5. The Zustand store persists to `localStorage` via `persist` middleware. The store is the source of truth during an active session.
+```
+Associate  { id, slug(unique), displayName, readinessStatus, recommendedArea, lastComputedAt }
+Session    { id, associateId(nullable FK), status, overallTechnicalScore, overallSoftSkillScore, techMap, ... }
+GapScore   { associateId, skill, topic, weightedScore — unique (associateId, skill, topic) }
+Settings   { id=1 (singleton), readinessThreshold }
+```
+
+There is no `Cohort` model. There is no `CurriculumWeek` model. Associate has no `cohortId`. These are the schema additions v1.1 requires.
 
 ---
 
-## Recommended Architecture: New Components
+## New Architecture: v1.1 Components
 
-### Component Map
+### Component Map (delta from v1.0)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  BROWSER LAYER                                                    │
-│                                                                   │
-│  Zustand Store (localStorage)                                     │
-│    Active session state (unchanged)                               │
-│                                                                   │
-│  /dashboard/trainer  (NEW — Server Component + Client islands)    │
-│    Roster view, readiness badges, associate drill-down            │
-│                                                                   │
-│  /interview, /review  (EXISTING — unchanged)                      │
-└────────────────────┬────────────────────────────────────────────┘
-                     │ HTTP
-┌────────────────────▼────────────────────────────────────────────┐
-│  SERVER LAYER (Next.js Route Handlers + Server Components)        │
-│                                                                   │
-│  /api/history  (MODIFIED — dual-write: file + Supabase)           │
-│                                                                   │
-│  /api/associates  (NEW — CRUD for associate profiles)             │
-│                                                                   │
-│  /api/gaps/[associateId]  (NEW — read computed gap state)         │
-│                                                                   │
-│  /api/gaps/recalculate  (NEW — trigger gap recomputation)         │
-│                                                                   │
-│  /api/readiness/[associateId]  (NEW — readiness signal)           │
-│                                                                   │
-│  GapService  (NEW — src/lib/gapService.ts)                        │
-│    calculateGaps(), computeReadiness(), getRecommendations()      │
-│                                                                   │
-│  PersistenceService  (NEW — src/lib/persistenceService.ts)        │
-│    Wraps Prisma client, dual-write logic                          │
-└────────────────────┬────────────────────────────────────────────┘
-                     │ Prisma Client (connection pool)
-┌────────────────────▼────────────────────────────────────────────┐
-│  DATA LAYER                                                       │
-│                                                                   │
-│  Supabase (Postgres)                                              │
-│    associates, sessions, question_results, skill_gaps, ...        │
-│                                                                   │
-│  data/interview-history.json  (PRESERVED — backward compat)       │
-│  data/rate-limits.json        (PRESERVED — unchanged)             │
-└─────────────────────────────────────────────────────────────────┘
+EXISTING (unchanged unless marked MODIFIED)
+┌──────────────────────────────────────────────────────────────┐
+│  Zustand Store → /interview → /api/score → /review           │
+│  → /api/history (MODIFIED: add cohortId to session record)   │
+│  → sessionPersistence.ts (unchanged)                         │
+│  → gapPersistence.ts (unchanged)                             │
+│  → readinessService.ts (unchanged)                           │
+└──────────────────────────────────────────────────────────────┘
+
+NEW — Public Interview Auth + Pipeline Connection
+┌──────────────────────────────────────────────────────────────┐
+│  /api/public/interview/start                                  │
+│    MODIFIED: accept { fingerprint, associateSlug }            │
+│    → validate slug, return sessionToken (JWT or signed cookie)│
+│                                                               │
+│  /api/public/interview/complete                               │
+│    MODIFIED: accept associateSlug, call gap+readiness pipeline│
+│    (same pipeline as trainer-led, already exists)             │
+└──────────────────────────────────────────────────────────────┘
+
+NEW — Cohort + Curriculum Data Layer
+┌──────────────────────────────────────────────────────────────┐
+│  prisma/schema.prisma (MODIFIED):                             │
+│    + Cohort model                                             │
+│    + CurriculumWeek model                                     │
+│    + Associate.cohortId FK (nullable)                         │
+│    + Session.cohortId FK (nullable, denormalized for queries) │
+│                                                               │
+│  /api/cohorts (NEW CRUD)                                      │
+│  /api/cohorts/[id]/curriculum (NEW CRUD)                      │
+│  /api/cohorts/[id]/associates (NEW — roster per cohort)       │
+└──────────────────────────────────────────────────────────────┘
+
+NEW — Trainer Dashboard Views
+┌──────────────────────────────────────────────────────────────┐
+│  /trainer (MODIFIED: add cohort filter dropdown/tabs)         │
+│  /trainer/cohort/[id] (NEW: cohort aggregate view)            │
+│  /trainer/[slug] (unchanged — per-associate detail)           │
+│                                                               │
+│  Cohort aggregate = GROUP BY cohort, COUNT readinessStatus    │
+│  No new services needed — query from existing Associate data  │
+└──────────────────────────────────────────────────────────────┘
+
+NEW — Email Notifications
+┌──────────────────────────────────────────────────────────────┐
+│  readinessService.ts (MODIFIED):                              │
+│    updateAssociateReadiness() emits notification when         │
+│    status transitions (not_ready→improving, improving→ready)  │
+│                                                               │
+│  /lib/notificationService.ts (NEW):                           │
+│    sendReadinessChangeEmail(associate, oldStatus, newStatus)  │
+│    Uses existing Resend client (no new deps)                  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Component Boundaries
+## Prisma Schema Changes
 
-| Component | Responsibility | Communicates With | Location |
-|-----------|---------------|-------------------|----------|
-| Zustand Store | Active session state in browser | Frontend components only | `src/store/interviewStore.ts` (existing) |
-| `/api/history` (modified) | Dual-write on session completion | PersistenceService, file system | `src/app/api/history/route.ts` |
-| PersistenceService | Supabase write + read operations via Prisma | Prisma client, called from route handlers | `src/lib/persistenceService.ts` (new) |
-| GapService | Gap calculation, readiness scoring | PersistenceService (read sessions), called from API routes | `src/lib/gapService.ts` (new) |
-| `/api/associates` | Associate profile CRUD | PersistenceService | `src/app/api/associates/route.ts` (new) |
-| `/api/gaps/[id]` | Serve current gap state for an associate | GapService | `src/app/api/gaps/[associateId]/route.ts` (new) |
-| `/api/readiness/[id]` | Serve readiness signal + recommendation | GapService | `src/app/api/readiness/[associateId]/route.ts` (new) |
-| Trainer Dashboard | Render roster + per-associate views | Fetches from `/api/associates`, `/api/gaps`, `/api/readiness` | `src/app/dashboard/trainer/` (new) |
-| Prisma schema | Database schema, migrations | Supabase Postgres | `prisma/schema.prisma` (new) |
-
----
-
-## Data Flow: Scoring Pipeline to Database
-
-The critical integration point is at session completion. The scoring pipeline itself does NOT change — it remains a stateless per-question API call. Persistence is added as a side effect at the existing write boundary.
-
-### Trainer-Led Flow (modified at completion point only)
-
-```
-1. /review page: trainer validates final scores
-2. completeReview() called → Zustand status = 'completed'
-3. Frontend calls POST /api/history with full InterviewSession
-4. /api/history handler:
-   a. [EXISTING] write to data/interview-history.json
-   b. [NEW] call PersistenceService.saveSession(session, associateId)
-      - upsert session record in `sessions` table
-      - upsert per-question results in `question_results` table
-      - trigger GapService.recalculateGaps(associateId)
-5. Return {success: true} — frontend unchanged
-```
-
-The dual-write is synchronous within the route handler. If Supabase write fails, log the error but still return success (file write succeeded — data not lost). This preserves backward compatibility.
-
-### Public Interview Flow (modified at completion point)
-
-```
-1. /api/public/interview/agent processes final question
-2. [EXISTING] increment rate limit counter
-3. [NEW] call PersistenceService.savePublicSession(session)
-   - no associateId (anonymous) unless fingerprint → associate mapping exists
-   - store with associate_id = null, fingerprint stored for potential future linkage
-4. [EXISTING] return session results to frontend
-```
-
-### Gap Recalculation Flow
-
-```
-GapService.recalculateGaps(associateId):
-  1. Fetch all sessions for associate from Supabase (ordered by date desc)
-  2. For each session, for each question_result:
-     - Extract: technology, topic, score, keywords_missed, date
-  3. Apply recency decay: weight = 0.8^(session_index) where index=0 is most recent
-  4. Aggregate by skill (technology) and topic:
-     weighted_score = sum(score * weight) / sum(weight)
-  5. Compute per-skill gap: gap_score = 5 - weighted_score (higher = bigger gap)
-  6. Upsert results into `skill_gaps` table
-  7. Compute readiness signal:
-     - avg_score >= 3.75 (75% of 5)
-     - session_count >= 3
-     - recent_trend >= 0 (last 3 sessions non-declining)
-  8. Upsert into `associate_readiness` table
-```
-
-Gap recalculation is synchronous within the save-session call for MVP. It runs in ~50ms for a typical associate (< 100 sessions). If it becomes slow later, move to a background queue.
-
----
-
-## Database Schema (Prisma)
+These are additive migrations — no existing tables change structure, only new tables added and nullable FKs added to existing tables.
 
 ```prisma
-model Associate {
-  id          String    @id @default(cuid())
-  slug        String    @unique          // trainer-assigned e.g. "jdoe-cohort3"
-  name        String
-  cohort      String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Cohort {
+  id          Int              @id @default(autoincrement())
+  name        String           // "April 2026 Cohort"
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  associates  Associate[]
+  curriculum  CurriculumWeek[]
   sessions    Session[]
-  skillGaps   SkillGap[]
-  readiness   AssociateReadiness?
 }
 
+model CurriculumWeek {
+  id          Int      @id @default(autoincrement())
+  cohortId    Int
+  cohort      Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  weekNumber  Int      // maps to existing selectedWeeks / techMap keys
+  skillName   String   // e.g. "React", "Node.js"
+  topicTags   String[] // e.g. ["hooks", "context", "lifecycle"]
+  startDate   DateTime // when this week's content becomes teachable
+  @@unique([cohortId, weekNumber])
+}
+
+// Associate: add cohortId FK (nullable — existing associates have no cohort)
+model Associate {
+  // ... existing fields unchanged ...
+  cohortId    Int?
+  cohort      Cohort?  @relation(fields: [cohortId], references: [id])
+}
+
+// Session: add cohortId (denormalized for efficient cohort-level queries)
 model Session {
-  id              String    @id          // matches InterviewSession.id from app
-  associateId     String?
-  associate       Associate? @relation(fields: [associateId], references: [id])
-  interviewerName String?
-  date            DateTime
-  status          String                 // 'completed' etc.
-  mode            String                 // 'trainer-led' | 'public'
-  overallTechnicalScore  Float?
-  overallSoftSkillScore  Float?
-  technicalFeedback      String?
-  softSkillFeedback      String?
-  rawPayload      Json                   // full InterviewSession blob — safety net
-  createdAt       DateTime @default(now())
-  questionResults QuestionResult[]
-}
-
-model QuestionResult {
-  id            String   @id @default(cuid())
-  sessionId     String
-  session       Session  @relation(fields: [sessionId], references: [id])
-  questionId    String                   // matches ParsedQuestion.id
-  technology    String?                  // derived from question source file
-  topic         String?                  // derived from question metadata
-  difficulty    String?                  // 'beginner' | 'intermediate' | 'advanced'
-  weekNumber    Int?
-  keywordsHit   String[]
-  keywordsMissed String[]
-  llmScore      Float?
-  finalScore    Float?
-  softSkills    Json                     // SoftSkillsAssessment blob
-  didNotGetTo   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-}
-
-model SkillGap {
-  id            String   @id @default(cuid())
-  associateId   String
-  associate     Associate @relation(fields: [associateId], references: [id])
-  technology    String
-  topic         String?
-  weightedScore Float
-  gapScore      Float                    // 5 - weightedScore
-  sessionCount  Int
-  lastUpdated   DateTime @updatedAt
-  @@unique([associateId, technology, topic])
-}
-
-model AssociateReadiness {
-  id            String   @id @default(cuid())
-  associateId   String   @unique
-  associate     Associate @relation(fields: [associateId], references: [id])
-  isReady       Boolean
-  avgScore      Float
-  sessionCount  Int
-  trend         Float                    // positive = improving
-  nextPracticeArea String?
-  computedAt    DateTime @updatedAt
+  // ... existing fields unchanged ...
+  cohortId    Int?
+  cohort      Cohort?  @relation(fields: [cohortId], references: [id])
+  mode        String   @default("trainer-led") // "trainer-led" | "automated"
 }
 ```
 
-The `rawPayload Json` column on `Session` is the safety net during migration — it stores the complete `InterviewSession` blob so nothing is lost even if schema extraction misses something.
+**Why denormalize `cohortId` onto Session:** Cohort-level dashboard queries (all sessions for a cohort, readiness distribution over time) are simpler and faster with a direct FK than joining Associate→Session through cohortId. The associate's current cohort may change; denormalizing captures which cohort was active at session time.
+
+**Why `mode` on Session:** The automated interview pipeline and trainer-led pipeline produce structurally identical sessions. The `mode` field lets the dashboard distinguish them for display (e.g., showing "AI mock" vs "trainer interview" in history).
 
 ---
 
-## Dashboard Data Fetching Pattern
+## Integration Point 1: Automated Interview → Readiness Pipeline
 
-### Use Server Components for Initial Render
+This is the highest-priority integration — it completes the pipeline that already exists.
 
-The trainer dashboard is authenticated (existing HttpOnly cookie auth). Server Components can read from Supabase via Prisma directly — no round-trip through a client-side API call for the initial page load.
+### Current State
 
-```
-src/app/dashboard/trainer/
-  page.tsx          ← Server Component: fetches all associates + readiness
-  [associateId]/
-    page.tsx        ← Server Component: fetches sessions + gaps for one associate
-```
+`/api/public/interview/complete` calls `persistSessionToDb(session)` but:
+1. Session has no `associateSlug` (never collected from user)
+2. Even if it did, the gap scoring + readiness update is never called after persist
+
+### Required Changes
+
+**`/api/public/interview/start` (MODIFIED)**
+
+Accept `associateSlug` in request body. Validate it. Return it in the response so the client can attach it to the session throughout the interview.
 
 ```typescript
-// src/app/dashboard/trainer/page.tsx
-// Server Component — direct Prisma call, no useEffect, no loading state
+// Current: { fingerprint, action }
+// New:     { fingerprint, action, associateSlug? }
+```
 
-import { prisma } from '@/lib/db'
-import { isAuthenticatedSession } from '@/lib/auth-server'
-import { redirect } from 'next/navigation'
-import RosterClient from './RosterClient'
+The slug is user-provided. Validate format (existing `validateSlug()` utility). Do NOT verify it exists in DB at start — create-on-first-session is the existing associate pattern.
 
-export default async function TrainerDashboard() {
-  if (!(await isAuthenticatedSession())) redirect('/login')
+**`/api/public/interview/complete` (MODIFIED)**
 
-  const associates = await prisma.associate.findMany({
-    include: { readiness: true },
-    orderBy: { name: 'asc' }
+After `persistSessionToDb()` succeeds, run the same gap + readiness pipeline as trainer-led sessions:
+
+```typescript
+// Add after: const success = await persistSessionToDb(session)
+if (success && session.associateSlug) {
+  const associate = await prisma.associate.findUnique({
+    where: { slug: session.associateSlug }
   })
-
-  return <RosterClient associates={associates} />
-}
-```
-
-`RosterClient` is a `'use client'` component that handles interactivity (sorting, filtering, navigation). The data arrives pre-fetched as props — no client-side fetch on initial load.
-
-### Use API Routes for Mutations and Reactive Updates
-
-| Operation | Pattern | Reason |
-|-----------|---------|--------|
-| Initial roster load | Server Component + Prisma | Zero client-side waterfall |
-| Per-associate detail | Server Component + Prisma | Same |
-| Marking associate active/inactive | `'use client'` + fetch to `/api/associates/[id]` | Mutation needs request context |
-| Refreshing gap data after new session | Client refetch to `/api/gaps/[id]` | Post-mutation revalidation |
-| Score calibration view | Server Component for data, client for overrides | Hybrid |
-
-Avoid the anti-pattern of Server Components calling internal API routes. Server Components should use Prisma/PersistenceService directly. API routes exist for the browser to call.
-
-### Revalidation Strategy
-
-Use Next.js `revalidatePath` in route handlers after writes:
-
-```typescript
-// In /api/history POST handler after successful Supabase write:
-import { revalidatePath } from 'next/cache'
-revalidatePath('/dashboard/trainer')
-revalidatePath(`/dashboard/trainer/${associateId}`)
-```
-
-This invalidates the Server Component cache so the next trainer page load reflects new data. No polling needed.
-
----
-
-## Dual-Write Migration Strategy
-
-The goal is zero downtime and zero data loss during the transition from file-only to Supabase-primary.
-
-### Phase 1: Parallel Write (add Supabase, keep file)
-
-```typescript
-// src/lib/persistenceService.ts
-
-export async function saveSession(session: InterviewSession, associateId?: string) {
-  try {
-    await prisma.session.upsert({
-      where: { id: session.id },
-      create: buildSessionCreate(session, associateId),
-      update: buildSessionUpdate(session),
-    })
-    if (associateId) {
-      await gapService.recalculateGaps(associateId)
-    }
-  } catch (error) {
-    // Log but do not throw — file write is the safety net
-    console.error('[PersistenceService] Supabase write failed:', error)
-    // Optional: write to a local failed-writes queue for retry
+  if (associate) {
+    // Fire-and-forget: same pattern as gapPersistence.ts
+    computeAndPersistGapScores(associate.id, session).catch(err =>
+      console.error('[public-complete] gap scoring failed:', err)
+    )
   }
 }
 ```
 
-`/api/history` POST calls file write first, then calls `PersistenceService.saveSession`. File write failure still throws (preserves existing behavior). Supabase write failure is caught and logged — the response to the client is unaffected.
+This is 8-10 lines of code that closes the pipeline gap. The services (`gapService`, `gapPersistence`, `readinessService`) already exist and are tested.
 
-### Phase 2: Validate (confirm Supabase has all data)
+**Front-end: public interview flow**
 
-Add a `/api/admin/validate-sync` route that compares file history count vs Supabase session count. Run this manually after a week of parallel writes. When counts match (within expected delta for old data), Supabase is the verified record of truth for new sessions.
-
-### Phase 3: Read from Supabase (when validated)
-
-For the trainer dashboard and history page: read from Supabase. The file remains as backup but is no longer the source of read queries. No code deletion yet.
-
-### Phase 4: Remove file writes (optional, post-MVP)
-
-After a stable period, deprecate the file write in `/api/history`. Keep the `data/` directory for rate-limits (unchanged).
+The public interview UI (wherever `/api/public/interview/start` is called) needs a slug input field before the interview begins. This is the same UX as the trainer-led setup wizard's "associate slug" field. Reuse the same component or the same validation logic.
 
 ---
 
-## Prisma Client Singleton Pattern (Docker/Long-running process)
+## Integration Point 2: Associate Auth
 
-This app runs in Docker (not serverless). Connection pooling behavior differs from Vercel deployment. Use a single Prisma client instance:
+### What v1.0 has
+
+Single-password trainer auth: `APP_PASSWORD` env var, HttpOnly cookie `nlm_session=authenticated`, 24hr expiry. Middleware protects `/dashboard`, `/interview`, `/review`, `/trainer`. Associates have no login — they are assigned a slug by the trainer.
+
+### What v1.1 needs
+
+Associates taking automated interviews need identity linkage, not full auth. The design decision: **slug-based identity, not login-based auth.**
+
+- Associates enter their trainer-assigned slug at the start of a public interview
+- The slug is validated (format check + optional existence check)
+- The slug flows through the session to link it to the Associate record
+- No password, no session cookie, no JWT for associates in v1.1
+
+This matches the existing v1.0 identity model and avoids the complexity of a full auth system. Full associate auth (login, passwords, email verification) is out of scope for v1.1 per PROJECT.md.
+
+**Why not JWT tokens for automated interviews:** The session already has an ID. The associate slug is passed through the session payload. Adding JWT would require key management and token refresh — unnecessary complexity when the existing `persistSessionToDb` already handles slug-based associate upsert.
+
+**Middleware: no changes needed.** Public interview routes (`/api/public/interview/*`) are intentionally unprotected — they are the public-facing entrypoint for associates. The rate limiting (fingerprint-based) is the only gate.
+
+---
+
+## Integration Point 3: Cohort Management
+
+### Data model integration
+
+Cohort is a new first-class entity. It sits above Associate in the hierarchy:
+
+```
+Cohort (1) → (many) Associate → (many) Session → (many) GapScore
+                                               → (many) readinessStatus
+             CurriculumWeek (1 per week)
+```
+
+Associates are assigned to a cohort by the trainer. This is a trainer-side operation, not associate-side.
+
+### API surface
+
+```
+POST   /api/cohorts                    — create cohort
+GET    /api/cohorts                    — list all cohorts (trainer)
+PATCH  /api/cohorts/[id]               — update name, dates
+DELETE /api/cohorts/[id]               — soft delete (set endDate)
+
+GET    /api/cohorts/[id]/curriculum    — get weeks for cohort
+POST   /api/cohorts/[id]/curriculum    — add week
+PATCH  /api/cohorts/[id]/curriculum/[weekId] — update week
+
+GET    /api/cohorts/[id]/associates    — roster for cohort
+POST   /api/cohorts/[id]/associates    — assign associate to cohort (sets cohortId FK)
+
+GET    /api/cohorts/[id]/readiness     — aggregate readiness (GROUP BY status)
+```
+
+All cohort API routes are protected by existing trainer auth middleware (`nlm_session` cookie check via `isAuthenticatedSession()`).
+
+### Trainer dashboard integration
+
+`/trainer` (MODIFIED):
+- Add cohort selector at top (dropdown with all cohort names + "All Associates")
+- When cohort is selected, roster query adds `WHERE cohortId = ?`
+- Cohort aggregate strip above the table: `3 ready / 4 improving / 1 not ready`
+- The existing `RosterTable` component is unchanged — it receives filtered associates as props
+
+`/trainer/cohort/[id]` (NEW):
+- Server Component, reads directly via Prisma
+- Shows cohort metadata, curriculum schedule, aggregate readiness donut/bar
+- Links to individual associate pages (existing `/trainer/[slug]`)
+
+The existing `/trainer/[slug]` associate detail page is unchanged.
+
+---
+
+## Integration Point 4: Curriculum-Driven Question Selection
+
+### Current mechanism
+
+The setup wizard's `selectedWeeks` is a manually chosen array of week numbers. The `techMap` (week number → skill name) is built from GitHub question bank file paths at question load time, not from a persistent curriculum record.
+
+### v1.1 integration
+
+When an associate is in a cohort with a defined curriculum, the setup wizard should:
+1. Fetch taught weeks: `GET /api/cohorts/[id]/curriculum?taught=true` (weeks where `startDate <= today`)
+2. Auto-populate `selectedWeeks` with those week numbers
+3. The `techMap` continues to be built from GitHub file paths — the curriculum `skillName` field should match the tech file naming convention
+
+This is pre-population, not enforcement. The trainer can still modify the selection. The adaptive setup (gap-driven weight pre-population) continues to work on top of this — it sets weights after the weeks are selected.
+
+**Key constraint:** `CurriculumWeek.weekNumber` must align with the week number convention used in GitHub question bank file paths. This is a naming convention contract, not enforced by code. Document it explicitly.
+
+---
+
+## Integration Point 5: Email Notifications
+
+### Existing email infrastructure
+
+`/api/send-email` uses Resend with `@react-pdf/renderer` for PDF reports. The Resend client and API key are already in place.
+
+### v1.1 additions
+
+Readiness change notifications (status transitions only, not every session):
+- `not_ready → improving`: "Associate is showing improvement"
+- `improving → ready`: "Associate has reached readiness threshold"
+- `ready → not_ready` / `ready → improving`: "Associate readiness regression"
+
+**Integration point in `readinessService.ts`:**
+
+`updateAssociateReadiness()` is the single write point for readiness status. It already reads the old status before updating. Adding notification dispatch here keeps notification logic co-located with the state change.
 
 ```typescript
-// src/lib/db.ts
-
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+// In updateAssociateReadiness() — after computing result, before prisma.update:
+const currentAssociate = await prisma.associate.findUnique({
+  where: { id: associateId },
+  select: { readinessStatus: true, displayName: true }
 })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// ... prisma.update ...
+if (currentAssociate?.readinessStatus !== result.status) {
+  notificationService.sendReadinessChangeEmail(/* ... */).catch(/* fire-and-forget */)
+}
 ```
 
-The `globalThis` pattern prevents multiple client instances during Next.js hot reloads in development. In production Docker, a single instance is maintained for the process lifetime — appropriate for a long-running container, not a serverless function.
-
-Supabase connection string: use the **Transaction pooler** URL (port 6543) for the connection string, not the direct connection (port 5432). The transaction pooler is Supabase's PgBouncer — handles concurrent Next.js requests from a single container efficiently.
-
-```
-DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
-DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres"
-```
-
-`prisma.config.ts` uses `directUrl` for migrations (needs direct connection), `url` for runtime queries (uses pooler). **Confidence: HIGH** — this is the documented Supabase+Prisma pattern.
+`notificationService.ts` wraps the Resend client. No new email library needed. Trainer email address is either hardcoded in env var (`TRAINER_EMAIL`) or stored in Settings singleton (simplest path: env var for v1.1).
 
 ---
 
-## Gap Calculation Service Architecture
+## Suggested Build Order
 
-```
-src/lib/gapService.ts
+Dependencies flow in one direction: schema → services → API routes → UI.
 
-exports:
-  recalculateGaps(associateId: string): Promise<void>
-  getGapsForAssociate(associateId: string): Promise<SkillGap[]>
-  computeReadiness(associateId: string): Promise<ReadinessResult>
-  getNextRecommendation(associateId: string): Promise<string | null>
-```
+### Phase 1: Cohort + Curriculum Schema Migration
 
-### Recency Decay Implementation
+**What:** Add `Cohort`, `CurriculumWeek` models. Add nullable `cohortId` on `Associate` and `Session`. Add `mode` field to `Session`.
 
-```typescript
-interface ScoredSession {
-  date: Date
-  results: QuestionResult[]
-}
+**Why first:** Everything else (cohort API, dashboard views, curriculum question filtering) depends on these tables existing. No application logic changes — just schema + migration.
 
-function applyRecencyDecay(sessions: ScoredSession[], decay = 0.8) {
-  // sessions sorted newest-first
-  const weighted: Map<string, { sumScore: number; sumWeight: number; count: number }> = new Map()
-
-  sessions.forEach((session, index) => {
-    const weight = Math.pow(decay, index) // 1.0, 0.8, 0.64, 0.512...
-
-    for (const result of session.results) {
-      if (result.didNotGetTo || result.finalScore === null) continue
-      const key = `${result.technology}::${result.topic ?? '__root__'}`
-      const existing = weighted.get(key) ?? { sumScore: 0, sumWeight: 0, count: 0 }
-      existing.sumScore += (result.finalScore ?? result.llmScore ?? 0) * weight
-      existing.sumWeight += weight
-      existing.count += 1
-      weighted.set(key, existing)
-    }
-  })
-
-  return weighted
-}
-```
-
-This is a pure function over fetched data — no database writes inside the loop. Compute everything in memory, then batch-upsert `skill_gaps` rows at the end.
-
-### Readiness Signal
-
-```typescript
-function computeReadiness(associate: Associate & { sessions: Session[] }) {
-  const sessionCount = associate.sessions.length
-  if (sessionCount < 3) return { isReady: false, reason: 'insufficient_sessions' }
-
-  const scores = associate.sessions
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 10) // look at last 10 sessions
-    .map(s => s.overallTechnicalScore ?? 0)
-
-  const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length
-  const last3 = scores.slice(0, 3)
-  const trend = last3[0] - last3[2] // positive = improving, negative = declining
-
-  return {
-    isReady: avgScore >= 3.75 && sessionCount >= 3 && trend >= 0,
-    avgScore,
-    sessionCount,
-    trend,
-  }
-}
-```
-
-Thresholds (75%, 3 sessions, non-negative trend) are constants in the service, not hardcoded database config. Easy to tune per-cohort later without a migration.
+**Files changed:** `prisma/schema.prisma`, new migration file
+**Risk:** Additive migration — no data loss, no breaking changes to existing queries
 
 ---
 
-## Suggested Build Order (Phase Dependencies)
+### Phase 2: Automated Interview → Readiness Pipeline
 
-The order matters because each layer is a prerequisite for the next.
+**What:** Modify `/api/public/interview/start` to accept `associateSlug`. Modify `/api/public/interview/complete` to call gap + readiness pipeline after persist. Add slug input to public interview UI.
 
-### 1. Foundation: Prisma + Supabase Connection (build first)
+**Why second:** This closes the highest-priority gap in the existing system with minimal code changes (~50 lines touching 2 route files + 1 UI component). It exercises existing services without building new ones. Can be shipped and validated before cohort management is built.
 
-No features work without this. Installs Prisma, writes `prisma/schema.prisma`, generates client, verifies `DATABASE_URL` in `.env.docker`. Everything else depends on the Prisma client existing.
+**Files changed:** `src/app/api/public/interview/start/route.ts`, `src/app/api/public/interview/complete/route.ts`, public interview UI component
+**Depends on:** Phase 1 (Session needs `mode` field to mark automated sessions)
 
-**Deliverable:** `prisma/schema.prisma`, `src/lib/db.ts`, migration applied to Supabase.
+---
 
-### 2. Dual-Write Persistence Layer (build second)
+### Phase 3: Cohort CRUD API + Trainer Cohort Management UI
 
-Modifies `/api/history` to call `PersistenceService` after the file write. The file write is unchanged — existing tests and flows continue working. Supabase gets data starting from this point forward.
+**What:** `/api/cohorts` CRUD. `/api/cohorts/[id]/curriculum` CRUD. `/api/cohorts/[id]/associates` for assignment. Basic trainer UI to create cohorts and assign associates.
 
-**Deliverable:** `src/lib/persistenceService.ts`, modified `/api/history/route.ts`. Can be deployed and run in shadow mode immediately.
+**Why third:** Cohort data must exist before the dashboard can filter by it and before curriculum can drive question selection.
 
-**Depends on:** Step 1.
+**Files changed:** New route handlers under `src/app/api/cohorts/`, new trainer UI components
+**Depends on:** Phase 1 (schema)
 
-### 3. Associate Profiles (build third)
+---
 
-Required by gap tracking and dashboard. A session must be linkable to an associate before gaps can be computed. Includes: associate table, `/api/associates` CRUD, and the UI affordance in the dashboard setup wizard to select or create an associate.
+### Phase 4: Cohort Dashboard Views
 
-**Deliverable:** `/api/associates`, associate selection in interview setup.
+**What:** Modify `/trainer` to add cohort filter. Add `/trainer/cohort/[id]` aggregate view. These are read-only consumers of data from Phase 3.
 
-**Depends on:** Step 2 (sessions need an `associateId` FK before associate profiles matter).
+**Why fourth:** Depends on cohorts existing (Phase 3) and sessions being tagged with cohortId (Phases 1-2).
 
-### 4. Gap Service + Recalculation (build fourth)
+**Files changed:** `src/app/trainer/page.tsx` (cohort selector), new `src/app/trainer/cohort/[id]/page.tsx`
+**Depends on:** Phases 1-3
 
-Depends on having sessions in the database (Step 2) and associate profiles (Step 3). The gap service reads `question_results`, applies decay, writes `skill_gaps`. Also triggers `computeReadiness`.
+---
 
-**Deliverable:** `src/lib/gapService.ts`, `skill_gaps` table populated after each session.
+### Phase 5: Curriculum-Driven Question Selection
 
-**Depends on:** Steps 2 and 3.
+**What:** Setup wizard fetches taught weeks from curriculum and auto-populates `selectedWeeks`. Adaptive weight pre-population continues to work on top of this.
 
-### 5. Trainer Dashboard (build fifth)
+**Why fifth:** Requires cohort curriculum data to exist (Phase 3). Can be validated once a test cohort with curriculum is set up.
 
-Reads from already-populated `associates`, `skill_gaps`, `associate_readiness` tables. Server Components fetch directly via Prisma. The dashboard is a read-only consumer of the prior layers — no new write paths.
+**Files changed:** Dashboard setup wizard component, new `/api/cohorts/[id]/curriculum?taught=true` query param
+**Depends on:** Phases 1 and 3
 
-**Deliverable:** `src/app/dashboard/trainer/` with roster + per-associate views.
+---
 
-**Depends on:** Steps 3 and 4 (needs associates with gaps computed).
+### Phase 6: Email Notifications + Design Cohesion
 
-### 6. Adaptive Mock Setup (build sixth — depends on gap data existing)
+**What:** `notificationService.ts` wrapping Resend. `updateAssociateReadiness()` modified to dispatch on status transition. Design tokens applied to public interview flow, auth page, associate profile page.
 
-The setup wizard reads `skill_gaps` to pre-weight technology selectors for the next session. Requires that at least one prior session has been processed through the gap service.
+**Why sixth:** Notifications are useful but not blocking other features. Design cohesion is important for credibility but not a functional dependency.
 
-**Deliverable:** Modified `/dashboard/page.tsx` that pre-populates tech weights from gap history.
+**Files changed:** New `src/lib/notificationService.ts`, `src/lib/readinessService.ts`, public interview pages, login page, associate profile page
+**Depends on:** Phase 2 (readiness pipeline must be running to generate notifications)
 
-**Depends on:** Step 4 (gaps must exist to adapt from).
+---
+
+## Component Boundaries: New vs. Modified
+
+| Component | Status | What Changes |
+|-----------|--------|--------------|
+| `prisma/schema.prisma` | MODIFIED | Add Cohort, CurriculumWeek; add cohortId to Associate + Session; add mode to Session |
+| `src/app/api/public/interview/start/route.ts` | MODIFIED | Accept + validate associateSlug |
+| `src/app/api/public/interview/complete/route.ts` | MODIFIED | Call gap + readiness pipeline after persist |
+| `src/lib/readinessService.ts` | MODIFIED | Emit notification on status transition in `updateAssociateReadiness()` |
+| `src/app/trainer/page.tsx` | MODIFIED | Add cohort selector filter |
+| `src/app/api/cohorts/*` | NEW | Full CRUD for cohort + curriculum + associate assignment |
+| `src/app/trainer/cohort/[id]/page.tsx` | NEW | Aggregate cohort readiness view (Server Component) |
+| `src/lib/notificationService.ts` | NEW | Resend wrapper for readiness change emails |
+| `src/middleware.ts` | UNCHANGED | Public interview routes stay unprotected; cohort API is trainer-only via cookie check in route handlers |
+| `src/lib/sessionPersistence.ts` | UNCHANGED | No changes — associate upsert via slug already works |
+| `src/lib/gapService.ts` | UNCHANGED | No changes — called from automated complete route same as trainer-led |
+| `src/lib/gapPersistence.ts` | UNCHANGED | No changes |
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Running Gap Recalculation in the Scoring Pipeline
+### Anti-Pattern 1: Adding Associate Login to v1.1
 
-**What:** Calling `recalculateGaps()` inside `/api/score` after every question.
-**Why bad:** The `/api/score` route is called 8-12 times per session (once per question), often concurrently during review. Gaps should be computed once at session completion, not per question. Running it per question would cause 10+ concurrent writes to `skill_gaps` with partial data.
-**Instead:** Call `recalculateGaps()` once in `/api/history` POST, at session completion.
+**What:** Adding a full auth system (credentials, sessions, JWT) for associates.
+**Why bad:** Trainer-assigned slug identity already covers the v1.1 use case (linking automated sessions to a readiness record). Full auth requires email verification, password reset, session management — 3-5x the scope for no new user value.
+**Instead:** Slug-based identity. Associates enter their slug at interview start. Create-on-first-session (existing behavior). Defer associate login to multi-tenancy phase.
 
-### Anti-Pattern 2: Fetching Session Data Through Client-Side API Calls for Dashboard
+### Anti-Pattern 2: Putting Cohort Logic in the Readiness Pipeline
 
-**What:** Dashboard page uses `useEffect` + `fetch('/api/associates')` to load roster.
-**Why bad:** Causes waterfall: page renders → fetch fires → data arrives → re-render. Trainer gets flash of empty state.
-**Instead:** Server Components fetch directly via Prisma at render time. Pass data as props to client islands.
+**What:** Modifying `readinessService.ts` or `gapService.ts` to be cohort-aware.
+**Why bad:** The readiness pipeline works per-associate. Cohort membership is context for display, not a variable in the readiness algorithm. Making the gap algorithm cohort-dependent would break the single-associate invariant.
+**Instead:** Cohort-level views are aggregations over per-associate readiness records. The pipeline stays per-associate.
 
-### Anti-Pattern 3: Multiple Prisma Client Instances
+### Anti-Pattern 3: Blocking Automated Interview Completion on Gap Scoring
 
-**What:** `new PrismaClient()` called at the module level in multiple files.
-**Why bad:** In Next.js dev mode with hot reload, creates dozens of database connections, exhausting Supabase's free-tier connection limit.
-**Instead:** Single singleton in `src/lib/db.ts` with `globalThis` guard.
+**What:** `await` the gap scoring inside `/api/public/interview/complete` before returning.
+**Why bad:** Gap scoring queries all prior sessions for the associate, runs weighted averages, and writes multiple GapScore rows. This adds 200-500ms to the completion response. Associates experience a hang at the end of their interview.
+**Instead:** Fire-and-forget (same pattern as trainer-led sessions). The readiness pipeline runs asynchronously after the response is sent.
 
-### Anti-Pattern 4: Blocking the Interview Flow on Supabase Writes
+### Anti-Pattern 4: Storing Curriculum in the Question Bank Repo
 
-**What:** `/api/history` awaits the Supabase write and returns an error to the frontend if it fails.
-**Why bad:** Supabase outage or network blip prevents session completion. Trainer cannot close the session.
-**Instead:** File write is the reliable path. Supabase write is wrapped in try/catch. Failures are logged but never propagate to the response.
+**What:** Embedding cohort curriculum as YAML frontmatter or a special file in the GitHub question bank repo.
+**Why bad:** Curriculum is org/cohort-specific operational data. The question bank is content. Mixing them couples deployment cadence and creates access control confusion (trainers need to push to the GitHub repo to update curriculum).
+**Instead:** Curriculum in the Supabase DB (the `CurriculumWeek` model). Trainers manage it via the dashboard UI, not via GitHub pushes.
 
-### Anti-Pattern 5: Storing Associate Identity in Zustand
+### Anti-Pattern 5: Fetching Cohort Data Client-Side in Trainer Dashboard
 
-**What:** Adding `associateId` to the Zustand session store with `persist` middleware.
-**Why bad:** Zustand persists to localStorage. Multiple sessions for the same associate would share browser-level state, creating collision bugs if a trainer runs back-to-back sessions for different associates on the same machine.
-**Instead:** Associate selection is a session-scoped piece of setup wizard state that is sent to `/api/history` as a parameter and cleared on `resetSession()`.
+**What:** Trainer dashboard uses `useEffect + fetch('/api/cohorts')` to load cohorts, then a second fetch for associates.
+**Why bad:** Two sequential client-side fetches cascade — cohorts load, then associates load with a visible delay. The existing trainer page already has this pattern (useEffect + fetch) and it causes a flash of empty state.
+**Instead:** Server Component for initial render. Fetch cohorts and associates in parallel via Prisma in the async Server Component. Pass both as props to the client island.
 
 ---
 
 ## Scalability Notes
 
-This architecture is deliberately simple for MVP. Known growth points:
-
-| Concern | MVP Approach | Future Approach |
-|---------|--------------|-----------------|
-| Gap recalculation latency | Synchronous on session save (~50ms) | Background job / Supabase Edge Function if > 200ms |
-| Dashboard query performance | Full table scan (acceptable at < 100 associates) | Add indexes on `associateId`, `technology`, add materialized view for readiness |
-| Rate limiting with multiple Docker replicas | File-based (breaks with multiple replicas) | Migrate to Supabase table or Redis when scaling out |
-| Associate identity linkage to public interviews | Fingerprint stored, no link | Add trainer-controlled claim flow post-MVP |
+| Concern | v1.1 Approach | Future |
+|---------|---------------|--------|
+| Cohort aggregate readiness query | Prisma `groupBy` on Associate.readinessStatus WHERE cohortId=? — fast at < 200 associates | Materialized view if roster grows to thousands |
+| Curriculum taught-weeks query | `CurriculumWeek WHERE cohortId=? AND startDate <= now()` — single indexed query | No change needed |
+| Readiness notifications volume | One email per associate per status transition — low volume for a training org | Rate-limit at notificationService level if needed |
+| Associate auth | Slug-based identity — no session state | Add Supabase Auth when multi-tenancy requires it |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `src/lib/types.ts`, `src/lib/langchain.ts`, `src/store/interviewStore.ts`, `src/app/api/history/route.ts`, `src/app/api/score/route.ts`, `src/lib/rateLimitService.ts` — HIGH confidence
-- Prisma singleton pattern for Next.js: documented in Prisma docs, well-established practice — HIGH confidence
-- Supabase PgBouncer (Transaction pooler) port 6543 for Prisma: documented Supabase+Prisma guide — HIGH confidence
-- Recency decay coefficient (0.8): from PROJECT.md key decisions, not yet validated — MEDIUM confidence (autoresearch target)
-- Readiness thresholds (75%/3 sessions): from PROJECT.md, not yet empirically validated — MEDIUM confidence (configurable)
-- Next.js Server Component + Prisma direct pattern: established Next.js 13+ App Router best practice — HIGH confidence
+- Direct codebase analysis (HIGH confidence): `src/middleware.ts`, `src/lib/auth-server.ts`, `src/lib/readinessService.ts`, `src/lib/sessionPersistence.ts`, `src/lib/adaptiveSetup.ts`, `src/app/api/public/interview/complete/route.ts`, `src/app/api/public/interview/start/route.ts`, `src/app/trainer/page.tsx`, `prisma/schema.prisma`
+- PROJECT.md v1.1 milestone goals and constraints (HIGH confidence): read directly
+- Next.js App Router Server Component + Prisma direct query pattern: established practice, consistent with existing dashboard implementation (HIGH confidence)
+- Resend API for notifications: already in use in `/api/send-email`, no new integration required (HIGH confidence)

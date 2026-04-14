@@ -1,301 +1,285 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Adaptive skills assessment platform — adding Supabase persistence, gap tracking, and trainer dashboard to existing Next.js 16 Docker app
-**Researched:** 2026-04-13
-**Confidence:** MEDIUM (codebase-verified patterns + established migration domain knowledge; no live web sources available)
+**Domain:** Adaptive skills assessment platform — adding associate auth, cohort management, curriculum scheduling, automated interview pipeline integration, cohort dashboard views, design cohesion, and email notifications to an existing Next.js 16 app with dual-write migration and single-password trainer auth
+**Researched:** 2026-04-14
+**Confidence:** HIGH (derived from direct codebase analysis of all affected files + established patterns for auth layering, cohort data modeling, and pipeline extension)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, data loss, or broken existing flows.
+Mistakes that cause rewrites, broken existing flows, or silent data corruption in this codebase specifically.
 
 ---
 
-### Pitfall 1: Prisma + Supabase Connection Exhaustion in Docker
+### Pitfall 1: Single Middleware Guarding Both Auth Systems Simultaneously
 
-**What goes wrong:** Prisma's default connection pool creates a new pool per Next.js hot-reload or per serverless invocation. In a Docker-deployed Next.js app (standalone mode), each request handler can open connections that never get released. Supabase free tier allows only 60 direct connections. Under load — or during a coding session with frequent `npm run dev` restarts — the pool fills up silently, and new DB calls hang or throw `P1001: Can't reach database server` or `too many connections`.
+**What goes wrong:** The current `src/middleware.ts` checks a single cookie (`nlm_session === 'authenticated'`) for all protected paths. When associate auth is added, the middleware must distinguish between "a trainer is logged in" (existing cookie) and "an associate is logged in" (new associate token). The failure mode is writing a guard like `if (trainerCookie || associateCookie)` that allows associates into `/trainer` routes or allows trainers into associate-only paths without scoping. Worse: both cookies present simultaneously creates ambiguous identity — the wrong user's data is loaded in server components.
 
-**Why it happens:** Next.js App Router runs API routes in separate module contexts. Without a global singleton for `PrismaClient`, each module instantiation creates a fresh pool. The `data/` file system backend has no concept of connections, so the existing code has no guard against this.
+**Why it happens:** The existing middleware is 20 lines with a simple string check. It looks trivially easy to extend. The guard feels done when the 401 stops returning, but the identity context downstream (which user are we?) is never resolved.
 
-**Consequences:** DB calls silently fail mid-interview. If the write to Supabase fails and the file-based fallback also fails (or isn't wired), the session is lost. Extremely hard to reproduce locally (connections look fine with 1-2 users).
+**Consequences:** Associates view other associates' data. Trainers inadvertently trigger associate-scoped sessions. Routes that check `isAuthenticatedSession()` in `auth-server.ts` have no concept of "which kind of authenticated" — they return `true` for both, so all protected route handlers break their authorization model.
 
-**Prevention:**
-- Use Supabase's **Transaction Mode connection pooler** (port 6543, not 5432) as the `DATABASE_URL` for Prisma. This routes through PgBouncer and caps each transaction's connection use.
-- Use port 5432 (Session Mode) only for `DIRECT_URL` in Prisma's `schema.prisma` (needed for migrations only).
-- Implement the standard singleton pattern:
-  ```typescript
-  // src/lib/db.ts
-  import { PrismaClient } from '@prisma/client'
-  const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
-  export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-  ```
-- Never import `new PrismaClient()` directly in route handlers.
+**How to avoid:** Before adding associate auth, explicitly enumerate route permission matrix:
+- `/dashboard`, `/interview`, `/review`, `/trainer/*` — trainer only (existing `nlm_session`)
+- `/associate/*`, `/interview/public/*` — associate only (new `associate_session` cookie)
+- Shared: none (no route serves both roles)
 
-**Warning signs:** `P1001` errors in logs, Supabase dashboard showing connection count near 60, slow queries that time out only when multiple tabs are open.
+Keep trainer and associate cookies entirely separate. Middleware should call `getCallerIdentity(request)` that returns `{ type: 'trainer' | 'associate' | 'anonymous', id?: string }` and route-specific guards use this. Never chain the two auth checks with `||` on a shared protected-paths list.
 
-**Phase:** PERSIST-01 (first DB write introduced)
+**Warning signs:** A test where you log in as an associate and directly navigate to `/trainer` — if it redirects to login instead of returning 403, the guard is ambiguous rather than correct.
+
+**Phase to address:** Associate Auth (first phase of v1.1)
 
 ---
 
-### Pitfall 2: Dual-Write Silently Diverging — File Succeeds, DB Fails
+### Pitfall 2: Associate Auth Breaks the Existing Zustand Store's `associateSlug` Pattern
 
-**What goes wrong:** The dual-write strategy (`data/interview-history.json` + Supabase) is intended as a safety net. In practice, the DB write is async and the file write is synchronous. If the DB insert throws (connection error, schema mismatch, constraint violation), the error is swallowed or logged but not surfaced to the caller. The session appears saved (file succeeded), but gap tracking data is never written. After disabling file writes, historical data in Supabase is incomplete and the gap algorithm produces misleading results.
+**What goes wrong:** The Zustand store (`interviewStore.ts`) accepts `associateSlug` as an optional parameter to `createSession()`. This is a trainer-entered string during setup — the trainer types the associate's slug and it flows into the session. When associate auth exists, the slug is known at login time and must come from the auth token, not from trainer input. If both pathways coexist — trainer can still type a slug AND an authenticated associate's slug is present — sessions can be created with a mismatched or missing `associateSlug` when an associate self-initiates, because the store's `createSession` call doesn't know to pull from the auth context instead.
 
-**Why it happens:** The natural implementation is `try { await db.save() } catch { log }` alongside the existing file write. The catch branch looks safe because the file write worked. But the DB divergence accumulates silently.
+**Why it happens:** The store was designed for trainer-driven setup. Adding a second identity source (auth context) without refactoring `createSession` means two different code paths that can produce sessions with different slug origins — or with no slug at all if the auto-population is wired incorrectly.
 
-**Consequences:** Gap algorithm trains on a partial dataset. Associates who had sessions before the bug was noticed appear to have fewer sessions than they did, distorting their readiness signal downward. Requires manual reconciliation.
+**Consequences:** Associate-initiated automated interviews complete but their sessions are not linked to the Associate row in the DB (no `associateId` on the Session), so gap scores and readiness are never computed. Sessions appear in the DB but are orphaned. The associate's readiness record never updates despite them completing interviews.
 
-**Prevention:**
-- Treat the dual-write as a **circuit breaker**, not fire-and-forget. Log every DB failure with session ID and timestamp to a dedicated error table or structured log line so divergence is detectable.
-- Add a `/api/admin/sync-check` endpoint (internal, auth-gated) that compares file session IDs against DB session IDs during the migration window.
-- Define a "migration complete" condition: DB write must succeed for N consecutive sessions before file writes are disabled.
-- Never disable file writes without running the sync check first.
+**How to avoid:** When associate auth lands, add a `setAssociateContext(slug: string)` action to the store that populates `associateSlug` from the auth token immediately after login. The `createSession` call should read from the store's existing `associateSlug` field rather than accepting it as a parameter. Trainer-entered slug should be a separate field (e.g., `trainerEnteredSlug`) so the two can never collide. Wire validation: if an authenticated associate session exists and `trainerEnteredSlug` disagrees, use the auth token value and warn.
 
-**Warning signs:** DB session count diverges from file session count. Gap data shows fewer sessions than trainers remember conducting.
+**Warning signs:** After an authenticated associate completes an interview, query `SELECT * FROM "Session" WHERE "associateId" IS NULL AND "date" > (now - 1hr)` — any rows here mean the slug is not being carried through.
 
-**Phase:** PERSIST-01 / PERSIST-02 transition
+**Phase to address:** Associate Auth
 
 ---
 
-### Pitfall 3: Prisma Migrations Failing in Docker Because `DIRECT_URL` Is Missing
+### Pitfall 3: Public Interview Complete Endpoint Has No Identity — Adding Auth to It Is a Breaking Change
 
-**What goes wrong:** Supabase requires `DIRECT_URL` (direct Postgres connection, port 5432) for `prisma migrate deploy`, because PgBouncer (transaction mode) does not support the advisory locks that migrations use. If only `DATABASE_URL` (pooler) is set in `.env.docker`, `prisma migrate deploy` hangs indefinitely or throws a cryptic lock timeout error.
+**What goes wrong:** `/api/public/interview/complete` (route.ts) is currently guarded only by fingerprint-based rate limiting. The session payload it receives may include `associateSlug` (set by the associate during public interview flow), but the endpoint does not validate that the slug belongs to the caller — any caller can submit any slug. When associate auth is added, the intent is for authenticated associates to have their public interviews attributed to their readiness record. But retrofitting auth onto this endpoint is a breaking change: existing clients (unauthenticated browsers) will immediately fail with 401.
 
-**Why it happens:** The existing `.env.docker` has no DB variables at all. Setting up Supabase for the first time, it's natural to add only one `DATABASE_URL` and use the connection string copied from the Supabase dashboard (which may default to the pooler URL).
+**Why it happens:** "Make it work, then make it secure" thinking during MVP. The endpoint was built as fire-and-forget. Now it needs to serve two roles: unauthenticated anonymous users AND authenticated associates.
 
-**Consequences:** Migrations never apply in production. Schema is out of sync with production DB. First deploy appears to succeed (Next.js starts), but all DB calls fail because tables don't exist.
+**Consequences:** If the endpoint requires auth, all existing anonymous interviews break. If auth is optional but the endpoint trusts a slug from an unauthenticated payload, a malicious caller can pollute any associate's readiness record by submitting their slug with fabricated scores (the existing code accepts full session objects from untrusted clients).
 
-**Prevention:**
-- Always configure two env vars in `.env.docker`:
-  ```
-  DATABASE_URL="postgres://[user]:[password]@[project].supabase.com:6543/postgres?pgbouncer=true"
-  DIRECT_URL="postgres://[user]:[password]@[project].supabase.com:5432/postgres"
-  ```
-- In `schema.prisma`:
-  ```
-  datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
-  }
-  ```
-- Run `prisma migrate deploy` (not `prisma migrate dev`) in the Docker entrypoint or CI step before starting the app server.
+**How to avoid:** Treat this as two separate flows at the controller level:
+1. Anonymous: existing endpoint unchanged, sessions persist without associateId (no readiness pipeline triggered).
+2. Authenticated associate: new endpoint `/api/associate/interview/complete` that requires the `associate_session` cookie and uses the auth token's slug — ignores any slug in the payload body.
 
-**Warning signs:** Migration commands hang > 30 seconds. `prisma db push` works but `migrate deploy` does not (they use different lock mechanisms).
+Never add optional auth to the same endpoint (the `if token exists, trust it` pattern is an IDOR vulnerability). The slug must come from the verified token, not the payload.
 
-**Phase:** PERSIST-01 (infrastructure setup)
+**Warning signs:** Searching for `associateSlug` in the public/interview/complete request body being trusted without token verification — this is the injection point.
+
+**Phase to address:** Associate Auth + Automated Interview Pipeline Integration
 
 ---
 
-### Pitfall 4: Gap Algorithm Producing Misleading Scores on Cold Start (< 3 Sessions)
+### Pitfall 4: Cohort Adds a Foreign Key to Associate — Existing `persistSessionToDb` Upserts Break
 
-**What goes wrong:** The recency-weighted gap score formula (`score * 0.8^age`) is designed for associates with multiple sessions. With 1 session, the weight is 1.0 regardless of decay, so a single bad session produces a gap score of 1/5 for a topic and triggers the "priority weakness" flag — even though one data point is statistically meaningless. This produces false urgency in the trainer dashboard during the first 1-2 sessions.
+**What goes wrong:** Currently `persistSessionToDb` upserts an Associate by slug with only `displayName`. When Cohort is added and every Associate needs a `cohortId` foreign key, the upsert's `create` block becomes invalid — it creates an Associate without a cohort, violating any non-nullable FK constraint. If `cohortId` is nullable (to keep upsert working), orphaned associates accumulate outside any cohort and the cohort roster is incomplete.
 
-**Why it happens:** The algorithm assumes a prior population of sessions. The formula has no lower bound on sample size before producing actionable signals.
+**Why it happens:** The upsert was written for the minimal Associate model. Adding a FK feels like a simple schema change. The consequence on the upsert logic is non-obvious until the constraint fires at runtime.
 
-**Consequences:** Trainers see alarming readiness badges ("Not Ready") for every new associate before they've had enough reps to establish a baseline. Trust in the dashboard erodes immediately on first use.
+**Consequences:** Trainer-led sessions for associates not yet assigned to a cohort fail at the DB write step. The error is caught by the try/catch in `persistSessionToDb` and returns `false`, but the file-based write already succeeded — divergence enters the system silently (known debt: INT-02 pattern repeating).
 
-**Prevention:**
-- Add a **minimum sessions gate** before computing readiness signals. Per PROJECT.md, the threshold is already defined as 3 sessions for the readiness signal. Apply the same gate to gap scores: display "Insufficient data (N/3 sessions)" instead of a gap score until the threshold is met.
-- For technology weights in adaptive setup (GAP-02), default to equal weights if fewer than 3 sessions exist for that associate. Only shift weights toward gaps after the baseline is established.
-- Store `session_count` per associate on the profile row so the gate check is O(1).
+**How to avoid:** Make `cohortId` nullable on Associate with a clear semantic: `null` means "unassigned." Add a cohort assignment step in the trainer flow separately from session creation. Never require cohort assignment for session persistence to succeed. Document that unassigned associates appear in a special "Unassigned" group in the cohort dashboard, not as an error.
 
-**Warning signs:** Dashboard shows "Priority Gap: React Hooks" after a single session where the associate scored 2/5. Trainers start dismissing dashboard recommendations as noise.
+**Warning signs:** After adding Cohort schema, run the sync-check endpoint (`/api/sync-check`) — any sessions missing from DB that are present in file history indicate the upsert is failing.
 
-**Phase:** GAP-01 / GAP-02 / DASH-01
+**Phase to address:** Cohort Management (schema design step)
 
 ---
 
-### Pitfall 5: N+1 Query Pattern in Trainer Dashboard Roster View
+### Pitfall 5: Curriculum Scheduling Filter Applied at Question Selection Time Without Cache — Degrades Every Setup Page Load
 
-**What goes wrong:** The roster view (DASH-01) shows all associates with their readiness status badge. The natural implementation fetches all associate profiles, then for each associate fetches their sessions, then for each session fetches the question assessments. This is 1 + N + N*M queries. With 20 associates averaging 10 sessions each, the page triggers 200+ queries on every load.
+**What goes wrong:** Curriculum-driven question selection means the setup wizard must know "which topics have been taught by today's date." This requires querying the curriculum schedule (a new DB table) on every setup page load to determine which question bank files are available for selection. If this query runs synchronously during the setup wizard's GitHub file listing step, it adds a serial DB round-trip to a flow that already awaits the GitHub API. At 200ms GitHub API + 50ms DB query, the setup wizard's tech selection phase now takes 250ms minimum — but in practice queries compose and the user perceives the delay as the wizard being "slow."
 
-**Why it happens:** Prisma's `findMany` is easy and explicit. It's tempting to `prisma.associate.findMany()` then loop and `prisma.session.findMany({ where: { associateId } })` inside the loop. The N+1 is invisible in development with 2-3 test associates.
+**Why it happens:** The curriculum filter is conceptually a WHERE clause on the question bank list — it feels natural to apply it at fetch time. The latency impact is invisible in dev (localhost DB, mock GitHub API).
 
-**Consequences:** Dashboard page loads in 800ms-2s in production with real data. Adding more associates makes it progressively worse. On the Supabase free tier with connection limits, each query consumes a connection slot for its duration.
+**Consequences:** Setup wizard feels noticeably slower. On the Supabase free tier with connection pool constraints, the extra query during setup also consumes a connection slot during the interview peak hours when connections are most scarce.
 
-**Prevention:**
-- Use Prisma's `include` to eager-load in a single query:
-  ```typescript
-  prisma.associate.findMany({
-    include: {
-      sessions: {
-        orderBy: { date: 'desc' },
-        take: 10, // Only recent sessions for badge computation
-        include: { assessments: true }
-      }
-    }
-  })
-  ```
-- For the roster view specifically, compute readiness signals server-side during session save (write the computed value to the `associate` row) rather than recomputing on every dashboard load. This is a **pre-computed badge pattern**: update `associate.readiness_status` and `associate.last_session_date` whenever a session completes.
-- Defer the per-associate detail query to the drill-down page (DASH-02), not the roster.
+**How to avoid:** Compute the "currently unlocked topics" set once per trainer session login and cache it server-side (Next.js route handler cache or a simple in-memory TTL cache). The curriculum schedule is not real-time — topics unlock by date, so a 15-minute cache is semantically correct. Do not fetch curriculum state per-request in the setup wizard's question loading path.
 
-**Warning signs:** Dashboard page takes > 500ms. Adding a `console.time()` around the data fetch reveals hundreds of DB calls. Supabase dashboard shows query count spikes on dashboard page loads.
+**Warning signs:** Adding `console.time('setup-wizard')` shows > 300ms to reach tech selection step after curriculum integration. The GitHub API fetch and curriculum fetch happen serially rather than in parallel via `Promise.all`.
 
-**Phase:** DASH-01
+**Phase to address:** Curriculum Scheduling
 
 ---
 
-### Pitfall 6: Zustand `persist` Stale State Blocking DB-Sourced Data
+### Pitfall 6: Email Notifications Sent on Every Readiness Recomputation, Not Just on Status Change
 
-**What goes wrong:** The existing Zustand store persists `session` and `repoConfig` to `localStorage` with `partialize`. When the app adds DB-sourced associate profiles (PERSIST-02) and gap history (GAP-01), there will be pressure to also persist these in Zustand for performance. If stale gap data from a previous page load persists in localStorage, a trainer opening the dashboard sees last session's data rather than current DB state. The persist middleware has no TTL by default.
+**What goes wrong:** The current readiness pipeline runs `updateAssociateReadiness` at the end of every session save. When email notifications are added for readiness changes (e.g., "Alex is now Ready"), the naive implementation adds a `sendEmail()` call inside `updateAssociateReadiness`. Every session completion sends an email. If an associate completes 5 sessions in one day (plausible for associates doing practice sprints), the trainer receives 5 emails, 4 of which say "Alex is still Ready." Email fatigue causes trainers to disable notifications, defeating the feature.
 
-**Why it happens:** The localStorage persist pattern is deeply embedded in the codebase. It's natural to extend `partialize` to include `gapHistory` and `associateProfile` when those are added to the store. The bug only surfaces when data is stale by > 1 session.
+**Why it happens:** The event "readiness recomputed" is fired on every session completion. It feels like the right hook for notification. The code path `computeReadiness → updateAssociate → sendEmail` is linear and obvious.
 
-**Consequences:** Trainer dashboard shows incorrect gap trends. Adaptive setup (GAP-02) pre-selects wrong technology weights because it reads stale gap data. Extremely hard to debug ("it works on my machine") because the cache state depends on the user's localStorage contents.
+**Consequences:** Email volume overwhelms Resend's free tier (100 emails/day). Trainers stop trusting or reading notification emails. Potential Resend rate limit errors in the session save pipeline if the email call is synchronous (currently `/api/send-email` is an HTTP call, not a direct Resend SDK call in the pipeline).
 
-**Prevention:**
-- Keep Zustand persist strictly for **in-progress interview state only** (as it currently is). Database-sourced data (associate profiles, gap history, session history) must never go into localStorage.
-- Use React Query / SWR or server components for DB-sourced data. These have built-in cache invalidation and are trivially revalidated on page focus.
-- If using server components for the dashboard, gap data is fetched fresh on every navigation — no cache layer to go stale.
-- Add a version key to the persist config so schema changes force a cache clear:
-  ```typescript
-  persist({ name: 'interview-session-storage', version: 2, ... })
-  ```
+**How to avoid:** Compare the new readiness status against the previous readiness status stored in `associate.readinessStatus` before sending. Only send when `oldStatus !== newStatus`. The `Associate` row already stores `readinessStatus` — read it before calling `computeReadiness`, then compare after. Implement this comparison inside `updateAssociateReadiness` before the `prisma.associate.update` call.
 
-**Warning signs:** Trainer sees data from a previous session after a completed interview. Gap scores don't update after a new session completes.
+```typescript
+const previous = await prisma.associate.findUnique({
+  where: { id: associateId },
+  select: { readinessStatus: true }
+});
+const result = await computeReadiness(associateId, threshold);
+if (previous?.readinessStatus !== result.status) {
+  await sendReadinessChangeNotification(associateId, result.status);
+}
+```
 
-**Phase:** PERSIST-02 / GAP-01
+**Warning signs:** Setting up email notifications and immediately receiving duplicate emails during a test session that completes multiple times (re-review flow).
 
----
-
-## Moderate Pitfalls
-
----
-
-### Pitfall 7: Associate Identity Collision — Trainer-Assigned Slugs Are Not Unique Across Time
-
-**What goes wrong:** PROJECT.md specifies trainer-assigned slugs/IDs for associate identity (no login). If two associates are named "John Smith" and both get slug `john-smith`, or if an associate leaves and a new associate is given the same slug, sessions from different people are aggregated into the same gap history. The recency-weighted algorithm would produce a nonsensical trend that mixes two people's data.
-
-**Why it happens:** Simple slug generation is case-insensitive and non-unique. Trainers don't think of slugs as globally unique identifiers.
-
-**Prevention:**
-- Enforce slug uniqueness at the DB level with a `UNIQUE` constraint on the `associates.slug` column.
-- Return a clear API error on duplicate slug creation (409 Conflict) with a suggestion (e.g., "john-smith-2").
-- Store `created_at` on associate profiles so the trainer can see if a slug is new or existing.
-- Never auto-generate slugs from names — require trainer to explicitly confirm the slug.
-
-**Warning signs:** Gap charts show implausible variance (score goes from 1 to 5 randomly across sessions).
-
-**Phase:** PERSIST-02
+**Phase to address:** Email Notifications
 
 ---
 
-### Pitfall 8: Recency Decay Parameter Hardcoded at 0.8 — No Observability
+### Pitfall 7: `recomputeAllReadiness` Called on Cohort Bulk Operations — Blocks Under Load
 
-**What goes wrong:** The 0.8 decay factor is noted in PROJECT.md as "a simple starting point, autoresearch optimizes later." If it's hardcoded inline in the gap computation function, autoresearch cannot iterate on it without modifying application code. The decay factor needs to be configurable without a deploy.
+**What goes wrong:** `readinessService.ts` exports `recomputeAllReadiness(threshold)` which iterates sequentially over all associates (`for...of` loop with `await` inside). It was designed for the settings threshold change. When cohort management introduces bulk operations — assigning 20 associates to a cohort, importing a cohort roster, bulk-enrolling in a curriculum — any code that triggers a readiness recomputation for all affected associates will serialize 20 DB round-trips sequentially. At ~50ms per associate (gap score fetch + readiness computation + associate update), a 20-associate cohort takes 1 second minimum for the bulk operation to complete. The Next.js route handler times out at the Vercel/GCE default (if configured) or the UI appears frozen for 1+ seconds.
 
-**Why it happens:** It's tempting to inline the constant during initial implementation: `const score = rawScore * Math.pow(0.8, sessionAge)`.
+**Why it happens:** The sequential loop was explicitly documented in the code as "safe for MVP (<200 associates)" — but cohort bulk operations were not anticipated as a trigger at the time of writing.
 
-**Consequences:** Autoresearch cannot run experiments on decay parameter without code changes. The optimization loop PROJECT.md envisions for gap algorithm tuning is blocked.
+**Consequences:** Cohort creation/assignment operations time out or produce partial state (some associates recomputed, others not) if the loop is interrupted. The UI shows a spinner for > 1 second on what should be an instant action.
 
-**Prevention:**
-- Store the decay parameter as a named constant in a `config/gap-algorithm.ts` file separate from the implementation, or as a DB-stored config row.
-- For autoresearch compatibility: the function signature should accept decay as a parameter with a default value sourced from config.
-- Document the parameter and its expected range (0.5–0.95) so autoresearch has a search space.
+**How to avoid:** Cohort bulk operations should NOT trigger synchronous bulk readiness recomputation. Instead, mark affected associates as `readinessStale: true` (add a boolean flag to the Associate model) and recompute lazily on next dashboard load for that associate. Alternatively, use `Promise.all` for parallel recomputation — but respect the Supabase connection pool (max 5 in current config) by batching in groups of 5.
 
-**Warning signs:** The decay factor appears as a bare magic number (`0.8`) inside a computation function rather than a named constant.
+**Warning signs:** Creating a cohort with multiple associates takes > 500ms server response time. Checking the DB shows partial updates — some associates have updated readiness, others have stale timestamps.
 
-**Phase:** GAP-01
+**Phase to address:** Cohort Management + Email Notifications
 
 ---
 
-### Pitfall 9: Dashboard Charts Re-Rendering on Every Keystroke
+## Technical Debt Patterns
 
-**What goes wrong:** Recharts (or any charting library) renders SVG. When a trainer views the per-associate detail (DASH-02) and types in notes or interacts with filter controls on the same page, React re-renders the chart on every keystroke. With 10+ data series and 20+ sessions per associate, this causes dropped frames and jank.
+Shortcuts that seem reasonable but create long-term problems specific to this codebase.
 
-**Why it happens:** Chart components placed in the same component tree as interactive inputs share the render cycle. No memoization is applied because the dev machine is fast and the issue is invisible during development.
-
-**Prevention:**
-- Wrap chart components in `React.memo` and ensure the data prop is referentially stable (created once, not inline `{ data: sessions.map(...) }` on every render).
-- Separate chart data computation into a `useMemo` hook keyed on the session array reference.
-- Consider placing the chart in a sub-component with its own isolated state scope.
-
-**Warning signs:** Profiler shows chart re-renders on text input events. Page feels sluggish on filter interactions.
-
-**Phase:** DASH-02
-
----
-
-### Pitfall 10: Rate Limit Service Breaking Under Dual-Write (File vs. DB)
-
-**What goes wrong:** The existing `rateLimitService.ts` is entirely file-based (`data/rate-limits.json`). When Supabase persistence is added, there is a temptation to also migrate rate limits to Supabase for consistency. However, rate limit checks happen on every `/api/public/interview/*` request and need sub-10ms response time. A DB round-trip adds 20-80ms latency per check, doubling or tripling the response time for the public interview agent calls that are already doing LLM inference.
-
-**Why it happens:** "Let's put everything in the DB" thinking during a persistence migration.
-
-**Prevention:**
-- Keep rate limits in the file system (or Redis if available) — they are ephemeral, high-frequency, and do not need relational querying.
-- If migrating rate limits to DB later, use Supabase's edge functions or a Redis layer (Upstash), not Prisma queries in the critical path.
-- Do not migrate rate limits in the same phase as session persistence.
-
-**Warning signs:** Public interview agent API response times increase by 50+ ms after the DB migration. Profiling shows DB queries in the rate limit check path.
-
-**Phase:** PERSIST-01 — explicitly scope out rate limit migration
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Making `cohortId` required on Associate | Cleaner data model | Breaks `persistSessionToDb` upsert for sessions with unassigned associates | Never — keep nullable |
+| Adding associate auth to existing `/api/public/interview/*` endpoints with optional token | Single endpoint handles both flows | IDOR: slug in payload trusted without verification; anonymous flow and auth flow share logic that diverges | Never — split into separate endpoints |
+| Sending notification emails synchronously inside the session save pipeline | Simple linear code | Blocks session save on Resend API latency/failure; inflates save response time by 50-200ms | Never — fire-and-forget or queue |
+| Reusing `nlm_session` cookie for associate auth by adding a role field | No new cookie infrastructure | Single cookie namespace means trainer-session and associate-session can collide; middleware logic becomes a tangle of role checks | Never — separate cookie names per identity type |
+| Computing curriculum-unlocked topics inside the setup wizard's question fetch | No additional state to manage | Serial DB + GitHub API call per page load; 200ms+ latency added to critical path | Only if curriculum table has <10 rows and is heavily cached |
+| Storing cohort assignments in Zustand persist | Cohort info available offline | Stale cohort data persists across sessions; associates appear in wrong cohort after reassignment | Never — cohort is DB-authoritative, never in localStorage |
+| Triggering bulk readiness recompute on every cohort mutation | Readiness always current | Sequential await loop serializes DB calls; blocks route handler for 1+ seconds at 20 associates | Only if explicitly batched with `Promise.all` and pool-size limited |
 
 ---
 
-## Minor Pitfalls
+## Integration Gotchas
+
+Common mistakes when connecting v1.1 features to this specific system.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Associate auth + existing `isAuthenticatedSession()` | Returning `true` from `isAuthenticatedSession` for associate cookies (both are "authenticated") | `isAuthenticatedSession` should remain trainer-only; add separate `isAssociateAuthenticated()` that checks the associate cookie |
+| Cohort FK + `persistSessionToDb` upsert | Making `cohortId` non-nullable on Associate, causing upsert to fail for unassigned associates | `cohortId` nullable; unassigned associates are valid; cohort assignment is a separate operation |
+| Email notifications + existing Resend `/api/send-email` route | Calling `/api/send-email` as an internal fetch from `updateAssociateReadiness` (server → server HTTP call in Docker) | Use Resend SDK directly in a `notificationService.ts` lib — avoid internal HTTP calls from server code |
+| Curriculum schedule + question bank selection | Fetching curriculum state and GitHub files serially in the setup wizard | `Promise.all([fetchCurriculumState(), fetchGitHubFiles()])` — parallel fetch, combine results |
+| Public interview + associate auth | Adding auth as optional middleware on `/api/public/interview/*` | Split: public flow stays public, authenticated flow uses new `/api/associate/interview/*` endpoints |
+| Cohort dashboard + existing trainer roster | Conditionally filtering the existing `/api/trainer` endpoint by cohort via query param | Keep existing endpoint unchanged; add `/api/trainer/cohorts/[cohortId]` for scoped roster — don't add query params that change the shape of an existing response |
+| Automated interview pipeline + gap scoring | Wiring gap scoring into the existing fire-and-forget path at `/api/public/interview/complete` | The existing endpoint must remain anonymous; gap scoring should only run when an authenticated associate session is present via the new endpoint |
 
 ---
 
-### Pitfall 11: Prisma Schema Out of Sync with `InterviewSession` TypeScript Type
+## Performance Traps
 
-**What goes wrong:** The existing `InterviewSession` type in `src/lib/types.ts` contains nested structures: `assessments: Record<string, QuestionAssessment>`, `starterQuestions: StarterQuestion[]`, `questions: ParsedQuestion[]`. If the Prisma schema stores these as a single `JSONB` column, Prisma returns `JsonValue` (not typed), requiring unsafe casts everywhere. If instead the schema fully normalizes into separate tables (`sessions`, `questions`, `assessments`), the TypeScript types need to be restructured — breaking every existing consumer of `InterviewSession`.
+Patterns that work at small scale but fail as cohort data grows.
 
-**Prevention:**
-- Decide the normalization strategy upfront and communicate it in the schema design phase. Recommendation: Store `assessments` as `JSONB` (it's a write-once blob), but normalize `sessions`, `associates`, and `gap_snapshots` into proper tables. This limits the cast surface to one field.
-- Create a `DbInterviewSession` type that mirrors the Prisma return shape and a mapping function `toInterviewSession(db: DbInterviewSession): InterviewSession` so the Zustand store and existing components are not aware of the DB shape.
-
-**Phase:** PERSIST-01
-
----
-
-### Pitfall 12: Gap Trend Direction Computed Inconsistently
-
-**What goes wrong:** The readiness signal requires a "non-negative trend" (PROJECT.md). If trend is computed as `lastScore - firstScore` in some places and as a linear regression slope in others, the badge can show "Ready" on the dashboard but "Declining trend" in the detail view.
-
-**Prevention:**
-- Define trend computation as a single utility function in `src/lib/gap-algorithm.ts`. All consumers call the same function. Never inline trend logic.
-- Document the definition: "trend = average score of most recent 3 sessions minus average score of 3 sessions before that."
-
-**Phase:** GAP-01 / READY-01
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Fetching all associates then filtering by cohort in JS | Cohort dashboard loads slowly; unnecessary data transferred | Add `WHERE cohortId = ?` to the `/api/trainer` cohort variant at the DB query level | ~50+ associates |
+| Loading full session JSON (assessments JSONB blob) for roster view | Roster page slow; high memory per request | Select only scalar fields (`overallTechnicalScore`, `readinessStatus`) for roster; reserve full JSONB load for drill-down | ~20 associates with 10+ sessions each |
+| Sequential `Promise.all` gap score upserts per session | Session save grows linearly with question count | Current code already uses `Promise.all` for upsert — maintain this; do not convert to sequential for curriculum topic tracking additions | ~50+ questions per session |
+| `recomputeAllReadiness` called on settings change with large cohort | Settings save blocks for seconds | Batch in chunks of 5 (match pool size) or move to background job | ~20+ associates |
+| Curriculum schedule fetched per request without cache | Setup wizard latency spikes | Cache unlocked topics per trainer session (15min TTL) | Any scale — it's a serial DB call in the hot path |
 
 ---
 
-### Pitfall 13: `data/` Directory Not Persisted in Docker Volume During Migration
+## Security Mistakes
 
-**What goes wrong:** The dual-write strategy writes to `data/interview-history.json` as the fallback. In Docker on GCE, if the container is restarted without a volume mount for the `data/` directory, the JSON files are wiped. During the migration window, if the DB write fails (and it may, due to pitfall #1 or #3) and the file backup is also lost on restart, sessions are gone permanently.
+Domain-specific security issues for v1.1.
 
-**Prevention:**
-- Verify `docker-compose.yml` has a volume mount for `./data:/app/data` before starting the migration phase.
-- Confirm this is already configured before the first dual-write code lands.
-
-**Warning signs:** History disappears after `docker compose down && docker compose up`.
-
-**Phase:** PERSIST-01 — verify before any code is written
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Accepting `associateSlug` from unauthenticated request body and using it to trigger gap/readiness pipeline | Any anonymous caller can pollute any associate's readiness record with fabricated scores | Slug must come from verified auth token only; public endpoint never triggers readiness pipeline |
+| Issuing associate auth cookies without an expiry or rotation mechanism | A stolen cookie provides permanent access | Set `Max-Age` (recommend 8 hours for interview sessions); use `HttpOnly` + `SameSite=Strict`; rotate on each interview completion |
+| Curriculum schedule accessible without trainer auth | Anonymous callers can enumerate what topics are taught and when | Add `isAuthenticatedSession()` guard to curriculum management API routes; curriculum data is business-sensitive |
+| Associate seeing another associate's gap scores via slug enumeration on `/associate/[slug]` | Associates can compare their readiness to others or confirm slugs exist | Add auth guard to `/associate/[slug]` route: only the authenticated associate for that slug (or a trainer) may view |
+| Email notifications containing readiness classification sent to wrong recipient | Trainer misconfigures notification email; wrong party receives associate data | Never include associate PII in notification subject line; confirm recipient is a trainer account before sending |
 
 ---
 
-## Phase-Specific Warnings
+## UX Pitfalls
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| PERSIST-01: First Supabase write | Connection exhaustion (Pitfall 1), migration lock hang (Pitfall 3), Docker volume loss (Pitfall 13) | Singleton DB client, dual URL config, verify volume mount |
-| PERSIST-01: Dual-write wiring | Silent DB failure divergence (Pitfall 2) | Structured error logging + sync check endpoint |
-| PERSIST-02: Associate profiles | Slug uniqueness collision (Pitfall 7) | DB UNIQUE constraint + 409 error on collision |
-| GAP-01: Gap algorithm | Cold start false alarms (Pitfall 4), hardcoded decay (Pitfall 8) | Minimum sessions gate, named constant in config file |
-| GAP-02: Adaptive setup | Stale Zustand cache (Pitfall 6) | Never persist DB-sourced data in localStorage |
-| DASH-01: Roster view | N+1 queries (Pitfall 5) | Eager-load with Prisma `include`, pre-compute badges on session save |
-| DASH-02: Per-associate detail | Chart re-render jank (Pitfall 9), type mismatch (Pitfall 11) | `React.memo` + `useMemo`, mapping layer between DB and component types |
-| READY-01/02: Readiness signals | Inconsistent trend computation (Pitfall 12) | Single utility function, documented formula |
-| Rate limit migration | Latency regression (Pitfall 10) | Explicitly out-of-scope for this milestone |
+Common user experience mistakes specific to these features.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Associate auth login is the same URL as trainer login | Associates and trainers land on the same form, creating confusion about what credentials to enter | Separate login pages: `/login` (trainer, existing), `/associate/login` (associates) with clearly different visual treatment |
+| Cohort dashboard shows "No Data" for associates < 3 sessions without explanation | Trainers think something is broken for new cohort members | Show "Needs 3 sessions to unlock readiness signal — N/3 complete" per associate in the roster |
+| Curriculum schedule shows all topics including future ones | Associates (or trainers) select a question bank for topics not yet taught; students are tested on material they haven't seen | Default to hiding future-dated topics; add a "preview future topics" toggle for trainers only |
+| Email notification arrives with no action link | Trainer reads "Alex is now Ready" but doesn't know where to go | Every notification email includes a deep link to `/trainer/[slug]` |
+| Design cohesion pass changes button colors/spacing in the interview flow mid-session | Associates in the middle of an interview notice visual changes between questions if any CSS is applied inconsistently | Apply design cohesion pass only to pages outside the interview flow first; interview pages (`/interview`, `/review`) are highest-risk for mid-session visual breakage |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+Things that appear complete but are missing critical pieces.
+
+- [ ] **Associate auth:** Associate can log in and complete an interview — but verify the session's `associateSlug` in the DB matches the auth token's slug (not the payload's slug) before declaring pipeline attribution working.
+- [ ] **Cohort creation:** Cohort row created in DB — but verify that existing sessions for associates added to the cohort are retrospectively visible in the cohort dashboard (cohort assignment is not retroactive by default).
+- [ ] **Curriculum scheduling:** Question bank filter applies during setup — but verify that changing the curriculum date does not retroactively change what question banks were available for past sessions (curriculum state is point-in-time, not retroactive).
+- [ ] **Automated interview pipeline integration:** Public interview session persists to DB — but verify gap scores and readiness actually recomputed for the associate (INT-02 tech debt from v1.0 — fire-and-forget path is confirmed to skip the gap pipeline).
+- [ ] **Email notifications:** Email sends on first test — but verify no duplicate sends when the same session is saved twice (the re-review flow calls `POST /api/history` multiple times for the same session ID).
+- [ ] **Design cohesion:** All pages render with DESIGN.md tokens — but verify that Tailwind's JIT compile didn't purge design-system classes that only appear in dynamically constructed strings (common with color interpolation like `text-${status}-500`).
+- [ ] **Cohort dashboard:** Roster filtered by cohort renders correctly — but verify the "All Associates" view (existing `/trainer` page) still works and is not accidentally scoped to the first cohort.
+
+---
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Middleware conflates trainer/associate auth | MEDIUM | Add route-level auth check as a secondary guard in each trainer route handler — middleware fix alone is not sufficient because sessions may already be mixed |
+| Associate sessions persisted without associateId (orphaned) | MEDIUM | Write a one-time migration script: for orphaned Sessions with a non-null `candidateName`, attempt slug lookup from `data/interview-history.json`; manually re-link via `prisma.session.update({ where: { id }, data: { associateId } })` |
+| Cohort FK causes upsert failures in production | LOW | Make `cohortId` nullable via `prisma migrate` — a non-breaking schema change; no data migration needed |
+| Duplicate notification emails sent | LOW | Add `notificationSentAt` timestamp to Associate row; check before sending; deduplicate by (associateId, newStatus, date) |
+| Curriculum filter breaks question bank loading entirely | MEDIUM | Curriculum filter should be additive (whitelist), never exclusive (blacklist that returns empty). If filter produces empty list, fall back to full question bank and log a warning |
+| Design tokens purged by Tailwind JIT | LOW | Add dynamic color classes to `safelist` in `tailwind.config.ts`; run `npm run build` and inspect CSS output for missing classes |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Middleware conflating trainer/associate auth (Pitfall 1) | Associate Auth | Navigate to `/trainer` while holding only an associate session cookie — must get 403, not 200 or redirect to login |
+| Zustand store slug origin collision (Pitfall 2) | Associate Auth | After associate login + interview complete, query `Session WHERE associateId IS NULL AND date > now-1hr` — must return 0 rows |
+| Public interview endpoint IDOR / breaking change (Pitfall 3) | Associate Auth + Automated Interview Pipeline | Confirm `/api/public/interview/complete` unchanged; new `/api/associate/interview/complete` exists; anonymous test still completes without 401 |
+| Cohort FK breaking associate upsert (Pitfall 4) | Cohort Management — schema design | Run `persistSessionToDb` for an associate with no cohort assigned — must succeed |
+| Curriculum filter serial latency (Pitfall 5) | Curriculum Scheduling | Setup wizard phase 2 (tech selection) loads in < 400ms with curriculum filter active; verify with `console.time` |
+| Email notification on every session, not on status change (Pitfall 6) | Email Notifications | Complete 3 sessions for same associate without status change — confirm 0 emails sent; then trigger status change — confirm exactly 1 email |
+| Bulk readiness recompute blocking cohort operations (Pitfall 7) | Cohort Management + Email Notifications | Create a cohort with 10 associates — route handler response time must be < 500ms; readiness recomputation must not be in the critical path |
 
 ---
 
 ## Sources
 
-- Codebase analysis: `src/lib/rateLimitService.ts`, `src/lib/types.ts`, `src/store/interviewStore.ts`, `src/app/api/history/route.ts`, `src/lib/langchain.ts` — all read directly
-- Project specification: `.planning/PROJECT.md` — read directly
-- Confidence note: Web fetch and web search were unavailable during this research session. All Prisma/Supabase specifics (connection modes, pooler ports, migration lock behavior) are based on well-established documentation patterns from training data (confidence: MEDIUM). The Prisma singleton pattern and Supabase connection string format are stable and broadly documented. Verify current Supabase free tier connection limit (was 60 as of 2024) before implementation.
+- Direct codebase analysis:
+  - `src/middleware.ts` — current auth logic, single-cookie pattern
+  - `src/lib/auth-server.ts` — `isAuthenticatedSession()` implementation
+  - `src/store/interviewStore.ts` — `associateSlug` parameter in `createSession`
+  - `src/app/api/public/interview/complete/route.ts` — fingerprint-only auth, slug from payload
+  - `src/app/api/public/interview/start/route.ts` — rate limit only, no identity
+  - `src/lib/sessionPersistence.ts` — upsert logic, `associateId` linking
+  - `src/lib/readinessService.ts` — `recomputeAllReadiness` sequential loop pattern
+  - `src/lib/gapPersistence.ts` — `saveGapScores` pipeline
+  - `src/app/api/history/route.ts` — dual-write pattern, fire-and-forget gap pipeline
+  - `prisma/schema.prisma` — current Associate model, nullable fields, FK structure
+- Project documentation:
+  - `.planning/PROJECT.md` — v1.1 target features, constraints, decisions
+  - `.planning/milestones/v1.0-MILESTONE-AUDIT.md` — known tech debt INT-02 (public interviews skip gap pipeline), FLOW-01 (no settings UI), 11 tracked debt items
+  - `CLAUDE.md` — architecture overview, dual-write design, auth pattern
+- Confidence note: All pitfalls derived from direct code inspection of this repository. No external web sources were available. Confidence is HIGH for pitfalls grounded in the actual code (auth middleware, upsert logic, readiness loop). Confidence is MEDIUM for performance thresholds (e.g., "breaks at 50 associates") — these are reasonable estimates based on Supabase free tier limits (60 connections, ~50ms query latency) documented in training data.
+
+---
+*Pitfalls research for: Next Level Mock v1.1 Cohort Readiness System*
+*Researched: 2026-04-14*

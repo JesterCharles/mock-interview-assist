@@ -1,149 +1,231 @@
 # Technology Stack
 
-**Project:** Next Level Mock — Readiness Engine (Persistence + Gap Tracking + Dashboard milestone)
-**Researched:** 2026-04-13
-**Scope:** Additions to existing Next.js 16.1.1 / React 19.2.3 / TypeScript 5 / Zustand 5 / LangGraph app
+**Project:** Next Level Mock — Readiness Engine (v1.1 Cohort Readiness System)
+**Researched:** 2026-04-14
+**Confidence:** HIGH for new additions (all versions verified from npm registry)
+**Scope:** Stack ADDITIONS only for v1.1 features. Existing stack (Next.js 16, React 19, Prisma 7, Zustand 5, recharts 3, Resend, Zod 4, Vitest 4) is validated and unchanged.
 
 ---
 
-## Recommended Stack
+## What v1.1 Needs That v1.0 Doesn't
 
-### Database + ORM
+| Feature | Need | Decision |
+|---------|------|----------|
+| Associate auth (magic link / password) | Session issuance, cookie management, JWT tokens | `@supabase/supabase-js` + `@supabase/ssr` — use Supabase Auth email OTP |
+| Cohort management | New Prisma models (Cohort, CurriculumWeek, Enrollment) | Schema additions only — no new library |
+| Curriculum scheduling | Associate interview unlocks based on taught weeks | Logic in existing Next.js API routes — no new library |
+| Email notifications on readiness changes | Triggered emails when status changes to ready/not_ready | Already have Resend (`resend@6.10.0`) — upgrade to 6.11.0 and add batch sends |
+| Scheduled notification delivery | Run notification checks periodically | `node-cron@4.2.1` registered in `src/instrumentation.ts` — same pattern as cleanup job |
+
+---
+
+## New Stack Additions
+
+### Associate Authentication
+
+**Decision: Supabase Auth with email OTP (magic link), not passwords.**
+
+Rationale:
+- Associates are internal training org members — they have email addresses on file
+- Passwords require password reset flows, hashing infrastructure, and forgotten-password UX — all complexity that adds nothing for an internal tool
+- Magic links / OTP are stateless to implement and eliminate credential management
+- Supabase Auth integrates directly with the existing Supabase Postgres instance — no second identity system
+- The `Associate` record already exists in Prisma; Supabase Auth provides a `user.id` (UUID) that can be linked to `Associate.authId` via a new column
+
+**Packages:**
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| Prisma CLI | 7.7.0 | Schema migrations, type generation | Latest stable. Node >=20.19 required — Docker uses node:22-alpine, satisfied. `prisma migrate deploy` works cleanly in CI/Docker build. |
-| @prisma/client | 7.7.0 | Type-safe query builder at runtime | Auto-generated from schema. Full TypeScript inference on queries. Pairs 1:1 with CLI version. |
-| @prisma/adapter-pg | 7.7.0 | pg driver adapter for Prisma | Enables Prisma to use the native `pg` driver instead of its own binary driver — better connection pool control with Supabase's pgBouncer. |
-| pg | 8.20.0 | PostgreSQL driver | Required peer for `@prisma/adapter-pg`. Mature, no breaking changes. |
-| @types/pg | 8.20.0 | TypeScript types for pg | Dev dep only. |
+| @supabase/supabase-js | 2.103.0 | Supabase Auth client — OTP send/verify, session management | Already planned in v1.0 STACK.md as prep for auth. Not yet installed. Current stable confirmed from npm registry. |
+| @supabase/ssr | 0.10.2 | Cookie-based session handling for Next.js App Router | Required for App Router server components to read Supabase auth session from HttpOnly cookies. Peer requires `@supabase/supabase-js ^2.102.1` — satisfied by 2.103.0. No React peer dep. |
 
-**DO NOT use Prisma 5 or 6** — Prisma 7 is current stable with the `postgres` native driver and proper adapter API. Prisma 6 is legacy maintenance mode.
+**What these replace / complement:**
+- The existing trainer single-password auth (`nlm_session` cookie, `auth-context.tsx`) stays unchanged — trainers keep password login
+- Associates get a separate auth flow: OTP email → Supabase session → `associate_session` HttpOnly cookie
+- Two auth domains coexist: trainer (password) + associate (OTP). Both use HttpOnly cookies. Middleware routes are separate.
 
-**Confidence:** HIGH — versions verified from npm registry directly.
+**Confidence:** HIGH — versions verified from npm registry. `@supabase/ssr@0.10.2` peer dep confirmed compatible with `@supabase/supabase-js@2.103.0`.
 
-#### Supabase Connection Pattern for Docker (Persistent Node Server)
+---
 
-This app runs as a persistent Node.js server (Docker + `node server.js`), NOT as serverless functions. This changes the connection pooling recommendation:
+### Scheduled Notifications (Readiness Change Emails)
 
-- Use the **Transaction Pooler** connection string from Supabase dashboard (port 6543, PgBouncer in transaction mode)
-- Add `?connection_limit=5&pool_timeout=10` to the DATABASE_URL
-- Do NOT use `?pgbouncer=true` session mode — that's for serverless/edge where each request gets a connection
-- Set `@prisma/adapter-pg` for explicit pool control; configure `max: 5` in `pg.Pool`
+**Decision: `node-cron` registered in `src/instrumentation.ts` — same pattern as existing cleanup job.**
 
-```
-# .env
-DATABASE_URL="postgresql://[user]:[pass]@[host]:6543/[db]?pgbouncer=true&connection_limit=5&pool_timeout=10&sslmode=require"
-# Also set DIRECT_URL for migrations (bypasses pooler)
-DIRECT_URL="postgresql://[user]:[pass]@[host]:5432/[db]?sslmode=require"
-```
+Rationale:
+- The app already uses `setInterval` in `instrumentation.ts` for the 12-hour cleanup job — this proves the pattern works in the persistent Docker container
+- `node-cron` is a strict upgrade: cron syntax (`0 8 * * *`) is far more readable and maintainable than millisecond intervals for daily/weekly notification windows
+- This app runs as `node server.js` in Docker (not serverless) — the Node.js process stays alive, so cron jobs persist
+- No external scheduling service (Vercel Cron, Inngest, etc.) needed — adding a hosted scheduler for a Docker-deployed solo project is unnecessary complexity and cost
 
-In `prisma/schema.prisma`:
-```prisma
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| node-cron | 4.2.1 | Cron-syntax scheduled jobs for readiness notification checks | Latest stable. Node >=6. TypeScript types included (`dist/cjs/node-cron.d.ts`). No `@types/node-cron` needed. Works in persistent Node.js process — Docker deployment pattern confirmed compatible. |
+
+**Registration pattern (extends existing `src/instrumentation.ts`):**
+
+```typescript
+// src/instrumentation.ts
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { runCleanupJob } = await import('./lib/cleanupService');
+    const cron = await import('node-cron');
+
+    runCleanupJob();
+    setInterval(() => runCleanupJob(), 12 * 60 * 60 * 1000);
+
+    // Daily 8am readiness notification check
+    cron.schedule('0 8 * * *', async () => {
+      const { runReadinessNotifications } = await import('./lib/notificationService');
+      await runReadinessNotifications();
+    });
+  }
 }
 ```
 
-`directUrl` is required so `prisma migrate deploy` bypasses pgBouncer (migrations use DDL statements that fail in transaction pooler mode).
+**What this does NOT need:**
+- Inngest — event-driven workflow orchestration; overkill for one daily email job
+- Vercel Cron — only works on Vercel deployments; this app runs on GCE Docker
+- BullMQ / Redis — job queue for at-scale retry logic; unnecessary for a single-tenant internal tool
+- `@vercel/cron` — same deployment constraint as Vercel Cron
 
-**Confidence:** HIGH — this is the canonical Prisma + Supabase pattern for non-serverless deployments. The `directUrl` field was added precisely for this use case.
-
----
-
-### Supabase Client (For Future Realtime / Auth Prep)
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| @supabase/supabase-js | 2.103.0 | Supabase JS client | Use for future Realtime subscriptions (trainer dashboard live updates) and eventual auth migration. Do NOT use for data queries in MVP — Prisma handles that. |
-| @supabase/ssr | 0.10.2 | Next.js App Router Supabase helpers | Handles cookie-based auth for server components and route handlers. Only needed when Supabase Auth is adopted. MVP can skip this. |
-
-**MVP install decision:** Install `@supabase/supabase-js` now (small, isomorphic). Skip `@supabase/ssr` until auth migration.
-
-**Confidence:** HIGH — versions verified from npm registry. `@supabase/ssr` 0.10.2 peer requires `@supabase/supabase-js: '^2.102.1'` — confirmed compatible with 2.103.0.
+**Confidence:** HIGH — `node-cron@4.2.1` version verified from npm. Instrumentation.ts persistent-process pattern is live and proven in codebase.
 
 ---
 
-### Data Visualization (Trainer Dashboard Charts)
+### Email Notifications (Resend — Already Installed)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| recharts | 3.8.1 | Score trend lines, skill radar/bar charts | Supports React 19 (`peerDependencies: react '^16.8 || ^17 || ^18 || ^19'`). Composable SVG API. Well-documented. Largest React chart ecosystem with most StackOverflow answers. Ships with `LineChart`, `BarChart`, `RadarChart` — covers all NLM dashboard needs. |
+**Decision: No new library. Upgrade Resend from 6.10.0 to 6.11.0 and add notification email templates.**
 
-**DO NOT use @tremor/react** — v3.18.7 (latest stable) has `peerDependencies: { react: '^18.0.0' }`. This app runs React 19.2.3. Tremor v4 (beta only, `4.0.0-beta-tremor-v4.4`) supports React 19 but is not stable. Using a beta UI library for a production dashboard adds unacceptable risk for a solo-developer timeline.
+Rationale:
+- `resend@6.10.0` is already in `package.json` and the send-email route is working
+- `resend@6.11.0` is current stable (confirmed from npm registry)
+- Resend supports batch sends via `resend.batch.send([...])` in v2+ API — available in 6.x
+- Readiness notifications are simple transactional emails (status change → email to associate + trainer) — no scheduling service, no template engine beyond what already exists in `src/lib/email-templates.ts`
 
-**DO NOT use @nivo** — v0.99.0 supports React 19, but brings the full D3 dependency tree (~200KB gzipped additional). Overkill for 3-4 chart types on an internal dashboard.
-
-**DO NOT use victory** — v37.3.6 supports React 19 but has a heavier API surface than recharts for the same use cases. Less commonly used in Next.js App Router apps.
-
-**Confidence:** HIGH — peer dependency compatibility verified directly from npm registry.
-
----
-
-### Gap Tracking Algorithm (No External Library)
-
-**Recommendation: Custom implementation, no npm package.**
-
-The gap tracking algorithm specified in PROJECT.md is:
-- Recency-weighted average per skill/topic: `score_n * 0.8^0 + score_(n-1) * 0.8^1 + ...` normalized
-- Readiness signal: 75% weighted avg + 3 sessions + non-negative trend (last 3 sessions slope >= 0)
-- Next recommended area: lowest weighted score topic
-
-This is ~50 lines of pure TypeScript math. No library adds value here.
-
-**DO NOT use ts-sm2** (or any SM-2 spaced repetition library) — SM-2 is designed for flashcard recall intervals. It models *when to next review* based on pass/fail. NLM needs *which area is weakest* based on scored assessments. Wrong problem domain.
-
-**Confidence:** HIGH — the algorithm is fully specified in PROJECT.md. Verified `ts-sm2` package scope via npm (`0.99.0`) — it is indeed an SM-2 flashcard scheduler, not a gap scoring algorithm.
-
-**Implementation location:** `src/lib/gapAlgorithm.ts` — pure functions, no side effects, easy to unit test and optimize via autoresearch later.
-
----
-
-### Validation (Request Payloads)
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| zod | 4.3.6 | API route input validation | Already the standard for Next.js App Router. Version 4 (latest stable) works with TypeScript 5. Use to validate incoming session payloads before Prisma writes. Do NOT add as a new dep — install and use. |
-
-**Confidence:** HIGH — version verified from npm registry. No React peer dependency; pure TS.
-
----
-
-### Data Fetching (Dashboard Pages)
-
-**Recommendation: Native Next.js App Router fetch + React Server Components.**
-
-Do NOT add TanStack Query (`@tanstack/react-query 5.99.0`) or SWR (`2.4.1`) for the trainer dashboard. Rationale:
-
-- Dashboard data (roster, associate history, gap trends) is read-heavy with no real-time requirement in MVP
-- Next.js App Router Server Components + route handlers provide sufficient data fetching patterns
-- Adding a client-side cache library adds complexity for a solo dev with a 3-5 week timeline
-- If Realtime is needed later (live score updates during trainer-led interviews), add Supabase Realtime subscriptions then
-
-Exception: If the trainer roster page needs client-side polling (e.g., live score updates during an interview), use `useSWR` with a narrow scope. Install `swr 2.4.1` at that point only.
-
-**Confidence:** MEDIUM — pragmatic recommendation based on project constraints. The case for React Server Components is well-established for read-heavy dashboards; TanStack Query adds genuine value only with optimistic updates or complex cache invalidation, which is absent here.
-
----
-
-## Full Installation
+**Upgrade:**
 
 ```bash
-# Database + ORM
-npm install prisma@7.7.0 @prisma/client@7.7.0 @prisma/adapter-pg@7.7.0 pg@8.20.0
-npm install -D @types/pg@8.20.0
-
-# Supabase client (prep for future realtime/auth)
-npm install @supabase/supabase-js@2.103.0
-
-# Charts
-npm install recharts@3.8.1
-
-# Validation (if not already present)
-npm install zod@4.3.6
+npm install resend@6.11.0
 ```
+
+**What to build in-code (no new dependency):**
+- `src/lib/notificationService.ts` — queries associates whose readiness changed since last notification, calls `resend.batch.send()` for batched delivery
+- New email template functions in `src/lib/email-templates.ts` alongside existing `getReportEmailHtml()`
+
+**Confidence:** HIGH — version verified from npm registry. Batch send API confirmed in Resend changelog (available since resend v2.x, well within 6.x scope).
+
+---
+
+### Prisma Schema Additions (No New Library)
+
+New models needed for cohort management. These extend the existing `prisma/schema.prisma` — no library change, just schema migration.
+
+**New models:**
+
+```prisma
+model Cohort {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  trainerId   String?       // links to trainer identifier (not auth system in v1.1 — string ref)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  enrollments Enrollment[]
+  weeks       CurriculumWeek[]
+}
+
+model CurriculumWeek {
+  id        Int      @id @default(autoincrement())
+  cohortId  Int
+  weekNum   Int
+  topic     String
+  taughtAt  DateTime?  // null = not yet taught; set when trainer marks week complete
+  cohort    Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, weekNum])
+}
+
+model Enrollment {
+  id          Int       @id @default(autoincrement())
+  associateId Int
+  cohortId    Int
+  enrolledAt  DateTime  @default(now())
+  associate   Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
+  cohort      Cohort    @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([associateId, cohortId])
+}
+```
+
+**Associate model additions:**
+
+```prisma
+// Add to existing Associate model
+authId              String?   @unique  // Supabase Auth user.id (UUID) — populated on first OTP login
+email               String?   @unique  // needed for OTP delivery
+lastNotifiedAt      DateTime? // tracks when last readiness notification was sent
+```
+
+**Confidence:** HIGH — these are straightforward relational extensions to the existing schema. No new ORM or migration tooling needed; `prisma migrate dev` handles it.
+
+---
+
+## What NOT to Add
+
+| Avoid | Why | What to Use Instead |
+|-------|-----|---------------------|
+| NextAuth.js / Auth.js | Adds a full auth framework for a feature (associate OTP) that Supabase Auth handles natively with 2 packages already planned | `@supabase/supabase-js` + `@supabase/ssr` |
+| Inngest | Event-driven workflow service — valuable for complex retry logic and fan-out, overkill for one daily notification cron | `node-cron` in `instrumentation.ts` |
+| BullMQ + Redis | Persistent job queue — adds a Redis deployment dependency for a Docker-on-GCE app with no queue depth requirements | `node-cron` for scheduling; Resend handles delivery retries |
+| @sendgrid/mail | Adding a second email provider when Resend is already installed and working | Resend `resend@6.11.0` |
+| react-email | Template rendering library — adds React SSR overhead for email templates already handled with simple HTML template functions | Extend `src/lib/email-templates.ts` |
+| jose | JWT signing/verification library — only needed if issuing custom JWTs; Supabase Auth handles token issuance | `@supabase/supabase-js` session management |
+| bcryptjs | Password hashing — only needed for password auth; OTP approach eliminates this entirely | Not needed with magic link / OTP |
+| TanStack Query | Client-side cache for cohort dashboard data — read-heavy, no optimistic updates in v1.1 | Next.js App Router RSC + fetch |
+
+---
+
+## Full v1.1 Install Commands
+
+```bash
+# Associate authentication (Supabase Auth + App Router session helpers)
+npm install @supabase/supabase-js@2.103.0 @supabase/ssr@0.10.2
+
+# Scheduled notifications (cron jobs in persistent Node.js process)
+npm install node-cron@4.2.1
+
+# Resend upgrade (minor — batch send API improvement)
+npm install resend@6.11.0
+```
+
+**Total additions: 3 packages (2 Supabase, 1 cron). 1 upgrade (Resend minor version).**
+
+---
+
+## New Environment Variables
+
+```bash
+# Supabase Auth (OTP delivery needs Supabase project URL + anon key)
+NEXT_PUBLIC_SUPABASE_URL="https://[project].supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="[anon-key]"
+SUPABASE_SERVICE_ROLE_KEY="[service-role-key]"   # server-side only — admin operations
+
+# Already exists — no change needed
+RESEND_API_KEY="..."
+```
+
+Note: `SUPABASE_SERVICE_ROLE_KEY` is needed server-side for admin operations (e.g., creating a user session on behalf of an associate who completes OTP). NEVER expose to the client.
+
+---
+
+## Version Compatibility Matrix
+
+| Package | Version | React Peer | Node Peer | Compatible With Existing Stack |
+|---------|---------|-----------|-----------|-------------------------------|
+| @supabase/supabase-js | 2.103.0 | none | none | YES |
+| @supabase/ssr | 0.10.2 | none | none | YES — only peers on `@supabase/supabase-js ^2.102.1` |
+| node-cron | 4.2.1 | none | >=6.0.0 | YES — Docker uses node:22-alpine |
+| resend | 6.11.0 | none | none | YES — minor upgrade from 6.10.0 |
 
 ---
 
@@ -151,56 +233,24 @@ npm install zod@4.3.6
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Charts | recharts 3.8.1 | @tremor/react 3.18.7 | Tremor v3 requires React ^18, incompatible with React 19.2.3 in this project |
-| Charts | recharts 3.8.1 | @nivo (0.99.0) | Full D3 dependency tree (~200KB extra), overkill for 3-4 chart types |
-| Charts | recharts 3.8.1 | react-chartjs-2 + chart.js | Canvas-based (not SVG), less composable, harder to theme with Tailwind 4 |
-| ORM | Prisma 7.7.0 | Drizzle ORM | Drizzle has excellent DX but Prisma is already in PROJECT.md as a decided choice; consistent with existing decision log |
-| ORM version | Prisma 7.7.0 | Prisma 6.14.0 | Prisma 7 is current stable; no reason to pin to 6 for this greenfield addition |
-| Gap algorithm | Custom TS | ts-sm2 | SM-2 is for flashcard recall intervals, wrong problem domain |
-| Gap algorithm | Custom TS | Any ML library | 50-line weighted average does not need ML infrastructure |
-| Data fetching | RSC + fetch | TanStack Query | Unnecessary complexity for read-heavy dashboard with no optimistic updates in MVP |
-| Supabase client | @supabase/supabase-js | Direct pg via Prisma only | Prisma handles data; Supabase client needed for future Realtime/auth migration path |
-
----
-
-## Environment Variables to Add
-
-```bash
-DATABASE_URL="postgresql://[user]:[pass]@[host]:6543/[db]?pgbouncer=true&connection_limit=5&pool_timeout=10&sslmode=require"
-DIRECT_URL="postgresql://[user]:[pass]@[host]:5432/[db]?sslmode=require"
-NEXT_PUBLIC_SUPABASE_URL="https://[project].supabase.co"   # for future use
-NEXT_PUBLIC_SUPABASE_ANON_KEY="[anon-key]"                 # for future use
-```
-
-`NEXT_PUBLIC_*` Supabase vars can be added to `.env` now but left unused until the Supabase client is actively called. They do not affect the Prisma connection.
-
----
-
-## Key Risk: Prisma + Next.js Standalone Docker Build
-
-Prisma generates a query engine binary at `npm install` time. With Next.js `output: 'standalone'`, the binary must be explicitly copied into the standalone output. Add to `next.config.ts`:
-
-```typescript
-// next.config.ts
-const nextConfig = {
-  output: 'standalone',
-  experimental: {
-    outputFileTracingIncludes: {
-      '/*': ['./node_modules/.prisma/client/**'],
-    },
-  },
-};
-```
-
-Without this, the production Docker container will fail with "PrismaClientInitializationError: Query engine binary not found."
-
-**Confidence:** HIGH — this is a well-documented Next.js standalone + Prisma production issue with a known fix.
+| Associate auth | Supabase Auth OTP | NextAuth.js | Full framework overhead for a feature Supabase handles natively; NextAuth adds session DB tables that duplicate what Supabase Auth already manages |
+| Associate auth | Supabase Auth OTP | Password-based (bcryptjs) | Passwords require reset flows, email verification, and ongoing credential management — unnecessary for internal training tool |
+| Associate auth | Supabase Auth OTP | Custom JWT (jose) | Re-inventing what Supabase Auth already provides with better security defaults and built-in refresh token rotation |
+| Scheduling | node-cron | Inngest | Inngest is a hosted service — adds external dependency and cost for one daily job; Docker-deployed app doesn't benefit from Vercel-optimized scheduling |
+| Scheduling | node-cron | Vercel Cron | Only works on Vercel — app deploys to GCE Docker |
+| Scheduling | node-cron | setInterval (existing pattern) | `setInterval` drifts and lacks cron semantics (exact time-of-day scheduling for "notify at 8am daily") |
+| Email notifications | Resend (existing) | SendGrid | Adding a second email provider when Resend is already installed and working |
 
 ---
 
 ## Sources
 
-- npm registry (direct version queries): prisma@7.7.0, @prisma/client@7.7.0, @prisma/adapter-pg@7.7.0, recharts@3.8.1, @tremor/react@3.18.7, @supabase/supabase-js@2.103.0, @supabase/ssr@0.10.2, zod@4.3.6, pg@8.20.0
-- Peer dependency verification: recharts@3.8.1 React peer confirmed `^19.0.0` compatible; @tremor/react@3.18.7 confirmed React `^18.0.0` only (INCOMPATIBLE)
-- Project constraints: Dockerfile (node:22-alpine), PROJECT.md decisions (Prisma + Supabase, 0.8 decay coefficient, dual-write migration)
-- Node engine requirement: prisma@7.7.0 requires `^20.19 || ^22.12 || >=24.0` — satisfied by Docker node:22-alpine and local node v24.2.0
+- npm registry (version queries): `@supabase/supabase-js@2.103.0`, `@supabase/ssr@0.10.2`, `node-cron@4.2.1`, `resend@6.11.0`
+- Peer dependency verification: `@supabase/ssr@0.10.2` peers `@supabase/supabase-js ^2.102.1` — confirmed compatible with 2.103.0
+- `node-cron@4.2.1` ships its own TypeScript types (`dist/cjs/node-cron.d.ts`) — no `@types/node-cron` needed
+- Existing codebase analysis: `src/instrumentation.ts` confirms persistent-process cron pattern is live and proven; `resend@6.10.0` confirmed in `node_modules`; `@supabase/supabase-js` and `node-cron` confirmed NOT yet installed
+
+---
+
+*Stack research for: Next Level Mock v1.1 Cohort Readiness System*
+*Researched: 2026-04-14*
