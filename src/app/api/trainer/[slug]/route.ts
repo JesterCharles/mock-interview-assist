@@ -66,13 +66,18 @@ export async function GET(
 
     // Map sessions — serialize assessments JSON to simplified SessionSummary shape
     const sessions: SessionSummary[] = associate.sessions.map((s) => {
-      // assessments is stored as JSON — cast and simplify to { questionId, llmScore, finalScore }
-      const rawAssessments = (s.assessments as Record<string, {
-        questionId?: string;
-        llmScore?: number;
-        finalScore?: number;
-        [key: string]: unknown;
-      }>) ?? {}
+      // assessments is stored as JSON — defensively guard against non-object shapes
+      // (array/string/null) before casting. Object.entries on non-objects would throw
+      // or produce bogus output.
+      const rawAssessments =
+        s.assessments && typeof s.assessments === 'object' && !Array.isArray(s.assessments)
+          ? (s.assessments as Record<string, {
+              questionId?: string;
+              llmScore?: number;
+              finalScore?: number;
+              [key: string]: unknown;
+            }>)
+          : {}
 
       const assessments: SessionSummary['assessments'] = {}
       for (const [key, val] of Object.entries(rawAssessments)) {
