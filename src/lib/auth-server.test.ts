@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
 
 process.env.ASSOCIATE_SESSION_SECRET = 'test-secret-for-auth-server';
 
+// Stub server-only (Next.js module; not resolvable in Vitest node env)
+vi.mock('server-only', () => ({}));
+
 // Mock prisma (used transitively by associateService)
 vi.mock('@/lib/prisma', () => {
   const findUnique = vi.fn();
