@@ -13,6 +13,8 @@ export interface RosterAssociate {
 
 // For the detail page (Plan 02)
 export interface AssociateDetail extends RosterAssociate {
+  /** Numeric DB id — required for trainer-only actions like PIN generation (Plan 09-03) */
+  id: number
   sessions: SessionSummary[]
   gapScores: GapScoreEntry[]
 }

@@ -95,6 +95,7 @@ export async function GET(
     }))
 
     const detail: AssociateDetail = {
+      id: associate.id,
       slug: associate.slug,
       displayName: associate.displayName ?? associate.slug,
       readinessStatus: validatedReadinessStatus(associate.readinessStatus),

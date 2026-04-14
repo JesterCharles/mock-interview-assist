@@ -10,6 +10,7 @@ import SessionHistoryList from '@/components/trainer/SessionHistoryList'
 import EmptyGapState from '@/components/trainer/EmptyGapState'
 import GapTrendChart from '@/components/trainer/GapTrendChart'
 import CalibrationView from '@/components/trainer/CalibrationView'
+import { GeneratePinButton } from '@/app/trainer/components/GeneratePinButton'
 import '../trainer.css'
 
 export default function AssociateDetailPage() {
@@ -175,6 +176,12 @@ export default function AssociateDetailPage() {
                 score={detail.readinessScore}
                 status={detail.readinessStatus}
               />
+              <div style={{ marginTop: '16px' }}>
+                <GeneratePinButton
+                  associateId={detail.id}
+                  associateName={detail.displayName}
+                />
+              </div>
             </div>
 
             {/* Asymmetric layout: 60% session history / 40% chart + calibration */}
