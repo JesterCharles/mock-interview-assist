@@ -9,7 +9,7 @@ export interface CohortDTO {
   startDate: string; // ISO-8601 string
   endDate: string | null; // ISO-8601 string or null (schema allows nullable endDate)
   description: string | null;
-  associateCount?: number;
+  associateCount: number;
 }
 
 export interface CohortCreateInput {
