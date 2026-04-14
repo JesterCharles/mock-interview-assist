@@ -38,6 +38,16 @@ export type GapScore = $Result.DefaultSelection<Prisma.$GapScorePayload>
  * 
  */
 export type Settings = $Result.DefaultSelection<Prisma.$SettingsPayload>
+/**
+ * Model Cohort
+ * 
+ */
+export type Cohort = $Result.DefaultSelection<Prisma.$CohortPayload>
+/**
+ * Model CurriculumWeek
+ * 
+ */
+export type CurriculumWeek = $Result.DefaultSelection<Prisma.$CurriculumWeekPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -209,6 +219,26 @@ export class PrismaClient<
     * ```
     */
   get settings(): Prisma.SettingsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.cohort`: Exposes CRUD operations for the **Cohort** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Cohorts
+    * const cohorts = await prisma.cohort.findMany()
+    * ```
+    */
+  get cohort(): Prisma.CohortDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.curriculumWeek`: Exposes CRUD operations for the **CurriculumWeek** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CurriculumWeeks
+    * const curriculumWeeks = await prisma.curriculumWeek.findMany()
+    * ```
+    */
+  get curriculumWeek(): Prisma.CurriculumWeekDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -647,7 +677,9 @@ export namespace Prisma {
     Associate: 'Associate',
     Session: 'Session',
     GapScore: 'GapScore',
-    Settings: 'Settings'
+    Settings: 'Settings',
+    Cohort: 'Cohort',
+    CurriculumWeek: 'CurriculumWeek'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -663,7 +695,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "healthCheck" | "associate" | "session" | "gapScore" | "settings"
+      modelProps: "healthCheck" | "associate" | "session" | "gapScore" | "settings" | "cohort" | "curriculumWeek"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1037,6 +1069,154 @@ export namespace Prisma {
           }
         }
       }
+      Cohort: {
+        payload: Prisma.$CohortPayload<ExtArgs>
+        fields: Prisma.CohortFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CohortFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CohortFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          findFirst: {
+            args: Prisma.CohortFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CohortFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          findMany: {
+            args: Prisma.CohortFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>[]
+          }
+          create: {
+            args: Prisma.CohortCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          createMany: {
+            args: Prisma.CohortCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CohortCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>[]
+          }
+          delete: {
+            args: Prisma.CohortDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          update: {
+            args: Prisma.CohortUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          deleteMany: {
+            args: Prisma.CohortDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CohortUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CohortUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>[]
+          }
+          upsert: {
+            args: Prisma.CohortUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CohortPayload>
+          }
+          aggregate: {
+            args: Prisma.CohortAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCohort>
+          }
+          groupBy: {
+            args: Prisma.CohortGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CohortGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CohortCountArgs<ExtArgs>
+            result: $Utils.Optional<CohortCountAggregateOutputType> | number
+          }
+        }
+      }
+      CurriculumWeek: {
+        payload: Prisma.$CurriculumWeekPayload<ExtArgs>
+        fields: Prisma.CurriculumWeekFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CurriculumWeekFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CurriculumWeekFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          findFirst: {
+            args: Prisma.CurriculumWeekFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CurriculumWeekFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          findMany: {
+            args: Prisma.CurriculumWeekFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>[]
+          }
+          create: {
+            args: Prisma.CurriculumWeekCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          createMany: {
+            args: Prisma.CurriculumWeekCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CurriculumWeekCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>[]
+          }
+          delete: {
+            args: Prisma.CurriculumWeekDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          update: {
+            args: Prisma.CurriculumWeekUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          deleteMany: {
+            args: Prisma.CurriculumWeekDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CurriculumWeekUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CurriculumWeekUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>[]
+          }
+          upsert: {
+            args: Prisma.CurriculumWeekUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CurriculumWeekPayload>
+          }
+          aggregate: {
+            args: Prisma.CurriculumWeekAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCurriculumWeek>
+          }
+          groupBy: {
+            args: Prisma.CurriculumWeekGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CurriculumWeekGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CurriculumWeekCountArgs<ExtArgs>
+            result: $Utils.Optional<CurriculumWeekCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1150,6 +1330,8 @@ export namespace Prisma {
     session?: SessionOmit
     gapScore?: GapScoreOmit
     settings?: SettingsOmit
+    cohort?: CohortOmit
+    curriculumWeek?: CurriculumWeekOmit
   }
 
   /* Types for Logging */
@@ -1262,6 +1444,55 @@ export namespace Prisma {
    */
   export type AssociateCountOutputTypeCountGapScoresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GapScoreWhereInput
+  }
+
+
+  /**
+   * Count Type CohortCountOutputType
+   */
+
+  export type CohortCountOutputType = {
+    associates: number
+    sessions: number
+    curriculumWeeks: number
+  }
+
+  export type CohortCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associates?: boolean | CohortCountOutputTypeCountAssociatesArgs
+    sessions?: boolean | CohortCountOutputTypeCountSessionsArgs
+    curriculumWeeks?: boolean | CohortCountOutputTypeCountCurriculumWeeksArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CohortCountOutputType without action
+   */
+  export type CohortCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CohortCountOutputType
+     */
+    select?: CohortCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CohortCountOutputType without action
+   */
+  export type CohortCountOutputTypeCountAssociatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AssociateWhereInput
+  }
+
+  /**
+   * CohortCountOutputType without action
+   */
+  export type CohortCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionWhereInput
+  }
+
+  /**
+   * CohortCountOutputType without action
+   */
+  export type CohortCountOutputTypeCountCurriculumWeeksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CurriculumWeekWhereInput
   }
 
 
@@ -2278,10 +2509,12 @@ export namespace Prisma {
 
   export type AssociateAvgAggregateOutputType = {
     id: number | null
+    cohortId: number | null
   }
 
   export type AssociateSumAggregateOutputType = {
     id: number | null
+    cohortId: number | null
   }
 
   export type AssociateMinAggregateOutputType = {
@@ -2293,6 +2526,7 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    cohortId: number | null
   }
 
   export type AssociateMaxAggregateOutputType = {
@@ -2304,6 +2538,7 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    cohortId: number | null
   }
 
   export type AssociateCountAggregateOutputType = {
@@ -2315,16 +2550,19 @@ export namespace Prisma {
     readinessStatus: number
     recommendedArea: number
     lastComputedAt: number
+    cohortId: number
     _all: number
   }
 
 
   export type AssociateAvgAggregateInputType = {
     id?: true
+    cohortId?: true
   }
 
   export type AssociateSumAggregateInputType = {
     id?: true
+    cohortId?: true
   }
 
   export type AssociateMinAggregateInputType = {
@@ -2336,6 +2574,7 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    cohortId?: true
   }
 
   export type AssociateMaxAggregateInputType = {
@@ -2347,6 +2586,7 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    cohortId?: true
   }
 
   export type AssociateCountAggregateInputType = {
@@ -2358,6 +2598,7 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    cohortId?: true
     _all?: true
   }
 
@@ -2456,6 +2697,7 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    cohortId: number | null
     _count: AssociateCountAggregateOutputType | null
     _avg: AssociateAvgAggregateOutputType | null
     _sum: AssociateSumAggregateOutputType | null
@@ -2486,6 +2728,8 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    cohortId?: boolean
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
@@ -2500,6 +2744,8 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    cohortId?: boolean
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
   }, ExtArgs["result"]["associate"]>
 
   export type AssociateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2511,6 +2757,8 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    cohortId?: boolean
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
   }, ExtArgs["result"]["associate"]>
 
   export type AssociateSelectScalar = {
@@ -2522,20 +2770,27 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    cohortId?: boolean
   }
 
-  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt" | "readinessStatus" | "recommendedArea" | "lastComputedAt", ExtArgs["result"]["associate"]>
+  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt" | "readinessStatus" | "recommendedArea" | "lastComputedAt" | "cohortId", ExtArgs["result"]["associate"]>
   export type AssociateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type AssociateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type AssociateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AssociateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
+  }
+  export type AssociateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | Associate$cohortArgs<ExtArgs>
+  }
 
   export type $AssociatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Associate"
     objects: {
+      cohort: Prisma.$CohortPayload<ExtArgs> | null
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       gapScores: Prisma.$GapScorePayload<ExtArgs>[]
     }
@@ -2548,6 +2803,7 @@ export namespace Prisma {
       readinessStatus: string | null
       recommendedArea: string | null
       lastComputedAt: Date | null
+      cohortId: number | null
     }, ExtArgs["result"]["associate"]>
     composites: {}
   }
@@ -2942,6 +3198,7 @@ export namespace Prisma {
    */
   export interface Prisma__AssociateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    cohort<T extends Associate$cohortArgs<ExtArgs> = {}>(args?: Subset<T, Associate$cohortArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     sessions<T extends Associate$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Associate$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     gapScores<T extends Associate$gapScoresArgs<ExtArgs> = {}>(args?: Subset<T, Associate$gapScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -2981,6 +3238,7 @@ export namespace Prisma {
     readonly readinessStatus: FieldRef<"Associate", 'String'>
     readonly recommendedArea: FieldRef<"Associate", 'String'>
     readonly lastComputedAt: FieldRef<"Associate", 'DateTime'>
+    readonly cohortId: FieldRef<"Associate", 'Int'>
   }
     
 
@@ -3235,6 +3493,10 @@ export namespace Prisma {
      */
     data: AssociateCreateManyInput | AssociateCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AssociateIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3305,6 +3567,10 @@ export namespace Prisma {
      * Limit how many Associates to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AssociateIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3371,6 +3637,25 @@ export namespace Prisma {
      * Limit how many Associates to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Associate.cohort
+   */
+  export type Associate$cohortArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    where?: CohortWhereInput
   }
 
   /**
@@ -3457,6 +3742,7 @@ export namespace Prisma {
     overallTechnicalScore: number | null
     overallSoftSkillScore: number | null
     associateId: number | null
+    cohortId: number | null
   }
 
   export type SessionSumAggregateOutputType = {
@@ -3464,6 +3750,7 @@ export namespace Prisma {
     overallTechnicalScore: number | null
     overallSoftSkillScore: number | null
     associateId: number | null
+    cohortId: number | null
   }
 
   export type SessionMinAggregateOutputType = {
@@ -3478,6 +3765,9 @@ export namespace Prisma {
     technicalFeedback: string | null
     softSkillFeedback: string | null
     associateId: number | null
+    cohortId: number | null
+    mode: string | null
+    readinessRecomputeStatus: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3494,6 +3784,9 @@ export namespace Prisma {
     technicalFeedback: string | null
     softSkillFeedback: string | null
     associateId: number | null
+    cohortId: number | null
+    mode: string | null
+    readinessRecomputeStatus: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3515,6 +3808,9 @@ export namespace Prisma {
     assessments: number
     techMap: number
     associateId: number
+    cohortId: number
+    mode: number
+    readinessRecomputeStatus: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -3526,6 +3822,7 @@ export namespace Prisma {
     overallTechnicalScore?: true
     overallSoftSkillScore?: true
     associateId?: true
+    cohortId?: true
   }
 
   export type SessionSumAggregateInputType = {
@@ -3533,6 +3830,7 @@ export namespace Prisma {
     overallTechnicalScore?: true
     overallSoftSkillScore?: true
     associateId?: true
+    cohortId?: true
   }
 
   export type SessionMinAggregateInputType = {
@@ -3547,6 +3845,9 @@ export namespace Prisma {
     technicalFeedback?: true
     softSkillFeedback?: true
     associateId?: true
+    cohortId?: true
+    mode?: true
+    readinessRecomputeStatus?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3563,6 +3864,9 @@ export namespace Prisma {
     technicalFeedback?: true
     softSkillFeedback?: true
     associateId?: true
+    cohortId?: true
+    mode?: true
+    readinessRecomputeStatus?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3584,6 +3888,9 @@ export namespace Prisma {
     assessments?: true
     techMap?: true
     associateId?: true
+    cohortId?: true
+    mode?: true
+    readinessRecomputeStatus?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3692,6 +3999,9 @@ export namespace Prisma {
     assessments: JsonValue
     techMap: JsonValue | null
     associateId: number | null
+    cohortId: number | null
+    mode: string
+    readinessRecomputeStatus: string
     createdAt: Date
     updatedAt: Date
     _count: SessionCountAggregateOutputType | null
@@ -3732,9 +4042,13 @@ export namespace Prisma {
     assessments?: boolean
     techMap?: boolean
     associateId?: boolean
+    cohortId?: boolean
+    mode?: boolean
+    readinessRecomputeStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3754,9 +4068,13 @@ export namespace Prisma {
     assessments?: boolean
     techMap?: boolean
     associateId?: boolean
+    cohortId?: boolean
+    mode?: boolean
+    readinessRecomputeStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3776,9 +4094,13 @@ export namespace Prisma {
     assessments?: boolean
     techMap?: boolean
     associateId?: boolean
+    cohortId?: boolean
+    mode?: boolean
+    readinessRecomputeStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectScalar = {
@@ -3798,25 +4120,32 @@ export namespace Prisma {
     assessments?: boolean
     techMap?: boolean
     associateId?: boolean
+    cohortId?: boolean
+    mode?: boolean
+    readinessRecomputeStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "techMap" | "associateId" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "techMap" | "associateId" | "cohortId" | "mode" | "readinessRecomputeStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }
   export type SessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }
   export type SessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associate?: boolean | Session$associateArgs<ExtArgs>
+    cohort?: boolean | Session$cohortArgs<ExtArgs>
   }
 
   export type $SessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Session"
     objects: {
       associate: Prisma.$AssociatePayload<ExtArgs> | null
+      cohort: Prisma.$CohortPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3835,6 +4164,9 @@ export namespace Prisma {
       assessments: Prisma.JsonValue
       techMap: Prisma.JsonValue | null
       associateId: number | null
+      cohortId: number | null
+      mode: string
+      readinessRecomputeStatus: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["session"]>
@@ -4232,6 +4564,7 @@ export namespace Prisma {
   export interface Prisma__SessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     associate<T extends Session$associateArgs<ExtArgs> = {}>(args?: Subset<T, Session$associateArgs<ExtArgs>>): Prisma__AssociateClient<$Result.GetResult<Prisma.$AssociatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    cohort<T extends Session$cohortArgs<ExtArgs> = {}>(args?: Subset<T, Session$cohortArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4277,6 +4610,9 @@ export namespace Prisma {
     readonly assessments: FieldRef<"Session", 'Json'>
     readonly techMap: FieldRef<"Session", 'Json'>
     readonly associateId: FieldRef<"Session", 'Int'>
+    readonly cohortId: FieldRef<"Session", 'Int'>
+    readonly mode: FieldRef<"Session", 'String'>
+    readonly readinessRecomputeStatus: FieldRef<"Session", 'String'>
     readonly createdAt: FieldRef<"Session", 'DateTime'>
     readonly updatedAt: FieldRef<"Session", 'DateTime'>
   }
@@ -4696,6 +5032,25 @@ export namespace Prisma {
      */
     include?: AssociateInclude<ExtArgs> | null
     where?: AssociateWhereInput
+  }
+
+  /**
+   * Session.cohort
+   */
+  export type Session$cohortArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    where?: CohortWhereInput
   }
 
   /**
@@ -6861,6 +7216,2324 @@ export namespace Prisma {
 
 
   /**
+   * Model Cohort
+   */
+
+  export type AggregateCohort = {
+    _count: CohortCountAggregateOutputType | null
+    _avg: CohortAvgAggregateOutputType | null
+    _sum: CohortSumAggregateOutputType | null
+    _min: CohortMinAggregateOutputType | null
+    _max: CohortMaxAggregateOutputType | null
+  }
+
+  export type CohortAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CohortSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CohortMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    startDate: Date | null
+    endDate: Date | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CohortMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    startDate: Date | null
+    endDate: Date | null
+    description: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CohortCountAggregateOutputType = {
+    id: number
+    name: number
+    startDate: number
+    endDate: number
+    description: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CohortAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type CohortSumAggregateInputType = {
+    id?: true
+  }
+
+  export type CohortMinAggregateInputType = {
+    id?: true
+    name?: true
+    startDate?: true
+    endDate?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CohortMaxAggregateInputType = {
+    id?: true
+    name?: true
+    startDate?: true
+    endDate?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CohortCountAggregateInputType = {
+    id?: true
+    name?: true
+    startDate?: true
+    endDate?: true
+    description?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CohortAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Cohort to aggregate.
+     */
+    where?: CohortWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cohorts to fetch.
+     */
+    orderBy?: CohortOrderByWithRelationInput | CohortOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CohortWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cohorts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cohorts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Cohorts
+    **/
+    _count?: true | CohortCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CohortAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CohortSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CohortMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CohortMaxAggregateInputType
+  }
+
+  export type GetCohortAggregateType<T extends CohortAggregateArgs> = {
+        [P in keyof T & keyof AggregateCohort]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCohort[P]>
+      : GetScalarType<T[P], AggregateCohort[P]>
+  }
+
+
+
+
+  export type CohortGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CohortWhereInput
+    orderBy?: CohortOrderByWithAggregationInput | CohortOrderByWithAggregationInput[]
+    by: CohortScalarFieldEnum[] | CohortScalarFieldEnum
+    having?: CohortScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CohortCountAggregateInputType | true
+    _avg?: CohortAvgAggregateInputType
+    _sum?: CohortSumAggregateInputType
+    _min?: CohortMinAggregateInputType
+    _max?: CohortMaxAggregateInputType
+  }
+
+  export type CohortGroupByOutputType = {
+    id: number
+    name: string
+    startDate: Date
+    endDate: Date | null
+    description: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CohortCountAggregateOutputType | null
+    _avg: CohortAvgAggregateOutputType | null
+    _sum: CohortSumAggregateOutputType | null
+    _min: CohortMinAggregateOutputType | null
+    _max: CohortMaxAggregateOutputType | null
+  }
+
+  type GetCohortGroupByPayload<T extends CohortGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CohortGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CohortGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CohortGroupByOutputType[P]>
+            : GetScalarType<T[P], CohortGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CohortSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    associates?: boolean | Cohort$associatesArgs<ExtArgs>
+    sessions?: boolean | Cohort$sessionsArgs<ExtArgs>
+    curriculumWeeks?: boolean | Cohort$curriculumWeeksArgs<ExtArgs>
+    _count?: boolean | CohortCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cohort"]>
+
+  export type CohortSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["cohort"]>
+
+  export type CohortSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["cohort"]>
+
+  export type CohortSelectScalar = {
+    id?: boolean
+    name?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    description?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CohortOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["cohort"]>
+  export type CohortInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associates?: boolean | Cohort$associatesArgs<ExtArgs>
+    sessions?: boolean | Cohort$sessionsArgs<ExtArgs>
+    curriculumWeeks?: boolean | Cohort$curriculumWeeksArgs<ExtArgs>
+    _count?: boolean | CohortCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CohortIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CohortIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $CohortPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Cohort"
+    objects: {
+      associates: Prisma.$AssociatePayload<ExtArgs>[]
+      sessions: Prisma.$SessionPayload<ExtArgs>[]
+      curriculumWeeks: Prisma.$CurriculumWeekPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      startDate: Date
+      endDate: Date | null
+      description: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["cohort"]>
+    composites: {}
+  }
+
+  type CohortGetPayload<S extends boolean | null | undefined | CohortDefaultArgs> = $Result.GetResult<Prisma.$CohortPayload, S>
+
+  type CohortCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CohortFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CohortCountAggregateInputType | true
+    }
+
+  export interface CohortDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Cohort'], meta: { name: 'Cohort' } }
+    /**
+     * Find zero or one Cohort that matches the filter.
+     * @param {CohortFindUniqueArgs} args - Arguments to find a Cohort
+     * @example
+     * // Get one Cohort
+     * const cohort = await prisma.cohort.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CohortFindUniqueArgs>(args: SelectSubset<T, CohortFindUniqueArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Cohort that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CohortFindUniqueOrThrowArgs} args - Arguments to find a Cohort
+     * @example
+     * // Get one Cohort
+     * const cohort = await prisma.cohort.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CohortFindUniqueOrThrowArgs>(args: SelectSubset<T, CohortFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Cohort that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortFindFirstArgs} args - Arguments to find a Cohort
+     * @example
+     * // Get one Cohort
+     * const cohort = await prisma.cohort.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CohortFindFirstArgs>(args?: SelectSubset<T, CohortFindFirstArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Cohort that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortFindFirstOrThrowArgs} args - Arguments to find a Cohort
+     * @example
+     * // Get one Cohort
+     * const cohort = await prisma.cohort.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CohortFindFirstOrThrowArgs>(args?: SelectSubset<T, CohortFindFirstOrThrowArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Cohorts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Cohorts
+     * const cohorts = await prisma.cohort.findMany()
+     * 
+     * // Get first 10 Cohorts
+     * const cohorts = await prisma.cohort.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const cohortWithIdOnly = await prisma.cohort.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CohortFindManyArgs>(args?: SelectSubset<T, CohortFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Cohort.
+     * @param {CohortCreateArgs} args - Arguments to create a Cohort.
+     * @example
+     * // Create one Cohort
+     * const Cohort = await prisma.cohort.create({
+     *   data: {
+     *     // ... data to create a Cohort
+     *   }
+     * })
+     * 
+     */
+    create<T extends CohortCreateArgs>(args: SelectSubset<T, CohortCreateArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Cohorts.
+     * @param {CohortCreateManyArgs} args - Arguments to create many Cohorts.
+     * @example
+     * // Create many Cohorts
+     * const cohort = await prisma.cohort.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CohortCreateManyArgs>(args?: SelectSubset<T, CohortCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Cohorts and returns the data saved in the database.
+     * @param {CohortCreateManyAndReturnArgs} args - Arguments to create many Cohorts.
+     * @example
+     * // Create many Cohorts
+     * const cohort = await prisma.cohort.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Cohorts and only return the `id`
+     * const cohortWithIdOnly = await prisma.cohort.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CohortCreateManyAndReturnArgs>(args?: SelectSubset<T, CohortCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Cohort.
+     * @param {CohortDeleteArgs} args - Arguments to delete one Cohort.
+     * @example
+     * // Delete one Cohort
+     * const Cohort = await prisma.cohort.delete({
+     *   where: {
+     *     // ... filter to delete one Cohort
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CohortDeleteArgs>(args: SelectSubset<T, CohortDeleteArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Cohort.
+     * @param {CohortUpdateArgs} args - Arguments to update one Cohort.
+     * @example
+     * // Update one Cohort
+     * const cohort = await prisma.cohort.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CohortUpdateArgs>(args: SelectSubset<T, CohortUpdateArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Cohorts.
+     * @param {CohortDeleteManyArgs} args - Arguments to filter Cohorts to delete.
+     * @example
+     * // Delete a few Cohorts
+     * const { count } = await prisma.cohort.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CohortDeleteManyArgs>(args?: SelectSubset<T, CohortDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Cohorts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Cohorts
+     * const cohort = await prisma.cohort.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CohortUpdateManyArgs>(args: SelectSubset<T, CohortUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Cohorts and returns the data updated in the database.
+     * @param {CohortUpdateManyAndReturnArgs} args - Arguments to update many Cohorts.
+     * @example
+     * // Update many Cohorts
+     * const cohort = await prisma.cohort.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Cohorts and only return the `id`
+     * const cohortWithIdOnly = await prisma.cohort.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CohortUpdateManyAndReturnArgs>(args: SelectSubset<T, CohortUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Cohort.
+     * @param {CohortUpsertArgs} args - Arguments to update or create a Cohort.
+     * @example
+     * // Update or create a Cohort
+     * const cohort = await prisma.cohort.upsert({
+     *   create: {
+     *     // ... data to create a Cohort
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Cohort we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CohortUpsertArgs>(args: SelectSubset<T, CohortUpsertArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Cohorts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortCountArgs} args - Arguments to filter Cohorts to count.
+     * @example
+     * // Count the number of Cohorts
+     * const count = await prisma.cohort.count({
+     *   where: {
+     *     // ... the filter for the Cohorts we want to count
+     *   }
+     * })
+    **/
+    count<T extends CohortCountArgs>(
+      args?: Subset<T, CohortCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CohortCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Cohort.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CohortAggregateArgs>(args: Subset<T, CohortAggregateArgs>): Prisma.PrismaPromise<GetCohortAggregateType<T>>
+
+    /**
+     * Group by Cohort.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CohortGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CohortGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CohortGroupByArgs['orderBy'] }
+        : { orderBy?: CohortGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CohortGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCohortGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Cohort model
+   */
+  readonly fields: CohortFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Cohort.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CohortClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    associates<T extends Cohort$associatesArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$associatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssociatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sessions<T extends Cohort$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    curriculumWeeks<T extends Cohort$curriculumWeeksArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$curriculumWeeksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Cohort model
+   */
+  interface CohortFieldRefs {
+    readonly id: FieldRef<"Cohort", 'Int'>
+    readonly name: FieldRef<"Cohort", 'String'>
+    readonly startDate: FieldRef<"Cohort", 'DateTime'>
+    readonly endDate: FieldRef<"Cohort", 'DateTime'>
+    readonly description: FieldRef<"Cohort", 'String'>
+    readonly createdAt: FieldRef<"Cohort", 'DateTime'>
+    readonly updatedAt: FieldRef<"Cohort", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Cohort findUnique
+   */
+  export type CohortFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter, which Cohort to fetch.
+     */
+    where: CohortWhereUniqueInput
+  }
+
+  /**
+   * Cohort findUniqueOrThrow
+   */
+  export type CohortFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter, which Cohort to fetch.
+     */
+    where: CohortWhereUniqueInput
+  }
+
+  /**
+   * Cohort findFirst
+   */
+  export type CohortFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter, which Cohort to fetch.
+     */
+    where?: CohortWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cohorts to fetch.
+     */
+    orderBy?: CohortOrderByWithRelationInput | CohortOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Cohorts.
+     */
+    cursor?: CohortWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cohorts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cohorts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Cohorts.
+     */
+    distinct?: CohortScalarFieldEnum | CohortScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort findFirstOrThrow
+   */
+  export type CohortFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter, which Cohort to fetch.
+     */
+    where?: CohortWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cohorts to fetch.
+     */
+    orderBy?: CohortOrderByWithRelationInput | CohortOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Cohorts.
+     */
+    cursor?: CohortWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cohorts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cohorts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Cohorts.
+     */
+    distinct?: CohortScalarFieldEnum | CohortScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort findMany
+   */
+  export type CohortFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter, which Cohorts to fetch.
+     */
+    where?: CohortWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cohorts to fetch.
+     */
+    orderBy?: CohortOrderByWithRelationInput | CohortOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Cohorts.
+     */
+    cursor?: CohortWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cohorts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cohorts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Cohorts.
+     */
+    distinct?: CohortScalarFieldEnum | CohortScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort create
+   */
+  export type CohortCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Cohort.
+     */
+    data: XOR<CohortCreateInput, CohortUncheckedCreateInput>
+  }
+
+  /**
+   * Cohort createMany
+   */
+  export type CohortCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Cohorts.
+     */
+    data: CohortCreateManyInput | CohortCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Cohort createManyAndReturn
+   */
+  export type CohortCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * The data used to create many Cohorts.
+     */
+    data: CohortCreateManyInput | CohortCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Cohort update
+   */
+  export type CohortUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Cohort.
+     */
+    data: XOR<CohortUpdateInput, CohortUncheckedUpdateInput>
+    /**
+     * Choose, which Cohort to update.
+     */
+    where: CohortWhereUniqueInput
+  }
+
+  /**
+   * Cohort updateMany
+   */
+  export type CohortUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Cohorts.
+     */
+    data: XOR<CohortUpdateManyMutationInput, CohortUncheckedUpdateManyInput>
+    /**
+     * Filter which Cohorts to update
+     */
+    where?: CohortWhereInput
+    /**
+     * Limit how many Cohorts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cohort updateManyAndReturn
+   */
+  export type CohortUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * The data used to update Cohorts.
+     */
+    data: XOR<CohortUpdateManyMutationInput, CohortUncheckedUpdateManyInput>
+    /**
+     * Filter which Cohorts to update
+     */
+    where?: CohortWhereInput
+    /**
+     * Limit how many Cohorts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cohort upsert
+   */
+  export type CohortUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Cohort to update in case it exists.
+     */
+    where: CohortWhereUniqueInput
+    /**
+     * In case the Cohort found by the `where` argument doesn't exist, create a new Cohort with this data.
+     */
+    create: XOR<CohortCreateInput, CohortUncheckedCreateInput>
+    /**
+     * In case the Cohort was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CohortUpdateInput, CohortUncheckedUpdateInput>
+  }
+
+  /**
+   * Cohort delete
+   */
+  export type CohortDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    /**
+     * Filter which Cohort to delete.
+     */
+    where: CohortWhereUniqueInput
+  }
+
+  /**
+   * Cohort deleteMany
+   */
+  export type CohortDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Cohorts to delete
+     */
+    where?: CohortWhereInput
+    /**
+     * Limit how many Cohorts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cohort.associates
+   */
+  export type Cohort$associatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Associate
+     */
+    select?: AssociateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Associate
+     */
+    omit?: AssociateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AssociateInclude<ExtArgs> | null
+    where?: AssociateWhereInput
+    orderBy?: AssociateOrderByWithRelationInput | AssociateOrderByWithRelationInput[]
+    cursor?: AssociateWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AssociateScalarFieldEnum | AssociateScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort.sessions
+   */
+  export type Cohort$sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    where?: SessionWhereInput
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    cursor?: SessionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort.curriculumWeeks
+   */
+  export type Cohort$curriculumWeeksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    where?: CurriculumWeekWhereInput
+    orderBy?: CurriculumWeekOrderByWithRelationInput | CurriculumWeekOrderByWithRelationInput[]
+    cursor?: CurriculumWeekWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CurriculumWeekScalarFieldEnum | CurriculumWeekScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort without action
+   */
+  export type CohortDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CurriculumWeek
+   */
+
+  export type AggregateCurriculumWeek = {
+    _count: CurriculumWeekCountAggregateOutputType | null
+    _avg: CurriculumWeekAvgAggregateOutputType | null
+    _sum: CurriculumWeekSumAggregateOutputType | null
+    _min: CurriculumWeekMinAggregateOutputType | null
+    _max: CurriculumWeekMaxAggregateOutputType | null
+  }
+
+  export type CurriculumWeekAvgAggregateOutputType = {
+    id: number | null
+    cohortId: number | null
+    weekNumber: number | null
+  }
+
+  export type CurriculumWeekSumAggregateOutputType = {
+    id: number | null
+    cohortId: number | null
+    weekNumber: number | null
+  }
+
+  export type CurriculumWeekMinAggregateOutputType = {
+    id: number | null
+    cohortId: number | null
+    weekNumber: number | null
+    skillName: string | null
+    skillSlug: string | null
+    startDate: Date | null
+  }
+
+  export type CurriculumWeekMaxAggregateOutputType = {
+    id: number | null
+    cohortId: number | null
+    weekNumber: number | null
+    skillName: string | null
+    skillSlug: string | null
+    startDate: Date | null
+  }
+
+  export type CurriculumWeekCountAggregateOutputType = {
+    id: number
+    cohortId: number
+    weekNumber: number
+    skillName: number
+    skillSlug: number
+    topicTags: number
+    startDate: number
+    _all: number
+  }
+
+
+  export type CurriculumWeekAvgAggregateInputType = {
+    id?: true
+    cohortId?: true
+    weekNumber?: true
+  }
+
+  export type CurriculumWeekSumAggregateInputType = {
+    id?: true
+    cohortId?: true
+    weekNumber?: true
+  }
+
+  export type CurriculumWeekMinAggregateInputType = {
+    id?: true
+    cohortId?: true
+    weekNumber?: true
+    skillName?: true
+    skillSlug?: true
+    startDate?: true
+  }
+
+  export type CurriculumWeekMaxAggregateInputType = {
+    id?: true
+    cohortId?: true
+    weekNumber?: true
+    skillName?: true
+    skillSlug?: true
+    startDate?: true
+  }
+
+  export type CurriculumWeekCountAggregateInputType = {
+    id?: true
+    cohortId?: true
+    weekNumber?: true
+    skillName?: true
+    skillSlug?: true
+    topicTags?: true
+    startDate?: true
+    _all?: true
+  }
+
+  export type CurriculumWeekAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CurriculumWeek to aggregate.
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CurriculumWeeks to fetch.
+     */
+    orderBy?: CurriculumWeekOrderByWithRelationInput | CurriculumWeekOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CurriculumWeekWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CurriculumWeeks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CurriculumWeeks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CurriculumWeeks
+    **/
+    _count?: true | CurriculumWeekCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CurriculumWeekAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CurriculumWeekSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CurriculumWeekMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CurriculumWeekMaxAggregateInputType
+  }
+
+  export type GetCurriculumWeekAggregateType<T extends CurriculumWeekAggregateArgs> = {
+        [P in keyof T & keyof AggregateCurriculumWeek]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCurriculumWeek[P]>
+      : GetScalarType<T[P], AggregateCurriculumWeek[P]>
+  }
+
+
+
+
+  export type CurriculumWeekGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CurriculumWeekWhereInput
+    orderBy?: CurriculumWeekOrderByWithAggregationInput | CurriculumWeekOrderByWithAggregationInput[]
+    by: CurriculumWeekScalarFieldEnum[] | CurriculumWeekScalarFieldEnum
+    having?: CurriculumWeekScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CurriculumWeekCountAggregateInputType | true
+    _avg?: CurriculumWeekAvgAggregateInputType
+    _sum?: CurriculumWeekSumAggregateInputType
+    _min?: CurriculumWeekMinAggregateInputType
+    _max?: CurriculumWeekMaxAggregateInputType
+  }
+
+  export type CurriculumWeekGroupByOutputType = {
+    id: number
+    cohortId: number
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags: string[]
+    startDate: Date
+    _count: CurriculumWeekCountAggregateOutputType | null
+    _avg: CurriculumWeekAvgAggregateOutputType | null
+    _sum: CurriculumWeekSumAggregateOutputType | null
+    _min: CurriculumWeekMinAggregateOutputType | null
+    _max: CurriculumWeekMaxAggregateOutputType | null
+  }
+
+  type GetCurriculumWeekGroupByPayload<T extends CurriculumWeekGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CurriculumWeekGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CurriculumWeekGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CurriculumWeekGroupByOutputType[P]>
+            : GetScalarType<T[P], CurriculumWeekGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CurriculumWeekSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    cohortId?: boolean
+    weekNumber?: boolean
+    skillName?: boolean
+    skillSlug?: boolean
+    topicTags?: boolean
+    startDate?: boolean
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["curriculumWeek"]>
+
+  export type CurriculumWeekSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    cohortId?: boolean
+    weekNumber?: boolean
+    skillName?: boolean
+    skillSlug?: boolean
+    topicTags?: boolean
+    startDate?: boolean
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["curriculumWeek"]>
+
+  export type CurriculumWeekSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    cohortId?: boolean
+    weekNumber?: boolean
+    skillName?: boolean
+    skillSlug?: boolean
+    topicTags?: boolean
+    startDate?: boolean
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["curriculumWeek"]>
+
+  export type CurriculumWeekSelectScalar = {
+    id?: boolean
+    cohortId?: boolean
+    weekNumber?: boolean
+    skillName?: boolean
+    skillSlug?: boolean
+    topicTags?: boolean
+    startDate?: boolean
+  }
+
+  export type CurriculumWeekOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "cohortId" | "weekNumber" | "skillName" | "skillSlug" | "topicTags" | "startDate", ExtArgs["result"]["curriculumWeek"]>
+  export type CurriculumWeekInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }
+  export type CurriculumWeekIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }
+  export type CurriculumWeekIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CohortDefaultArgs<ExtArgs>
+  }
+
+  export type $CurriculumWeekPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CurriculumWeek"
+    objects: {
+      cohort: Prisma.$CohortPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      cohortId: number
+      weekNumber: number
+      skillName: string
+      skillSlug: string
+      topicTags: string[]
+      startDate: Date
+    }, ExtArgs["result"]["curriculumWeek"]>
+    composites: {}
+  }
+
+  type CurriculumWeekGetPayload<S extends boolean | null | undefined | CurriculumWeekDefaultArgs> = $Result.GetResult<Prisma.$CurriculumWeekPayload, S>
+
+  type CurriculumWeekCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CurriculumWeekFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CurriculumWeekCountAggregateInputType | true
+    }
+
+  export interface CurriculumWeekDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CurriculumWeek'], meta: { name: 'CurriculumWeek' } }
+    /**
+     * Find zero or one CurriculumWeek that matches the filter.
+     * @param {CurriculumWeekFindUniqueArgs} args - Arguments to find a CurriculumWeek
+     * @example
+     * // Get one CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CurriculumWeekFindUniqueArgs>(args: SelectSubset<T, CurriculumWeekFindUniqueArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CurriculumWeek that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CurriculumWeekFindUniqueOrThrowArgs} args - Arguments to find a CurriculumWeek
+     * @example
+     * // Get one CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CurriculumWeekFindUniqueOrThrowArgs>(args: SelectSubset<T, CurriculumWeekFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CurriculumWeek that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekFindFirstArgs} args - Arguments to find a CurriculumWeek
+     * @example
+     * // Get one CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CurriculumWeekFindFirstArgs>(args?: SelectSubset<T, CurriculumWeekFindFirstArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CurriculumWeek that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekFindFirstOrThrowArgs} args - Arguments to find a CurriculumWeek
+     * @example
+     * // Get one CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CurriculumWeekFindFirstOrThrowArgs>(args?: SelectSubset<T, CurriculumWeekFindFirstOrThrowArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CurriculumWeeks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CurriculumWeeks
+     * const curriculumWeeks = await prisma.curriculumWeek.findMany()
+     * 
+     * // Get first 10 CurriculumWeeks
+     * const curriculumWeeks = await prisma.curriculumWeek.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const curriculumWeekWithIdOnly = await prisma.curriculumWeek.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CurriculumWeekFindManyArgs>(args?: SelectSubset<T, CurriculumWeekFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CurriculumWeek.
+     * @param {CurriculumWeekCreateArgs} args - Arguments to create a CurriculumWeek.
+     * @example
+     * // Create one CurriculumWeek
+     * const CurriculumWeek = await prisma.curriculumWeek.create({
+     *   data: {
+     *     // ... data to create a CurriculumWeek
+     *   }
+     * })
+     * 
+     */
+    create<T extends CurriculumWeekCreateArgs>(args: SelectSubset<T, CurriculumWeekCreateArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CurriculumWeeks.
+     * @param {CurriculumWeekCreateManyArgs} args - Arguments to create many CurriculumWeeks.
+     * @example
+     * // Create many CurriculumWeeks
+     * const curriculumWeek = await prisma.curriculumWeek.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CurriculumWeekCreateManyArgs>(args?: SelectSubset<T, CurriculumWeekCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CurriculumWeeks and returns the data saved in the database.
+     * @param {CurriculumWeekCreateManyAndReturnArgs} args - Arguments to create many CurriculumWeeks.
+     * @example
+     * // Create many CurriculumWeeks
+     * const curriculumWeek = await prisma.curriculumWeek.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CurriculumWeeks and only return the `id`
+     * const curriculumWeekWithIdOnly = await prisma.curriculumWeek.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CurriculumWeekCreateManyAndReturnArgs>(args?: SelectSubset<T, CurriculumWeekCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CurriculumWeek.
+     * @param {CurriculumWeekDeleteArgs} args - Arguments to delete one CurriculumWeek.
+     * @example
+     * // Delete one CurriculumWeek
+     * const CurriculumWeek = await prisma.curriculumWeek.delete({
+     *   where: {
+     *     // ... filter to delete one CurriculumWeek
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CurriculumWeekDeleteArgs>(args: SelectSubset<T, CurriculumWeekDeleteArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CurriculumWeek.
+     * @param {CurriculumWeekUpdateArgs} args - Arguments to update one CurriculumWeek.
+     * @example
+     * // Update one CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CurriculumWeekUpdateArgs>(args: SelectSubset<T, CurriculumWeekUpdateArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CurriculumWeeks.
+     * @param {CurriculumWeekDeleteManyArgs} args - Arguments to filter CurriculumWeeks to delete.
+     * @example
+     * // Delete a few CurriculumWeeks
+     * const { count } = await prisma.curriculumWeek.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CurriculumWeekDeleteManyArgs>(args?: SelectSubset<T, CurriculumWeekDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CurriculumWeeks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CurriculumWeeks
+     * const curriculumWeek = await prisma.curriculumWeek.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CurriculumWeekUpdateManyArgs>(args: SelectSubset<T, CurriculumWeekUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CurriculumWeeks and returns the data updated in the database.
+     * @param {CurriculumWeekUpdateManyAndReturnArgs} args - Arguments to update many CurriculumWeeks.
+     * @example
+     * // Update many CurriculumWeeks
+     * const curriculumWeek = await prisma.curriculumWeek.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CurriculumWeeks and only return the `id`
+     * const curriculumWeekWithIdOnly = await prisma.curriculumWeek.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CurriculumWeekUpdateManyAndReturnArgs>(args: SelectSubset<T, CurriculumWeekUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CurriculumWeek.
+     * @param {CurriculumWeekUpsertArgs} args - Arguments to update or create a CurriculumWeek.
+     * @example
+     * // Update or create a CurriculumWeek
+     * const curriculumWeek = await prisma.curriculumWeek.upsert({
+     *   create: {
+     *     // ... data to create a CurriculumWeek
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CurriculumWeek we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CurriculumWeekUpsertArgs>(args: SelectSubset<T, CurriculumWeekUpsertArgs<ExtArgs>>): Prisma__CurriculumWeekClient<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CurriculumWeeks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekCountArgs} args - Arguments to filter CurriculumWeeks to count.
+     * @example
+     * // Count the number of CurriculumWeeks
+     * const count = await prisma.curriculumWeek.count({
+     *   where: {
+     *     // ... the filter for the CurriculumWeeks we want to count
+     *   }
+     * })
+    **/
+    count<T extends CurriculumWeekCountArgs>(
+      args?: Subset<T, CurriculumWeekCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CurriculumWeekCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CurriculumWeek.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CurriculumWeekAggregateArgs>(args: Subset<T, CurriculumWeekAggregateArgs>): Prisma.PrismaPromise<GetCurriculumWeekAggregateType<T>>
+
+    /**
+     * Group by CurriculumWeek.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CurriculumWeekGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CurriculumWeekGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CurriculumWeekGroupByArgs['orderBy'] }
+        : { orderBy?: CurriculumWeekGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CurriculumWeekGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCurriculumWeekGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CurriculumWeek model
+   */
+  readonly fields: CurriculumWeekFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CurriculumWeek.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CurriculumWeekClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cohort<T extends CohortDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CohortDefaultArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CurriculumWeek model
+   */
+  interface CurriculumWeekFieldRefs {
+    readonly id: FieldRef<"CurriculumWeek", 'Int'>
+    readonly cohortId: FieldRef<"CurriculumWeek", 'Int'>
+    readonly weekNumber: FieldRef<"CurriculumWeek", 'Int'>
+    readonly skillName: FieldRef<"CurriculumWeek", 'String'>
+    readonly skillSlug: FieldRef<"CurriculumWeek", 'String'>
+    readonly topicTags: FieldRef<"CurriculumWeek", 'String[]'>
+    readonly startDate: FieldRef<"CurriculumWeek", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CurriculumWeek findUnique
+   */
+  export type CurriculumWeekFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter, which CurriculumWeek to fetch.
+     */
+    where: CurriculumWeekWhereUniqueInput
+  }
+
+  /**
+   * CurriculumWeek findUniqueOrThrow
+   */
+  export type CurriculumWeekFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter, which CurriculumWeek to fetch.
+     */
+    where: CurriculumWeekWhereUniqueInput
+  }
+
+  /**
+   * CurriculumWeek findFirst
+   */
+  export type CurriculumWeekFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter, which CurriculumWeek to fetch.
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CurriculumWeeks to fetch.
+     */
+    orderBy?: CurriculumWeekOrderByWithRelationInput | CurriculumWeekOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CurriculumWeeks.
+     */
+    cursor?: CurriculumWeekWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CurriculumWeeks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CurriculumWeeks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CurriculumWeeks.
+     */
+    distinct?: CurriculumWeekScalarFieldEnum | CurriculumWeekScalarFieldEnum[]
+  }
+
+  /**
+   * CurriculumWeek findFirstOrThrow
+   */
+  export type CurriculumWeekFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter, which CurriculumWeek to fetch.
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CurriculumWeeks to fetch.
+     */
+    orderBy?: CurriculumWeekOrderByWithRelationInput | CurriculumWeekOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CurriculumWeeks.
+     */
+    cursor?: CurriculumWeekWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CurriculumWeeks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CurriculumWeeks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CurriculumWeeks.
+     */
+    distinct?: CurriculumWeekScalarFieldEnum | CurriculumWeekScalarFieldEnum[]
+  }
+
+  /**
+   * CurriculumWeek findMany
+   */
+  export type CurriculumWeekFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter, which CurriculumWeeks to fetch.
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CurriculumWeeks to fetch.
+     */
+    orderBy?: CurriculumWeekOrderByWithRelationInput | CurriculumWeekOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CurriculumWeeks.
+     */
+    cursor?: CurriculumWeekWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CurriculumWeeks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CurriculumWeeks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CurriculumWeeks.
+     */
+    distinct?: CurriculumWeekScalarFieldEnum | CurriculumWeekScalarFieldEnum[]
+  }
+
+  /**
+   * CurriculumWeek create
+   */
+  export type CurriculumWeekCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CurriculumWeek.
+     */
+    data: XOR<CurriculumWeekCreateInput, CurriculumWeekUncheckedCreateInput>
+  }
+
+  /**
+   * CurriculumWeek createMany
+   */
+  export type CurriculumWeekCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CurriculumWeeks.
+     */
+    data: CurriculumWeekCreateManyInput | CurriculumWeekCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CurriculumWeek createManyAndReturn
+   */
+  export type CurriculumWeekCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * The data used to create many CurriculumWeeks.
+     */
+    data: CurriculumWeekCreateManyInput | CurriculumWeekCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CurriculumWeek update
+   */
+  export type CurriculumWeekUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CurriculumWeek.
+     */
+    data: XOR<CurriculumWeekUpdateInput, CurriculumWeekUncheckedUpdateInput>
+    /**
+     * Choose, which CurriculumWeek to update.
+     */
+    where: CurriculumWeekWhereUniqueInput
+  }
+
+  /**
+   * CurriculumWeek updateMany
+   */
+  export type CurriculumWeekUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CurriculumWeeks.
+     */
+    data: XOR<CurriculumWeekUpdateManyMutationInput, CurriculumWeekUncheckedUpdateManyInput>
+    /**
+     * Filter which CurriculumWeeks to update
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * Limit how many CurriculumWeeks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CurriculumWeek updateManyAndReturn
+   */
+  export type CurriculumWeekUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * The data used to update CurriculumWeeks.
+     */
+    data: XOR<CurriculumWeekUpdateManyMutationInput, CurriculumWeekUncheckedUpdateManyInput>
+    /**
+     * Filter which CurriculumWeeks to update
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * Limit how many CurriculumWeeks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CurriculumWeek upsert
+   */
+  export type CurriculumWeekUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CurriculumWeek to update in case it exists.
+     */
+    where: CurriculumWeekWhereUniqueInput
+    /**
+     * In case the CurriculumWeek found by the `where` argument doesn't exist, create a new CurriculumWeek with this data.
+     */
+    create: XOR<CurriculumWeekCreateInput, CurriculumWeekUncheckedCreateInput>
+    /**
+     * In case the CurriculumWeek was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CurriculumWeekUpdateInput, CurriculumWeekUncheckedUpdateInput>
+  }
+
+  /**
+   * CurriculumWeek delete
+   */
+  export type CurriculumWeekDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+    /**
+     * Filter which CurriculumWeek to delete.
+     */
+    where: CurriculumWeekWhereUniqueInput
+  }
+
+  /**
+   * CurriculumWeek deleteMany
+   */
+  export type CurriculumWeekDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CurriculumWeeks to delete
+     */
+    where?: CurriculumWeekWhereInput
+    /**
+     * Limit how many CurriculumWeeks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CurriculumWeek without action
+   */
+  export type CurriculumWeekDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CurriculumWeek
+     */
+    select?: CurriculumWeekSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CurriculumWeek
+     */
+    omit?: CurriculumWeekOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CurriculumWeekInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6890,7 +9563,8 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     readinessStatus: 'readinessStatus',
     recommendedArea: 'recommendedArea',
-    lastComputedAt: 'lastComputedAt'
+    lastComputedAt: 'lastComputedAt',
+    cohortId: 'cohortId'
   };
 
   export type AssociateScalarFieldEnum = (typeof AssociateScalarFieldEnum)[keyof typeof AssociateScalarFieldEnum]
@@ -6913,6 +9587,9 @@ export namespace Prisma {
     assessments: 'assessments',
     techMap: 'techMap',
     associateId: 'associateId',
+    cohortId: 'cohortId',
+    mode: 'mode',
+    readinessRecomputeStatus: 'readinessRecomputeStatus',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -6940,6 +9617,32 @@ export namespace Prisma {
   };
 
   export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
+
+
+  export const CohortScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    description: 'description',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CohortScalarFieldEnum = (typeof CohortScalarFieldEnum)[keyof typeof CohortScalarFieldEnum]
+
+
+  export const CurriculumWeekScalarFieldEnum: {
+    id: 'id',
+    cohortId: 'cohortId',
+    weekNumber: 'weekNumber',
+    skillName: 'skillName',
+    skillSlug: 'skillSlug',
+    topicTags: 'topicTags',
+    startDate: 'startDate'
+  };
+
+  export type CurriculumWeekScalarFieldEnum = (typeof CurriculumWeekScalarFieldEnum)[keyof typeof CurriculumWeekScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7119,6 +9822,8 @@ export namespace Prisma {
     readinessStatus?: StringNullableFilter<"Associate"> | string | null
     recommendedArea?: StringNullableFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    cohortId?: IntNullableFilter<"Associate"> | number | null
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
   }
@@ -7132,6 +9837,8 @@ export namespace Prisma {
     readinessStatus?: SortOrderInput | SortOrder
     recommendedArea?: SortOrderInput | SortOrder
     lastComputedAt?: SortOrderInput | SortOrder
+    cohortId?: SortOrderInput | SortOrder
+    cohort?: CohortOrderByWithRelationInput
     sessions?: SessionOrderByRelationAggregateInput
     gapScores?: GapScoreOrderByRelationAggregateInput
   }
@@ -7148,6 +9855,8 @@ export namespace Prisma {
     readinessStatus?: StringNullableFilter<"Associate"> | string | null
     recommendedArea?: StringNullableFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    cohortId?: IntNullableFilter<"Associate"> | number | null
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
   }, "id" | "slug">
@@ -7161,6 +9870,7 @@ export namespace Prisma {
     readinessStatus?: SortOrderInput | SortOrder
     recommendedArea?: SortOrderInput | SortOrder
     lastComputedAt?: SortOrderInput | SortOrder
+    cohortId?: SortOrderInput | SortOrder
     _count?: AssociateCountOrderByAggregateInput
     _avg?: AssociateAvgOrderByAggregateInput
     _max?: AssociateMaxOrderByAggregateInput
@@ -7180,6 +9890,7 @@ export namespace Prisma {
     readinessStatus?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     recommendedArea?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableWithAggregatesFilter<"Associate"> | Date | string | null
+    cohortId?: IntNullableWithAggregatesFilter<"Associate"> | number | null
   }
 
   export type SessionWhereInput = {
@@ -7202,9 +9913,13 @@ export namespace Prisma {
     assessments?: JsonFilter<"Session">
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
+    cohortId?: IntNullableFilter<"Session"> | number | null
+    mode?: StringFilter<"Session"> | string
+    readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
     associate?: XOR<AssociateNullableScalarRelationFilter, AssociateWhereInput> | null
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
   }
 
   export type SessionOrderByWithRelationInput = {
@@ -7224,9 +9939,13 @@ export namespace Prisma {
     assessments?: SortOrder
     techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
+    cohortId?: SortOrderInput | SortOrder
+    mode?: SortOrder
+    readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     associate?: AssociateOrderByWithRelationInput
+    cohort?: CohortOrderByWithRelationInput
   }
 
   export type SessionWhereUniqueInput = Prisma.AtLeast<{
@@ -7249,9 +9968,13 @@ export namespace Prisma {
     assessments?: JsonFilter<"Session">
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
+    cohortId?: IntNullableFilter<"Session"> | number | null
+    mode?: StringFilter<"Session"> | string
+    readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
     associate?: XOR<AssociateNullableScalarRelationFilter, AssociateWhereInput> | null
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
   }, "id">
 
   export type SessionOrderByWithAggregationInput = {
@@ -7271,6 +9994,9 @@ export namespace Prisma {
     assessments?: SortOrder
     techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
+    cohortId?: SortOrderInput | SortOrder
+    mode?: SortOrder
+    readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: SessionCountOrderByAggregateInput
@@ -7300,6 +10026,9 @@ export namespace Prisma {
     assessments?: JsonWithAggregatesFilter<"Session">
     techMap?: JsonNullableWithAggregatesFilter<"Session">
     associateId?: IntNullableWithAggregatesFilter<"Session"> | number | null
+    cohortId?: IntNullableWithAggregatesFilter<"Session"> | number | null
+    mode?: StringWithAggregatesFilter<"Session"> | string
+    readinessRecomputeStatus?: StringWithAggregatesFilter<"Session"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
   }
@@ -7416,6 +10145,147 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Settings"> | Date | string
   }
 
+  export type CohortWhereInput = {
+    AND?: CohortWhereInput | CohortWhereInput[]
+    OR?: CohortWhereInput[]
+    NOT?: CohortWhereInput | CohortWhereInput[]
+    id?: IntFilter<"Cohort"> | number
+    name?: StringFilter<"Cohort"> | string
+    startDate?: DateTimeFilter<"Cohort"> | Date | string
+    endDate?: DateTimeNullableFilter<"Cohort"> | Date | string | null
+    description?: StringNullableFilter<"Cohort"> | string | null
+    createdAt?: DateTimeFilter<"Cohort"> | Date | string
+    updatedAt?: DateTimeFilter<"Cohort"> | Date | string
+    associates?: AssociateListRelationFilter
+    sessions?: SessionListRelationFilter
+    curriculumWeeks?: CurriculumWeekListRelationFilter
+  }
+
+  export type CohortOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    associates?: AssociateOrderByRelationAggregateInput
+    sessions?: SessionOrderByRelationAggregateInput
+    curriculumWeeks?: CurriculumWeekOrderByRelationAggregateInput
+  }
+
+  export type CohortWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: CohortWhereInput | CohortWhereInput[]
+    OR?: CohortWhereInput[]
+    NOT?: CohortWhereInput | CohortWhereInput[]
+    name?: StringFilter<"Cohort"> | string
+    startDate?: DateTimeFilter<"Cohort"> | Date | string
+    endDate?: DateTimeNullableFilter<"Cohort"> | Date | string | null
+    description?: StringNullableFilter<"Cohort"> | string | null
+    createdAt?: DateTimeFilter<"Cohort"> | Date | string
+    updatedAt?: DateTimeFilter<"Cohort"> | Date | string
+    associates?: AssociateListRelationFilter
+    sessions?: SessionListRelationFilter
+    curriculumWeeks?: CurriculumWeekListRelationFilter
+  }, "id">
+
+  export type CohortOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CohortCountOrderByAggregateInput
+    _avg?: CohortAvgOrderByAggregateInput
+    _max?: CohortMaxOrderByAggregateInput
+    _min?: CohortMinOrderByAggregateInput
+    _sum?: CohortSumOrderByAggregateInput
+  }
+
+  export type CohortScalarWhereWithAggregatesInput = {
+    AND?: CohortScalarWhereWithAggregatesInput | CohortScalarWhereWithAggregatesInput[]
+    OR?: CohortScalarWhereWithAggregatesInput[]
+    NOT?: CohortScalarWhereWithAggregatesInput | CohortScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Cohort"> | number
+    name?: StringWithAggregatesFilter<"Cohort"> | string
+    startDate?: DateTimeWithAggregatesFilter<"Cohort"> | Date | string
+    endDate?: DateTimeNullableWithAggregatesFilter<"Cohort"> | Date | string | null
+    description?: StringNullableWithAggregatesFilter<"Cohort"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Cohort"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Cohort"> | Date | string
+  }
+
+  export type CurriculumWeekWhereInput = {
+    AND?: CurriculumWeekWhereInput | CurriculumWeekWhereInput[]
+    OR?: CurriculumWeekWhereInput[]
+    NOT?: CurriculumWeekWhereInput | CurriculumWeekWhereInput[]
+    id?: IntFilter<"CurriculumWeek"> | number
+    cohortId?: IntFilter<"CurriculumWeek"> | number
+    weekNumber?: IntFilter<"CurriculumWeek"> | number
+    skillName?: StringFilter<"CurriculumWeek"> | string
+    skillSlug?: StringFilter<"CurriculumWeek"> | string
+    topicTags?: StringNullableListFilter<"CurriculumWeek">
+    startDate?: DateTimeFilter<"CurriculumWeek"> | Date | string
+    cohort?: XOR<CohortScalarRelationFilter, CohortWhereInput>
+  }
+
+  export type CurriculumWeekOrderByWithRelationInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+    skillName?: SortOrder
+    skillSlug?: SortOrder
+    topicTags?: SortOrder
+    startDate?: SortOrder
+    cohort?: CohortOrderByWithRelationInput
+  }
+
+  export type CurriculumWeekWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    cohortId_weekNumber?: CurriculumWeekCohortIdWeekNumberCompoundUniqueInput
+    AND?: CurriculumWeekWhereInput | CurriculumWeekWhereInput[]
+    OR?: CurriculumWeekWhereInput[]
+    NOT?: CurriculumWeekWhereInput | CurriculumWeekWhereInput[]
+    cohortId?: IntFilter<"CurriculumWeek"> | number
+    weekNumber?: IntFilter<"CurriculumWeek"> | number
+    skillName?: StringFilter<"CurriculumWeek"> | string
+    skillSlug?: StringFilter<"CurriculumWeek"> | string
+    topicTags?: StringNullableListFilter<"CurriculumWeek">
+    startDate?: DateTimeFilter<"CurriculumWeek"> | Date | string
+    cohort?: XOR<CohortScalarRelationFilter, CohortWhereInput>
+  }, "id" | "cohortId_weekNumber">
+
+  export type CurriculumWeekOrderByWithAggregationInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+    skillName?: SortOrder
+    skillSlug?: SortOrder
+    topicTags?: SortOrder
+    startDate?: SortOrder
+    _count?: CurriculumWeekCountOrderByAggregateInput
+    _avg?: CurriculumWeekAvgOrderByAggregateInput
+    _max?: CurriculumWeekMaxOrderByAggregateInput
+    _min?: CurriculumWeekMinOrderByAggregateInput
+    _sum?: CurriculumWeekSumOrderByAggregateInput
+  }
+
+  export type CurriculumWeekScalarWhereWithAggregatesInput = {
+    AND?: CurriculumWeekScalarWhereWithAggregatesInput | CurriculumWeekScalarWhereWithAggregatesInput[]
+    OR?: CurriculumWeekScalarWhereWithAggregatesInput[]
+    NOT?: CurriculumWeekScalarWhereWithAggregatesInput | CurriculumWeekScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CurriculumWeek"> | number
+    cohortId?: IntWithAggregatesFilter<"CurriculumWeek"> | number
+    weekNumber?: IntWithAggregatesFilter<"CurriculumWeek"> | number
+    skillName?: StringWithAggregatesFilter<"CurriculumWeek"> | string
+    skillSlug?: StringWithAggregatesFilter<"CurriculumWeek"> | string
+    topicTags?: StringNullableListFilter<"CurriculumWeek">
+    startDate?: DateTimeWithAggregatesFilter<"CurriculumWeek"> | Date | string
+  }
+
   export type HealthCheckCreateInput = {
     createdAt?: Date | string
   }
@@ -7456,6 +10326,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohort?: CohortCreateNestedOneWithoutAssociatesInput
     sessions?: SessionCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
@@ -7469,6 +10340,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohortId?: number | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
@@ -7481,6 +10353,7 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
@@ -7494,6 +10367,7 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
   }
@@ -7507,6 +10381,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohortId?: number | null
   }
 
   export type AssociateUpdateManyMutationInput = {
@@ -7528,6 +10403,7 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type SessionCreateInput = {
@@ -7546,9 +10422,12 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     associate?: AssociateCreateNestedOneWithoutSessionsInput
+    cohort?: CohortCreateNestedOneWithoutSessionsInput
   }
 
   export type SessionUncheckedCreateInput = {
@@ -7568,6 +10447,9 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
+    cohortId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7588,9 +10470,12 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associate?: AssociateUpdateOneWithoutSessionsNestedInput
+    cohort?: CohortUpdateOneWithoutSessionsNestedInput
   }
 
   export type SessionUncheckedUpdateInput = {
@@ -7610,6 +10495,9 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7631,6 +10519,9 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
+    cohortId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7651,6 +10542,8 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7672,6 +10565,9 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7785,6 +10681,151 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     readinessThreshold?: FloatFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CohortCreateInput = {
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateCreateNestedManyWithoutCohortInput
+    sessions?: SessionCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUncheckedCreateInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortCreateManyInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CohortUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CohortUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekCreateInput = {
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+    cohort: CohortCreateNestedOneWithoutCurriculumWeeksInput
+  }
+
+  export type CurriculumWeekUncheckedCreateInput = {
+    id?: number
+    cohortId: number
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+  }
+
+  export type CurriculumWeekUpdateInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    cohort?: CohortUpdateOneRequiredWithoutCurriculumWeeksNestedInput
+  }
+
+  export type CurriculumWeekUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    cohortId?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekCreateManyInput = {
+    id?: number
+    cohortId: number
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+  }
+
+  export type CurriculumWeekUpdateManyMutationInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    cohortId?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -7903,6 +10944,22 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type CohortNullableScalarRelationFilter = {
+    is?: CohortWhereInput | null
+    isNot?: CohortWhereInput | null
+  }
+
   export type SessionListRelationFilter = {
     every?: SessionWhereInput
     some?: SessionWhereInput
@@ -7937,10 +10994,12 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type AssociateAvgOrderByAggregateInput = {
     id?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type AssociateMaxOrderByAggregateInput = {
@@ -7952,6 +11011,7 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type AssociateMinOrderByAggregateInput = {
@@ -7963,10 +11023,12 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type AssociateSumOrderByAggregateInput = {
     id?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -8017,6 +11079,22 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -8076,17 +11154,6 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type AssociateNullableScalarRelationFilter = {
     is?: AssociateWhereInput | null
     isNot?: AssociateWhereInput | null
@@ -8109,6 +11176,9 @@ export namespace Prisma {
     assessments?: SortOrder
     techMap?: SortOrder
     associateId?: SortOrder
+    cohortId?: SortOrder
+    mode?: SortOrder
+    readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -8118,6 +11188,7 @@ export namespace Prisma {
     overallTechnicalScore?: SortOrder
     overallSoftSkillScore?: SortOrder
     associateId?: SortOrder
+    cohortId?: SortOrder
   }
 
   export type SessionMaxOrderByAggregateInput = {
@@ -8132,6 +11203,9 @@ export namespace Prisma {
     technicalFeedback?: SortOrder
     softSkillFeedback?: SortOrder
     associateId?: SortOrder
+    cohortId?: SortOrder
+    mode?: SortOrder
+    readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -8148,6 +11222,9 @@ export namespace Prisma {
     technicalFeedback?: SortOrder
     softSkillFeedback?: SortOrder
     associateId?: SortOrder
+    cohortId?: SortOrder
+    mode?: SortOrder
+    readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -8157,6 +11234,7 @@ export namespace Prisma {
     overallTechnicalScore?: SortOrder
     overallSoftSkillScore?: SortOrder
     associateId?: SortOrder
+    cohortId?: SortOrder
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -8225,22 +11303,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedJsonNullableFilter<$PrismaModel>
     _max?: NestedJsonNullableFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -8351,6 +11413,122 @@ export namespace Prisma {
     readinessThreshold?: SortOrder
   }
 
+  export type AssociateListRelationFilter = {
+    every?: AssociateWhereInput
+    some?: AssociateWhereInput
+    none?: AssociateWhereInput
+  }
+
+  export type CurriculumWeekListRelationFilter = {
+    every?: CurriculumWeekWhereInput
+    some?: CurriculumWeekWhereInput
+    none?: CurriculumWeekWhereInput
+  }
+
+  export type AssociateOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CurriculumWeekOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CohortCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CohortAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type CohortMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CohortMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CohortSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type CohortScalarRelationFilter = {
+    is?: CohortWhereInput
+    isNot?: CohortWhereInput
+  }
+
+  export type CurriculumWeekCohortIdWeekNumberCompoundUniqueInput = {
+    cohortId: number
+    weekNumber: number
+  }
+
+  export type CurriculumWeekCountOrderByAggregateInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+    skillName?: SortOrder
+    skillSlug?: SortOrder
+    topicTags?: SortOrder
+    startDate?: SortOrder
+  }
+
+  export type CurriculumWeekAvgOrderByAggregateInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+  }
+
+  export type CurriculumWeekMaxOrderByAggregateInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+    skillName?: SortOrder
+    skillSlug?: SortOrder
+    startDate?: SortOrder
+  }
+
+  export type CurriculumWeekMinOrderByAggregateInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+    skillName?: SortOrder
+    skillSlug?: SortOrder
+    startDate?: SortOrder
+  }
+
+  export type CurriculumWeekSumOrderByAggregateInput = {
+    id?: SortOrder
+    cohortId?: SortOrder
+    weekNumber?: SortOrder
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -8361,6 +11539,12 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type CohortCreateNestedOneWithoutAssociatesInput = {
+    create?: XOR<CohortCreateWithoutAssociatesInput, CohortUncheckedCreateWithoutAssociatesInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutAssociatesInput
+    connect?: CohortWhereUniqueInput
   }
 
   export type SessionCreateNestedManyWithoutAssociateInput = {
@@ -8403,6 +11587,16 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
+  export type CohortUpdateOneWithoutAssociatesNestedInput = {
+    create?: XOR<CohortCreateWithoutAssociatesInput, CohortUncheckedCreateWithoutAssociatesInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutAssociatesInput
+    upsert?: CohortUpsertWithoutAssociatesInput
+    disconnect?: CohortWhereInput | boolean
+    delete?: CohortWhereInput | boolean
+    connect?: CohortWhereUniqueInput
+    update?: XOR<XOR<CohortUpdateToOneWithWhereWithoutAssociatesInput, CohortUpdateWithoutAssociatesInput>, CohortUncheckedUpdateWithoutAssociatesInput>
+  }
+
   export type SessionUpdateManyWithoutAssociateNestedInput = {
     create?: XOR<SessionCreateWithoutAssociateInput, SessionUncheckedCreateWithoutAssociateInput> | SessionCreateWithoutAssociateInput[] | SessionUncheckedCreateWithoutAssociateInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutAssociateInput | SessionCreateOrConnectWithoutAssociateInput[]
@@ -8429,6 +11623,14 @@ export namespace Prisma {
     update?: GapScoreUpdateWithWhereUniqueWithoutAssociateInput | GapScoreUpdateWithWhereUniqueWithoutAssociateInput[]
     updateMany?: GapScoreUpdateManyWithWhereWithoutAssociateInput | GapScoreUpdateManyWithWhereWithoutAssociateInput[]
     deleteMany?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type SessionUncheckedUpdateManyWithoutAssociateNestedInput = {
@@ -8465,6 +11667,12 @@ export namespace Prisma {
     connect?: AssociateWhereUniqueInput
   }
 
+  export type CohortCreateNestedOneWithoutSessionsInput = {
+    create?: XOR<CohortCreateWithoutSessionsInput, CohortUncheckedCreateWithoutSessionsInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutSessionsInput
+    connect?: CohortWhereUniqueInput
+  }
+
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -8483,12 +11691,14 @@ export namespace Prisma {
     update?: XOR<XOR<AssociateUpdateToOneWithWhereWithoutSessionsInput, AssociateUpdateWithoutSessionsInput>, AssociateUncheckedUpdateWithoutSessionsInput>
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+  export type CohortUpdateOneWithoutSessionsNestedInput = {
+    create?: XOR<CohortCreateWithoutSessionsInput, CohortUncheckedCreateWithoutSessionsInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutSessionsInput
+    upsert?: CohortUpsertWithoutSessionsInput
+    disconnect?: CohortWhereInput | boolean
+    delete?: CohortWhereInput | boolean
+    connect?: CohortWhereUniqueInput
+    update?: XOR<XOR<CohortUpdateToOneWithWhereWithoutSessionsInput, CohortUpdateWithoutSessionsInput>, CohortUncheckedUpdateWithoutSessionsInput>
   }
 
   export type AssociateCreateNestedOneWithoutGapScoresInput = {
@@ -8511,6 +11721,155 @@ export namespace Prisma {
     upsert?: AssociateUpsertWithoutGapScoresInput
     connect?: AssociateWhereUniqueInput
     update?: XOR<XOR<AssociateUpdateToOneWithWhereWithoutGapScoresInput, AssociateUpdateWithoutGapScoresInput>, AssociateUncheckedUpdateWithoutGapScoresInput>
+  }
+
+  export type AssociateCreateNestedManyWithoutCohortInput = {
+    create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
+    createMany?: AssociateCreateManyCohortInputEnvelope
+    connect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+  }
+
+  export type SessionCreateNestedManyWithoutCohortInput = {
+    create?: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput> | SessionCreateWithoutCohortInput[] | SessionUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutCohortInput | SessionCreateOrConnectWithoutCohortInput[]
+    createMany?: SessionCreateManyCohortInputEnvelope
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type CurriculumWeekCreateNestedManyWithoutCohortInput = {
+    create?: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput> | CurriculumWeekCreateWithoutCohortInput[] | CurriculumWeekUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CurriculumWeekCreateOrConnectWithoutCohortInput | CurriculumWeekCreateOrConnectWithoutCohortInput[]
+    createMany?: CurriculumWeekCreateManyCohortInputEnvelope
+    connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+  }
+
+  export type AssociateUncheckedCreateNestedManyWithoutCohortInput = {
+    create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
+    createMany?: AssociateCreateManyCohortInputEnvelope
+    connect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+  }
+
+  export type SessionUncheckedCreateNestedManyWithoutCohortInput = {
+    create?: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput> | SessionCreateWithoutCohortInput[] | SessionUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutCohortInput | SessionCreateOrConnectWithoutCohortInput[]
+    createMany?: SessionCreateManyCohortInputEnvelope
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput = {
+    create?: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput> | CurriculumWeekCreateWithoutCohortInput[] | CurriculumWeekUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CurriculumWeekCreateOrConnectWithoutCohortInput | CurriculumWeekCreateOrConnectWithoutCohortInput[]
+    createMany?: CurriculumWeekCreateManyCohortInputEnvelope
+    connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+  }
+
+  export type AssociateUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
+    upsert?: AssociateUpsertWithWhereUniqueWithoutCohortInput | AssociateUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: AssociateCreateManyCohortInputEnvelope
+    set?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    disconnect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    delete?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    connect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    update?: AssociateUpdateWithWhereUniqueWithoutCohortInput | AssociateUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: AssociateUpdateManyWithWhereWithoutCohortInput | AssociateUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: AssociateScalarWhereInput | AssociateScalarWhereInput[]
+  }
+
+  export type SessionUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput> | SessionCreateWithoutCohortInput[] | SessionUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutCohortInput | SessionCreateOrConnectWithoutCohortInput[]
+    upsert?: SessionUpsertWithWhereUniqueWithoutCohortInput | SessionUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: SessionCreateManyCohortInputEnvelope
+    set?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    disconnect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    delete?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    update?: SessionUpdateWithWhereUniqueWithoutCohortInput | SessionUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: SessionUpdateManyWithWhereWithoutCohortInput | SessionUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type CurriculumWeekUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput> | CurriculumWeekCreateWithoutCohortInput[] | CurriculumWeekUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CurriculumWeekCreateOrConnectWithoutCohortInput | CurriculumWeekCreateOrConnectWithoutCohortInput[]
+    upsert?: CurriculumWeekUpsertWithWhereUniqueWithoutCohortInput | CurriculumWeekUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: CurriculumWeekCreateManyCohortInputEnvelope
+    set?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    disconnect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    delete?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    update?: CurriculumWeekUpdateWithWhereUniqueWithoutCohortInput | CurriculumWeekUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: CurriculumWeekUpdateManyWithWhereWithoutCohortInput | CurriculumWeekUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
+  }
+
+  export type AssociateUncheckedUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
+    upsert?: AssociateUpsertWithWhereUniqueWithoutCohortInput | AssociateUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: AssociateCreateManyCohortInputEnvelope
+    set?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    disconnect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    delete?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    connect?: AssociateWhereUniqueInput | AssociateWhereUniqueInput[]
+    update?: AssociateUpdateWithWhereUniqueWithoutCohortInput | AssociateUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: AssociateUpdateManyWithWhereWithoutCohortInput | AssociateUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: AssociateScalarWhereInput | AssociateScalarWhereInput[]
+  }
+
+  export type SessionUncheckedUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput> | SessionCreateWithoutCohortInput[] | SessionUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutCohortInput | SessionCreateOrConnectWithoutCohortInput[]
+    upsert?: SessionUpsertWithWhereUniqueWithoutCohortInput | SessionUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: SessionCreateManyCohortInputEnvelope
+    set?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    disconnect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    delete?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    update?: SessionUpdateWithWhereUniqueWithoutCohortInput | SessionUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: SessionUpdateManyWithWhereWithoutCohortInput | SessionUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput> | CurriculumWeekCreateWithoutCohortInput[] | CurriculumWeekUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CurriculumWeekCreateOrConnectWithoutCohortInput | CurriculumWeekCreateOrConnectWithoutCohortInput[]
+    upsert?: CurriculumWeekUpsertWithWhereUniqueWithoutCohortInput | CurriculumWeekUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: CurriculumWeekCreateManyCohortInputEnvelope
+    set?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    disconnect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    delete?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+    update?: CurriculumWeekUpdateWithWhereUniqueWithoutCohortInput | CurriculumWeekUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: CurriculumWeekUpdateManyWithWhereWithoutCohortInput | CurriculumWeekUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
+  }
+
+  export type CurriculumWeekCreatetopicTagsInput = {
+    set: string[]
+  }
+
+  export type CohortCreateNestedOneWithoutCurriculumWeeksInput = {
+    create?: XOR<CohortCreateWithoutCurriculumWeeksInput, CohortUncheckedCreateWithoutCurriculumWeeksInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutCurriculumWeeksInput
+    connect?: CohortWhereUniqueInput
+  }
+
+  export type CurriculumWeekUpdatetopicTagsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CohortUpdateOneRequiredWithoutCurriculumWeeksNestedInput = {
+    create?: XOR<CohortCreateWithoutCurriculumWeeksInput, CohortUncheckedCreateWithoutCurriculumWeeksInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutCurriculumWeeksInput
+    upsert?: CohortUpsertWithoutCurriculumWeeksInput
+    connect?: CohortWhereUniqueInput
+    update?: XOR<XOR<CohortUpdateToOneWithWhereWithoutCurriculumWeeksInput, CohortUpdateWithoutCurriculumWeeksInput>, CohortUncheckedUpdateWithoutCurriculumWeeksInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -8615,6 +11974,17 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8649,17 +12019,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -8672,6 +12031,22 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -8747,22 +12122,6 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -8777,6 +12136,34 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type CohortCreateWithoutAssociatesInput = {
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUncheckedCreateWithoutAssociatesInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortCreateOrConnectWithoutAssociatesInput = {
+    where: CohortWhereUniqueInput
+    create: XOR<CohortCreateWithoutAssociatesInput, CohortUncheckedCreateWithoutAssociatesInput>
   }
 
   export type SessionCreateWithoutAssociateInput = {
@@ -8795,8 +12182,11 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    cohort?: CohortCreateNestedOneWithoutSessionsInput
   }
 
   export type SessionUncheckedCreateWithoutAssociateInput = {
@@ -8815,6 +12205,9 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    cohortId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -8857,6 +12250,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CohortUpsertWithoutAssociatesInput = {
+    update: XOR<CohortUpdateWithoutAssociatesInput, CohortUncheckedUpdateWithoutAssociatesInput>
+    create: XOR<CohortCreateWithoutAssociatesInput, CohortUncheckedCreateWithoutAssociatesInput>
+    where?: CohortWhereInput
+  }
+
+  export type CohortUpdateToOneWithWhereWithoutAssociatesInput = {
+    where?: CohortWhereInput
+    data: XOR<CohortUpdateWithoutAssociatesInput, CohortUncheckedUpdateWithoutAssociatesInput>
+  }
+
+  export type CohortUpdateWithoutAssociatesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortUncheckedUpdateWithoutAssociatesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+  }
+
   export type SessionUpsertWithWhereUniqueWithoutAssociateInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutAssociateInput, SessionUncheckedUpdateWithoutAssociateInput>
@@ -8893,6 +12320,9 @@ export namespace Prisma {
     assessments?: JsonFilter<"Session">
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
+    cohortId?: IntNullableFilter<"Session"> | number | null
+    mode?: StringFilter<"Session"> | string
+    readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
   }
@@ -8934,6 +12364,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohort?: CohortCreateNestedOneWithoutAssociatesInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
   }
 
@@ -8946,12 +12377,41 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohortId?: number | null
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateCreateOrConnectWithoutSessionsInput = {
     where: AssociateWhereUniqueInput
     create: XOR<AssociateCreateWithoutSessionsInput, AssociateUncheckedCreateWithoutSessionsInput>
+  }
+
+  export type CohortCreateWithoutSessionsInput = {
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUncheckedCreateWithoutSessionsInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortCreateOrConnectWithoutSessionsInput = {
+    where: CohortWhereUniqueInput
+    create: XOR<CohortCreateWithoutSessionsInput, CohortUncheckedCreateWithoutSessionsInput>
   }
 
   export type AssociateUpsertWithoutSessionsInput = {
@@ -8973,6 +12433,7 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
   }
 
@@ -8985,7 +12446,42 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type CohortUpsertWithoutSessionsInput = {
+    update: XOR<CohortUpdateWithoutSessionsInput, CohortUncheckedUpdateWithoutSessionsInput>
+    create: XOR<CohortCreateWithoutSessionsInput, CohortUncheckedCreateWithoutSessionsInput>
+    where?: CohortWhereInput
+  }
+
+  export type CohortUpdateToOneWithWhereWithoutSessionsInput = {
+    where?: CohortWhereInput
+    data: XOR<CohortUpdateWithoutSessionsInput, CohortUncheckedUpdateWithoutSessionsInput>
+  }
+
+  export type CohortUpdateWithoutSessionsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortUncheckedUpdateWithoutSessionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
   }
 
   export type AssociateCreateWithoutGapScoresInput = {
@@ -8996,6 +12492,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohort?: CohortCreateNestedOneWithoutAssociatesInput
     sessions?: SessionCreateNestedManyWithoutAssociateInput
   }
 
@@ -9008,6 +12505,7 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    cohortId?: number | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
   }
 
@@ -9035,6 +12533,7 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
   }
 
@@ -9047,7 +12546,264 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateCreateWithoutCohortInput = {
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
+    sessions?: SessionCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateUncheckedCreateWithoutCohortInput = {
+    id?: number
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateCreateOrConnectWithoutCohortInput = {
+    where: AssociateWhereUniqueInput
+    create: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput>
+  }
+
+  export type AssociateCreateManyCohortInputEnvelope = {
+    data: AssociateCreateManyCohortInput | AssociateCreateManyCohortInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SessionCreateWithoutCohortInput = {
+    id: string
+    candidateName?: string | null
+    interviewerName?: string | null
+    date: string
+    status: string
+    questionCount: number
+    selectedWeeks: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: number | null
+    overallSoftSkillScore?: number | null
+    technicalFeedback?: string | null
+    softSkillFeedback?: string | null
+    questions: JsonNullValueInput | InputJsonValue
+    starterQuestions: JsonNullValueInput | InputJsonValue
+    assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: string
+    readinessRecomputeStatus?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associate?: AssociateCreateNestedOneWithoutSessionsInput
+  }
+
+  export type SessionUncheckedCreateWithoutCohortInput = {
+    id: string
+    candidateName?: string | null
+    interviewerName?: string | null
+    date: string
+    status: string
+    questionCount: number
+    selectedWeeks: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: number | null
+    overallSoftSkillScore?: number | null
+    technicalFeedback?: string | null
+    softSkillFeedback?: string | null
+    questions: JsonNullValueInput | InputJsonValue
+    starterQuestions: JsonNullValueInput | InputJsonValue
+    assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    associateId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionCreateOrConnectWithoutCohortInput = {
+    where: SessionWhereUniqueInput
+    create: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput>
+  }
+
+  export type SessionCreateManyCohortInputEnvelope = {
+    data: SessionCreateManyCohortInput | SessionCreateManyCohortInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CurriculumWeekCreateWithoutCohortInput = {
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+  }
+
+  export type CurriculumWeekUncheckedCreateWithoutCohortInput = {
+    id?: number
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+  }
+
+  export type CurriculumWeekCreateOrConnectWithoutCohortInput = {
+    where: CurriculumWeekWhereUniqueInput
+    create: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput>
+  }
+
+  export type CurriculumWeekCreateManyCohortInputEnvelope = {
+    data: CurriculumWeekCreateManyCohortInput | CurriculumWeekCreateManyCohortInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AssociateUpsertWithWhereUniqueWithoutCohortInput = {
+    where: AssociateWhereUniqueInput
+    update: XOR<AssociateUpdateWithoutCohortInput, AssociateUncheckedUpdateWithoutCohortInput>
+    create: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput>
+  }
+
+  export type AssociateUpdateWithWhereUniqueWithoutCohortInput = {
+    where: AssociateWhereUniqueInput
+    data: XOR<AssociateUpdateWithoutCohortInput, AssociateUncheckedUpdateWithoutCohortInput>
+  }
+
+  export type AssociateUpdateManyWithWhereWithoutCohortInput = {
+    where: AssociateScalarWhereInput
+    data: XOR<AssociateUpdateManyMutationInput, AssociateUncheckedUpdateManyWithoutCohortInput>
+  }
+
+  export type AssociateScalarWhereInput = {
+    AND?: AssociateScalarWhereInput | AssociateScalarWhereInput[]
+    OR?: AssociateScalarWhereInput[]
+    NOT?: AssociateScalarWhereInput | AssociateScalarWhereInput[]
+    id?: IntFilter<"Associate"> | number
+    slug?: StringFilter<"Associate"> | string
+    displayName?: StringNullableFilter<"Associate"> | string | null
+    createdAt?: DateTimeFilter<"Associate"> | Date | string
+    updatedAt?: DateTimeFilter<"Associate"> | Date | string
+    readinessStatus?: StringNullableFilter<"Associate"> | string | null
+    recommendedArea?: StringNullableFilter<"Associate"> | string | null
+    lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    cohortId?: IntNullableFilter<"Associate"> | number | null
+  }
+
+  export type SessionUpsertWithWhereUniqueWithoutCohortInput = {
+    where: SessionWhereUniqueInput
+    update: XOR<SessionUpdateWithoutCohortInput, SessionUncheckedUpdateWithoutCohortInput>
+    create: XOR<SessionCreateWithoutCohortInput, SessionUncheckedCreateWithoutCohortInput>
+  }
+
+  export type SessionUpdateWithWhereUniqueWithoutCohortInput = {
+    where: SessionWhereUniqueInput
+    data: XOR<SessionUpdateWithoutCohortInput, SessionUncheckedUpdateWithoutCohortInput>
+  }
+
+  export type SessionUpdateManyWithWhereWithoutCohortInput = {
+    where: SessionScalarWhereInput
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyWithoutCohortInput>
+  }
+
+  export type CurriculumWeekUpsertWithWhereUniqueWithoutCohortInput = {
+    where: CurriculumWeekWhereUniqueInput
+    update: XOR<CurriculumWeekUpdateWithoutCohortInput, CurriculumWeekUncheckedUpdateWithoutCohortInput>
+    create: XOR<CurriculumWeekCreateWithoutCohortInput, CurriculumWeekUncheckedCreateWithoutCohortInput>
+  }
+
+  export type CurriculumWeekUpdateWithWhereUniqueWithoutCohortInput = {
+    where: CurriculumWeekWhereUniqueInput
+    data: XOR<CurriculumWeekUpdateWithoutCohortInput, CurriculumWeekUncheckedUpdateWithoutCohortInput>
+  }
+
+  export type CurriculumWeekUpdateManyWithWhereWithoutCohortInput = {
+    where: CurriculumWeekScalarWhereInput
+    data: XOR<CurriculumWeekUpdateManyMutationInput, CurriculumWeekUncheckedUpdateManyWithoutCohortInput>
+  }
+
+  export type CurriculumWeekScalarWhereInput = {
+    AND?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
+    OR?: CurriculumWeekScalarWhereInput[]
+    NOT?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
+    id?: IntFilter<"CurriculumWeek"> | number
+    cohortId?: IntFilter<"CurriculumWeek"> | number
+    weekNumber?: IntFilter<"CurriculumWeek"> | number
+    skillName?: StringFilter<"CurriculumWeek"> | string
+    skillSlug?: StringFilter<"CurriculumWeek"> | string
+    topicTags?: StringNullableListFilter<"CurriculumWeek">
+    startDate?: DateTimeFilter<"CurriculumWeek"> | Date | string
+  }
+
+  export type CohortCreateWithoutCurriculumWeeksInput = {
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateCreateNestedManyWithoutCohortInput
+    sessions?: SessionCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUncheckedCreateWithoutCurriculumWeeksInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortCreateOrConnectWithoutCurriculumWeeksInput = {
+    where: CohortWhereUniqueInput
+    create: XOR<CohortCreateWithoutCurriculumWeeksInput, CohortUncheckedCreateWithoutCurriculumWeeksInput>
+  }
+
+  export type CohortUpsertWithoutCurriculumWeeksInput = {
+    update: XOR<CohortUpdateWithoutCurriculumWeeksInput, CohortUncheckedUpdateWithoutCurriculumWeeksInput>
+    create: XOR<CohortCreateWithoutCurriculumWeeksInput, CohortUncheckedCreateWithoutCurriculumWeeksInput>
+    where?: CohortWhereInput
+  }
+
+  export type CohortUpdateToOneWithWhereWithoutCurriculumWeeksInput = {
+    where?: CohortWhereInput
+    data: XOR<CohortUpdateWithoutCurriculumWeeksInput, CohortUncheckedUpdateWithoutCurriculumWeeksInput>
+  }
+
+  export type CohortUpdateWithoutCurriculumWeeksInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortUncheckedUpdateWithoutCurriculumWeeksInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
   }
 
   export type SessionCreateManyAssociateInput = {
@@ -9066,6 +12822,9 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    cohortId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9095,8 +12854,11 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cohort?: CohortUpdateOneWithoutSessionsNestedInput
   }
 
   export type SessionUncheckedUpdateWithoutAssociateInput = {
@@ -9115,6 +12877,9 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9135,6 +12900,9 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9164,6 +12932,180 @@ export namespace Prisma {
     weightedScore?: FloatFieldUpdateOperationsInput | number
     sessionCount?: IntFieldUpdateOperationsInput | number
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AssociateCreateManyCohortInput = {
+    id?: number
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
+  }
+
+  export type SessionCreateManyCohortInput = {
+    id: string
+    candidateName?: string | null
+    interviewerName?: string | null
+    date: string
+    status: string
+    questionCount: number
+    selectedWeeks: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: number | null
+    overallSoftSkillScore?: number | null
+    technicalFeedback?: string | null
+    softSkillFeedback?: string | null
+    questions: JsonNullValueInput | InputJsonValue
+    starterQuestions: JsonNullValueInput | InputJsonValue
+    assessments: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    associateId?: number | null
+    mode?: string
+    readinessRecomputeStatus?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CurriculumWeekCreateManyCohortInput = {
+    id?: number
+    weekNumber: number
+    skillName: string
+    skillSlug: string
+    topicTags?: CurriculumWeekCreatetopicTagsInput | string[]
+    startDate: Date | string
+  }
+
+  export type AssociateUpdateWithoutCohortInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sessions?: SessionUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateUncheckedUpdateWithoutCohortInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateUncheckedUpdateManyWithoutCohortInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SessionUpdateWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    candidateName?: NullableStringFieldUpdateOperationsInput | string | null
+    interviewerName?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    questionCount?: IntFieldUpdateOperationsInput | number
+    selectedWeeks?: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    overallSoftSkillScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    technicalFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    softSkillFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    questions?: JsonNullValueInput | InputJsonValue
+    starterQuestions?: JsonNullValueInput | InputJsonValue
+    assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associate?: AssociateUpdateOneWithoutSessionsNestedInput
+  }
+
+  export type SessionUncheckedUpdateWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    candidateName?: NullableStringFieldUpdateOperationsInput | string | null
+    interviewerName?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    questionCount?: IntFieldUpdateOperationsInput | number
+    selectedWeeks?: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    overallSoftSkillScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    technicalFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    softSkillFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    questions?: JsonNullValueInput | InputJsonValue
+    starterQuestions?: JsonNullValueInput | InputJsonValue
+    assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateManyWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    candidateName?: NullableStringFieldUpdateOperationsInput | string | null
+    interviewerName?: NullableStringFieldUpdateOperationsInput | string | null
+    date?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    questionCount?: IntFieldUpdateOperationsInput | number
+    selectedWeeks?: JsonNullValueInput | InputJsonValue
+    overallTechnicalScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    overallSoftSkillScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    technicalFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    softSkillFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    questions?: JsonNullValueInput | InputJsonValue
+    starterQuestions?: JsonNullValueInput | InputJsonValue
+    assessments?: JsonNullValueInput | InputJsonValue
+    techMap?: NullableJsonNullValueInput | InputJsonValue
+    associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    mode?: StringFieldUpdateOperationsInput | string
+    readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekUpdateWithoutCohortInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekUncheckedUpdateWithoutCohortInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CurriculumWeekUncheckedUpdateManyWithoutCohortInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    skillName?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 
