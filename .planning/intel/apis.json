@@ -1,0 +1,209 @@
+{
+  "_meta": {
+    "updated_at": "2026-04-14T13:32:37.382Z",
+    "description": "API route surface — all Next.js route handlers",
+    "version": 2
+  },
+  "routes": [
+    {
+      "path": "/api/auth",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "Single-password authentication, sets nlm_session cookie",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/score",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "LLM scoring via LangGraph — evaluates interview answers",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/github",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "GitHub content proxy — hides GITHUB_TOKEN from client",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/generate-summary",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "AI-generated interview summaries via LLM",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server"
+      ]
+    },
+    {
+      "path": "/api/send-email",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "Email delivery via Resend — sends PDF reports",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "email-templates"
+      ]
+    },
+    {
+      "path": "/api/history",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "purpose": "Interview history CRUD — file + dual-write to Supabase",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "types",
+        "historyService",
+        "sessionPersistence",
+        "prisma",
+        "gapPersistence",
+        "readinessService",
+        "settingsService"
+      ],
+      "notes": "POST triggers full save pipeline: file write + DB upsert + gap scoring + readiness recompute"
+    },
+    {
+      "path": "/api/health",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "DB connectivity check via Prisma — used by Docker HEALTHCHECK",
+      "auth_required": false,
+      "lib_deps": [
+        "prisma"
+      ]
+    },
+    {
+      "path": "/api/settings",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "purpose": "Read/write trainer settings (readiness threshold)",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "settingsService"
+      ]
+    },
+    {
+      "path": "/api/sync-check",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "Compare file vs DB session parity for migration validation",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "prisma",
+        "historyService"
+      ]
+    },
+    {
+      "path": "/api/trainer",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "Roster of all associates with readiness data for trainer dashboard",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "prisma",
+        "trainer-types"
+      ]
+    },
+    {
+      "path": "/api/trainer/[slug]",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "Associate detail: sessions, gap scores, trend data",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "prisma",
+        "trainer-types"
+      ]
+    },
+    {
+      "path": "/api/associates/[slug]/gap-scores",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "Gap scores for adaptive setup pre-population",
+      "auth_required": true,
+      "lib_deps": [
+        "auth-server",
+        "prisma",
+        "adaptiveSetup"
+      ]
+    },
+    {
+      "path": "/api/load-markdown",
+      "methods": [
+        "GET"
+      ],
+      "purpose": "Load and parse markdown question files",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/question-banks",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "purpose": "Manage question bank configurations (GitHub repos)",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/public/interview/start",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "Start public automated interview — rate-limited",
+      "auth_required": false,
+      "lib_deps": [
+        "rateLimitService"
+      ]
+    },
+    {
+      "path": "/api/public/interview/agent",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "Process public interview responses via AI agent",
+      "auth_required": false,
+      "lib_deps": []
+    },
+    {
+      "path": "/api/public/interview/complete",
+      "methods": [
+        "POST"
+      ],
+      "purpose": "Persist public interview session to Supabase",
+      "auth_required": false,
+      "lib_deps": [
+        "rateLimitService",
+        "sessionPersistence",
+        "types"
+      ]
+    }
+  ]
+}

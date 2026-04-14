@@ -2,68 +2,71 @@
 
 **Gathered:** 2026-04-14
 **Status:** Ready for planning
+**Patched:** 2026-04-14 (Codex findings #7 downgrade <400ms SLO, #9 canonical skillSlug)
 
 <domain>
 ## Phase Boundary
 
-Trainers define a weekly curriculum schedule per cohort (week number, skill name, topic tags, start date). The interview setup wizard auto-filters question selection to skills whose `startDate <= today` when the associate belongs to a cohort with a curriculum. Adaptive gap-based weight pre-population composes on top of the filter. If no cohort or no curriculum exists, wizard behavior is identical to v1.0 (no regression).
+Trainers define a weekly curriculum schedule per cohort (week number, skill name, canonical skillSlug, topic tags, start date). The interview setup wizard auto-filters question selection to skills whose `startDate <= today` when the associate belongs to a cohort with a curriculum. Adaptive gap-based weight pre-population composes on top of the filter. If no cohort or no curriculum exists, wizard behavior is identical to v1.0 (no regression).
 
-Out of scope: curriculum cloning between cohorts (deferred to v1.2), curriculum-scoped gap computation, notifications when new weeks unlock.
+Out of scope: curriculum cloning between cohorts (deferred to v1.2), curriculum-scoped gap computation, notifications when new weeks unlock, cached question-bank manifest (deferred — see D-19 patch).
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Curriculum data model (from Phase 8)
-- **D-01:** `CurriculumWeek` already exists in `prisma/schema.prisma` with fields `id`, `cohortId` (FK), `weekNumber` (Int), `skillName` (String), `topicTags` (String[] or Json), `startDate` (DateTime). No schema changes needed in this phase.
-- **D-02:** `weekNumber` naming convention matches GitHub question bank file paths (e.g. `react/question-bank-v1.md` week numbers). This is a documented contract, not code-enforced.
+### Curriculum data model (from Phase 8, patched per Codex finding #9)
+- **D-01:** `CurriculumWeek` in `prisma/schema.prisma` has fields `id`, `cohortId` (FK), `weekNumber` (Int), `skillName` (String — DISPLAY ONLY), `skillSlug` (String — CANONICAL MATCHER), `topicTags` (String[]), `startDate` (DateTime). The `skillSlug` column and `@@unique([cohortId, weekNumber])` constraint are added in Phase 8 per the patch.
+- **D-02:** `weekNumber` naming convention matches GitHub question bank file paths. Documented contract, not code-enforced.
 
 ### Trainer curriculum UI
-- **D-03:** Curriculum is managed per cohort via a table view inside the cohort detail page (`/trainer/cohorts/[id]` or inline section on existing cohort management page from Phase 11). Table columns: Week #, Skill Name, Topic Tags, Start Date, Actions (edit/delete).
-- **D-04:** Add-week row: inline form at bottom of table with number input, text input, tag input (comma-separated → array), date picker. Single "Add Week" button.
-- **D-05:** Edit is inline (click row → fields become editable). Delete is a confirm dialog.
-- **D-06:** No bulk import in v1.1 (single-row CRUD only). No curriculum cloning.
-- **D-07:** Styling uses DESIGN.md tokens (warm parchment, Clash Display headings, DM Sans body) — Phase 14 ensures cohesion but this phase ships DESIGN-compliant from the start.
+- **D-03:** Curriculum is managed per cohort via a table view inside the cohort detail page. Columns: Week #, Skill Name (display), Skill Slug (canonical), Topic Tags, Start Date, Actions.
+- **D-04:** Add-week row: inline form with number input, text input (skillName display), text input (skillSlug canonical — lower-kebab-case suggested/autofilled from skillName but editable), tag input, date picker.
+- **D-05:** Edit is inline. Delete is a confirm dialog.
+- **D-06:** No bulk import in v1.1. No curriculum cloning.
+- **D-07:** Styling uses DESIGN.md tokens.
 
 ### API surface
-- **D-08:** `GET /api/cohorts/[id]/curriculum` — returns all weeks for the cohort, ordered by weekNumber.
-- **D-09:** `GET /api/cohorts/[id]/curriculum?taught=true` — returns only weeks where `startDate <= now()`. Used by setup wizard.
-- **D-10:** `POST /api/cohorts/[id]/curriculum` — add a week. Body: `{ weekNumber, skillName, topicTags, startDate }`. Validated with Zod.
-- **D-11:** `PATCH /api/cohorts/[id]/curriculum/[weekId]` — update a week.
-- **D-12:** `DELETE /api/cohorts/[id]/curriculum/[weekId]` — delete a week.
-- **D-13:** All routes guarded by trainer auth middleware (existing pattern).
+- **D-08:** `GET /api/cohorts/[id]/curriculum` — returns all weeks ordered by weekNumber.
+- **D-09:** `GET /api/cohorts/[id]/curriculum?taught=true` — returns only weeks where `startDate <= now()`.
+- **D-10:** `POST /api/cohorts/[id]/curriculum` — add a week. Body: `{ weekNumber, skillName, skillSlug, topicTags, startDate }`. Zod-validated. `skillSlug` required, lowercase-kebab regex.
+- **D-11:** `PATCH /api/cohorts/[id]/curriculum/[weekId]` — update.
+- **D-12:** `DELETE /api/cohorts/[id]/curriculum/[weekId]` — delete.
+- **D-13:** All routes trainer-auth guarded.
+- **D-24 (NEW per Codex #9):** The unique constraint `(cohortId, weekNumber)` is DB-enforced (Phase 8). API routes return 409 on violation with a clear message instead of a 500.
 
-### Setup wizard filter integration
-- **D-14:** On dashboard mount, if the entered associate slug maps to an associate with `cohortId != null`, fetch `/api/cohorts/{cohortId}/curriculum?taught=true` in parallel with the GitHub tech list fetch (both via `Promise.all`).
-- **D-15:** Filter the available tech list (`availableTechs` from GitHub) to only entries whose path/name matches a taught `skillName`. Matching rule: case-insensitive substring match between `CurriculumWeek.skillName` and `GitHubFile.path.split('/')[0]` (the skill folder).
-- **D-16:** Adaptive weights (from `adaptiveSetup.ts`) apply AFTER curriculum filter: map gap scores to weights for the filtered tech list only. Order: curriculum filters the set → adaptiveSetup weights what remains.
-- **D-17:** Fallback behavior (no regression): if associate has no `cohortId`, or cohort has no curriculum rows, or `/api/cohorts/[id]/curriculum?taught=true` returns empty or errors → show the full unfiltered GitHub tech list (v1.0 behavior). Failure is silent (log warn, do not block wizard).
-- **D-18:** UI signal: when filter is active, show a small badge near the tech list header: "Filtered by cohort curriculum (N taught skills)". Clicking the badge shows a dropdown of taught week names for transparency. No "disable filter" override in v1.1 — filter is authoritative when curriculum exists.
+### Setup wizard filter integration (REVISED per Codex finding #9)
+- **D-14:** On dashboard mount, if the entered associate slug maps to an associate with `cohortId != null`, fetch `/api/cohorts/{cohortId}/curriculum?taught=true` in parallel with the GitHub tech list fetch (`Promise.all`).
+- **D-15 (REVISED):** Match GitHub path segments to curriculum rows using `skillSlug` with an EXACT (case-insensitive) comparison. Extract the first path segment: `tech.path.split('/')[0].toLowerCase()`; compare to `taughtSlugs.map(s => s.toLowerCase())` via `includes`. NO substring matching. This eliminates `sql` vs `postgresql`, `node` vs `nodejs`, `react` vs `react-native` ambiguity. `skillName` is NEVER used for matching — it's display text only.
+- **D-16:** Adaptive weights apply AFTER curriculum filter.
+- **D-17:** Fallback behavior (no regression): if associate has no `cohortId`, or cohort has no curriculum, or fetch errors, or `taughtSlugs` empty → show full unfiltered GitHub tech list. Silent failure (log warn).
+- **D-18:** UI signal: "Filtered by cohort curriculum (N taught skills)" badge with dropdown of week names (display: skillName).
 
-### Performance budget
-- **D-19:** Wizard must load in under 400ms when curriculum filter is active. Curriculum fetch and GitHub fetch run in parallel via `Promise.all` — total time = max(curriculum, github), not sum.
-- **D-20:** Curriculum fetch is a single indexed DB query (`WHERE cohortId = ? AND startDate <= now()`), expected < 50ms.
-- **D-21:** Perf is measured via Playwright timing from wizard mount to tech list render. Assertion in E2E test (not unit).
+### Performance posture (REVISED per Codex finding #7)
+- **D-19 (REVISED):** `<400ms` wizard load with curriculum filter active is a TARGET, NOT a release gate. Reason: the dominant latency source is the recursive GitHub question-bank discovery (`src/lib/github-service.ts` walks the repo), NOT the curriculum DB fetch. `Promise.all` only hides serial latency — it can't make recursive GitHub calls faster. A mocked Playwright perf assertion would validate client render speed only, not real system latency. The perf test in Plan 13-03 becomes ADVISORY (non-blocking). Future milestone: a cached/persisted question-bank manifest is the real fix. Tracked under `Deferred Ideas`.
+- **D-20:** Curriculum fetch is a single indexed DB query (`WHERE cohortId = ? AND startDate <= now()`), expected <50ms — still true and still useful as a baseline.
+- **D-21:** Playwright timing in Plan 13-03 measures wizard mount → tech list render. Test logs elapsed ms but does NOT assert < 400. The assertion becomes `expect(elapsed).toBeLessThan(2000)` as a sanity ceiling (not a perf gate). A real-infra perf benchmark is out of scope for v1.1.
 
 ### Composition with adaptiveSetup
-- **D-22:** `mapGapScoresToWeights` is called after curriculum filter is applied. The gap scores response may contain skills not in the taught list; those are silently dropped before weight mapping (don't pre-populate weights for untaught skills).
-- **D-23:** If an associate has gap scores for a skill that is no longer in the taught list (curriculum changed), that skill is hidden from the wizard. No warning — trainer is responsible for curriculum correctness.
+- **D-22:** `mapGapScoresToWeights` called after curriculum filter. Gap scores for untaught skills silently dropped.
+- **D-23:** Associates with gap scores for skills no longer in the taught list: those skills hidden from wizard; no warning.
 
 ### Claude's Discretion
-- Exact tag input UX (comma-separated vs chip input)
-- Visual design of the filter badge (within DESIGN.md bounds)
-- Sort order of taught weeks in the dropdown (weekNumber ascending assumed)
+- Exact tag input UX
+- Visual design of the filter badge
+- Sort order of taught weeks in the dropdown (weekNumber asc assumed)
 - Error toast wording
+- Whether the curriculum UI auto-suggests a slug from the skillName (nice UX polish)
 
 </decisions>
 
 <specifics>
 ## Specific Ideas
 
-- Filter badge should feel informative, not restrictive — trainers should read it as "curriculum is guiding this" rather than "something is being hidden"
-- `Promise.all` composition pattern: wizard should never block on curriculum if GitHub is slow or vice versa
-- When curriculum changes while a session is in flight, the existing in-memory session keeps working — only future wizard loads reflect the change
+- Canonical `skillSlug` matches GitHub folder names exactly — e.g. a question bank folder `react/` maps to `skillSlug: "react"`. Trainer sees `skillName: "React"` as display.
+- Filter badge should feel informative, not restrictive.
+- `Promise.all` still used for wizard concurrency even though it is not a perf gate — general hygiene.
 
 </specifics>
 
@@ -71,28 +74,28 @@ Out of scope: curriculum cloning between cohorts (deferred to v1.2), curriculum-
 ## Canonical References
 
 ### Curriculum architecture
-- `.planning/research/ARCHITECTURE.md` §curriculum — curriculum data flow, setup wizard integration, week number convention
-- `.planning/research/ARCHITECTURE.md` §setup-wizard — existing selectedWeeks/techMap flow
-- `.planning/REQUIREMENTS.md` §Curriculum — CURRIC-01, CURRIC-02 definitions
-- `.planning/ROADMAP.md` §"Phase 13" — goal, success criteria
+- `.planning/research/ARCHITECTURE.md` §curriculum
+- `.planning/REQUIREMENTS.md` §Curriculum — CURRIC-01, CURRIC-02
+- `.planning/ROADMAP.md` §"Phase 13"
+- `.planning/PIPELINE-PLAN-CODEX.md` §Findings 7, 8, 9
 
 ### Phase 8 schema (foundation)
-- `prisma/schema.prisma` — CurriculumWeek model (added Phase 8)
-- `.planning/phases/08-schema-migration/08-CONTEXT.md` — schema decisions
+- `prisma/schema.prisma` — CurriculumWeek model with `skillSlug` + unique `(cohortId, weekNumber)` (Phase 8 patched)
+- `.planning/phases/08-schema-migration/08-CONTEXT.md`
 
-### Phase 11 cohort management (parent UI)
-- `.planning/phases/11-cohort-management/` — cohort CRUD, trainer UI patterns to mirror
+### Phase 11 cohort management
+- `.planning/phases/11-cohort-management/`
 
 ### Adaptive setup (composition target)
-- `src/lib/adaptiveSetup.ts` — `mapGapScoresToWeights` pure function to compose with
-- `src/app/dashboard/page.tsx` — setup wizard where filter integrates
+- `src/lib/adaptiveSetup.ts` — `mapGapScoresToWeights`
+- `src/app/dashboard/page.tsx`
 
 ### Question source
-- `src/lib/github-service.ts` — GitHub fetch contract (`GitHubFile`)
-- `src/lib/markdownParser.ts` — question parsing (no change needed)
+- `src/lib/github-service.ts` — GitHub fetch contract (`GitHubFile`); recursive discovery is the real perf bottleneck per Codex #7
+- `src/lib/markdownParser.ts`
 
 ### Design
-- `DESIGN.md` — token source for curriculum UI styling
+- `DESIGN.md`
 
 </canonical_refs>
 
@@ -100,32 +103,32 @@ Out of scope: curriculum cloning between cohorts (deferred to v1.2), curriculum-
 ## Existing Code Insights
 
 ### Reusable Assets
-- `src/lib/adaptiveSetup.ts::mapGapScoresToWeights` — pure function, already handles empty input, compose in-memory after filter
-- Phase 11 cohort CRUD routes — mirror the same auth + Zod validation pattern
-- `src/app/api/associates/[slug]/gap-scores/route.ts` — Phase 7 fetch pattern to follow for wizard integration
-- `useInterviewStore` — `selectedTechs` and `techWeights` already in store; no store shape changes needed
+- `src/lib/adaptiveSetup.ts::mapGapScoresToWeights`
+- Phase 11 cohort CRUD routes — mirror auth + Zod pattern
+- `src/app/api/associates/[slug]/gap-scores/route.ts` — Phase 7 fetch pattern
 
 ### Established Patterns
-- Zod validation at API route entry (CLAUDE.md §Validation)
-- `Promise.all` for parallel async work (already used in wizard for GitHub fetch + gap scores)
-- HttpOnly trainer cookie auth middleware (existing)
-- `src/lib/prisma.ts` singleton for DB access
+- Zod validation at API entry
+- `Promise.all` for parallel async work (hygiene, not a perf gate)
+- HttpOnly trainer cookie auth
 
 ### Integration Points
-- Dashboard mount useEffect: add curriculum fetch to existing Promise.all block (currently fetches gap scores + GitHub)
-- After `availableTechs` is set, apply curriculum filter before rendering
-- Before calling `mapGapScoresToWeights`, filter gap scores to taught skills
+- Dashboard mount useEffect: add curriculum fetch to Promise.all
+- After `availableTechs`, apply curriculum filter via `skillSlug` exact match
+- Before `mapGapScoresToWeights`, filter gap scores to taught slugs
 
 </code_context>
 
 <deferred>
 ## Deferred Ideas
 
-- Curriculum cloning from another cohort — v1.2 (CURRIC-FUTURE-01)
+- Curriculum cloning between cohorts — v1.2 (CURRIC-FUTURE-01)
 - Curriculum-scoped gap computation — v1.2 (CURRIC-FUTURE-02)
-- Bulk CSV import of weeks — post-v1.1
-- Notifications when a new week becomes taught — post-v1.1
-- Trainer override to disable the curriculum filter per-session — post-v1.1
+- Bulk CSV import — post-v1.1
+- Notifications when new week taught — post-v1.1
+- Per-session override to disable filter — post-v1.1
+- **Cached question-bank manifest (the REAL fix for <400ms wizard load)** — later milestone per Codex finding #7. Server pre-discovers GitHub question-bank structure and caches; wizard loads the manifest in a single DB call; <400ms becomes achievable and enforceable.
+- Upgrading `<400ms` from advisory to release gate — deferred until the cached manifest exists.
 
 </deferred>
 
@@ -133,3 +136,4 @@ Out of scope: curriculum cloning between cohorts (deferred to v1.2), curriculum-
 
 *Phase: 13-curriculum-schedule*
 *Context gathered: 2026-04-14*
+*Patched 2026-04-14 for Codex findings #7 (perf SLO → target), #8/#9 (canonical skillSlug matching)*

@@ -1,0 +1,69 @@
+{
+  "_meta": {
+    "updated_at": "2026-04-14T13:32:37.347Z",
+    "description": "File role classification — maps every key file to its responsibility",
+    "version": 2
+  },
+  "pages": {
+    "src/app/page.tsx": "Landing / home page",
+    "src/app/login/page.tsx": "Login form (single password auth)",
+    "src/app/dashboard/page.tsx": "Setup wizard (3 phases): repo config -> tech selection -> question count + candidate info",
+    "src/app/interview/page.tsx": "Interview conductor: starter/behavioral + technical questions with voice input",
+    "src/app/review/page.tsx": "Score review: validate/override LLM scores, edit assessments",
+    "src/app/pdf/page.tsx": "PDF report generation with @react-pdf/renderer",
+    "src/app/history/page.tsx": "Interview history list",
+    "src/app/question-banks/page.tsx": "Question bank management UI",
+    "src/app/trainer/page.tsx": "Trainer dashboard — roster view with readiness badges",
+    "src/app/trainer/[slug]/page.tsx": "Associate detail — session history, gap trend charts, calibration",
+    "src/app/associate/[slug]/page.tsx": "Public associate profile — session history + readiness status"
+  },
+  "components": {
+    "src/components/ClientLayout.tsx": "Client-side layout wrapper (auth context, toasts)",
+    "src/components/Navbar.tsx": "Navigation bar",
+    "src/components/PDFReport.tsx": "PDF report template (react-pdf)",
+    "src/components/ProgressBar.tsx": "Progress indicator for interview flow",
+    "src/components/QuestionCard.tsx": "Individual question display during interview",
+    "src/components/SpeechToText.tsx": "Web Speech API voice input component",
+    "src/components/trainer/ReadinessDisplay.tsx": "Readiness badge/status display",
+    "src/components/trainer/RosterTable.tsx": "Sortable roster table on trainer dashboard",
+    "src/components/trainer/EmptyGapState.tsx": "Empty state for no gap data",
+    "src/components/trainer/SessionHistoryList.tsx": "Session history list on associate detail",
+    "src/components/trainer/SkillFilterDropdown.tsx": "Skill filter for gap trend chart",
+    "src/components/trainer/GapTrendChart.tsx": "Recharts line chart for gap score trends",
+    "src/components/trainer/CalibrationView.tsx": "Score calibration view on associate detail"
+  },
+  "lib_services": {
+    "src/lib/prisma.ts": "Singleton Prisma client with pg pool adapter for Supabase",
+    "src/lib/sessionPersistence.ts": "Dual-write orchestrator — upserts Associate + writes Session to Supabase",
+    "src/lib/gapService.ts": "Pure-function gap scoring (0.8 decay, recency-weighted averages)",
+    "src/lib/gapPersistence.ts": "Persists gap scores to DB, reads gap scores with 3-session gate",
+    "src/lib/readinessService.ts": "Classifies associates (ready/improving/not_ready) based on threshold+trend+sessions",
+    "src/lib/settingsService.ts": "Read/write trainer settings, triggers bulk readiness recompute on change",
+    "src/lib/adaptiveSetup.ts": "Maps gap scores to tech weights (1-5) for setup wizard pre-population",
+    "src/lib/historyService.ts": "File-based history read/write (data/interview-history.json)",
+    "src/lib/langchain.ts": "LangGraph scoring workflow with conditional routing (starter vs technical vs public)",
+    "src/lib/markdownParser.ts": "Parses question markdown into structured data, weighted random selection",
+    "src/lib/github-service.ts": "GitHub API client for fetching question bank content",
+    "src/lib/rateLimitService.ts": "Per-user rate limiting via fingerprinting (2/13hr session, 125/day)",
+    "src/lib/cleanupService.ts": "Scheduled cleanup for history (72hr) and rate limits (24hr)",
+    "src/lib/auth-server.ts": "Server-side auth check via HttpOnly cookie",
+    "src/lib/email-templates.ts": "HTML email template for PDF report delivery",
+    "src/lib/slug-validation.ts": "Zod-based slug validation (lowercase, trimmed)",
+    "src/lib/types.ts": "Core TypeScript types (InterviewSession, ParsedQuestion, QuestionAssessment, etc.)",
+    "src/lib/trainer-types.ts": "Trainer dashboard types (RosterAssociate, AssociateDetail, GapScoreEntry)"
+  },
+  "store": {
+    "src/store/interviewStore.ts": "Central Zustand store — interview session, setup wizard, assessments, navigation"
+  },
+  "config": {
+    "src/middleware.ts": "Route protection — guards /dashboard, /interview, /review, /trainer",
+    "next.config.ts": "Next.js config — standalone output, Prisma tracing, transpile react-pdf",
+    "prisma/schema.prisma": "Database schema — Associate, Session, GapScore, Settings, HealthCheck",
+    "Dockerfile": "Multi-stage Docker build (deps -> builder -> runner) on node:22-alpine",
+    "src/instrumentation.ts": "Boot-time initialization (cleanup scheduling)"
+  },
+  "data_layer": {
+    "data/interview-history.json": "File-based session storage (backward compat, 72hr retention)",
+    "data/rate-limits.json": "Rate limit state per fingerprint (24hr cleanup)"
+  }
+}

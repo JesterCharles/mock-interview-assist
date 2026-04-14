@@ -37,5 +37,18 @@
   "phase_naming": "sequential",
   "agent_skills": {},
   "mode": "yolo",
-  "granularity": "standard"
+  "granularity": "standard",
+  "intel": {
+    "enabled": true
+  },
+  "deploy": {
+    "platform": "custom",
+    "provider": "gce",
+    "runtime": "docker-compose",
+    "production_url": "https://nextlevelmock.com",
+    "health_check": "/api/health",
+    "port_mapping": "80:3000",
+    "deploy_command": "gcloud compute ssh YOUR_INSTANCE_NAME --zone=YOUR_ZONE -- 'cd /path/to/mock-interview-assist && git pull && docker compose up --build -d'",
+    "verify_command": "curl -sf -o /dev/null -w '%{http_code}' https://nextlevelmock.com/api/health"
+  }
 }

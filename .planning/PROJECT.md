@@ -90,8 +90,9 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - **Existing codebase**: Next.js 16, App Router, Zustand, LangGraph — must preserve working flows
 - **Backwards compatible**: Trainer-led and public interview modes must keep working
 - **Supabase (Postgres)**: Hosted database — free tier, scales to multi-user later
-- **Dual-write active**: File storage (backward compat) + Supabase until migration fully validated
+- **Postgres canonical (v1.1)**: Per Codex review finding #6, v1.1 treats Postgres as the single source of truth for all new features (cohorts, PINs, authenticated automated sessions, curriculum, cohort dashboards). File history is transitional export/backup for trainer-led sessions only — no new code path in v1.1 writes to file storage. `/api/sync-check` is an advisory export-parity check, no longer a safety-critical gate. Deleting the file-history write path entirely is deferred to a later milestone.
 - **Docker deployment**: GCE via Docker Compose, port 80
+- **ASSOCIATE_SESSION_SECRET**: Dedicated env var for HMAC-signing associate PIN session cookies. Separate from `APP_PASSWORD`. Added per Codex review finding #4 — rotating the trainer password no longer invalidates associate sessions, and the cryptographic secret is not a human-entered string.
 
 ## Key Decisions
 
@@ -103,7 +104,9 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 | 0.8 recency decay for gap algorithm | Recent sessions weighted more. Autoresearch optimizes later. | ✓ Validated P4 |
 | 75% / 3 sessions / non-negative trend = "ready" | Configurable default. Trainers calibrate. | ✓ Validated P5 |
 | recharts 3.8.1 (not Tremor) | React 19 compatible. Tremor requires React 18. | ✓ Validated P6 |
-| Dual-write migration (file + DB) | Preserve existing flows. No data migration. | ✓ Validated P2 |
+| Dual-write migration (file + DB) | v1.0: preserve existing flows. | ✓ Validated P2 |
+| Postgres canonical for v1.1 | Cohorts/PINs/automated pipeline are DB-only by design; file layer is legacy backup. | Codex review 2026-04-14 |
+| Dedicated ASSOCIATE_SESSION_SECRET | Decouple associate auth from trainer password; enable token versioning. | Codex review 2026-04-14 |
 | Interview format only for MVP | Validate core loop before expanding | ✓ Good |
 
 ## Evolution
@@ -124,4 +127,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 — v1.1 Cohort Readiness System milestone started*
+*Last updated: 2026-04-14 — v1.1 Cohort Readiness System milestone started; patched with Codex review findings #4, #6*

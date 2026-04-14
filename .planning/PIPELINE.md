@@ -1,50 +1,39 @@
 # Pipeline Status
 
 ## Current Run
-- Started: 2026-04-13
-- Current stage: COMPLETE
-- Mode: resume
+- Started: 2026-04-14
+- Current stage: PLAN (milestone setup complete, phase planning pending)
+- Mode: paused — resume with /pipeline-coordinator --resume
+- Previous: v1.0 pipeline completed 2026-04-14
 
 ## Stages
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| discover | done | 2026-04-13 | 2026-04-13 | Office hours complete. Design doc APPROVED. Startup mode, Approach A (Readiness Loop MVP). |
-| init | done | 2026-04-13 | 2026-04-13 | PROJECT.md, REQUIREMENTS.md (22 reqs), ROADMAP.md (7 phases), 4 research agents |
-| design | done | 2026-04-13 | 2026-04-13 | DESIGN.md created. Editorial/utilitarian aesthetic. 3 AI voices converged. Outside voices (Codex+subagent) approved. Preview shipped. |
-| plan | done | 2026-04-13 | 2026-04-13 | 15 plans across 7 phases. 7 researchers + 7 planners + 1 checker. No taste decisions — all auto-approved. |
-| execute | done | 2026-04-13 | 2026-04-14 | All 7 phases complete (15/15 plans). P7 UX fixes applied post-checkpoint. |
-| review | done | 2026-04-13 | 2026-04-14 | 3 HIGH issues identified. All resolved in debug stage. Codex review deferred. |
-| test | done | 2026-04-13 | 2026-04-14 | 22/22 UAT pass. 2 bugs (1 low, 1 medium). UI 7.8/10. See PIPELINE-TEST.md |
-| debug | done | 2026-04-14 | 2026-04-14 | Most issues pre-fixed. CR-02 (auth consistency) fixed. npm audit: 3 moderate in prisma transitive dep — no safe fix. |
-| optimize | skipped | | | No optimization targets flagged. New routes fast (22-24ms). Pre-existing perf (PDF 600ms) is out of scope. |
-| ship | done | 2026-04-14 | 2026-04-14 | Codex adversarial review (9 findings, 4 fixed). Docs updated (CLAUDE.md, README, .planning/). Milestone summary + audit complete. TECH_DEBT status — 22/22 reqs, no blockers. |
-| reflect | done | 2026-04-14 | 2026-04-14 | Retrospective written. 6 improvements, 8 learnings, 6 priority debt items. |
-| maintain | done | 2026-04-14 | 2026-04-14 | Build green, 60/60 tests pass. 83 phase files ready for archival. No regressions. |
+| discover | done | 2026-04-14 | 2026-04-14 | Office hours complete. Startup mode. Cohort Readiness System (v1.1) APPROVED. Codex cold read contributed. 3 rounds adversarial review (30 issues fixed). |
+| init | done | 2026-04-14 | 2026-04-14 | Codebase mapped (7 docs), intel generated (5 files), health baseline 8.4/10, dev profile created. Deploy config pending user input. |
+| design | pending | | | |
+| plan | in_progress | 2026-04-14 | | Per-phase CONTEXT+PLAN complete for all 7 phases (17 PLAN.md + 7 CONTEXT.md committed). Multi-lens review running (autoplan + codex). Security verification pending. |
+| execute | pending | | | |
+| review | pending | | | |
+| test | pending | | | |
+| debug | pending | | | |
+| optimize | pending | | | |
+| ship | pending | | | |
+| reflect | pending | | | |
+| maintain | pending | | | |
 
 ## HITL Gates
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
-| Design selection | design | sync | passed | Approved editorial/utilitarian direction. Warm parchment + burnt orange accent. |
-| Taste decisions | plan | async | passed | No taste decisions surfaced — all auto-defaults aligned with CLAUDE.md stack decisions |
-| Review findings | review | async | passed | 3 HIGH resolved: middleware already fixed, endpoint already wired, npm audit = prisma transitive (no safe fix). CR-02 fixed. Codex deferred. |
-| Merge approval | ship | sync | passed | Work on main — no PR needed. Codex adversarial review complete. Fixes pushed. |
-| Milestone closure | ship | async | passed | Audit: TECH_DEBT — 22/22 reqs met, 11 debt items tracked, no blockers. |
+| Design selection | design | sync | pending | |
+| Taste decisions | plan | async | pending | |
+| Review findings | review | async | pending | |
+| Merge approval | ship | sync | pending | |
+| Milestone closure | ship | async | pending | |
 
 ## Artifacts
-- PIPELINE-DISCOVER: ~/.gstack/projects/JesterCharles-mock-interview-assist/jestercharles-main-design-20260413-115201.md (APPROVED)
-- DESIGN.md: /Users/jestercharles/mock-interview-assist/DESIGN.md (APPROVED)
-- Design preview: ~/.gstack/projects/JesterCharles-mock-interview-assist/designs/design-system-20260413/preview.html
-- PIPELINE-PLAN: .planning/PIPELINE-PLAN.md (15 plans, 7 phases, 22 reqs)
-- PIPELINE-REVIEW: .planning/PIPELINE-REVIEW.md (GATE_REQUIRED — 3 HIGH issues, Codex deferred)
-- PIPELINE-TEST: .planning/PIPELINE-TEST.md (22/22 UAT, 2 bugs, UI 7.8/10)
-- MILESTONE-SUMMARY: .planning/reports/MILESTONE_SUMMARY-v1.0.md (7 sections, onboarding doc)
-- MILESTONE-AUDIT: .planning/v1.0-MILESTONE-AUDIT.md (TECH_DEBT — 22/22 reqs, 11 debt items)
-- RETROSPECTIVE: .planning/RETROSPECTIVE.md (6 improvements, 8 learnings)
-
-## Pipeline Complete
-- Total duration: ~26 hours (2026-04-13 to 2026-04-14)
-- Stages completed: 11/12 (optimize skipped)
-- HITL gates passed: 5/5
-- Artifacts produced: 10
-- Requirements met: 22/22
-- Tech debt items: 11 (tracked, no blockers)
+- PIPELINE-DISCOVER: ~/.gstack/projects/JesterCharles-mock-interview-assist/jestercharles-main-design-20260414-073736.md (APPROVED)
+- PIPELINE-INIT: .planning/PIPELINE-INIT.md
+- Research: .planning/research/ (STACK, FEATURES, ARCHITECTURE, PITFALLS, SUMMARY)
+- Requirements: .planning/REQUIREMENTS.md (14 reqs for v1.1)
+- Roadmap: .planning/ROADMAP.md (Phases 8-14)

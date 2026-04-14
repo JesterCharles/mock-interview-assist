@@ -1,0 +1,175 @@
+{
+  "_meta": {
+    "updated_at": "2026-04-14T13:32:37.416Z",
+    "description": "Internal module dependency graph — lib-to-lib and consumer-to-lib edges",
+    "version": 2
+  },
+  "lib_internal_deps": {
+    "gapPersistence.ts": [
+      "prisma.ts",
+      "gapService.ts",
+      "types.ts"
+    ],
+    "gapService.ts": [
+      "types.ts"
+    ],
+    "readinessService.ts": [
+      "prisma.ts"
+    ],
+    "sessionPersistence.ts": [
+      "prisma.ts",
+      "types.ts",
+      "slug-validation.ts"
+    ],
+    "settingsService.ts": [
+      "prisma.ts",
+      "readinessService.ts"
+    ],
+    "historyService.ts": [
+      "types.ts"
+    ],
+    "cleanupService.ts": [
+      "types.ts",
+      "rateLimitService.ts"
+    ],
+    "langchain.ts": [],
+    "markdownParser.ts": [],
+    "prisma.ts": [],
+    "auth-server.ts": [],
+    "github-service.ts": [],
+    "rateLimitService.ts": [],
+    "adaptiveSetup.ts": [],
+    "email-templates.ts": [],
+    "slug-validation.ts": [],
+    "trainer-types.ts": [],
+    "types.ts": []
+  },
+  "api_route_deps": {
+    "/api/auth": [],
+    "/api/generate-summary": [
+      "auth-server"
+    ],
+    "/api/github": [],
+    "/api/health": [
+      "prisma"
+    ],
+    "/api/history": [
+      "auth-server",
+      "types",
+      "historyService",
+      "sessionPersistence",
+      "prisma",
+      "gapPersistence",
+      "readinessService",
+      "settingsService"
+    ],
+    "/api/load-markdown": [],
+    "/api/question-banks": [],
+    "/api/score": [],
+    "/api/send-email": [
+      "auth-server",
+      "email-templates"
+    ],
+    "/api/settings": [
+      "auth-server",
+      "settingsService"
+    ],
+    "/api/sync-check": [
+      "auth-server",
+      "prisma",
+      "historyService"
+    ],
+    "/api/trainer": [
+      "auth-server",
+      "prisma",
+      "trainer-types"
+    ],
+    "/api/trainer/[slug]": [
+      "auth-server",
+      "prisma",
+      "trainer-types"
+    ],
+    "/api/associates/[slug]/gap-scores": [
+      "auth-server",
+      "prisma",
+      "adaptiveSetup"
+    ],
+    "/api/public/interview/start": [
+      "rateLimitService"
+    ],
+    "/api/public/interview/agent": [],
+    "/api/public/interview/complete": [
+      "rateLimitService",
+      "sessionPersistence",
+      "types"
+    ]
+  },
+  "store_deps": {
+    "interviewStore.ts": [
+      "types.ts",
+      "markdownParser.ts",
+      "github-service.ts"
+    ]
+  },
+  "critical_paths": {
+    "session_save_pipeline": [
+      "api/history (POST)",
+      "-> historyService.writeHistory (file)",
+      "-> sessionPersistence.persistSessionToDb (Supabase)",
+      "-> gapPersistence.saveGapScores",
+      "-> readinessService.updateAssociateReadiness"
+    ],
+    "adaptive_setup": [
+      "api/associates/[slug]/gap-scores (GET)",
+      "-> gapPersistence.getGapScores",
+      "-> adaptiveSetup.mapGapScoresToWeights",
+      "-> dashboard setup wizard pre-population"
+    ],
+    "readiness_recompute": [
+      "settingsService.updateThreshold",
+      "-> readinessService.recomputeAllReadiness",
+      "-> updates all Associate records"
+    ]
+  },
+  "most_depended_on": [
+    {
+      "module": "auth-server.ts",
+      "dependents": 9,
+      "note": "Guards all protected API routes"
+    },
+    {
+      "module": "prisma.ts",
+      "dependents": 7,
+      "note": "Singleton Prisma client"
+    },
+    {
+      "module": "types.ts",
+      "dependents": 5,
+      "note": "Core type definitions"
+    },
+    {
+      "module": "settingsService.ts",
+      "dependents": 3
+    },
+    {
+      "module": "trainer-types.ts",
+      "dependents": 2
+    },
+    {
+      "module": "sessionPersistence.ts",
+      "dependents": 2
+    },
+    {
+      "module": "readinessService.ts",
+      "dependents": 2
+    },
+    {
+      "module": "rateLimitService.ts",
+      "dependents": 2
+    },
+    {
+      "module": "historyService.ts",
+      "dependents": 2
+    }
+  ]
+}

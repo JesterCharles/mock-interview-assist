@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "updated_at": "2026-04-14T13:32:04.306Z",
+    "description": "Technology stack and dependency inventory",
+    "version": 1
+  },
+  "framework": {
+    "name": "Next.js",
+    "version": "^16.2.3",
+    "router": "App Router",
+    "output": "standalone",
+    "runtime": "Node.js 22 (Docker), Node.js 24 (local)"
+  },
+  "language": {
+    "name": "TypeScript",
+    "version": "^5"
+  },
+  "react": {
+    "version": "19.2.3"
+  },
+  "styling": {
+    "name": "Tailwind CSS",
+    "version": "^4"
+  },
+  "state_management": {
+    "name": "Zustand",
+    "version": "^5.0.9",
+    "middleware": [
+      "persist"
+    ],
+    "store_file": "src/store/interviewStore.ts"
+  },
+  "database": {
+    "provider": "Supabase (PostgreSQL)",
+    "orm": "Prisma",
+    "orm_version": "^7.7.0",
+    "adapter": "@prisma/adapter-pg ^7.7.0",
+    "driver": "pg ^8.20.0",
+    "schema": "prisma/schema.prisma",
+    "generated_client": "src/generated/prisma/",
+    "connection": "Transaction Pooler (port 6543)"
+  },
+  "llm": {
+    "provider": "OpenAI (gpt-4o-mini)",
+    "orchestration": "LangChain/LangGraph",
+    "packages": [
+      "@langchain/core ^1.1.39",
+      "@langchain/langgraph ^1.2.7",
+      "@langchain/openai ^1.2.0",
+      "langchain ^1.3.0"
+    ],
+    "scoring_file": "src/lib/langchain.ts"
+  },
+  "charts": {
+    "name": "Recharts",
+    "version": "^3.8.1",
+    "usage": "Trainer dashboard trend lines, gap charts"
+  },
+  "pdf": {
+    "name": "@react-pdf/renderer",
+    "version": "^4.3.1"
+  },
+  "email": {
+    "name": "Resend",
+    "version": "^6.10.0"
+  },
+  "validation": {
+    "name": "Zod",
+    "version": "^4.3.6"
+  },
+  "testing": {
+    "runner": "Vitest ^4.1.4",
+    "coverage": "@vitest/coverage-v8 ^4.1.4"
+  },
+  "auth": {
+    "strategy": "Single-password with HttpOnly cookie (nlm_session, 24hr expiry)"
+  },
+  "icons": {
+    "name": "lucide-react",
+    "version": "^0.562.0"
+  },
+  "other_deps": {
+    "@fingerprintjs/fingerprintjs": "^5.1.0 — device fingerprinting for rate limiting",
+    "gray-matter": "^4.0.3 — frontmatter parsing",
+    "marked": "^17.0.1 — markdown rendering",
+    "dotenv": "^17.4.2 — env loading",
+    "react-hot-toast": "^2.6.0 — toast notifications"
+  },
+  "deployment": {
+    "platform": "Docker on GCE",
+    "dockerfile": "Dockerfile (multi-stage: deps -> builder -> runner)",
+    "base_image": "node:22-alpine",
+    "port_mapping": "80 -> 3000",
+    "healthcheck": "/api/health"
+  }
+}

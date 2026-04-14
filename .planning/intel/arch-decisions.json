@@ -1,0 +1,181 @@
+{
+  "_meta": {
+    "updated_at": "2026-04-14T13:32:04.451Z",
+    "description": "Architecture decisions and design patterns in the codebase",
+    "version": 1
+  },
+  "decisions": [
+    {
+      "id": "ARCH-01",
+      "title": "Dual-write persistence strategy",
+      "description": "Sessions are written to both file storage (data/interview-history.json) and Supabase. File layer is source of truth for existing interview flow; Supabase is source of truth for trainer dashboard, gap scores, and readiness signals.",
+      "rationale": "Backward compatibility during migration — existing trainer-led flow must keep working",
+      "files": [
+        "src/lib/historyService.ts",
+        "src/lib/sessionPersistence.ts",
+        "src/app/api/history/route.ts"
+      ]
+    },
+    {
+      "id": "ARCH-02",
+      "title": "Prisma + pg adapter for Supabase connection pooling",
+      "description": "Uses @prisma/adapter-pg with native pg Pool (max: 5) instead of Prisma's binary driver. Connects via Transaction Pooler (port 6543).",
+      "rationale": "Better connection pool control with Supabase's pgBouncer for persistent Node server",
+      "files": [
+        "src/lib/prisma.ts",
+        "prisma/schema.prisma"
+      ]
+    },
+    {
+      "id": "ARCH-03",
+      "title": "Gap scoring with recency-weighted average",
+      "description": "Per-skill scores use 0.8 decay factor: score_n * 0.8^0 + score_(n-1) * 0.8^1 + ... normalized. Pure functions in gapService.ts, DB operations in gapPersistence.ts.",
+      "rationale": "Recent performance weighted more heavily; 50-line algorithm doesn't need ML infrastructure",
+      "files": [
+        "src/lib/gapService.ts",
+        "src/lib/gapPersistence.ts"
+      ]
+    },
+    {
+      "id": "ARCH-04",
+      "title": "Three-state readiness classification",
+      "description": "Cascade: ready (avg >= threshold AND trend >= 0 AND sessions >= 3), improving (sessions >= 3 AND trend > 0), not_ready (everything else). Pre-computed on session save.",
+      "rationale": "Dashboard reads are instant — no on-the-fly computation",
+      "files": [
+        "src/lib/readinessService.ts"
+      ]
+    },
+    {
+      "id": "ARCH-05",
+      "title": "Zustand store as central nervous system",
+      "description": "Single Zustand store with persist middleware (localStorage) holds full interview session, setup wizard state, assessments, tech weights, associate slug, and navigation.",
+      "rationale": "Simple single-store pattern for solo dev; localStorage persistence survives page refreshes",
+      "files": [
+        "src/store/interviewStore.ts"
+      ]
+    },
+    {
+      "id": "ARCH-06",
+      "title": "LangGraph conditional routing for scoring",
+      "description": "Scoring workflow routes differently based on question type: starter -> guideline evaluation, technical -> keyword matching + soft skills, public -> transcript evaluation.",
+      "rationale": "Different question types need different evaluation strategies",
+      "files": [
+        "src/lib/langchain.ts"
+      ]
+    },
+    {
+      "id": "ARCH-07",
+      "title": "Single-password auth with middleware protection",
+      "description": "HttpOnly cookie (nlm_session, 24hr expiry) set on password match. Middleware redirects unauthenticated requests to /login for protected paths.",
+      "rationale": "Simplest viable auth for single-trainer use case",
+      "files": [
+        "src/middleware.ts",
+        "src/lib/auth-server.ts",
+        "src/app/api/auth/route.ts"
+      ]
+    },
+    {
+      "id": "ARCH-08",
+      "title": "Adaptive setup from gap scores",
+      "description": "When associate has 3+ sessions, dashboard fetches gap scores and pre-populates tech weights: weakest skills get weight 5, strongest get weight 1, linear interpolation.",
+      "rationale": "Interviews automatically focus on weak areas without trainer manual configuration",
+      "files": [
+        "src/lib/adaptiveSetup.ts",
+        "src/app/api/associates/[slug]/gap-scores/route.ts"
+      ]
+    },
+    {
+      "id": "ARCH-09",
+      "title": "GitHub-backed question banks",
+      "description": "Questions parsed from markdown files in configurable GitHub repos. Fetched via /api/github proxy to keep tokens server-side. Weighted random selection by tech weights + difficulty stratification.",
+      "rationale": "Question content managed in Git for version control and collaboration",
+      "files": [
+        "src/lib/github-service.ts",
+        "src/lib/markdownParser.ts",
+        "src/app/api/github/route.ts"
+      ]
+    },
+    {
+      "id": "ARCH-10",
+      "title": "Standalone Docker build with Prisma tracing",
+      "description": "Next.js standalone output with explicit Prisma binary inclusion via outputFileTracingIncludes. Multi-stage Dockerfile with prisma generate during build.",
+      "rationale": "Prisma binaries are pruned from standalone output by default — explicit inclusion prevents runtime crashes",
+      "files": [
+        "next.config.ts",
+        "Dockerfile"
+      ]
+    },
+    {
+      "id": "ARCH-11",
+      "title": "Settings-triggered bulk recompute",
+      "description": "When trainer changes readiness threshold via /api/settings PUT, all associates' readiness is recomputed with the new threshold.",
+      "rationale": "Readiness status must always reflect current threshold — stale classifications would mislead trainers",
+      "files": [
+        "src/lib/settingsService.ts",
+        "src/lib/readinessService.ts"
+      ]
+    }
+  ],
+  "data_models": {
+    "Associate": {
+      "purpose": "Identity + readiness fields per associate",
+      "key_fields": [
+        "slug (unique)",
+        "displayName",
+        "readinessStatus",
+        "recommendedArea",
+        "lastComputedAt"
+      ],
+      "relations": [
+        "has many Sessions",
+        "has many GapScores"
+      ]
+    },
+    "Session": {
+      "purpose": "Full interview session data",
+      "key_fields": [
+        "id",
+        "candidateName",
+        "date",
+        "status",
+        "questionCount",
+        "overallTechnicalScore",
+        "overallSoftSkillScore",
+        "questions (JSON)",
+        "assessments (JSON)",
+        "techMap (JSON)"
+      ],
+      "relations": [
+        "belongs to Associate (optional)"
+      ]
+    },
+    "GapScore": {
+      "purpose": "Per-skill recency-weighted scores",
+      "key_fields": [
+        "skill",
+        "topic",
+        "weightedScore",
+        "sessionCount"
+      ],
+      "unique_constraint": "(associateId, skill, topic)",
+      "relations": [
+        "belongs to Associate (cascade delete)"
+      ]
+    },
+    "Settings": {
+      "purpose": "Singleton trainer configuration",
+      "key_fields": [
+        "readinessThreshold (default 75)"
+      ],
+      "notes": "id pinned to 1 — only one row ever exists"
+    },
+    "HealthCheck": {
+      "purpose": "DB connectivity test",
+      "key_fields": [
+        "id",
+        "createdAt"
+      ],
+      "notes": "Proves Prisma -> Supabase pipeline works"
+    }
+  }
+}
