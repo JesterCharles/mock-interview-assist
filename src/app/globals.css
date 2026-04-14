@@ -27,6 +27,45 @@
   /* Typography */
   --background: #0f1525;
   --foreground: #e2e8f0;
+
+  /* ========================================
+     DESIGN.md Tokens (Phase 14)
+     ADDED ALONGSIDE legacy --nlm-* tokens (Codex finding #8)
+     Consumed by NEW routes: trainer login, /associate/login,
+     /associate/[slug], /associate/[slug]/interview.
+     Legacy /, /interview, /review continue using --nlm-* tokens.
+     ======================================== */
+  --bg: #F5F0E8;
+  --surface: #FFFFFF;
+  --surface-muted: #F0EBE2;
+  --ink: #1A1A1A;
+  --muted: #7A7267;
+  --accent: #C85A2E;
+  --accent-hover: #B04E27;
+  --success: #2D6A4F;
+  --warning: #B7791F;
+  --danger: #B83B2E;
+  --border: #DDD5C8;
+  --border-subtle: #E8E2D9;
+  --highlight: #FFF8F0;
+  --font-clash-display: 'Clash Display', 'DM Sans', system-ui, sans-serif;
+}
+
+/* Dark mode tokens (defined but NOT wired — toggle deferred) */
+[data-theme="dark"] {
+  --bg: #1C1917;
+  --surface: #262220;
+  --surface-muted: #2E2A27;
+  --ink: #E8E2D9;
+  --muted: #9C9488;
+  --accent: #D4743F;
+  --accent-hover: #E0854F;
+  --success: #3D8B6A;
+  --warning: #D4952A;
+  --danger: #D45040;
+  --border: #3D3733;
+  --border-subtle: #332F2B;
+  --highlight: #2E2520;
 }
 
 @theme inline {
@@ -34,6 +73,23 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+
+  /* DESIGN.md token mappings for Tailwind utilities (Phase 14) */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-highlight: var(--highlight);
+  --font-display: var(--font-clash-display);
+  --font-sans-new: var(--font-dm-sans);
 }
 
 /* ========================================
@@ -239,4 +295,47 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.5);
+}
+
+/* ========================================
+   Phase 14 — DESIGN.md New Button Classes
+   ADDED alongside legacy .btn-primary / .btn-accent.
+   Used by NEW routes only.
+   ======================================== */
+.btn-accent-flat {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  transition: background 120ms ease-out;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+.btn-accent-flat:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.btn-accent-flat:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary-flat {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  transition: background 120ms ease-out;
+  cursor: pointer;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+.btn-secondary-flat:hover:not(:disabled) {
+  background: var(--highlight);
+}
+.btn-secondary-flat:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
