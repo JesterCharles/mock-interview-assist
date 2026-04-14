@@ -55,6 +55,7 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
         questions: session.questions as unknown as Prisma.InputJsonValue,
         starterQuestions: session.starterQuestions as unknown as Prisma.InputJsonValue,
         assessments: session.assessments as unknown as Prisma.InputJsonValue,
+        techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         associateId,
       },
       update: {
@@ -71,6 +72,7 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
         questions: session.questions as unknown as Prisma.InputJsonValue,
         starterQuestions: session.starterQuestions as unknown as Prisma.InputJsonValue,
         assessments: session.assessments as unknown as Prisma.InputJsonValue,
+        techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         ...(associateId !== null ? { associateId } : {}),
       },
     });

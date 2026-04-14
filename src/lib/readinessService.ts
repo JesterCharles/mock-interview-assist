@@ -61,8 +61,8 @@ export function computeTrend(
     // Legacy path: fetch sessions from DB (kept for backward compat)
     return (async () => {
       const recentSessions = await prisma.session.findMany({
-        where: { associateId: associateIdOrSessions },
-        orderBy: { createdAt: 'desc' },
+        where: { associateId: associateIdOrSessions, status: 'completed' },
+        orderBy: { date: 'desc' },
         take: 3,
         select: { overallTechnicalScore: true, overallSoftSkillScore: true, createdAt: true },
       });
@@ -110,11 +110,11 @@ export async function computeReadiness(
   associateId: number,
   threshold: number,
 ): Promise<ReadinessResult> {
-  // Fetch last 3 sessions once — used for both gate check and trend computation
-  // (WR-01: eliminates TOCTOU race between separate count + findMany queries)
+  // Fetch last 3 completed sessions — used for both gate check and trend computation
+  // (WR-01: eliminates TOCTOU race) (Codex #5: completed only, #6: sort by date)
   const recentSessions = await prisma.session.findMany({
-    where: { associateId },
-    orderBy: { createdAt: 'desc' },
+    where: { associateId, status: 'completed' },
+    orderBy: { date: 'desc' },
     take: 3,
     select: { overallTechnicalScore: true, overallSoftSkillScore: true, createdAt: true },
   });

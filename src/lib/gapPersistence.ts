@@ -34,10 +34,10 @@ const REQUIRED_SESSIONS = 3;
  * 5. Clean up stale GapScore records no longer in computed results
  */
 export async function saveGapScores(associateId: number): Promise<void> {
-  // 1. Query sessions for this associate, newest first
+  // 1. Query completed sessions for this associate, newest first (Codex #5: filter status, #6: sort by date)
   const dbSessions = await prisma.session.findMany({
-    where: { associateId },
-    orderBy: { createdAt: 'desc' },
+    where: { associateId, status: 'completed' },
+    orderBy: { date: 'desc' },
   });
 
   if (dbSessions.length === 0) return;
@@ -121,9 +121,9 @@ export async function saveGapScores(associateId: number): Promise<void> {
  * Otherwise returns all GapScore records for the associate.
  */
 export async function getGapScores(associateId: number): Promise<GapScoreResult> {
-  // Count completed sessions
+  // Count completed sessions only (Codex #5: consistent with gap-scores API)
   const sessionCount = await prisma.session.count({
-    where: { associateId },
+    where: { associateId, status: 'completed' },
   });
 
   if (sessionCount < REQUIRED_SESSIONS) {

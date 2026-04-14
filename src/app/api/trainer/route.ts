@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { isAuthenticatedSession } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { RosterAssociate } from '@/lib/trainer-types'
 
@@ -12,10 +12,8 @@ function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_re
 }
 
 export async function GET() {
-  // Auth check — validate nlm_session cookie before returning data (T-06-01)
-  const cookieStore = await cookies()
-  const session = cookieStore.get('nlm_session')
-  if (!session || session.value !== 'authenticated') {
+  // Auth check — use shared helper for consistency (T-06-01, CR-02)
+  if (!(await isAuthenticatedSession())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
