@@ -138,7 +138,7 @@ describe('GET /api/trainer — cohortId filter (raw array)', () => {
     const body = await res.json();
     expect(Array.isArray(body)).toBe(true);
     const args = mockFindMany.mock.calls[0][0];
-    expect(args.where).toEqual({ cohortId: '42' });
+    expect(args.where).toEqual({ cohortId: 42 });
   });
 });
 
@@ -168,7 +168,7 @@ describe('GET /api/trainer — cohortId + includeSummary (wrapped)', () => {
     expect(body.associates).toHaveLength(6);
     expect(body.summary).toEqual({ ready: 2, improving: 1, notReady: 3 });
     const args = mockFindMany.mock.calls[0][0];
-    expect(args.where).toEqual({ cohortId: '42' });
+    expect(args.where).toEqual({ cohortId: 42 });
   });
 
   it('returns zero counts when cohort is empty', async () => {
