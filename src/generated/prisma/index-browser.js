@@ -167,6 +167,12 @@ exports.Prisma.GapScoreScalarFieldEnum = {
   lastUpdated: 'lastUpdated'
 };
 
+exports.Prisma.SettingsScalarFieldEnum = {
+  id: 'id',
+  readinessThreshold: 'readinessThreshold',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -202,7 +208,8 @@ exports.Prisma.ModelName = {
   HealthCheck: 'HealthCheck',
   Associate: 'Associate',
   Session: 'Session',
-  GapScore: 'GapScore'
+  GapScore: 'GapScore',
+  Settings: 'Settings'
 };
 
 /**

@@ -62,3 +62,11 @@ model GapScore {
   @@unique([associateId, skill, topic])
   @@index([associateId])
 }
+
+// Singleton-row trainer configuration. id is pinned to 1 — only one row ever exists.
+// Additional trainer-configurable settings can be added here in future phases.
+model Settings {
+  id                 Int      @id @default(1)
+  readinessThreshold Float    @default(75)
+  updatedAt          DateTime @updatedAt
+}
