@@ -88,8 +88,8 @@ Plans:
   3. A trainer can change the readiness threshold in settings and the badges on all associate profiles update accordingly
 **Plans:** 2 plans
 Plans:
-- [ ] 05-01-PLAN.md — Readiness service, classification logic, Associate schema extension, session save integration
-- [ ] 05-02-PLAN.md — Settings model, threshold API, bulk recompute on threshold change
+- [x] 05-01-PLAN.md — Readiness service, classification logic, Associate schema extension, session save integration
+- [x] 05-02-PLAN.md — Settings model, threshold API, bulk recompute on threshold change
 
 ### Phase 6: Trainer Dashboard
 **Goal**: Trainers can view their entire associate roster at a glance and drill into any associate's history, gaps, and score calibration
