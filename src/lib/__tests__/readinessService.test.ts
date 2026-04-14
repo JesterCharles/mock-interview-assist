@@ -125,7 +125,11 @@ describe('computeReadiness', () => {
   });
 
   it('returns not_ready with null recommendedArea when associate has fewer than 3 sessions', async () => {
-    mockSessionCount.mockResolvedValue(2);
+    // Only 2 sessions returned by findMany (gate check uses findMany result length)
+    mockSessionFindMany.mockResolvedValue([
+      makeSession(80, 70, new Date('2024-01-01')),
+      makeSession(85, 75, new Date('2024-01-08')),
+    ]);
     const result = await computeReadiness(1, 75);
     expect(result.status).toBe('not_ready');
     expect(result.recommendedArea).toBeNull();
@@ -133,7 +137,6 @@ describe('computeReadiness', () => {
   });
 
   it('returns ready when avg >= threshold, sessions >= 3, trend slope >= 0', async () => {
-    mockSessionCount.mockResolvedValue(5);
     // Positive trend
     mockSessionFindMany.mockResolvedValue([
       makeSession(80, 80, new Date('2024-01-15')),
@@ -154,7 +157,6 @@ describe('computeReadiness', () => {
   });
 
   it('returns improving when sessions >= 3, trend > 0, avg < threshold', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Increasing trend: 60 → 65 → 70
     mockSessionFindMany.mockResolvedValue([
       makeSession(70, 70, new Date('2024-01-15')),
@@ -172,7 +174,6 @@ describe('computeReadiness', () => {
   });
 
   it('returns not_ready when sessions >= 3, trend < 0', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Declining trend: 80 → 70 → 60
     mockSessionFindMany.mockResolvedValue([
       makeSession(60, 60, new Date('2024-01-15')),
@@ -189,7 +190,6 @@ describe('computeReadiness', () => {
   });
 
   it('returns not_ready when sessions >= 3, trend == 0 (flat), avg < threshold', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Flat trend: all 65
     mockSessionFindMany.mockResolvedValue([
       makeSession(65, 65, new Date('2024-01-15')),
@@ -207,7 +207,6 @@ describe('computeReadiness', () => {
   });
 
   it('uses the passed threshold parameter, not a hardcoded 75', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Positive trend: 81 → 83 → 85
     mockSessionFindMany.mockResolvedValue([
       makeSession(85, 85, new Date('2024-01-15')),
@@ -225,7 +224,6 @@ describe('computeReadiness', () => {
 
     // Reset mocks for second call
     vi.clearAllMocks();
-    mockSessionCount.mockResolvedValue(4);
     mockSessionFindMany.mockResolvedValue([
       makeSession(85, 85, new Date('2024-01-15')),
       makeSession(83, 83, new Date('2024-01-08')),
@@ -242,7 +240,6 @@ describe('computeReadiness', () => {
   });
 
   it('recommendedArea equals the topic with the lowest weightedScore from GapScore (topic != "")', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Positive trend
     mockSessionFindMany.mockResolvedValue([
       makeSession(80, 80, new Date('2024-01-15')),
@@ -260,7 +257,6 @@ describe('computeReadiness', () => {
   });
 
   it('recommendedArea falls back to lowest skill name when no topic-level scores exist', async () => {
-    mockSessionCount.mockResolvedValue(4);
     // Positive trend
     mockSessionFindMany.mockResolvedValue([
       makeSession(80, 80, new Date('2024-01-15')),
@@ -291,8 +287,7 @@ describe('recomputeAllReadiness', () => {
     const associates = [{ id: 1 }, { id: 2 }];
     mockAssocFindMany.mockResolvedValue(associates);
 
-    // For each associate: session count, session findMany, gap findMany, gap findFirst
-    mockSessionCount.mockResolvedValue(3);
+    // For each associate: session findMany, gap findMany, gap findFirst
     mockSessionFindMany.mockResolvedValue([
       makeSession(70, 70, new Date('2024-01-15')),
       makeSession(65, 65, new Date('2024-01-08')),

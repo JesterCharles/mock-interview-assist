@@ -42,14 +42,37 @@ export interface ReadinessResult {
  * after the 3-session gate has been checked. Do not call it independently
  * (Pitfall 2: associating a trend with <3-session associates).
  */
-export async function computeTrend(associateId: number): Promise<number> {
-  const recentSessions = await prisma.session.findMany({
-    where: { associateId },
-    orderBy: { createdAt: 'desc' },
-    take: 3,
-    select: { overallTechnicalScore: true, overallSoftSkillScore: true, createdAt: true },
-  });
+/**
+ * Shape of session data needed for trend computation.
+ * Used to pass pre-fetched sessions and avoid redundant queries (TOCTOU fix).
+ */
+type SessionTrendData = {
+  overallTechnicalScore: number | null;
+  overallSoftSkillScore: number | null;
+  createdAt: Date;
+};
 
+export async function computeTrend(associateId: number): Promise<number>;
+export function computeTrend(sessions: SessionTrendData[]): number;
+export function computeTrend(
+  associateIdOrSessions: number | SessionTrendData[],
+): number | Promise<number> {
+  if (typeof associateIdOrSessions === 'number') {
+    // Legacy path: fetch sessions from DB (kept for backward compat)
+    return (async () => {
+      const recentSessions = await prisma.session.findMany({
+        where: { associateId: associateIdOrSessions },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+        select: { overallTechnicalScore: true, overallSoftSkillScore: true, createdAt: true },
+      });
+      return computeTrendFromSessions(recentSessions);
+    })();
+  }
+  return computeTrendFromSessions(associateIdOrSessions);
+}
+
+function computeTrendFromSessions(recentSessions: SessionTrendData[]): number {
   if (recentSessions.length < 3) return -1;
 
   // Reverse to chronological order: [oldest, middle, newest] → x = [0, 1, 2]
@@ -87,9 +110,17 @@ export async function computeReadiness(
   associateId: number,
   threshold: number,
 ): Promise<ReadinessResult> {
+  // Fetch last 3 sessions once — used for both gate check and trend computation
+  // (WR-01: eliminates TOCTOU race between separate count + findMany queries)
+  const recentSessions = await prisma.session.findMany({
+    where: { associateId },
+    orderBy: { createdAt: 'desc' },
+    take: 3,
+    select: { overallTechnicalScore: true, overallSoftSkillScore: true, createdAt: true },
+  });
+
   // Gate: < 3 sessions → not_ready immediately, no recommendation (Pitfall 2)
-  const sessionCount = await prisma.session.count({ where: { associateId } });
-  if (sessionCount < 3) {
+  if (recentSessions.length < 3) {
     return { status: 'not_ready', recommendedArea: null, lastComputedAt: new Date() };
   }
 
@@ -105,8 +136,8 @@ export async function computeReadiness(
       ? skillGapScores.reduce((sum, g) => sum + g.weightedScore, 0) / skillGapScores.length
       : 0;
 
-  // Compute trend (3-session gate already passed above)
-  const trend = await computeTrend(associateId);
+  // Compute trend from pre-fetched sessions (no re-query needed)
+  const trend = computeTrend(recentSessions);
 
   // Classification cascade — ORDER MATTERS (Pitfall 1):
   // Check 'ready' BEFORE 'improving' to avoid misclassifying above-threshold+positive-trend as 'improving'
