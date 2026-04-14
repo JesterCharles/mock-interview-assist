@@ -11,6 +11,7 @@ import EmptyGapState from '@/components/trainer/EmptyGapState'
 import GapTrendChart from '@/components/trainer/GapTrendChart'
 import CalibrationView from '@/components/trainer/CalibrationView'
 import { GeneratePinButton } from '@/app/trainer/components/GeneratePinButton'
+import AssociateCohortSelect from './AssociateCohortSelect'
 import '../trainer.css'
 
 export default function AssociateDetailPage() {
@@ -181,6 +182,24 @@ export default function AssociateDetailPage() {
                   associateId={detail.id}
                   associateName={detail.displayName}
                 />
+              </div>
+              <div style={{ marginTop: '20px' }}>
+                <AssociateCohortSelect
+                  slug={detail.slug}
+                  initialCohortId={detail.cohortId}
+                  initialCohortName={detail.cohortName}
+                />
+                <p
+                  style={{
+                    fontSize: '13px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    color: '#7A7267',
+                    marginTop: '6px',
+                    marginBottom: 0,
+                  }}
+                >
+                  Current: {detail.cohortName ?? 'Unassigned'}
+                </p>
               </div>
             </div>
 
