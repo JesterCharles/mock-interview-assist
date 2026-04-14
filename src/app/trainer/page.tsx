@@ -6,15 +6,9 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { RosterAssociate, RosterResponse, CohortSummary } from '@/lib/trainer-types'
 import RosterTable from '@/components/trainer/RosterTable'
-import CohortFilterBar from '@/components/trainer/CohortFilterBar'
-import CohortSummaryBar from '@/components/trainer/CohortSummaryBar'
+import { CohortFilter } from '@/components/cohort/CohortFilter'
+import { ReadinessSummaryBar } from '@/components/cohort/ReadinessSummaryBar'
 import './trainer.css'
-
-interface CohortOption {
-  id: string
-  name: string
-  startDate?: string
-}
 
 export default function TrainerPage() {
   const router = useRouter()
@@ -166,13 +160,24 @@ export default function TrainerPage() {
           Trainer Dashboard
         </h1>
 
-        <CohortFilterBar
-          cohorts={cohorts}
-          selectedCohortId={selectedCohortId}
-          onChange={setSelectedCohortId}
-        />
+        <div style={{ marginBottom: '24px' }}>
+          <CohortFilter
+            cohorts={cohorts}
+            selectedId={selectedCohortId === 'all' ? null : selectedCohortId}
+            onChange={(id) => setSelectedCohortId(id ?? 'all')}
+          />
+        </div>
 
-        {summary && <CohortSummaryBar summary={summary} />}
+        {summary && selectedCohortId !== 'all' && (
+          <ReadinessSummaryBar
+            ready={summary.ready}
+            improving={summary.improving}
+            notReady={summary.notReady}
+            cohortName={
+              cohorts.find((c) => c.id === selectedCohortId)?.name ?? 'Cohort'
+            }
+          />
+        )}
 
         {dataLoading && (
           <div>

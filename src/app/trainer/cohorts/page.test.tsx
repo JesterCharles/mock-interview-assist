@@ -71,12 +71,14 @@ describe('/trainer/cohorts server page', () => {
     expect(mocks.findManyMock).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: { startDate: 'desc' },
-        include: { _count: { select: { associates: true } } },
+        include: expect.objectContaining({
+          _count: { select: { associates: true } },
+        }),
       }),
     )
   })
 
-  it('serializes Cohort rows into CohortDTO[] (ISO strings, nullable endDate) for client', async () => {
+  it('serializes Cohort rows with readiness counts (ISO strings, nullable endDate) for client', async () => {
     mocks.isAuthenticatedSessionMock.mockResolvedValue(true)
     mocks.findManyMock.mockResolvedValue([
       {
@@ -86,6 +88,12 @@ describe('/trainer/cohorts server page', () => {
         endDate: new Date('2026-09-01T00:00:00.000Z'),
         description: 'Summer cohort',
         _count: { associates: 4 },
+        associates: [
+          { readinessStatus: 'ready' },
+          { readinessStatus: 'ready' },
+          { readinessStatus: 'improving' },
+          { readinessStatus: 'not_ready' },
+        ],
       },
       {
         id: 1,
@@ -94,6 +102,7 @@ describe('/trainer/cohorts server page', () => {
         endDate: null,
         description: null,
         _count: { associates: 0 },
+        associates: [],
       },
     ])
 
@@ -109,6 +118,9 @@ describe('/trainer/cohorts server page', () => {
         endDate: '2026-09-01T00:00:00.000Z',
         description: 'Summer cohort',
         associateCount: 4,
+        readyCount: 2,
+        improvingCount: 1,
+        notReadyCount: 1,
       },
       {
         id: 1,
@@ -117,6 +129,9 @@ describe('/trainer/cohorts server page', () => {
         endDate: null,
         description: null,
         associateCount: 0,
+        readyCount: 0,
+        improvingCount: 0,
+        notReadyCount: 0,
       },
     ])
   })

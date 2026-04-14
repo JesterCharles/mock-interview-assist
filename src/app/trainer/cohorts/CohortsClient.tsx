@@ -1,27 +1,25 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import type { CohortDTO } from '@/lib/cohort-types'
+import { CohortCard } from '@/components/cohort/CohortCard'
+import { CohortForm, type CohortInput } from '@/components/cohort/CohortForm'
 import '../trainer.css'
-import './cohorts.css'
 
-interface Props {
-  initialCohorts: CohortDTO[]
-}
-
-interface FormState {
+export interface CohortWithCounts {
+  id: number
   name: string
   startDate: string
-  endDate: string
-  description: string
+  endDate: string | null
+  description: string | null
+  associateCount: number
+  readyCount: number
+  improvingCount: number
+  notReadyCount: number
 }
 
-const EMPTY_FORM: FormState = {
-  name: '',
-  startDate: '',
-  endDate: '',
-  description: '',
+interface Props {
+  initialCohorts: CohortWithCounts[]
 }
 
 interface ZodIssue {
@@ -31,188 +29,109 @@ interface ZodIssue {
 
 function toDateInputValue(iso: string | null): string {
   if (!iso) return ''
-  // iso is ISO string — take first 10 chars yyyy-mm-dd
   return iso.slice(0, 10)
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return '—'
-  try {
-    const d = new Date(iso)
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC',
-    }).format(d)
-  } catch {
-    return iso
-  }
-}
-
 export default function CohortsClient({ initialCohorts }: Props) {
-  const [cohorts, setCohorts] = useState<CohortDTO[]>(initialCohorts)
+  const [cohorts, setCohorts] = useState<CohortWithCounts[]>(initialCohorts)
   const [formOpen, setFormOpen] = useState(false)
   const [editingCohortId, setEditingCohortId] = useState<number | null>(null)
-  const [formState, setFormState] = useState<FormState>(EMPTY_FORM)
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [formTopError, setFormTopError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
   const [rowError, setRowError] = useState<string | null>(null)
+  const [formInitial, setFormInitial] = useState<CohortInput | undefined>()
 
   const isEditing = editingCohortId !== null
-  const formTitle = isEditing ? 'Edit Cohort' : 'New Cohort'
-  const submitLabel = submitting
-    ? isEditing
-      ? 'Updating…'
-      : 'Creating…'
-    : isEditing
-    ? 'Update'
-    : 'Create'
-
-  const sortedCohorts = useMemo(
-    () =>
-      [...cohorts].sort(
-        (a, b) =>
-          new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
-      ),
-    [cohorts],
-  )
 
   function openCreateForm() {
     setEditingCohortId(null)
-    setFormState(EMPTY_FORM)
-    setFormErrors({})
-    setFormTopError(null)
+    setFormInitial(undefined)
+    setRowError(null)
     setFormOpen(true)
   }
 
-  function openEditForm(c: CohortDTO) {
+  function openEditForm(c: CohortWithCounts) {
     setEditingCohortId(c.id)
-    setFormState({
+    setFormInitial({
       name: c.name,
       startDate: toDateInputValue(c.startDate),
       endDate: toDateInputValue(c.endDate),
       description: c.description ?? '',
     })
-    setFormErrors({})
-    setFormTopError(null)
+    setRowError(null)
     setFormOpen(true)
   }
 
   function closeForm() {
     setFormOpen(false)
     setEditingCohortId(null)
-    setFormState(EMPTY_FORM)
-    setFormErrors({})
-    setFormTopError(null)
+    setFormInitial(undefined)
   }
 
-  function validateLocal(): Record<string, string> {
-    const errs: Record<string, string> = {}
-    if (!formState.name.trim()) {
-      errs.name = 'Name is required'
-    } else if (formState.name.length > 100) {
-      errs.name = 'Name must be 100 characters or fewer'
-    }
-    if (!formState.startDate) {
-      errs.startDate = 'Start date is required'
-    }
-    if (formState.endDate && formState.startDate) {
-      if (new Date(formState.endDate) < new Date(formState.startDate)) {
-        errs.endDate = 'End date must be on or after start date'
-      }
-    }
-    if (formState.description.length > 500) {
-      errs.description = 'Description must be 500 characters or fewer'
-    }
-    return errs
-  }
-
-  function mapZodIssuesToErrors(issues: ZodIssue[]): Record<string, string> {
-    const errs: Record<string, string> = {}
-    for (const issue of issues) {
-      const field = String(issue.path[0] ?? '')
-      if (field && !errs[field]) {
-        errs[field] = issue.message
-      }
-    }
-    return errs
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setFormTopError(null)
-
-    const localErrs = validateLocal()
-    if (Object.keys(localErrs).length > 0) {
-      setFormErrors(localErrs)
-      return
-    }
-    setFormErrors({})
-
+  async function handleSubmit(input: CohortInput) {
     const payload: Record<string, unknown> = {
-      name: formState.name.trim(),
-      startDate: formState.startDate,
-      endDate: formState.endDate || null,
-      description: formState.description.trim() || null,
+      name: input.name,
+      startDate: input.startDate,
+      endDate: input.endDate || null,
+      description: input.description || null,
     }
 
-    setSubmitting(true)
-    try {
-      const url = isEditing
-        ? `/api/cohorts/${editingCohortId}`
-        : '/api/cohorts'
-      const method = isEditing ? 'PATCH' : 'POST'
+    const url = isEditing
+      ? `/api/cohorts/${editingCohortId}`
+      : '/api/cohorts'
+    const method = isEditing ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
-        method,
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+    const res = await fetch(url, {
+      method,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
 
-      if (res.status === 400) {
-        const body = await res.json().catch(() => ({}))
-        if (Array.isArray(body?.issues)) {
-          setFormErrors(mapZodIssuesToErrors(body.issues as ZodIssue[]))
-        }
-        setFormTopError(body?.error ?? 'Invalid input')
-        return
-      }
-      if (res.status === 409) {
-        setFormErrors({ name: 'A cohort with that name already exists' })
-        setFormTopError(null)
-        return
-      }
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        setFormTopError(body?.error ?? `Request failed (${res.status})`)
-        return
-      }
-
-      const saved: CohortDTO = await res.json()
-      if (isEditing) {
-        setCohorts((prev) =>
-          prev.map((c) =>
-            c.id === saved.id
-              ? { ...saved, associateCount: c.associateCount }
-              : c,
-          ),
-        )
-      } else {
-        setCohorts((prev) => [{ ...saved, associateCount: 0 }, ...prev])
-      }
-      closeForm()
-    } catch (err) {
-      console.error('[CohortsClient] submit failed', err)
-      setFormTopError('Network error — please try again')
-    } finally {
-      setSubmitting(false)
+    if (res.status === 400) {
+      const body = await res.json().catch(() => ({}))
+      const issues = Array.isArray(body?.issues)
+        ? (body.issues as ZodIssue[]).map((i) => i.message).join('; ')
+        : null
+      throw new Error(issues || body?.error || 'Invalid input')
     }
+    if (res.status === 409) {
+      throw new Error('A cohort with that name already exists')
+    }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error(body?.error ?? `Request failed (${res.status})`)
+    }
+
+    const saved = await res.json()
+    if (isEditing) {
+      setCohorts((prev) =>
+        prev.map((c) =>
+          c.id === saved.id
+            ? {
+                ...saved,
+                associateCount: c.associateCount,
+                readyCount: c.readyCount,
+                improvingCount: c.improvingCount,
+                notReadyCount: c.notReadyCount,
+              }
+            : c,
+        ),
+      )
+    } else {
+      setCohorts((prev) => [
+        {
+          ...saved,
+          associateCount: 0,
+          readyCount: 0,
+          improvingCount: 0,
+          notReadyCount: 0,
+        },
+        ...prev,
+      ])
+    }
+    closeForm()
   }
 
-  async function handleDelete(c: CohortDTO) {
+  async function handleDelete(c: CohortWithCounts) {
     setRowError(null)
     const ok = window.confirm(
       `Delete cohort "${c.name}"? Associates will be unassigned but kept.`,
@@ -238,7 +157,14 @@ export default function CohortsClient({ initialCohorts }: Props) {
   }
 
   return (
-    <div className="trainer-shell">
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg)',
+        color: 'var(--ink)',
+        fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+      }}
+    >
       <div
         style={{
           maxWidth: '1120px',
@@ -246,19 +172,68 @@ export default function CohortsClient({ initialCohorts }: Props) {
           padding: '48px 24px',
         }}
       >
-        <nav className="cohorts-subnav" aria-label="Trainer sections">
-          <Link href="/trainer">Dashboard</Link>
-          <span className="active" aria-current="page">
+        {/* Sub-nav */}
+        <nav
+          aria-label="Trainer sections"
+          style={{
+            display: 'flex',
+            gap: '16px',
+            marginBottom: '24px',
+            fontSize: '13px',
+            fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+            fontWeight: 500,
+          }}
+        >
+          <Link
+            href="/trainer"
+            style={{
+              color: 'var(--muted)',
+              textDecoration: 'none',
+              padding: '6px 10px',
+              borderRadius: '6px',
+            }}
+          >
+            Dashboard
+          </Link>
+          <span
+            aria-current="page"
+            style={{
+              color: 'var(--ink)',
+              backgroundColor: 'var(--surface-muted)',
+              padding: '6px 10px',
+              borderRadius: '6px',
+            }}
+          >
             Cohorts
           </span>
         </nav>
 
-        <div className="cohorts-header">
-          <h1 className="cohorts-title">Cohorts</h1>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginBottom: '32px',
+            gap: '16px',
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: "var(--font-display), 'Clash Display', sans-serif",
+              fontWeight: 600,
+              fontSize: '48px',
+              color: 'var(--ink)',
+              lineHeight: 1.1,
+              margin: 0,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Cohorts
+          </h1>
           {!formOpen && (
             <button
               type="button"
-              className="cohorts-btn-primary"
+              className="btn-accent-flat"
               onClick={openCreateForm}
             >
               New Cohort
@@ -267,172 +242,96 @@ export default function CohortsClient({ initialCohorts }: Props) {
         </div>
 
         {formOpen && (
-          <form className="cohorts-form" onSubmit={handleSubmit} noValidate>
-            <h2 className="cohorts-form-title">{formTitle}</h2>
-            {formTopError && (
-              <div className="cohorts-form-error" role="alert">
-                {formTopError}
-              </div>
-            )}
-            <div className="cohorts-form-grid">
-              <div className="cohorts-field full">
-                <label htmlFor="cohort-name">Name</label>
-                <input
-                  id="cohort-name"
-                  type="text"
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, name: e.target.value }))
-                  }
-                  maxLength={100}
-                  aria-invalid={!!formErrors.name}
-                  aria-describedby={
-                    formErrors.name ? 'cohort-name-error' : undefined
-                  }
-                />
-                {formErrors.name && (
-                  <span id="cohort-name-error" className="error">
-                    {formErrors.name}
-                  </span>
-                )}
-              </div>
-
-              <div className="cohorts-field">
-                <label htmlFor="cohort-start">Start Date</label>
-                <input
-                  id="cohort-start"
-                  type="date"
-                  value={formState.startDate}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, startDate: e.target.value }))
-                  }
-                  aria-invalid={!!formErrors.startDate}
-                />
-                {formErrors.startDate && (
-                  <span className="error">{formErrors.startDate}</span>
-                )}
-              </div>
-
-              <div className="cohorts-field">
-                <label htmlFor="cohort-end">End Date</label>
-                <input
-                  id="cohort-end"
-                  type="date"
-                  value={formState.endDate}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, endDate: e.target.value }))
-                  }
-                  aria-invalid={!!formErrors.endDate}
-                />
-                {formErrors.endDate && (
-                  <span className="error">{formErrors.endDate}</span>
-                )}
-              </div>
-
-              <div className="cohorts-field full">
-                <label htmlFor="cohort-desc">Description</label>
-                <textarea
-                  id="cohort-desc"
-                  value={formState.description}
-                  onChange={(e) =>
-                    setFormState((s) => ({
-                      ...s,
-                      description: e.target.value,
-                    }))
-                  }
-                  maxLength={500}
-                  aria-invalid={!!formErrors.description}
-                />
-                {formErrors.description && (
-                  <span className="error">{formErrors.description}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="cohorts-form-actions">
-              <button
-                type="button"
-                className="cohorts-btn-secondary"
-                onClick={closeForm}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="cohorts-btn-primary"
-                disabled={submitting}
-              >
-                {submitLabel}
-              </button>
-            </div>
-          </form>
+          <div style={{ marginBottom: '32px' }}>
+            <CohortForm
+              initial={formInitial}
+              onSubmit={handleSubmit}
+              onCancel={closeForm}
+              submitLabel={isEditing ? 'Update' : 'Create'}
+              title={isEditing ? 'Edit Cohort' : 'New Cohort'}
+            />
+          </div>
         )}
 
         {rowError && (
-          <div className="cohorts-form-error" role="alert">
+          <div
+            role="alert"
+            style={{
+              backgroundColor: 'var(--surface-muted)',
+              border: '1px solid var(--danger)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              color: 'var(--danger)',
+              fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+              fontSize: '14px',
+              marginBottom: '24px',
+            }}
+          >
             {rowError}
           </div>
         )}
 
-        {sortedCohorts.length === 0 ? (
-          <div className="cohorts-empty">
+        {cohorts.length === 0 ? (
+          <div
+            style={{
+              padding: '64px 24px',
+              textAlign: 'center',
+              color: 'var(--muted)',
+              fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+              fontSize: '14px',
+              border: '1px dashed var(--border)',
+              borderRadius: '12px',
+              backgroundColor: 'var(--surface)',
+            }}
+          >
             No cohorts yet. Click &ldquo;New Cohort&rdquo; to create the first one.
           </div>
         ) : (
           <div
-            className="trainer-card"
-            style={{ padding: 0, overflow: 'hidden' }}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))',
+              gap: '24px',
+            }}
           >
-            <table className="trainer-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Associates</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCohorts.map((c) => (
-                  <tr key={c.id} style={{ cursor: 'default' }}>
-                    <td>
-                      <div style={{ fontWeight: 500 }}>{c.name}</div>
-                      {c.description && (
-                        <div
-                          className="trainer-meta"
-                          style={{ marginTop: '2px' }}
-                        >
-                          {c.description}
-                        </div>
-                      )}
-                    </td>
-                    <td>{formatDate(c.startDate)}</td>
-                    <td>{formatDate(c.endDate)}</td>
-                    <td>{c.associateCount ?? 0}</td>
-                    <td>
-                      <div className="cohorts-actions-cell">
-                        <button
-                          type="button"
-                          className="cohorts-btn-ghost"
-                          onClick={() => openEditForm(c)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className="cohorts-btn-ghost danger"
-                          onClick={() => handleDelete(c)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {cohorts.map((c) => (
+              <div key={c.id}>
+                <CohortCard
+                  cohort={{
+                    id: c.id,
+                    name: c.name,
+                    startDate: c.startDate,
+                    endDate: c.endDate,
+                    description: c.description,
+                    associateCount: c.associateCount,
+                    readyCount: c.readyCount,
+                    improvingCount: c.improvingCount,
+                    notReadyCount: c.notReadyCount,
+                  }}
+                  onEdit={() => openEditForm(c)}
+                  onDelete={() => handleDelete(c)}
+                />
+                <div
+                  style={{
+                    marginTop: '8px',
+                    textAlign: 'right',
+                    fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+                    fontSize: '13px',
+                  }}
+                >
+                  <Link
+                    href={`/trainer/cohorts/${c.id}`}
+                    style={{
+                      color: 'var(--accent)',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                    }}
+                  >
+                    View cohort →
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
