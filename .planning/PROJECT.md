@@ -33,8 +33,8 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - [ ] **DASH-01**: Trainer dashboard — roster view with readiness status badges
 - [ ] **DASH-02**: Per-associate detail — session history, gap trend charts, skill/topic selector
 - [ ] **DASH-03**: AI vs trainer score calibration view
-- [ ] **READY-01**: Computed readiness signal (75% avg / 3 sessions / non-negative trend)
-- [ ] **READY-02**: Next recommended practice area per associate
+- [x] **READY-01**: Computed readiness signal (75% avg / 3 sessions / non-negative trend) — Validated in Phase 5: Readiness Signals
+- [x] **READY-02**: Next recommended practice area per associate — Validated in Phase 5: Readiness Signals
 
 ### Out of Scope
 
