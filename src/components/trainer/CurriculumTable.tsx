@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import CurriculumWeekRow, { CurriculumWeekData } from './CurriculumWeekRow'
-import '../../../app/trainer/trainer.css'
+import '@/app/trainer/trainer.css'
 
 interface CurriculumTableProps {
   cohortId: number
