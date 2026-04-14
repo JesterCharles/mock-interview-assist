@@ -22,7 +22,7 @@ const DEFAULT_THRESHOLD = 75;
 const LOG_PREFIX = '[readiness-pipeline]';
 
 async function markStatus(
-  sessionId: number | undefined,
+  sessionId: string | undefined,
   status: 'pending' | 'done' | 'failed',
 ): Promise<void> {
   if (sessionId === undefined) return;
@@ -40,7 +40,7 @@ async function markStatus(
 
 export async function runReadinessPipeline(
   associateId: number,
-  sessionId?: number,
+  sessionId?: string,
 ): Promise<void> {
   await markStatus(sessionId, 'pending');
 
