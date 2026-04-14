@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { SessionSummary } from '@/lib/trainer-types'
 
 interface CalibrationViewProps {
@@ -61,6 +61,13 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
   const [selectedSessionId, setSelectedSessionId] = useState<string>(
     scoredSessions[0]?.id ?? ''
   )
+
+  // Sync selectedSessionId when sessions prop changes and current selection is stale (WR-02)
+  useEffect(() => {
+    if (scoredSessions.length > 0 && !scoredSessions.find((s) => s.id === selectedSessionId)) {
+      setSelectedSessionId(scoredSessions[0].id)
+    }
+  }, [scoredSessions, selectedSessionId])
 
   const selectedSession = useMemo(
     () => scoredSessions.find((s) => s.id === selectedSessionId) ?? null,
