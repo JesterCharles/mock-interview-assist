@@ -84,8 +84,8 @@
   5. Session.readinessRecomputeStatus transitions pending→done on success; failed recomputes are repairable via `/api/admin/readiness-sweep` (Codex finding #5)
 **Plans**: 3 plans
 - [x] 10-01-PLAN.md — Hardened public/complete (strip identity) + NEW /api/associate/interview/complete + shared runReadinessPipeline with DB marker
-- [ ] 10-02-PLAN.md — Integration tests (authenticated + anonymous + spoofing), sync-check parity, human verification
-- [ ] 10-03-PLAN.md — /api/admin/readiness-sweep endpoint + runReadinessSweep helper (Codex finding #5 repair path)
+- [x] 10-02-PLAN.md — Integration tests (authenticated + anonymous + spoofing), sync-check parity, human verification
+- [x] 10-03-PLAN.md — /api/admin/readiness-sweep endpoint + runReadinessSweep helper (Codex finding #5 repair path)
 
 ---
 
@@ -171,7 +171,7 @@
 | 7. Adaptive Setup | v1.0 | 2/2 | Complete | 2026-04-14 |
 | 8. Schema Migration | v1.1 | 0/2 | Planned | - |
 | 9. Associate PIN Auth | v1.1 | 0/3 | Planned | - |
-| 10. Automated Interview Pipeline | v1.1 | 1/3 | In Progress|  |
+| 10. Automated Interview Pipeline | v1.1 | 3/3 | Complete   | 2026-04-14 |
 | 11. Cohort Management | v1.1 | 0/3 | Planned | - |
 | 12. Cohort Dashboard Views | v1.1 | 0/2 | Planned | - |
 | 13. Curriculum Schedule | v1.1 | 0/3 | Planned | - |
