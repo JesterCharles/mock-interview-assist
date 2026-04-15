@@ -38,7 +38,7 @@
 ### v1.2 Analytics & Auth Overhaul (Phases 16-25)
 
 - [x] **Phase 16: Cached Question-Bank Manifest** -- in-memory cache + ETag short-circuit + manual refresh, hits <400ms wizard target (completed 2026-04-15)
-- [ ] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI
+- [x] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI (completed 2026-04-15)
 - [ ] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery)
 - [ ] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap)
 - [ ] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth
@@ -81,7 +81,7 @@ Plans:
 - [x] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
 - [x] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
 - [x] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
-- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
+- [x] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 18: Supabase Auth Install
@@ -118,9 +118,9 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
-- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
-- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [x] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [x] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [x] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
 - [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
@@ -257,7 +257,7 @@ Plans:
 | 14. Design Cohesion | v1.1 | 2/2 | Complete | 2026-04-14 |
 | 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete | 2026-04-14 |
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
-| 17. Schema Prep + Email Backfill | v1.2 | 3/4 | In Progress|  |
+| 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 0/0 | Not started | - |
 | 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
