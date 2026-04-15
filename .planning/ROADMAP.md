@@ -156,6 +156,19 @@
 - [x] 14-02-PLAN.md — Cohort + curriculum UI components on DESIGN.md tokens
 **UI hint**: yes
 
+### Phase 15: Design Cohesion Sweep
+
+**Goal:** All routes (including legacy `/`, `/interview`, `/review`, `/dashboard`, `/login`) render on DESIGN.md tokens; legacy `--nlm-*` tokens and utilities (`.glass-card`, `.gradient-text`, `.nlm-bg`, glow classes, motion keyframes) deleted from `globals.css`. Single unified design system, zero retrofit debt.
+**Requirements**: DESIGN-03 (new — unification)
+**Depends on:** Phase 14
+**Plans:** 1/4 plans executed
+
+Plans:
+- [x] 15-01-PLAN.md — Migrate shared components (Navbar, QuestionCard, SpeechToText, ProgressBar) to DESIGN tokens (Wave 1)
+- [ ] 15-02-PLAN.md — Migrate legacy interview surfaces /, /interview, /review + manual trainer smoke (Wave 2, HIGH RISK)
+- [ ] 15-03-PLAN.md — Migrate /dashboard, /pdf, /history, /question-banks (Wave 2, parallel to 15-02)
+- [ ] 15-04-PLAN.md — Grep gate + Playwright regression + delete --nlm-* tokens/utilities/keyframes from globals.css (Wave 3, FINAL)
+
 ---
 
 ## Progress

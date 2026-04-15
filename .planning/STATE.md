@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-04-14T23:23:56.429Z"
-last_activity: 2026-04-14
+status: executing
+stopped_at: Completed 15-01-PLAN.md (Wave 1 components migrated)
+last_updated: "2026-04-15T00:22:48.507Z"
+last_activity: 2026-04-15
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 7
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
+  total_plans: 22
+  completed_plans: 19
+  percent: 86
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Phase 14 — design-cohesion
+**Current focus:** Phase 15 — design-cohesion-sweep
 
 ## Current Position
 
-Phase: 14 (design-cohesion) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-04-14
+Phase: 15 (design-cohesion-sweep) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-04-15
 
 Progress: [████████░░] 89%
 
@@ -78,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 10]: Anonymous /api/public/interview/complete unconditionally nulls associateSlug; authenticated callers routed to /api/associate/interview/complete (Codex #3 closure)
 - [Phase 10]: [Phase 10-03]: Readiness sweep uses most-recent session as pipeline marker; sweeps other outstanding markers via updateMany — one recompute covers all of an associate's outstanding state
 - [Phase 14]: Phase 14-01: PublicShell exposes data-* passthrough so guard-matrix tests inspect returned element props directly
+- [Phase 15]: Plan 15-01 grep gate regex corrected (btn-accent[^-] pattern) to preserve .btn-accent-flat
+- [Phase 15]: a11y added to .btn-accent-flat/.btn-secondary-flat: min-height 44px + :focus-visible 2px accent outline
 
 ### Pending Todos
 
@@ -90,6 +92,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-14T23:23:56.427Z
-Stopped at: Completed 14-02-PLAN.md
+Last session: 2026-04-15T00:22:48.505Z
+Stopped at: Completed 15-01-PLAN.md (Wave 1 components migrated)
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
