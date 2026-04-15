@@ -1,17 +1,25 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-stopped_at: Completed 15-04 deletion commit — Task 3 human-verify pending
-last_updated: "2026-04-15T11:21:02.172Z"
-last_activity: 2026-04-15 -- Phase 15 execution started
+milestone: v1.1
+milestone_name: Cohort Readiness System
+status: complete
+stopped_at: v1.1 milestone summary generated
+last_updated: "2026-04-15T12:00:00.000Z"
+last_activity: 2026-04-15 -- v1.1 milestone summary written
 progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 22
   completed_plans: 22
   percent: 100
+summary_report: .planning/reports/MILESTONE_SUMMARY-v1.1.md
+---
+
+# v1.1 COMPLETE
+
+Shipped 2026-04-14 (PR merged as `4238e36`). 8 phases (8-15), 22 plans, 14 requirements, 131 commits.
+Summary: [MILESTONE_SUMMARY-v1.1.md](reports/MILESTONE_SUMMARY-v1.1.md)
+
 ---
 
 # Project State
