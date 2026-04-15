@@ -2,13 +2,18 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: PLAN done for Phase 16. Next: EXECUTE stage → `/pipeline-execute 16` (or `/gsd-execute-phase 16`).
+- Current stage: Phase 16 EXECUTE + VERIFY done (7/7 must-haves, 247 tests pass). Next: per-phase review+validate OR plan Phase 17.
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Next action on resume: `/gsd-execute-phase 16` to build Phase 16 (cache module + invalidate route + wizard UI + call-site migration, 5 tasks, 1 wave). CONTEXT+RESEARCH+PLAN committed; plan-checker pass after 1 revision (invalidate scope contract fix + UI anchor pin). Multi-lens review (autoplan/peer/codex) skipped — narrow backend+polish scope. Roadmap Phases 17-25 still pending plan.
+Phase 16 shipped locally: 7 commits (7447b87…2012710), 247/247 tests, tsc clean, VERIFICATION 7/7 PASS. Next options:
+- `/gsd-code-review 16` + `/gsd-validate-phase 16` (parallel per-phase quality) before moving on
+- `/gsd-plan-phase 17` to plan next phase
+- `/pipeline-coordinator --resume` to auto-route
+
+Roadmap Phases 17-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -33,8 +38,8 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phase 16 PLAN done (5 tasks, 1 wave, plan-checker PASS after 1 revision). Phases 17-25 pending. |
-| execute | next | | | Phase 16 ready: `/gsd-execute-phase 16`. |
+| plan | in_progress | 2026-04-15 | | Phase 16 PLAN done. Phases 17-25 pending. |
+| execute | in_progress | 2026-04-15 | | Phase 16 done (7 commits, 7447b87…2012710, 247 tests, VERIFY 7/7). Phases 17-25 pending. |
 | review | pending | | | |
 | test | pending | | | |
 | debug | pending | | | |

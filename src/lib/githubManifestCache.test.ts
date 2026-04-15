@@ -34,7 +34,7 @@ describe('githubManifestCache', () => {
   it('cold fetch: empty cache → calls fetcher → stores entry and returns manifest', async () => {
     const files = makeFiles(2);
     const fetcher: FetcherFn = vi.fn(async () => ({
-      status: 200,
+      status: 200 as const,
       files,
       etag: 'etag-v1',
       truncated: false,
@@ -161,12 +161,11 @@ describe('githubManifestCache', () => {
   });
 
   it('stampede: two concurrent getManifest() calls → fetcher invoked exactly once', async () => {
-    let resolveFetch: (v: { status: 200; files: any[]; etag: string; truncated: boolean }) => void;
-    const deferred = new Promise<{ status: 200; files: any[]; etag: string; truncated: boolean }>(
-      (r) => {
-        resolveFetch = r;
-      },
-    );
+    type OkResp = { status: 200; files: ReturnType<typeof makeFiles>; etag: string; truncated: boolean };
+    let resolveFetch: (v: OkResp) => void;
+    const deferred = new Promise<OkResp>((r) => {
+      resolveFetch = r;
+    });
     const fetcher = vi.fn(async () => deferred);
     __setFetcher(fetcher);
 
