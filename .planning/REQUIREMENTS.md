@@ -8,8 +8,8 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## Cached Question-Bank Manifest (Phase 1)
 
-- [ ] **CACHE-01**: `/api/github` manifest responses cached in-memory (`Map` + 5-min TTL + ETag `If-None-Match` short-circuit). Per-repo+branch key. Setup wizard first fetch populates cache; subsequent wizard loads hit <400ms for cached entries.
-- [ ] **CACHE-02**: Trainer-only `/api/github/cache/invalidate` endpoint clears one entry or the full cache. Setup wizard shows "last synced {time}" hint + manual "Refresh" button that calls the invalidate endpoint for the current repo+branch.
+- [x] **CACHE-01**: `/api/github` manifest responses cached in-memory (`Map` + 5-min TTL + ETag `If-None-Match` short-circuit). Per-repo+branch key. Setup wizard first fetch populates cache; subsequent wizard loads hit <400ms for cached entries.
+- [x] **CACHE-02**: Trainer-only `/api/github/cache/invalidate` endpoint clears one entry or the full cache. Setup wizard shows "last synced {time}" hint + manual "Refresh" button that calls the invalidate endpoint for the current repo+branch.
 
 ## Schema Prep + Email Backfill (Phase 2)
 
@@ -98,8 +98,8 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 
 | REQ-ID | Roadmap Phase | Status |
 |--------|---------------|--------|
-| CACHE-01 | Phase 16 | Pending |
-| CACHE-02 | Phase 16 | Pending |
+| CACHE-01 | Phase 16 | Complete |
+| CACHE-02 | Phase 16 | Complete |
 | BACKFILL-01 | Phase 17 | Pending |
 | BACKFILL-02 | Phase 17 | Pending |
 | AUTH-05 | Phase 18 | Pending |

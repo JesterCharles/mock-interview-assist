@@ -37,7 +37,7 @@
 
 ### v1.2 Analytics & Auth Overhaul (Phases 16-25)
 
-- [ ] **Phase 16: Cached Question-Bank Manifest** -- in-memory cache + ETag short-circuit + manual refresh, hits <400ms wizard target
+- [x] **Phase 16: Cached Question-Bank Manifest** -- in-memory cache + ETag short-circuit + manual refresh, hits <400ms wizard target (completed 2026-04-15)
 - [ ] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI
 - [ ] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery)
 - [ ] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap)
@@ -62,7 +62,7 @@
   5. Conditional GET via `If-None-Match` returns 304 and resets TTL without re-downloading the body
 **Plans**: 1 plan
 Plans:
-- [ ] 16-01-PLAN.md — Manifest cache module + /api/github?type=manifest + invalidate route + wizard UI + call-site migration
+- [x] 16-01-PLAN.md — Manifest cache module + /api/github?type=manifest + invalidate route + wizard UI + call-site migration
 
 ### Phase 17: Schema Prep + Email Backfill
 **Goal**: Database schema is ready for Supabase identity linkage; existing Associate rows have trainer-curated emails (or are deleted) before auth cutover.
@@ -202,7 +202,7 @@ Plans:
 | 13. Curriculum Schedule | v1.1 | 3/3 | Complete | 2026-04-14 |
 | 14. Design Cohesion | v1.1 | 2/2 | Complete | 2026-04-14 |
 | 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete | 2026-04-14 |
-| 16. Cached Question-Bank Manifest | v1.2 | 0/0 | Not started | - |
+| 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 0/0 | Not started | - |
 | 18. Supabase Auth Install | v1.2 | 0/0 | Not started | - |
 | 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
