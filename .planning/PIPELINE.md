@@ -2,13 +2,13 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: DISCOVER in progress — research complete (4 agents + synthesizer, commit `58fc27f`). Paused at open-questions gate before requirements gathering.
+- Current stage: DISCOVER done. Next: PLAN stage → `/gsd-plan-phase 16` (Cached Question-Bank Manifest).
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Next action on resume: answer 4 open questions from research (Q1 email audit, Q2 Supabase tier, Q4 session provenance, Q5 finalized.html reconcile), then `/gsd-new-milestone` continues to requirements phase.
+Next action on resume: `/gsd-plan-phase 16` to start planning Phase 16 (Cached Question-Bank Manifest). Roadmap covers Phases 16-25, 30 reqs.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -30,10 +30,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 ## Stages (v1.2)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| discover | in_progress | 2026-04-15 | | Research complete (58fc27f). Paused at open-questions gate before requirements. |
-| init | pending | | | Codebase + intel from v1.1 still current; may skip remap. |
-| design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase for UI-SPEC per frontend phase. |
-| plan | pending | | | |
+| discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
+| init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
+| design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
+| plan | next | | | Phase 16 up first: `/gsd-plan-phase 16`. |
 | execute | pending | | | |
 | review | pending | | | |
 | test | pending | | | |
@@ -47,7 +47,9 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
 | Research yes/no | discover | sync | done | Run — 4 researchers + synthesizer, commit 58fc27f |
-| Open questions | discover | sync | **pending — resume here** | Q1/Q2/Q4/Q5 answers needed before requirements |
+| Open questions | discover | sync | done | Locked: bank `topic:` frontmatter, two-level nav, invite-only, trainer email-backfill UI (5f27441) |
+| Requirements approval | discover | sync | done | 30 reqs / 10 categories approved (440a1df) |
+| Roadmap approval | discover | sync | done | 10 phases 16-25 approved (218d32f) |
 | Requirements approval | discover | sync | pending | |
 | Roadmap approval | discover | sync | pending | |
 | Design selection | design | sync | pending | finalized.html already locked; expect light ui-phase pass |
