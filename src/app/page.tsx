@@ -731,7 +731,7 @@ export default function PublicInterviewPage() {
                         <div className="mt-4 inline-flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
                             <span>Have a PIN from your trainer?</span>
                             <a
-                                href="/associate/login"
+                                href="/signin?as=associate"
                                 className="inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded"
                                 style={{ color: 'var(--accent)', outlineColor: 'var(--accent)' }}
                             >
