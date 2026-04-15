@@ -36,10 +36,12 @@ decisions:
   - "::selection and scrollbar rules retuned to DESIGN parchment palette via --accent / --muted / --border / --surface-muted (kept, not deleted — plan did not list them, but their dark-palette rgbs would have clashed visually)"
   - "AssociateNav.tsx deleted in this plan (safe — only self-reference + docstring mention in /api/associate/me/route.ts)"
   - "Task 3 (human-verify) pending — checkpoint emitted, not auto-approved"
+status: COMPLETE
 metrics:
   duration: "~25 minutes"
-  completed: "2026-04-15"
-  tasks_completed: 2
+  completed: "2026-04-14"
+  approved: "2026-04-14 — user 'approved' post-deletion smoke"
+  tasks_completed: 3
   tasks_total: 3
   commits: 2
   lines_deleted_globals_css: "~190"
