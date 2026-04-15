@@ -8,27 +8,28 @@ An adaptive technical skills development platform that gives associates repeated
 
 Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories that trainers and clients can trust.
 
-## Current State (v1.0 shipped 2026-04-14)
+## Current State
 
-- 7 phases, 15 plans, 22 requirements — all complete
-- Prisma 7 + Supabase with dual-write migration (file + DB)
-- 60 unit tests passing, TypeScript clean
-- Trainer dashboard at /trainer with gap trend charts (recharts)
-- Adaptive mock setup pre-populates from associate gap history
-- 11 tech debt items tracked (see milestones/v1.0-MILESTONE-AUDIT.md)
+**v1.1 shipped (PR `4238e36`, merged 2026-04-14) — production deploy deferred to v1.2 cycle.**
 
-## Current Milestone: v1.1 Cohort Readiness System
+- **v1.0 (2026-04-14):** 7 phases, 15 plans, 22 requirements. Prisma + Supabase foundation, gap scoring, readiness classification, trainer dashboard, adaptive mock setup.
+- **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest, 24/24 Playwright, Codex findings all P1/P2 resolved pre-merge.
+- Total codebase: 35 routes, standalone Docker output, idempotent migrations.
 
-**Goal:** Build a trusted readiness record that any evidence source can feed — starting with connecting automated interviews to the readiness pipeline, adding associate auth, cohort management, and curriculum-driven question selection.
+## Next Milestone Goals: v1.2 (placeholder)
 
-**Target features:**
-- Associate authentication (automated interviews link to identity and readiness record)
-- Cohort management (groups with curriculum schedules, trainer assignment)
-- Curriculum-driven question selection (auto-filter based on what's been taught)
-- Automated interviews feeding readiness pipeline (sessions persist, gap scores compute)
-- Cohort-level trainer dashboard views (roster filtered by cohort, aggregate readiness)
-- Design cohesion across all pages (apply DESIGN.md consistently)
-- Email notifications on readiness changes
+**Carry-forward tech debt (sourced from `milestones/v1.1-MILESTONE-AUDIT.md` §5):**
+
+- Production deploy of v1.1 (merged to main, not yet promoted — user choice at ship time)
+- **PIN auth:** harden rate limiter (IP reputation, exponential backoff), validate in staging, flip `ENABLE_ASSOCIATE_AUTH=true`
+- **Perf:** cached GitHub question-bank manifest (wizard `<400ms` target — currently advisory)
+- **Ops:** scheduled readiness sweep cron (endpoint exists, today trainer-invoked)
+- **Dark mode:** visual QA across every interactive state (tokens defined, toggle wired, spot-checked only)
+- **Nyquist validation hygiene:** backfill VALIDATION.md for phases that shipped with `human_needed` residuals
+
+**Deferred features (see `milestones/v1.1-REQUIREMENTS.md` deferred list):** magic-link / Supabase Auth OTP (replace PIN), curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, self-service PIN reset.
+
+Concrete v1.1→v1.2 scoping happens via `/gsd-new-milestone`.
 
 ## Requirements
 
@@ -62,9 +63,15 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - ✓ READY-03: Configurable readiness threshold — v1.0
 - ✓ DASH-01 through DASH-07: Trainer dashboard — v1.0
 
+- ✓ AUTH-01..04: Associate PIN auth (6-digit, dedicated secret, cookie versioning) — v1.1 (flag-gated off in prod)
+- ✓ PIPE-01..02: Authenticated automated-interview pipeline + readiness recompute marker + sweep — v1.1
+- ✓ COHORT-01..04: Cohort CRUD, nullable FK, roster filter, opt-in summary (backward-compatible shape) — v1.1
+- ✓ CURRIC-01..02: Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
+- ✓ DESIGN-01..03: Unified DESIGN.md token system; legacy `--nlm-*` deleted; single `/signin` tabs — v1.1
+
 ### Active
 
-(Defining in REQUIREMENTS.md for v1.1)
+(TBD for v1.2 — populate via `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -127,4 +134,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 — v1.1 Cohort Readiness System milestone started; patched with Codex review findings #4, #6*
+*Last updated: 2026-04-15 after v1.1 milestone (shipped 2026-04-14, prod deploy deferred to v1.2)*

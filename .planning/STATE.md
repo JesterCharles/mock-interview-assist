@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Cohort Readiness System
-status: complete
-stopped_at: v1.1 milestone summary generated
-last_updated: "2026-04-15T12:00:00.000Z"
-last_activity: 2026-04-15 -- v1.1 milestone summary written
+status: shipped
+stopped_at: v1.1 milestone archived and tagged
+last_updated: "2026-04-15T18:00:00.000Z"
+last_activity: 2026-04-15 -- v1.1 milestone archived; ready for v1.2 planning
 progress:
   total_phases: 8
   completed_phases: 8
@@ -13,12 +13,20 @@ progress:
   completed_plans: 22
   percent: 100
 summary_report: .planning/reports/MILESTONE_SUMMARY-v1.1.md
+archives:
+  - .planning/milestones/v1.1-ROADMAP.md
+  - .planning/milestones/v1.1-REQUIREMENTS.md
+  - .planning/milestones/v1.1-MILESTONE-AUDIT.md
+git_tag: v1.1
 ---
 
-# v1.1 COMPLETE
+# v1.1 COMPLETE — Archived
 
-Shipped 2026-04-14 (PR merged as `4238e36`). 8 phases (8-15), 22 plans, 14 requirements, 131 commits.
+Shipped 2026-04-14 (PR merged as `4238e36`). 8 phases (8–15), 22 plans, 14 requirements, 131 commits.
+Archived 2026-04-15. Tag `v1.1` created locally (not yet pushed).
 Summary: [MILESTONE_SUMMARY-v1.1.md](reports/MILESTONE_SUMMARY-v1.1.md)
+
+Production deploy of v1.1 is DEFERRED to v1.2 (user choice — code on main, prod not yet promoted).
 
 ---
 
@@ -26,82 +34,54 @@ Summary: [MILESTONE_SUMMARY-v1.1.md](reports/MILESTONE_SUMMARY-v1.1.md)
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-14)
+See: .planning/PROJECT.md (updated 2026-04-15 after v1.1 milestone)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Phase 15 — design-cohesion-sweep
+**Current focus:** Planning next milestone (v1.2) — carry-forward tech debt: PIN limiter hardening + flag flip, prod deploy, cached question-bank manifest, readiness sweep cron.
 
 ## Current Position
 
-Phase: 15 (design-cohesion-sweep) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 15
-Last activity: 2026-04-15 -- Phase 15 execution started
+Milestone: v1.1 SHIPPED + ARCHIVED
+Next: run `/gsd-new-milestone` to scope v1.2
 
-Progress: [████████░░] 89%
+Progress: [██████████] 100% (v1.1)
 
-## Phase Map (v1.1)
+## Phase Map (v1.1 — archived)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 8 | Schema Migration | (enabling foundation) | Complete |
-| 9 | Associate PIN Auth | AUTH-01, AUTH-02, AUTH-03 | Complete |
-| 10 | Automated Interview Pipeline | PIPE-01, PIPE-02 | Complete |
-| 11 | Cohort Management | COHORT-01, COHORT-02 | Complete |
-| 12 | Cohort Dashboard Views | COHORT-03, COHORT-04 | Complete |
-| 13 | Curriculum Schedule | CURRIC-01, CURRIC-02 | Complete |
-| 14 | Design Cohesion | DESIGN-01, DESIGN-02 | Not started |
-
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: -
-
-*Updated after first plan completes*
+| 8 | Schema Migration | (enabling foundation) | ✅ Complete |
+| 9 | Associate PIN Auth | AUTH-01..04 | ✅ Complete (flag-gated off) |
+| 10 | Automated Interview Pipeline | PIPE-01, PIPE-02 | ✅ Complete |
+| 11 | Cohort Management | COHORT-01, COHORT-02 | ✅ Complete |
+| 12 | Cohort Dashboard Views | COHORT-03, COHORT-04 | ✅ Complete |
+| 13 | Curriculum Schedule | CURRIC-01, CURRIC-02 | ✅ Complete |
+| 14 | Design Cohesion | DESIGN-01, DESIGN-02 | ✅ Complete |
+| 15 | Design Cohesion Sweep | DESIGN-03 (added mid-milestone) | ✅ Complete |
 
 ## Accumulated Context
 
-### Decisions
+### Decisions (v1.1 — see PROJECT.md + milestones/v1.1-ROADMAP.md for full log)
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+- PIN auth flag-gated off for v1.1 ship; harden limiter and flip in v1.2
+- Legacy `--nlm-*` deleted entirely (overrode Codex #8 preservation intent via mid-milestone DESIGN-03)
+- Idempotent migrations (`IF NOT EXISTS` + `duplicate_object` guards) safe for fresh + pre-existing DBs
+- Split completion endpoints eliminate forged-linkage by construction (Codex #3)
+- `Session.readinessRecomputeStatus` + sweep endpoint replaces fire-and-forget fan-out (Codex #5)
+- Opt-in `?includeSummary=true` preserves v1.0 `/api/trainer` shape (Codex #1)
+- Exact skillSlug match via `Set.has(firstSegment)` + `@@unique([cohortId, weekNumber])` (Codex #9)
+- Dedicated `ASSOCIATE_SESSION_SECRET` with `pinGeneratedAt` token version (Codex #4)
 
-- v1.1: Associate auth is PIN-based (6-digit, trainer-generated) — NOT Supabase Auth OTP. Research suggested OTP but requirements specify PIN. Simpler, no email infrastructure needed for auth.
-- v1.1: Phase 8 is schema-only (Cohort, CurriculumWeek, nullable cohortId on Associate + Session, mode on Session) — no application logic. All other phases depend on it.
-- v1.1: Automated interview pipeline (Phase 10) uses new authenticated endpoint — existing `/api/public/interview/complete` stays anonymous to avoid breaking anonymous users (Pitfall 3 from research).
-- v1.1: cohortId is nullable on Associate — unassigned associates remain fully functional (Pitfall 4 mitigation).
-- v1.1: Curriculum fetch and GitHub question bank fetch must be parallel (`Promise.all`) in setup wizard — serial fetch degrades perceived performance (Pitfall 5 mitigation).
-- v1.1: Design cohesion (Phase 14) applied last — after all new UIs exist. Does NOT touch `/interview` or `/review` pages to avoid mid-session visual regressions.
-- [Phase 08]: Hand-wrote migration SQL: Supabase DB lacks _prisma_migrations history; --create-only required destructive reset
-- [Phase 09-associate-pin-auth]: Dedicated ASSOCIATE_SESSION_SECRET decoupled from APP_PASSWORD; token version = pinGeneratedAt for DB-backed revocation (Codex #4 mitigation)
-- [Phase 09-associate-pin-auth]: bcryptjs chosen over native bcrypt for node:22-alpine Docker compatibility
-- [Phase 09]: Middleware uses cookie-only identity enum (no DB) for Edge-runtime safety; revocation check lives in server-component helpers
-- [Phase 09]: isAuthenticatedSession() stays trainer-only (D-13) — associate auth uses sibling helpers to prevent Pitfall 1
-- [Phase 09]: [Phase 09-03]: Server components return JSX-wrapped 403 (data-http-status marker) since Next.js cannot return a raw Response from a page component
-- [Phase 09]: [Phase 09-03]: Authenticated interview shell intentionally minimal — Phase 10 owns the runtime integration
-- [Phase 10]: Session.id is cuid string — runReadinessPipeline sessionId typed as string; no persistSessionToDb contract change needed
-- [Phase 10]: Anonymous /api/public/interview/complete unconditionally nulls associateSlug; authenticated callers routed to /api/associate/interview/complete (Codex #3 closure)
-- [Phase 10]: [Phase 10-03]: Readiness sweep uses most-recent session as pipeline marker; sweeps other outstanding markers via updateMany — one recompute covers all of an associate's outstanding state
-- [Phase 14]: Phase 14-01: PublicShell exposes data-* passthrough so guard-matrix tests inspect returned element props directly
-- [Phase 15]: Plan 15-01 grep gate regex corrected (btn-accent[^-] pattern) to preserve .btn-accent-flat
-- [Phase 15]: a11y added to .btn-accent-flat/.btn-secondary-flat: min-height 44px + :focus-visible 2px accent outline
-- [Phase 15]: Plan 15-03: /dashboard, /pdf, /history, /question-banks migrated to DESIGN tokens (21→0 legacy refs); Rule 1 fix — corrected difficulty enum mismatch (beginner/intermediate/advanced)
-- [Phase 15]: Plan 15-04: DESIGN system unified — 50→0 legacy refs, all in one atomic commit (06987c7); Playwright suite 24/24 green
+### Pending (v1.2 carry-forward)
 
-### Pending Todos
-
-- Run `/gsd-plan-phase 8` to begin schema migration planning
+- Prod deploy v1.1 (user may deploy before starting v1.2 work)
+- Decide v1.2 scope via `/gsd-new-milestone`
 
 ### Blockers/Concerns
 
-- PIN storage approach: must decide between hashing (bcrypt) vs. plain PIN with short TTL. PIN is low-sensitivity internal credential but should still be hashed. Resolve during Phase 9 planning.
-- `CurriculumWeek.weekNumber` must align with existing techMap week number convention from GitHub question bank file paths — naming contract, not enforced by code. Document explicitly in Phase 13.
+- None blocking milestone closure. Deploy gate is user-choice, not audit blocker.
 
 ## Session Continuity
 
-Last session: 2026-04-15T02:06:21.196Z
-Stopped at: Completed 15-04 deletion commit — Task 3 human-verify pending
-Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
+Last session: 2026-04-15 — v1.1 milestone archived + tagged
+Resume with: `/gsd-new-milestone` for v1.2 scoping
