@@ -192,7 +192,7 @@ export default function PublicInterviewPage() {
         try {
             // Using placeholder config because /api/github ignores credentials/repos and uses environment variables
             const service = new GitHubService('owner', 'repo', 'main');
-            const files = await service.findQuestionBanks('');
+            const { files } = await service.loadManifest();
             setAvailableTopics(files);
         } catch (e) {
             console.error("Error fetching topics from GitHub", e);
