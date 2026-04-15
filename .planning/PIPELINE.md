@@ -2,7 +2,7 @@
 
 ## Current Run
 - Started: 2026-04-14
-- Current stage: EXECUTE complete — 8/8 v1.1 phases (22/22 plans) including Phase 15 design-cohesion-sweep (unified DESIGN system, legacy deleted). Next: SHIP.
+- Current stage: MILESTONE ARCHIVED — v1.1 shipped (PR #3 / 4238e36), docs synced, milestone summary + audit complete, tag v1.1 created locally. Deploy deferred to v1.2.
 - Mode: autonomous
 - Previous: v1.0 pipeline completed 2026-04-14
 
@@ -18,7 +18,7 @@
 | test | per-phase | 2026-04-14 | | Phase 11 VALIDATION: 40/40 green. Full suite 199/199 + 4 skipped. typecheck clean. |
 | debug | pending | | | |
 | optimize | pending | | | |
-| ship | pending | | | |
+| ship | done | 2026-04-14 | 2026-04-14 | PR #3 merged 4238e36. Codex gate: initial FAIL (2xP1 + 3xP2), fixed in 21187f9, re-merged. Deploy deferred to v1.2 per user. Tag v1.1 local (not pushed). |
 | reflect | pending | | | |
 | maintain | pending | | | |
 
