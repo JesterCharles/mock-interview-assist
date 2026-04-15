@@ -59,3 +59,29 @@ export interface RosterResponse {
   associates: RosterAssociate[]
   summary: CohortSummary
 }
+
+// Plan 17-02 — Trainer backfill surface.
+// Row shape for /api/trainer/associates list used by the BACKFILL-02 admin UI.
+// Includes id (numeric PK) for trainer-only PATCH/DELETE actions.
+export interface AssociateBackfillRow {
+  id: number
+  slug: string
+  displayName: string | null
+  email: string | null
+  sessionCount: number
+  cohortId: number | null
+  cohortName: string | null
+  createdAt: string // ISO
+}
+
+// Dry-run preview counts returned by /api/trainer/associates/preview.
+// slugOnlyZeroSessions = count of rows safe to delete (email IS NULL AND sessionCount === 0).
+// sessionsOrphanedIfAllDeleted is reserved for future rule changes; always 0
+// while the server-side orphan guard refuses to delete any associate with sessions.
+export interface BackfillPreview {
+  total: number
+  withEmail: number
+  withoutEmail: number
+  slugOnlyZeroSessions: number
+  sessionsOrphanedIfAllDeleted: number
+}
