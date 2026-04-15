@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 15-01-PLAN.md (Wave 1 components migrated)
-last_updated: "2026-04-15T00:22:48.507Z"
+stopped_at: Completed 15-03-PLAN.md (Wave 2 lower-risk pages migrated)
+last_updated: "2026-04-15T00:44:44.564Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 22
-  completed_plans: 19
-  percent: 86
+  completed_plans: 21
+  percent: 95
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 15 (design-cohesion-sweep) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -80,6 +80,7 @@ Recent decisions affecting current work:
 - [Phase 14]: Phase 14-01: PublicShell exposes data-* passthrough so guard-matrix tests inspect returned element props directly
 - [Phase 15]: Plan 15-01 grep gate regex corrected (btn-accent[^-] pattern) to preserve .btn-accent-flat
 - [Phase 15]: a11y added to .btn-accent-flat/.btn-secondary-flat: min-height 44px + :focus-visible 2px accent outline
+- [Phase 15]: Plan 15-03: /dashboard, /pdf, /history, /question-banks migrated to DESIGN tokens (21→0 legacy refs); Rule 1 fix — corrected difficulty enum mismatch (beginner/intermediate/advanced)
 
 ### Pending Todos
 
@@ -92,6 +93,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-15T00:22:48.505Z
-Stopped at: Completed 15-01-PLAN.md (Wave 1 components migrated)
+Last session: 2026-04-15T00:44:38.177Z
+Stopped at: Completed 15-03-PLAN.md (Wave 2 lower-risk pages migrated)
 Resume with: `/gsd-execute-phase 8` (if more plans) or advance to Phase 9
