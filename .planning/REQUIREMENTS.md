@@ -94,8 +94,41 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## Traceability
 
-Filled by roadmapper in Phase 10 step.
+Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered 16-25 (continuing from v1.1 which ended at Phase 15). The "Phase N" labels in the section headers above (Phase 1-10) are the milestone-relative ordinals.
 
-| REQ-ID | Phase |
-|--------|-------|
-| _pending roadmap_ | |
+| REQ-ID | Roadmap Phase | Status |
+|--------|---------------|--------|
+| CACHE-01 | Phase 16 | Pending |
+| CACHE-02 | Phase 16 | Pending |
+| BACKFILL-01 | Phase 17 | Pending |
+| BACKFILL-02 | Phase 17 | Pending |
+| AUTH-05 | Phase 18 | Pending |
+| AUTH-06 | Phase 18 | Pending |
+| AUTH-07 | Phase 18 | Pending |
+| AUTH-08 | Phase 18 | Pending |
+| INVITE-01 | Phase 19 | Pending |
+| INVITE-02 | Phase 19 | Pending |
+| INVITE-03 | Phase 19 | Pending |
+| AUTH-09 | Phase 20 | Pending |
+| AUTH-10 | Phase 20 | Pending |
+| SHELL-01 | Phase 21 | Pending |
+| SHELL-02 | Phase 21 | Pending |
+| SHELL-03 | Phase 21 | Pending |
+| SHELL-04 | Phase 21 | Pending |
+| ANALYTICS-01 | Phase 22 | Pending |
+| ANALYTICS-02 | Phase 22 | Pending |
+| ANALYTICS-03 | Phase 22 | Pending |
+| ANALYTICS-04 | Phase 22 | Pending |
+| ANALYTICS-05 | Phase 22 | Pending |
+| ANALYTICS-06 | Phase 22 | Pending |
+| ASELF-01 | Phase 23 | Pending |
+| ASELF-02 | Phase 23 | Pending |
+| ASELF-03 | Phase 23 | Pending |
+| ASELF-04 | Phase 23 | Pending |
+| PDF-01 | Phase 24 | Pending |
+| PDF-02 | Phase 24 | Pending |
+| CLEANUP-01 | Phase 25 | Pending |
+| CLEANUP-02 | Phase 25 | Pending |
+| CLEANUP-03 | Phase 25 | Pending |
+
+**Coverage:** 30/30 v1.2 requirements mapped. No orphans.

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Analytics & Auth Overhaul
-status: defining_requirements
-stopped_at: milestone scoped; requirements gathering next
-last_updated: "2026-04-15T19:00:00.000Z"
-last_activity: 2026-04-15 -- v1.2 milestone started via /gsd-new-milestone
+status: roadmap_ready
+stopped_at: roadmap created; Phase 16 ready to plan
+last_updated: "2026-04-15T20:00:00.000Z"
+last_activity: 2026-04-15 -- ROADMAP.md created with 10 phases (16-25), 30 reqs mapped
 progress:
-  total_phases: 0
+  total_phases: 10
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -23,12 +23,17 @@ previous_milestone:
 
 **Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
 
-**Target features:**
-- Trainer analytics + reporting (KPI strip, cohort trends, sparklines, gap aggregation, PDF export)
-- Dashboard redesign per `finalized.html` (topbar + sidebar layout, Gap Analysis / Calibration / Reports sidebar routes)
-- Associate dashboard upgrade (self-view gap trends, recommended next area, goals/streaks, book-next-mock)
-- Full Supabase Auth cutover + bulk magic-link cohort onboarding (replaces trainer password + PIN system)
-- Cached question-bank manifest
+**Phase structure (16-25):**
+- Phase 16: Cached Question-Bank Manifest (independent quick win)
+- Phase 17: Schema Prep + Email Backfill (independent data migration)
+- Phase 18: Supabase Auth Install (depends on 17)
+- Phase 19: Bulk Invite (depends on 18)
+- Phase 20: Middleware Cutover + RLS (depends on 18, 19)
+- Phase 21: App Shell Redesign (parallelizable)
+- Phase 22: Trainer Analytics (depends on 21, 17)
+- Phase 23: Associate Self-Dashboard (depends on 20, 21)
+- Phase 24: PDF Analytics Export (depends on 22)
+- Phase 25: PIN Removal + Cleanup (depends on 20 + 2-week grace)
 
 **Deferred to v1.3 (CI/CD milestone):** prod deploy automation, readiness sweep cron, dark-mode visual QA, Nyquist validation backfill.
 
@@ -41,38 +46,59 @@ previous_milestone:
 See: .planning/PROJECT.md (updated 2026-04-15 — v1.2 milestone active)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** v1.2 — defining requirements, then roadmap.
+**Current focus:** v1.2 Phase 16 — ready to plan.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 16 (Cached Question-Bank Manifest) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-15 — Milestone v1.2 started
+Status: Roadmap ready, awaiting `/gsd-plan-phase 16`
+Last activity: 2026-04-15 — ROADMAP.md written, 30/30 reqs mapped across phases 16-25
+
+## Performance Metrics
+
+- v1.0: 7 phases, 22 reqs, ~26h
+- v1.1: 8 phases, 14 reqs, ~24h, 131 commits
+- v1.2: 10 phases, 30 reqs (planned)
 
 ## Accumulated Context
 
-### v1.1 decisions (retained for reference)
+### Locked decisions (from research/SUMMARY.md)
+
+- Auth stack: `@supabase/ssr` + `@supabase/supabase-js` admin (greenfield install)
+- RLS = defense-in-depth; app-layer auth primary; Prisma stays on service-role + Transaction Pooler
+- `Associate.authUserId` additive nullable FK (no PK swap, `Session.associateId` unchanged)
+- Trainer role marker: `auth.users.user_metadata.role = 'trainer'`
+- Magic-link delivery: `admin.generateLink` + Resend (NOT Supabase default SMTP); PKCE + 7-day expiry
+- Manifest cache: in-memory `Map` + 5-min TTL + ETag `If-None-Match` + manual invalidate (no Redis)
+- Recharts only outside PDFs; pre-rendered SVG sparkline helper inside `@react-pdf`
+- 4 KPI cards max (Avg Readiness / Mocks This Week / At-Risk Count + Top Gap / AI-Trainer Variance)
+- Bulk invite: 50/call cap, per-email transaction, `lastInvitedAt` 5-min throttle
+- PIN removal: staged 4-commit sequence + 2-week grace + CI grep-gate before `DROP COLUMN`
+- No streaks / no leaderboards / no push notifications; readiness-goal progress bar only
+- Cohort-mate names hidden on associate dashboard (aggregate-only privacy default)
+
+### v1.1 decisions (retained)
 
 - Postgres canonical for all new features; file history legacy export only
-- Dedicated `ASSOCIATE_SESSION_SECRET` (retires w/ PIN system in v1.2)
-- Idempotent migrations (`IF NOT EXISTS` + `duplicate_object` guards)
+- Idempotent migrations (`IF NOT EXISTS` + DO-block guards)
 - Split completion endpoints for automated interviews
 - Opt-in `?includeSummary=true` preserves v1.0 `/api/trainer` shape
 - Exact skillSlug match for curriculum filter
 
-### v1.2 starting context
+### Open questions (resolve during phase planning)
 
-- Auth migration is breaking; need path for existing associates → `auth.users`
-- Bulk invite = new trainer surface; pairs cohort assignment + curriculum mapping + magic-link send
-- Dashboard redesign touches all trainer routes; `finalized.html` mockup at `~/.gstack/projects/JesterCharles-mock-interview-assist/designs/design-system-20260413/finalized.html`
-- Question-bank caching invalidation strategy TBD (TTL vs hash)
+- Q1: Existing Associate email coverage audit (BLOCKER for Phase 17 strategy)
+- Q2: Supabase project tier + April-2026 email rate limits (Phase 18)
+- Q3: Latest `@supabase/ssr` version verification (Phase 18)
+- Q4: Does `Session` capture question-bank provenance? (affects Phase 22 per-bank analytics)
+- Q5: `finalized.html` sidebar spec reconcile (Phase 21)
 
 ### Blockers/Concerns
 
-- None at scope stage.
+- None at roadmap stage. Q1 must answer before Phase 17 plan finalizes.
 
 ## Session Continuity
 
-Last session: 2026-04-15 — v1.2 scoped via `/gsd-new-milestone`
-Resume with: `/gsd-plan-phase [N]` once roadmap approved.
+Last session: 2026-04-15 — roadmap written via `/gsd-roadmap-project`
+Resume with: `/gsd-plan-phase 16`
