@@ -2,7 +2,7 @@
 
 ## Current Run
 - Started: 2026-04-14
-- Current stage: MILESTONE ARCHIVED — v1.1 shipped (PR #3 / 4238e36), docs synced, milestone summary + audit complete, tag v1.1 created locally. Deploy deferred to v1.2.
+- Current stage: PIPELINE COMPLETE — v1.1 shipped (PR #3 / 4238e36), tag v1.1 pushed. Reflect + maintain skipped by user choice. Resume routes to /gsd-new-milestone for v1.2 scoping.
 - Mode: autonomous
 - Previous: v1.0 pipeline completed 2026-04-14
 
@@ -19,8 +19,8 @@
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | done | 2026-04-14 | 2026-04-14 | PR #3 merged 4238e36. Codex gate: initial FAIL (2xP1 + 3xP2), fixed in 21187f9, re-merged. Deploy deferred to v1.2 per user. Tag v1.1 local (not pushed). |
-| reflect | pending | | | |
-| maintain | pending | | | |
+| reflect | skipped | 2026-04-14 | 2026-04-14 | Deferred — user opted to route directly to v1.2 scoping on resume. Run /pipeline-reflect manually if retro desired later. |
+| maintain | skipped | 2026-04-14 | 2026-04-14 | Deferred to v1.2 cycle. |
 
 ## HITL Gates
 | Gate | Stage | Type | Status | Decision |
