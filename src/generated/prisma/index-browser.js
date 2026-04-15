@@ -136,7 +136,10 @@ exports.Prisma.AssociateScalarFieldEnum = {
   lastComputedAt: 'lastComputedAt',
   pinHash: 'pinHash',
   pinGeneratedAt: 'pinGeneratedAt',
-  cohortId: 'cohortId'
+  cohortId: 'cohortId',
+  email: 'email',
+  authUserId: 'authUserId',
+  lastInvitedAt: 'lastInvitedAt'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -159,6 +162,7 @@ exports.Prisma.SessionScalarFieldEnum = {
   cohortId: 'cohortId',
   mode: 'mode',
   readinessRecomputeStatus: 'readinessRecomputeStatus',
+  aiTrainerVariance: 'aiTrainerVariance',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
