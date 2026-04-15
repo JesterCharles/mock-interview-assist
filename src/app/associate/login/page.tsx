@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { isAuthenticatedSession, isAssociateAuthenticated } from '@/lib/auth-server';
+import { isAssociateAuthenticated } from '@/lib/auth-server';
 import { PinEntryForm } from './PinEntryForm';
 import { PublicShell } from '@/components/layout/PublicShell';
 
@@ -27,12 +27,13 @@ export default async function AssociateLoginPage({ searchParams }: PageProps) {
   const { next } = await searchParams;
   const nextPath = safeNext(next);
 
-  const [trainer, associate] = await Promise.all([
-    isAuthenticatedSession(),
-    isAssociateAuthenticated(),
-  ]);
+  const associate = await isAssociateAuthenticated();
 
-  if (trainer || associate) {
+  // Only bounce already-authenticated associates. Trainers can view the page
+  // (e.g., to demo the flow or generate-then-test a PIN) without being redirected
+  // back to the public root, which causes an apparent "click does nothing" bug
+  // when the trainer cookie is present.
+  if (associate) {
     redirect(nextPath ?? '/');
   }
 
