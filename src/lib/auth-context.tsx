@@ -18,10 +18,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is already authenticated
-        const authStatus = localStorage.getItem(AUTH_KEY);
-        setIsAuthenticated(authStatus === 'true');
-        setIsLoading(false);
+        // Cookie truth — localStorage is just a render-fast hint. Always
+        // confirm with the server so a stale localStorage value can't trigger
+        // the trainer-page-redirect loop (login -> signin -> trainer -> login).
+        let cancelled = false;
+        const cached = localStorage.getItem(AUTH_KEY) === 'true';
+        setIsAuthenticated(cached);
+        (async () => {
+            try {
+                const res = await fetch('/api/auth', { cache: 'no-store' });
+                if (!res.ok) throw new Error('check failed');
+                const data = (await res.json()) as { authenticated?: boolean };
+                if (cancelled) return;
+                const truth = !!data.authenticated;
+                setIsAuthenticated(truth);
+                if (truth) localStorage.setItem(AUTH_KEY, 'true');
+                else localStorage.removeItem(AUTH_KEY);
+            } catch {
+                // network failure — keep cached value, don't flip auth state
+            } finally {
+                if (!cancelled) setIsLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const login = async (password: string): Promise<boolean> => {
@@ -45,6 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = () => {
+        // Fire-and-forget cookie clear. Local state flips immediately so the
+        // navbar updates without waiting for the round-trip; the cookie clear
+        // ensures a stale cookie can't survive and re-trigger /signin -> /trainer.
+        void fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
         localStorage.removeItem(AUTH_KEY);
         setIsAuthenticated(false);
     };
