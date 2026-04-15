@@ -64,8 +64,14 @@ export default function Navbar() {
         window.location.href = '/login';
     };
 
-    // Don't show navbar on login page
-    if (pathname === '/login') {
+    // Hide global Navbar on routes that ship their own PublicShell header
+    // (avoids two stacked navbars). Includes: anonymous root, trainer login,
+    // and the entire /associate namespace.
+    const publicShellRoutes =
+        pathname === '/' ||
+        pathname === '/login' ||
+        pathname.startsWith('/associate/');
+    if (publicShellRoutes) {
         return null;
     }
 
