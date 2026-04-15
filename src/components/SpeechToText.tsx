@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, MicOff, Square, Trash2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Mic, Square, Trash2, AlertTriangle } from 'lucide-react';
 
 interface SpeechToTextProps {
     onTranscriptChange: (text: string) => void;
@@ -57,7 +57,7 @@ export default function SpeechToText({
 
         recognition.onresult = (event: any) => {
             // Build text from this recognition session only
-            let sessionText = Array.from(event.results)
+            const sessionText = Array.from(event.results)
                 .map((result: any) => result[0].transcript)
                 .join('');
 
@@ -196,10 +196,15 @@ export default function SpeechToText({
     const isWarning = charCount >= warningLimit;
     const isLimit = charCount >= charLimit;
 
+    const monoLabel: React.CSSProperties = {
+        fontFamily: 'var(--font-jetbrains-mono)',
+        letterSpacing: '0.08em',
+    };
+
     return (
         <div className="w-full flex flex-col gap-3 animate-fade-in">
             {error && (
-                <div className="flex items-center gap-2 text-red-400 text-sm font-medium glass-card p-3 border-red-500/20">
+                <div className="flex items-center gap-2 text-[var(--danger)] text-sm font-medium bg-[var(--surface)] border border-[var(--danger)] rounded-lg p-3">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                     {error}
                 </div>
@@ -208,10 +213,10 @@ export default function SpeechToText({
             {!hideTranscript && (
                 <div className="relative">
                     <textarea
-                        className={`w-full h-32 p-4 rounded-xl resize-none focus:ring-2 focus:outline-none transition-all duration-300 bg-white/[0.03] border text-slate-200 placeholder-slate-500
-                    ${isLimit ? 'border-red-500/40 focus:ring-red-500/30 bg-red-500/[0.03]' :
-                                isWarning ? 'border-amber-500/40 focus:ring-amber-500/30 bg-amber-500/[0.03]' :
-                                    'border-white/[0.08] focus:ring-cyan-500/30 focus:border-cyan-500/30'}`}
+                        className={`w-full h-32 p-4 rounded-lg resize-none focus:ring-2 focus:outline-none transition-colors duration-150 bg-[var(--surface-muted)] border text-[var(--ink)] placeholder-[var(--muted)]
+                    ${isLimit ? 'border-[var(--danger)] focus:ring-[var(--danger)]/30' :
+                                isWarning ? 'border-[var(--warning)] focus:ring-[var(--warning)]/30' :
+                                    'border-[var(--border-subtle)] focus:ring-[var(--accent)]/30 focus:border-[var(--accent)]'}`}
                         value={transcript}
                         onChange={handleTextChange}
                         placeholder="Click the microphone to start speaking, or type your answer here..."
@@ -219,7 +224,10 @@ export default function SpeechToText({
                     />
 
                     <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm ${isLimit ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-500'}`}>
+                        <span
+                            className={`text-xs font-medium px-2 py-1 rounded-md bg-[var(--surface)] border border-[var(--border-subtle)] tabular-nums ${isLimit ? 'text-[var(--danger)]' : isWarning ? 'text-[var(--warning)]' : 'text-[var(--muted)]'}`}
+                            style={monoLabel}
+                        >
                             {charCount} / {charLimit}
                         </span>
                     </div>
@@ -228,30 +236,26 @@ export default function SpeechToText({
 
             {/* Character bar + warnings for hidden transcript mode */}
             {isWarning && !isLimit && (
-                <div className="flex items-center gap-2 text-amber-400 text-xs font-medium">
+                <div className="flex items-center gap-2 text-[var(--warning)] text-xs font-medium">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     Approaching character limit. Stay concise.
                 </div>
             )}
 
             {isLimit && (
-                <div className="flex items-center gap-2 text-red-400 text-xs font-medium">
+                <div className="flex items-center gap-2 text-[var(--danger)] text-xs font-medium">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     Maximum character limit reached.
                 </div>
             )}
 
-            <div className={`flex items-center ${hideTranscript ? 'justify-between glass-card p-4' : 'gap-3'}`}>
+            <div className={`flex items-center ${hideTranscript ? 'justify-between bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4' : 'gap-3'}`}>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={toggleRecording}
                         disabled={disabled || !!error || isLimit}
-                        className={`relative flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${isRecording
-                            ? 'bg-red-500/15 text-red-400 border border-red-500/30 recording-ring'
-                            : isFollowUp
-                                ? 'btn-accent shadow-lg'
-                                : 'btn-primary shadow-lg'
-                            } disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
+                        className={`${isRecording ? 'btn-secondary-flat' : 'btn-accent-flat'} flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed`}
+                        aria-pressed={isRecording}
                     >
                         {isRecording ? (
                             <>
@@ -270,30 +274,41 @@ export default function SpeechToText({
                         <button
                             onClick={clearTranscript}
                             disabled={disabled}
-                            className="flex items-center gap-1.5 px-3 py-3 rounded-xl text-slate-500 hover:text-red-400 bg-white/[0.04] border border-white/[0.06] hover:border-red-500/20 transition-all duration-200 text-xs font-medium disabled:opacity-30"
+                            className="flex items-center gap-1.5 px-3 py-3 rounded-md text-[var(--muted)] hover:text-[var(--danger)] bg-[var(--surface-muted)] border border-[var(--border-subtle)] hover:border-[var(--danger)] transition-colors duration-150 text-xs font-medium disabled:opacity-30"
                         >
                             <Trash2 className="w-3.5 h-3.5" /> Clear
                         </button>
                     )}
 
+                    {/* Static recording indicator (DESIGN.md D-02, no animation) */}
                     {isRecording && (
-                        <span className="flex items-center gap-2 text-red-400 text-xs font-medium">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            Recording...
+                        <span
+                            className="inline-flex items-center gap-2 text-[var(--accent)] uppercase"
+                            style={{ ...monoLabel, fontSize: 11 }}
+                            aria-live="polite"
+                        >
+                            <span
+                                className="inline-block rounded-full bg-[var(--accent)]"
+                                style={{ width: 8, height: 8 }}
+                            />
+                            Recording
                         </span>
                     )}
                 </div>
 
-                {/* Character progress bar for hidden transcript */}
+                {/* Character progress bar for hidden transcript — flat accent fill */}
                 {hideTranscript && (
                     <div className="flex items-center gap-3 flex-1 ml-4">
-                        <div className="flex-1 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
                             <div
-                                className={`h-full rounded-full transition-all duration-500 ${isLimit ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'progress-gradient'}`}
+                                className={`h-full rounded-full transition-all duration-300 ${isLimit ? 'bg-[var(--danger)]' : isWarning ? 'bg-[var(--warning)]' : 'bg-[var(--accent)]'}`}
                                 style={{ width: `${charPercent}%` }}
                             />
                         </div>
-                        <span className={`text-xs font-mono font-medium tabular-nums whitespace-nowrap ${isLimit ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-500'}`}>
+                        <span
+                            className={`text-xs font-medium tabular-nums whitespace-nowrap ${isLimit ? 'text-[var(--danger)]' : isWarning ? 'text-[var(--warning)]' : 'text-[var(--muted)]'}`}
+                            style={monoLabel}
+                        >
                             {charCount}/{charLimit}
                         </span>
                     </div>
