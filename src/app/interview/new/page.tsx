@@ -184,20 +184,29 @@ export default function DashboardPage() {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
+    // ME-02: scope to the current repo via empty body (endpoint defaults to
+    // the configured owner/repo/branch). Avoids nuking other cached keys
+    // once Phase 17+ supports multiple repos.
+    // ME-03: invalidate and refetch use independent error channels —
+    // fetchTechs() owns its own error state, so don't wrap it here.
     try {
       const res = await fetch('/api/github/cache/invalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scope: 'all' }),
+        body: '{}',
       });
-      if (!res.ok) throw new Error('Refresh failed');
-      await fetchTechs();
+      if (!res.ok) {
+        setError('Failed to invalidate cache.');
+        return;
+      }
     } catch (err) {
       console.error(err);
-      setError('Failed to refresh manifest.');
+      setError('Failed to invalidate cache.');
+      return;
     } finally {
       setIsRefreshing(false);
     }
+    await fetchTechs();
   }, [fetchTechs]);
 
   // Trigger loading questions when moving to Phase 2 (or when techs are confirmed)
