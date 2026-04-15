@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 /**
  * PublicShell — shared chrome for NEW public/auth/associate routes.
@@ -66,6 +67,7 @@ export function PublicShell(props: PublicShellProps) {
           >
             Next Level Mock
           </Link>
+          <ThemeToggle />
         </div>
       </header>
 

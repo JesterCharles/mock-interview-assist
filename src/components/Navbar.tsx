@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface NavItem {
     href: string;
@@ -124,6 +125,7 @@ export default function Navbar() {
                                     <LogOut className="w-4 h-4" />
                                     Logout
                                 </button>
+                                <div className="ml-2"><ThemeToggle /></div>
                             </div>
 
                             {/* Mobile Menu Button */}
@@ -138,6 +140,7 @@ export default function Navbar() {
                     ) : (
                         /* Not authenticated - show public features + login link */
                         <div className="flex items-center gap-3">
+                            <ThemeToggle />
                             <Link
                                 href="/login"
                                 className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--highlight)] transition-colors duration-150"

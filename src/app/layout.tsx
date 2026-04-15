@@ -46,6 +46,12 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@fontsource/clash-display@0.1.0/index.css"
         />
+        {/* Theme boot — set data-theme before paint to avoid light->dark flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('nlm-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} ${geistMono.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
