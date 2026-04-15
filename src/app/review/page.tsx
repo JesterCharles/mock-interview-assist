@@ -21,6 +21,39 @@ import { calculateAggregateScores } from '@/lib/langchain';
 import { ParsedQuestion, StarterQuestion } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
 
+const surfaceCard: React.CSSProperties = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 12,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
+
+const surfaceMuted: React.CSSProperties = {
+    background: 'var(--surface-muted)',
+    border: '1px solid var(--border-subtle)',
+    borderRadius: 12,
+};
+
+const headingDisplay: React.CSSProperties = {
+    fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
+    color: 'var(--ink)',
+};
+
+const monoLabel: React.CSSProperties = {
+    fontFamily: "var(--font-jetbrains-mono), ui-monospace, monospace",
+    fontSize: 11,
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    color: 'var(--muted)',
+};
+
+const tabularNums: React.CSSProperties = {
+    fontVariantNumeric: 'tabular-nums',
+};
+
 export default function ReviewPage() {
     const router = useRouter();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -128,17 +161,17 @@ export default function ReviewPage() {
 
     if (!session) {
         return (
-            <div className="min-h-screen nlm-bg flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            <div
+                className="min-h-screen flex items-center justify-center"
+                style={{ background: 'var(--bg)' }}
+            >
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
             </div>
         );
     }
 
     const allQuestions = getAllQuestions();
     const aggregateScores = calculateAggregateScores(session.assessments);
-
-    // Generate GENERALIZED feedback across all questions
-
 
     const handleStartEdit = (questionId: string) => {
         const assessment = getAssessment(questionId);
@@ -238,18 +271,49 @@ export default function ReviewPage() {
     };
 
     const getStatusInfo = (status: string, didNotGetTo: boolean) => {
+        // DESIGN.md Semantic Badge Colors
         if (didNotGetTo) {
-            return { icon: SkipForward, color: 'text-gray-400', bg: 'bg-gray-100', label: 'Skipped' };
+            return {
+                icon: SkipForward,
+                bg: 'var(--surface-muted)',
+                border: 'var(--border-subtle)',
+                text: 'var(--muted)',
+                label: 'Skipped',
+            };
         }
         switch (status) {
             case 'validated':
-                return { icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-100', label: 'Validated' };
+                return {
+                    icon: CheckCircle2,
+                    bg: '#E8F5EE',
+                    border: 'var(--success)',
+                    text: 'var(--success)',
+                    label: 'Validated',
+                };
             case 'ready':
-                return { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-100', label: 'Needs Review' };
+                return {
+                    icon: AlertCircle,
+                    bg: '#FEF3E0',
+                    border: 'var(--warning)',
+                    text: 'var(--warning)',
+                    label: 'Needs Review',
+                };
             case 'processing':
-                return { icon: Loader2, color: 'text-blue-600', bg: 'bg-blue-100', label: 'Processing' };
+                return {
+                    icon: Loader2,
+                    bg: 'var(--highlight)',
+                    border: 'var(--accent)',
+                    text: 'var(--accent)',
+                    label: 'Processing',
+                };
             default:
-                return { icon: AlertCircle, color: 'text-gray-400', bg: 'bg-gray-100', label: 'Pending' };
+                return {
+                    icon: AlertCircle,
+                    bg: 'var(--surface-muted)',
+                    border: 'var(--border-subtle)',
+                    text: 'var(--muted)',
+                    label: 'Pending',
+                };
         }
     };
 
@@ -259,31 +323,32 @@ export default function ReviewPage() {
     });
 
     return (
-        <main className="min-h-screen nlm-bg">
+        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <button
                         onClick={() => router.push('/interview')}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 transition-colors text-sm font-medium hover:underline"
+                        style={{ color: 'var(--muted)' }}
                     >
                         <ArrowLeft className="w-5 h-5" />
                         Back to Interview
                     </button>
 
-                    <h1 className="text-2xl font-bold text-white">Review & Validate Scores</h1>
+                    <h1 style={{ ...headingDisplay, fontSize: 28 }}>Review &amp; Validate Scores</h1>
 
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleValidateAll}
-                            className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                            className="btn-secondary-flat text-sm"
                         >
                             Accept All
                         </button>
                         <button
                             onClick={handleGeneratePDF}
                             disabled={!allValidated || isGeneratingPDF}
-                            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="btn-accent-flat text-sm"
                         >
                             {isGeneratingPDF ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -297,25 +362,27 @@ export default function ReviewPage() {
 
                 {/* Summary Cards - Editable */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className="glass-card-strong rounded-xl p-6 border border-white/10">
-                        <p className="text-sm text-slate-400 mb-1">Overall Score</p>
+                    <div className="p-6" style={surfaceCard}>
+                        <p style={{ ...monoLabel, marginBottom: 6 }}>Overall Score</p>
                         {editingOverall ? (
                             <>
-                                <p className="text-3xl font-bold text-indigo-400">
+                                <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--accent)', ...tabularNums }}>
                                     {(
                                         (overallTechnical * (100 - softSkillWeight) + overallSoftSkill * softSkillWeight) / 100
                                     ).toFixed(1)}/5
                                 </p>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
                                     Tech {100 - softSkillWeight}% / Soft {softSkillWeight}%
                                 </p>
                             </>
                         ) : (
-                            <p className="text-3xl font-bold text-indigo-400">{aggregateScores.averageScore}/5</p>
+                            <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--accent)', ...tabularNums }}>
+                                {aggregateScores.averageScore}/5
+                            </p>
                         )}
                     </div>
-                    <div className="glass-card-strong rounded-xl p-6 border border-white/10 relative group">
-                        <p className="text-sm text-slate-400 mb-1">Technical Score</p>
+                    <div className="p-6" style={surfaceCard}>
+                        <p style={{ ...monoLabel, marginBottom: 6 }}>Technical Score</p>
                         {editingOverall ? (
                             <input
                                 type="number"
@@ -324,16 +391,24 @@ export default function ReviewPage() {
                                 step="0.1"
                                 value={overallTechnical}
                                 onChange={(e) => setOverallTechnical(parseFloat(e.target.value) || 0)}
-                                className="w-20 text-2xl font-bold text-blue-400 bg-white/10 border border-white/20 rounded px-2 py-1 outline-none"
+                                className="w-20 text-2xl font-bold rounded px-2 py-1 outline-none"
+                                style={{
+                                    ...headingDisplay,
+                                    fontSize: 24,
+                                    color: 'var(--ink)',
+                                    background: 'var(--bg)',
+                                    border: '1px solid var(--border)',
+                                    ...tabularNums,
+                                }}
                             />
                         ) : (
-                            <p className="text-3xl font-bold text-blue-400">
+                            <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--ink)', ...tabularNums }}>
                                 {(session?.overallTechnicalScore ?? aggregateScores.technicalScore).toFixed(1)}/5
                             </p>
                         )}
                     </div>
-                    <div className="glass-card-strong rounded-xl p-6 border border-white/10 relative group">
-                        <p className="text-sm text-slate-400 mb-1">Soft Skills Score</p>
+                    <div className="p-6" style={surfaceCard}>
+                        <p style={{ ...monoLabel, marginBottom: 6 }}>Soft Skills Score</p>
                         {editingOverall ? (
                             <>
                                 <input
@@ -343,10 +418,18 @@ export default function ReviewPage() {
                                     step="0.1"
                                     value={overallSoftSkill}
                                     onChange={(e) => setOverallSoftSkill(parseFloat(e.target.value) || 0)}
-                                    className="w-20 text-2xl font-bold text-purple-400 bg-white/10 border border-white/20 rounded px-2 py-1 outline-none"
+                                    className="w-20 rounded px-2 py-1 outline-none"
+                                    style={{
+                                        ...headingDisplay,
+                                        fontSize: 24,
+                                        color: 'var(--ink)',
+                                        background: 'var(--bg)',
+                                        border: '1px solid var(--border)',
+                                        ...tabularNums,
+                                    }}
                                 />
                                 <div className="mt-3">
-                                    <label className="text-xs text-slate-400 block mb-1">
+                                    <label style={{ ...monoLabel, display: 'block', marginBottom: 4 }}>
                                         Soft Skills Weight: {softSkillWeight}%
                                     </label>
                                     <input
@@ -356,21 +439,27 @@ export default function ReviewPage() {
                                         step="5"
                                         value={softSkillWeight}
                                         onChange={(e) => setSoftSkillWeight(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                        className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
+                                        style={{
+                                            background: 'var(--border-subtle)',
+                                            accentColor: 'var(--accent)',
+                                        }}
                                     />
                                 </div>
                             </>
                         ) : (
-                            <p className="text-3xl font-bold text-purple-400">
+                            <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--ink)', ...tabularNums }}>
                                 {(session?.overallSoftSkillScore ?? aggregateScores.softSkillScore).toFixed(1)}/5
                             </p>
                         )}
                     </div>
-                    <div className="glass-card-strong rounded-xl p-6 border border-white/10">
-                        <p className="text-sm text-slate-400 mb-1">Questions</p>
-                        <p className="text-3xl font-bold text-white">
+                    <div className="p-6" style={surfaceCard}>
+                        <p style={{ ...monoLabel, marginBottom: 6 }}>Questions</p>
+                        <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--ink)', ...tabularNums }}>
                             {aggregateScores.completedCount}
-                            <span className="text-lg text-slate-500">/{allQuestions.length}</span>
+                            <span style={{ fontSize: 16, color: 'var(--muted)', fontWeight: 400 }}>
+                                /{allQuestions.length}
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -381,7 +470,7 @@ export default function ReviewPage() {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setEditingOverall(false)}
-                                className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm"
+                                className="btn-secondary-flat text-xs"
                             >
                                 Cancel
                             </button>
@@ -391,7 +480,7 @@ export default function ReviewPage() {
                                     setOverallFeedback(technicalFeedbackText, softSkillFeedbackText);
                                     setEditingOverall(false);
                                 }}
-                                className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 flex items-center gap-1"
+                                className="btn-accent-flat text-xs"
                             >
                                 <Save className="w-3 h-3" />
                                 Save
@@ -415,42 +504,56 @@ export default function ReviewPage() {
 
                                 setEditingOverall(true);
                             }}
-                            className="px-3 py-1 text-indigo-600 hover:text-indigo-700 text-sm flex items-center gap-1"
+                            className="btn-secondary-flat text-xs"
                         >
                             <Edit3 className="w-3 h-3" />
-                            Edit Overall Scores & Generate Feedback
+                            Edit Overall Scores &amp; Generate Feedback
                         </button>
                     )}
                 </div>
 
                 {/* Overall Feedback Sections */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-blue-500/10 rounded-xl shadow-sm border border-blue-500/20 p-6">
-                        <h3 className="text-sm font-semibold text-blue-300 mb-2">Overall Technical Feedback</h3>
+                    <div className="p-6" style={surfaceMuted}>
+                        <h3 style={{ ...monoLabel, color: 'var(--accent)', marginBottom: 8 }}>
+                            Overall Technical Feedback
+                        </h3>
                         {editingOverall ? (
                             <textarea
                                 value={technicalFeedbackText}
                                 onChange={(e) => setTechnicalFeedbackText(e.target.value)}
                                 placeholder="Summarize the candidate's technical strengths and areas for improvement..."
-                                className="w-full h-32 p-3 border border-white/[0.08] rounded-lg text-sm text-white bg-white/[0.06] resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full h-32 p-3 rounded-lg text-sm resize-none outline-none transition-colors"
+                                style={{
+                                    background: 'var(--surface)',
+                                    border: '1px solid var(--border)',
+                                    color: 'var(--ink)',
+                                }}
                             />
                         ) : (
-                            <p className="text-blue-100 text-sm">
+                            <p style={{ color: 'var(--ink)', fontSize: 14, lineHeight: 1.6 }}>
                                 {session?.technicalFeedback || 'No overall technical feedback provided yet. Click "Edit Overall Scores" to add.'}
                             </p>
                         )}
                     </div>
-                    <div className="bg-purple-500/10 rounded-xl shadow-sm border border-purple-500/20 p-6">
-                        <h3 className="text-sm font-semibold text-purple-300 mb-2">Overall Soft Skills Feedback</h3>
+                    <div className="p-6" style={surfaceMuted}>
+                        <h3 style={{ ...monoLabel, color: 'var(--accent)', marginBottom: 8 }}>
+                            Overall Soft Skills Feedback
+                        </h3>
                         {editingOverall ? (
                             <textarea
                                 value={softSkillFeedbackText}
                                 onChange={(e) => setSoftSkillFeedbackText(e.target.value)}
                                 placeholder="Summarize the candidate's communication, confidence, and presentation..."
-                                className="w-full h-32 p-3 border border-white/[0.08] rounded-lg text-sm text-white bg-white/[0.06] resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full h-32 p-3 rounded-lg text-sm resize-none outline-none transition-colors"
+                                style={{
+                                    background: 'var(--surface)',
+                                    border: '1px solid var(--border)',
+                                    color: 'var(--ink)',
+                                }}
                             />
                         ) : (
-                            <p className="text-purple-100 text-sm">
+                            <p style={{ color: 'var(--ink)', fontSize: 14, lineHeight: 1.6 }}>
                                 {session?.softSkillFeedback || 'No overall soft skills feedback provided yet. Click "Edit Overall Scores" to add.'}
                             </p>
                         )}
@@ -471,22 +574,30 @@ export default function ReviewPage() {
                         return (
                             <div
                                 key={question.id}
-                                className={`glass-card rounded-xl overflow-hidden border border-white/10 ${assessment.didNotGetTo ? 'opacity-60' : ''
-                                    }`}
+                                className={`overflow-hidden ${assessment.didNotGetTo ? 'opacity-60' : ''}`}
+                                style={surfaceCard}
                             >
                                 <div className="p-6">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <span className="text-sm font-medium text-slate-400">
+                                                <span style={{ ...monoLabel, color: 'var(--muted)' }}>
                                                     Q{index + 1}
                                                 </span>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}>
-                                                    <StatusIcon className={`w-3 h-3 inline-block mr-1 ${assessment.status === 'processing' ? 'animate-spin' : ''}`} />
+                                                <span
+                                                    className="px-2 py-1 text-xs font-medium inline-flex items-center gap-1"
+                                                    style={{
+                                                        background: statusInfo.bg,
+                                                        border: `1px solid ${statusInfo.border}`,
+                                                        borderRadius: 9999,
+                                                        color: statusInfo.text,
+                                                    }}
+                                                >
+                                                    <StatusIcon className={`w-3 h-3 ${assessment.status === 'processing' ? 'animate-spin' : ''}`} />
                                                     {statusInfo.label}
                                                 </span>
                                             </div>
-                                            <h3 className="text-lg font-medium text-white mb-3">
+                                            <h3 style={{ ...headingDisplay, fontSize: 18, marginBottom: 12, lineHeight: 1.5 }}>
                                                 {isParsedQuestion ? (question as ParsedQuestion).question : (question as StarterQuestion).question}
                                             </h3>
 
@@ -494,9 +605,9 @@ export default function ReviewPage() {
                                                 <>
                                                     {/* Score Display/Edit */}
                                                     {isEditing ? (
-                                                        <div className="space-y-4 bg-black/20 rounded-lg p-4 border border-white/5">
+                                                        <div className="space-y-4 p-4" style={surfaceMuted}>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                                <label style={{ ...monoLabel, display: 'block', marginBottom: 8 }}>
                                                                     Score (1-5)
                                                                 </label>
                                                                 <div className="flex items-center gap-2">
@@ -504,10 +615,13 @@ export default function ReviewPage() {
                                                                         <button
                                                                             key={score}
                                                                             onClick={() => setEditScore(score)}
-                                                                            className={`w-10 h-10 rounded-lg font-medium transition-all ${editScore === score
-                                                                                ? 'bg-indigo-600 text-white shadow-md border border-indigo-500/50'
-                                                                                : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                                                                                }`}
+                                                                            className="w-10 h-10 rounded-lg font-medium transition-colors"
+                                                                            style={{
+                                                                                background: editScore === score ? 'var(--accent)' : 'var(--surface)',
+                                                                                border: `1px solid ${editScore === score ? 'var(--accent)' : 'var(--border)'}`,
+                                                                                color: editScore === score ? 'var(--surface)' : 'var(--ink)',
+                                                                                ...tabularNums,
+                                                                            }}
                                                                         >
                                                                             {score}
                                                                         </button>
@@ -515,25 +629,30 @@ export default function ReviewPage() {
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                                <label style={{ ...monoLabel, display: 'block', marginBottom: 8 }}>
                                                                     Feedback
                                                                 </label>
                                                                 <textarea
                                                                     value={editFeedback}
                                                                     onChange={(e) => setEditFeedback(e.target.value)}
-                                                                    className="w-full h-24 p-3 border border-white/[0.08] bg-white/[0.06] rounded-lg resize-none text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                                    className="w-full h-24 p-3 rounded-lg resize-none outline-none"
+                                                                    style={{
+                                                                        background: 'var(--surface)',
+                                                                        border: '1px solid var(--border)',
+                                                                        color: 'var(--ink)',
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <div className="flex justify-end gap-3">
                                                                 <button
                                                                     onClick={() => setEditingId(null)}
-                                                                    className="px-4 py-2 text-slate-400 hover:text-white"
+                                                                    className="btn-secondary-flat text-sm"
                                                                 >
                                                                     Cancel
                                                                 </button>
                                                                 <button
                                                                     onClick={handleSaveEdit}
-                                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+                                                                    className="btn-accent-flat text-sm"
                                                                 >
                                                                     <Save className="w-4 h-4" />
                                                                     Save
@@ -543,17 +662,21 @@ export default function ReviewPage() {
                                                     ) : (
                                                         <div className="flex items-start gap-4">
                                                             <div className="flex items-center gap-1">
-                                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                                    <Star
-                                                                        key={star}
-                                                                        className={`w-5 h-5 ${star <= (assessment.finalScore || assessment.llmScore || 0)
-                                                                            ? 'text-amber-400 fill-amber-400'
-                                                                            : 'text-slate-600'
-                                                                            }`}
-                                                                    />
-                                                                ))}
+                                                                {[1, 2, 3, 4, 5].map((star) => {
+                                                                    const filled = star <= (assessment.finalScore || assessment.llmScore || 0);
+                                                                    return (
+                                                                        <Star
+                                                                            key={star}
+                                                                            className="w-5 h-5"
+                                                                            style={{
+                                                                                color: filled ? 'var(--accent)' : 'var(--border)',
+                                                                                fill: filled ? 'var(--accent)' : 'none',
+                                                                            }}
+                                                                        />
+                                                                    );
+                                                                })}
                                                             </div>
-                                                            <p className="flex-1 text-slate-300 text-sm">
+                                                            <p style={{ flex: 1, color: 'var(--ink)', fontSize: 14, lineHeight: 1.6 }}>
                                                                 {assessment.finalFeedback || assessment.llmFeedback || 'Awaiting feedback...'}
                                                             </p>
                                                         </div>
@@ -573,7 +696,8 @@ export default function ReviewPage() {
                                                         <button
                                                             onClick={() => handleRetryScoring(question.id)}
                                                             disabled={retryingId === question.id}
-                                                            className="p-2 text-amber-500 hover:text-amber-600 transition-colors disabled:opacity-50"
+                                                            className="p-2 transition-colors disabled:opacity-50"
+                                                            style={{ color: 'var(--warning)' }}
                                                             title="Retry AI scoring"
                                                         >
                                                             <RefreshCw className={`w-5 h-5 ${retryingId === question.id ? 'animate-spin' : ''}`} />
@@ -581,7 +705,8 @@ export default function ReviewPage() {
                                                     )}
                                                 <button
                                                     onClick={() => handleStartEdit(question.id)}
-                                                    className="p-2 text-slate-400 hover:text-white transition-colors"
+                                                    className="p-2 transition-colors"
+                                                    style={{ color: 'var(--muted)' }}
                                                     title="Edit score"
                                                 >
                                                     <Edit3 className="w-5 h-5" />
@@ -593,7 +718,8 @@ export default function ReviewPage() {
                                                             assessment.llmScore || 3,
                                                             assessment.llmFeedback || 'No feedback available.'
                                                         )}
-                                                        className="p-2 text-green-500 hover:text-green-600 transition-colors"
+                                                        className="p-2 transition-colors"
+                                                        style={{ color: 'var(--success)' }}
                                                         title="Accept score"
                                                     >
                                                         <CheckCircle2 className="w-5 h-5" />
@@ -605,8 +731,8 @@ export default function ReviewPage() {
 
                                     {/* Keywords Summary */}
                                     {isParsedQuestion && !assessment.didNotGetTo && (
-                                        <div className="mt-4 pt-4 border-t border-gray-100">
-                                            <p className="text-sm text-gray-500">
+                                        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                                            <p style={{ fontSize: 13, color: 'var(--muted)', ...tabularNums }}>
                                                 Keywords: {assessment.keywordsHit.length} hit, {assessment.keywordsMissed.length} missed
                                             </p>
                                         </div>
@@ -620,7 +746,7 @@ export default function ReviewPage() {
                 {/* Bottom Action */}
                 <div className="mt-8 text-center">
                     {!allValidated && (
-                        <p className="text-amber-600 mb-4">
+                        <p style={{ color: 'var(--warning)', marginBottom: 16, fontSize: 14 }}>
                             Please validate all scores before generating the PDF report.
                         </p>
                     )}
