@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getManifest } from '@/lib/githubManifestCache';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = 'JesterCharles';
@@ -41,9 +42,18 @@ async function fetchFromGitHub(path: string, isRaw: boolean = false) {
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const path = searchParams.get('path') || '';
-    const type = searchParams.get('type'); // 'content' or 'list'
+    const type = searchParams.get('type'); // 'manifest' | 'content' | 'list'
 
     try {
+        if (type === 'manifest') {
+            const result = await getManifest(OWNER, REPO, BRANCH);
+            return NextResponse.json({
+                files: result.files,
+                lastSynced: new Date(result.lastSyncedAt).toISOString(),
+                etag: result.etag,
+            });
+        }
+
         const data = await fetchFromGitHub(path, type === 'content');
 
         if (data === null) {
@@ -63,8 +73,9 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
         console.error('GitHub Proxy Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
