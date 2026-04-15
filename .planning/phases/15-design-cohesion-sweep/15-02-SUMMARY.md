@@ -4,8 +4,8 @@ plan: 02
 subsystem: design-system
 tags: [design, refactor, tokens, mid-session, regression-risk]
 requirements: [DESIGN-03]
-status: AWAITING-MANUAL-SMOKE
-completed: PENDING
+status: COMPLETE
+completed: 2026-04-14
 duration_min: ~15 (Tasks 1-2; checkpoint pending)
 dependency_graph:
   requires:
@@ -146,10 +146,38 @@ None. All three pages retain full behavior (interview state machine, scoring fan
 - Next build green.
 - Typecheck clean.
 
-## Pending — Task 3 (checkpoint:human-verify gate=blocking)
+## Task 3 — APPROVED (D-20 trainer smoke, 2026-04-14)
 
-This summary is **PRELIMINARY**. Plan 15-02 cannot be marked complete (and Plan 15-04 deletion cannot start) until the human runs the D-20 trainer-led full-interview smoke as specified in the plan and approves with `"approved — full smoke passed"` (or reports a regression).
+User: "much better, looks good, flows good" — full trainer-led smoke passed including substantial UX hardening landed during the smoke session.
 
-Smoke covers: dashboard setup wizard -> trainer-led interview (warm parchment, static recording dot, voice + scoring + timer) -> `/review` (validation, override, PDF generation, email send) -> anonymous `/` (incognito, automated public flow). See `15-02-PLAN.md` Task 3 `<how-to-verify>` for the full step-by-step.
+Smoke covered:
+- Trainer login -> /trainer dashboard (post-rename)
+- Setup wizard at /interview/new (renamed from /dashboard, redirect preserved)
+- Full /interview: warm parchment, Clash heading, flat orange, static recording dot, ProgressBar flat orange, STT works, scoring + timer + keywords advance
+- /review: warm surface score table, override saves, semantic badge colors, PDF generates
+- Anonymous /: hero on parchment, public interview runs end-to-end, fingerprint + rate limit functional
+- "Have a PIN? Sign in" CTA on / discoverable + functional
+- Unified Navbar (anonymous / trainer / associate) with role badge
+- Unified /signin with Trainer | Associate tabs (PIN-only associate)
+- Dark mode toggle persists, no light-to-dark flash
+- Single sign-out click
+- Brand link on /signin returns to /
 
-Once approved, this SUMMARY will be updated with the approval quote, status flipped to `complete`, and STATE.md / ROADMAP.md / requirements advanced.
+Additional commits during smoke (UX hardening — beyond original plan scope):
+- 03ebbbd PIN CTA on / for associate discoverability
+- cf8a54a allow trainers to view /associate/login
+- 3fc3cac PIN-only login + redirect to interview + Start CTA on profile
+- 671b563 /dashboard -> /interview/new rename, /trainer is dashboard
+- b46111c PublicShell wordmark links home
+- 5309399 /associate/login redirects authed associate to interview
+- 1ac42fa dark theme toggle wired (Phase 14 dark tokens)
+- d211f1b AssociateNav (later folded into unified Navbar)
+- b9d56cc /api/associate/me self-fetch
+- 83c6b5d hide global Navbar on PublicShell routes (folded into unification)
+- 95b5068 unified Navbar + /signin tabs
+- 03117a4 fix /signin->/trainer->/login redirect loop (cookie/localStorage drift)
+- 08d6eff await trainer logout DELETE before navigation
+- a1296c3 suppressHydrationWarning on <html>
+- ebb41c4 show Navbar on /signin
+
+Status: COMPLETE. Plan 15-04 (final deletion + Playwright) unblocked.
