@@ -1,32 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Cohort Readiness System
-status: shipped
-stopped_at: v1.1 milestone archived and tagged
-last_updated: "2026-04-15T18:00:00.000Z"
-last_activity: 2026-04-15 -- v1.1 milestone archived; ready for v1.2 planning
+milestone: v1.2
+milestone_name: Analytics & Auth Overhaul
+status: defining_requirements
+stopped_at: milestone scoped; requirements gathering next
+last_updated: "2026-04-15T19:00:00.000Z"
+last_activity: 2026-04-15 -- v1.2 milestone started via /gsd-new-milestone
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 22
-  completed_plans: 22
-  percent: 100
-summary_report: .planning/reports/MILESTONE_SUMMARY-v1.1.md
-archives:
-  - .planning/milestones/v1.1-ROADMAP.md
-  - .planning/milestones/v1.1-REQUIREMENTS.md
-  - .planning/milestones/v1.1-MILESTONE-AUDIT.md
-git_tag: v1.1
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+previous_milestone:
+  version: v1.1
+  name: Cohort Readiness System
+  summary_report: .planning/reports/MILESTONE_SUMMARY-v1.1.md
+  git_tag: v1.1
 ---
 
-# v1.1 COMPLETE — Archived
+# v1.2 — Analytics & Auth Overhaul (started 2026-04-15)
 
-Shipped 2026-04-14 (PR merged as `4238e36`). 8 phases (8–15), 22 plans, 14 requirements, 131 commits.
-Archived 2026-04-15. Tag `v1.1` created locally (not yet pushed).
-Summary: [MILESTONE_SUMMARY-v1.1.md](reports/MILESTONE_SUMMARY-v1.1.md)
+**Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
 
-Production deploy of v1.1 is DEFERRED to v1.2 (user choice — code on main, prod not yet promoted).
+**Target features:**
+- Trainer analytics + reporting (KPI strip, cohort trends, sparklines, gap aggregation, PDF export)
+- Dashboard redesign per `finalized.html` (topbar + sidebar layout, Gap Analysis / Calibration / Reports sidebar routes)
+- Associate dashboard upgrade (self-view gap trends, recommended next area, goals/streaks, book-next-mock)
+- Full Supabase Auth cutover + bulk magic-link cohort onboarding (replaces trainer password + PIN system)
+- Cached question-bank manifest
+
+**Deferred to v1.3 (CI/CD milestone):** prod deploy automation, readiness sweep cron, dark-mode visual QA, Nyquist validation backfill.
 
 ---
 
@@ -34,54 +38,41 @@ Production deploy of v1.1 is DEFERRED to v1.2 (user choice — code on main, pro
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-15 after v1.1 milestone)
+See: .planning/PROJECT.md (updated 2026-04-15 — v1.2 milestone active)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Planning next milestone (v1.2) — carry-forward tech debt: PIN limiter hardening + flag flip, prod deploy, cached question-bank manifest, readiness sweep cron.
+**Current focus:** v1.2 — defining requirements, then roadmap.
 
 ## Current Position
 
-Milestone: v1.1 SHIPPED + ARCHIVED
-Next: run `/gsd-new-milestone` to scope v1.2
-
-Progress: [██████████] 100% (v1.1)
-
-## Phase Map (v1.1 — archived)
-
-| Phase | Name | Requirements | Status |
-|-------|------|--------------|--------|
-| 8 | Schema Migration | (enabling foundation) | ✅ Complete |
-| 9 | Associate PIN Auth | AUTH-01..04 | ✅ Complete (flag-gated off) |
-| 10 | Automated Interview Pipeline | PIPE-01, PIPE-02 | ✅ Complete |
-| 11 | Cohort Management | COHORT-01, COHORT-02 | ✅ Complete |
-| 12 | Cohort Dashboard Views | COHORT-03, COHORT-04 | ✅ Complete |
-| 13 | Curriculum Schedule | CURRIC-01, CURRIC-02 | ✅ Complete |
-| 14 | Design Cohesion | DESIGN-01, DESIGN-02 | ✅ Complete |
-| 15 | Design Cohesion Sweep | DESIGN-03 (added mid-milestone) | ✅ Complete |
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-15 — Milestone v1.2 started
 
 ## Accumulated Context
 
-### Decisions (v1.1 — see PROJECT.md + milestones/v1.1-ROADMAP.md for full log)
+### v1.1 decisions (retained for reference)
 
-- PIN auth flag-gated off for v1.1 ship; harden limiter and flip in v1.2
-- Legacy `--nlm-*` deleted entirely (overrode Codex #8 preservation intent via mid-milestone DESIGN-03)
-- Idempotent migrations (`IF NOT EXISTS` + `duplicate_object` guards) safe for fresh + pre-existing DBs
-- Split completion endpoints eliminate forged-linkage by construction (Codex #3)
-- `Session.readinessRecomputeStatus` + sweep endpoint replaces fire-and-forget fan-out (Codex #5)
-- Opt-in `?includeSummary=true` preserves v1.0 `/api/trainer` shape (Codex #1)
-- Exact skillSlug match via `Set.has(firstSegment)` + `@@unique([cohortId, weekNumber])` (Codex #9)
-- Dedicated `ASSOCIATE_SESSION_SECRET` with `pinGeneratedAt` token version (Codex #4)
+- Postgres canonical for all new features; file history legacy export only
+- Dedicated `ASSOCIATE_SESSION_SECRET` (retires w/ PIN system in v1.2)
+- Idempotent migrations (`IF NOT EXISTS` + `duplicate_object` guards)
+- Split completion endpoints for automated interviews
+- Opt-in `?includeSummary=true` preserves v1.0 `/api/trainer` shape
+- Exact skillSlug match for curriculum filter
 
-### Pending (v1.2 carry-forward)
+### v1.2 starting context
 
-- Prod deploy v1.1 (user may deploy before starting v1.2 work)
-- Decide v1.2 scope via `/gsd-new-milestone`
+- Auth migration is breaking; need path for existing associates → `auth.users`
+- Bulk invite = new trainer surface; pairs cohort assignment + curriculum mapping + magic-link send
+- Dashboard redesign touches all trainer routes; `finalized.html` mockup at `~/.gstack/projects/JesterCharles-mock-interview-assist/designs/design-system-20260413/finalized.html`
+- Question-bank caching invalidation strategy TBD (TTL vs hash)
 
 ### Blockers/Concerns
 
-- None blocking milestone closure. Deploy gate is user-choice, not audit blocker.
+- None at scope stage.
 
 ## Session Continuity
 
-Last session: 2026-04-15 — v1.1 milestone archived + tagged
-Resume with: `/gsd-new-milestone` for v1.2 scoping
+Last session: 2026-04-15 — v1.2 scoped via `/gsd-new-milestone`
+Resume with: `/gsd-plan-phase [N]` once roadmap approved.

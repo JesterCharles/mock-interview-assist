@@ -16,20 +16,21 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest, 24/24 Playwright, Codex findings all P1/P2 resolved pre-merge.
 - Total codebase: 35 routes, standalone Docker output, idempotent migrations.
 
-## Next Milestone Goals: v1.2 (placeholder)
+## Current Milestone: v1.2 Analytics & Auth Overhaul
 
-**Carry-forward tech debt (sourced from `milestones/v1.1-MILESTONE-AUDIT.md` §5):**
+**Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
 
-- Production deploy of v1.1 (merged to main, not yet promoted — user choice at ship time)
-- **PIN auth:** harden rate limiter (IP reputation, exponential backoff), validate in staging, flip `ENABLE_ASSOCIATE_AUTH=true`
-- **Perf:** cached GitHub question-bank manifest (wizard `<400ms` target — currently advisory)
-- **Ops:** scheduled readiness sweep cron (endpoint exists, today trainer-invoked)
-- **Dark mode:** visual QA across every interactive state (tokens defined, toggle wired, spot-checked only)
-- **Nyquist validation hygiene:** backfill VALIDATION.md for phases that shipped with `human_needed` residuals
+**Target features:**
 
-**Deferred features (see `milestones/v1.1-REQUIREMENTS.md` deferred list):** magic-link / Supabase Auth OTP (replace PIN), curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, self-service PIN reset.
+- **Trainer Analytics + Reporting** — KPI strip (Avg Readiness, Mocks This Week, Top Gap, AI/Trainer Variance), cohort-wide readiness trends, individual sparklines in roster, skill gap aggregation across cohort, PDF export of analytics (cohort + per-associate)
+- **Dashboard Redesign (per `finalized.html`)** — topbar + left sidebar layout (Overview: Roster/Gap Analysis/Calibration; Actions: New Mock/Reports), cohort header with readiness split counts, KPI card strip, enhanced roster (sparkline, trend-word, top-gap tag, last-mock), sidebar routes for Gap Analysis / Calibration / Reports
+- **Associate Dashboard Upgrade** — self-view gap scores + trend charts, recommended next practice area CTA, goals/progress streaks, book-next-mock action
+- **Full Supabase Auth + Bulk Onboarding** — trainer login via Supabase email/password (or OAuth), associate login via Supabase magic link; bulk invite flow (trainer pastes comma-sep emails → picks cohort + curriculum → single action creates Associate records, assigns cohort, maps curriculum, sends magic links); migrate existing Associate records to `auth.users` FK; RLS policies on Session/GapScore/Cohort/CurriculumWeek; full cutover (remove PIN system + `ENABLE_ASSOCIATE_AUTH` flag)
+- **Cached Question-Bank Manifest** — cache GitHub manifest to hit wizard `<400ms` target; TTL or hash-based invalidation
 
-Concrete v1.1→v1.2 scoping happens via `/gsd-new-milestone`.
+**Deferred to v1.3 (CI/CD pipeline milestone):** production deploy automation, scheduled readiness sweep cron, dark-mode visual QA, Nyquist validation hygiene backfill.
+
+**Deferred features (see `milestones/v1.1-REQUIREMENTS.md` deferred list):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications.
 
 ## Requirements
 
@@ -69,9 +70,9 @@ Concrete v1.1→v1.2 scoping happens via `/gsd-new-milestone`.
 - ✓ CURRIC-01..02: Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
 - ✓ DESIGN-01..03: Unified DESIGN.md token system; legacy `--nlm-*` deleted; single `/signin` tabs — v1.1
 
-### Active
+### Active (v1.2 — populated by roadmap)
 
-(TBD for v1.2 — populate via `/gsd-new-milestone`)
+(REQ-IDs to be filled by requirements gathering)
 
 ### Out of Scope
 
@@ -134,4 +135,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 after v1.1 milestone (shipped 2026-04-14, prod deploy deferred to v1.2)*
+*Last updated: 2026-04-15 — v1.2 Analytics & Auth Overhaul milestone started*
