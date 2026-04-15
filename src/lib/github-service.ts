@@ -61,6 +61,21 @@ export class GitHubService {
     }
 
     /**
+     * Load the full question-bank manifest from the server-side cached endpoint.
+     * Returns a normalized {files, lastSynced} pair. Prefer this over
+     * `findQuestionBanks` — it collapses what used to be N recursive GitHub
+     * contents calls into a single cached Trees-API read.
+     */
+    async loadManifest(): Promise<{ files: GitHubFile[]; lastSynced: string }> {
+        const response = await fetch('/api/github?type=manifest');
+        if (!response.ok) {
+            throw new Error('Failed to load manifest');
+        }
+        const data = await response.json();
+        return { files: data.files, lastSynced: data.lastSynced };
+    }
+
+    /**
      * Recursive search for markdown files
      */
     async findQuestionBanks(path: string = ''): Promise<GitHubFile[]> {
