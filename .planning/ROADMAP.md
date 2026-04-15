@@ -75,7 +75,13 @@ Plans:
   4. Trainer can type and save emails per associate; uniqueness violations surface inline
   5. Trainer can one-click delete a slug-only Associate with zero sessions (confirm modal); rows with sessions are protected
   6. Pre-cutover dry-run preview shows counts: associates with email / without email / sessions orphaned if deleted
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 18: Supabase Auth Install
@@ -89,7 +95,13 @@ Plans:
   4. Associate can request a magic link at `/signin` (Associate tab); link is delivered via Resend, opens via PKCE, and expires after 7 days
   5. `getCallerIdentity()` returns the same `trainer | associate | anonymous` shape from Supabase session OR legacy PIN cookie (grace fallback)
   6. Middleware refreshes Supabase session BEFORE route guard and returns the mutated `NextResponse`
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 19: Bulk Invite
@@ -103,7 +115,13 @@ Plans:
   4. `/api/trainer/invites/bulk` runs per-email transactions; partial failures do not roll back siblings; response is a result table with per-email status
   5. Re-invite throttle (`lastInvitedAt` < 5 min) blocks repeat sends with a clear message
   6. New invitee receives a Resend-delivered magic link that lands them on `/associate/[slug]/dashboard` after click-through
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 20: Middleware Cutover + RLS
@@ -116,7 +134,13 @@ Plans:
   3. RLS policies on `Session`, `GapScore`, `Associate`, `Cohort`, `CurriculumWeek` block direct `supabase-js` reads from non-owners (verified by manual test query)
   4. All Prisma reads in route handlers filter explicitly by identity from `getCallerIdentity()`; no implicit RLS reliance
   5. PROJECT.md documents the BYPASSRLS + Transaction Pooler architecture and the explicit-filter requirement
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 
 ### Phase 21: App Shell Redesign
 **Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher and reorganized routes.
@@ -129,7 +153,13 @@ Plans:
   4. New `/trainer/settings` section provides Threshold / Cohorts / Curriculum / Users / Associates pages (BACKFILL-02 page lives here)
   5. Topbar cohort switcher persists selection to `?cohort=<id>` URL param; all Dashboard child pages respect the filter
   6. Sidebar collapsed state persists to localStorage; mobile sidebar is a Radix off-canvas sheet
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 22: Trainer Analytics
@@ -143,7 +173,13 @@ Plans:
   4. New question-bank parser reads optional `topic:` frontmatter; `Session.questions` JSON stores `topic` per question (fallback to `keywords[0]`)
   5. Dashboard > Calibration shows trainer-override frequency + AI-vs-trainer delta distribution sourced from denormalized `Session.aiTrainerVariance`
   6. Cohort Trends card on Dashboard > Roster shows a 12-week weekly average readiness line chart for the selected cohort
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 23: Associate Self-Dashboard
@@ -156,7 +192,13 @@ Plans:
   3. A readiness-goal progress bar shows the associate's current weighted readiness vs the cohort threshold; no cohort-mate names are visible (aggregate-only)
   4. "Book a Mock" CTA opens a working trainer-contact path (mailto or in-app message) — no full scheduler required
   5. Associates from other slugs cannot access this dashboard (middleware enforces matching identity)
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 24: PDF Analytics Export
@@ -168,7 +210,13 @@ Plans:
   2. Trainer can export a per-associate PDF from the associate detail page containing gap trend, session list, and recommended areas
   3. PDFs render using a hand-rolled SVG sparkline helper (no recharts inside `@react-pdf/renderer`)
   4. PDF generation completes without OOM on the constrained Docker host (verified on production-equivalent memory limits)
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
 ### Phase 25: PIN Removal + Cleanup
@@ -181,7 +229,13 @@ Plans:
   3. Prisma migration drops `Associate.pinHash` and `Associate.pinGeneratedAt`; `prisma migrate deploy` succeeds
   4. Env vars `APP_PASSWORD`, `ASSOCIATE_SESSION_SECRET`, `ENABLE_ASSOCIATE_AUTH` are removed from `.env.example`, `.env.docker`, deploy docs, and CLAUDE.md / PROJECT.md
   5. App boots and all auth flows function with only Supabase env vars present
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 
 ## Progress
 
