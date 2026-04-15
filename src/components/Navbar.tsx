@@ -3,7 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-    Home,
+    LayoutDashboard,
+    PlayCircle,
     FileText,
     History,
     Menu,
@@ -28,9 +29,14 @@ export default function Navbar() {
 
     const navItems: NavItem[] = [
         {
-            href: '/dashboard',
-            label: 'Setup',
-            icon: <Home className="w-4 h-4" />
+            href: '/trainer',
+            label: 'Dashboard',
+            icon: <LayoutDashboard className="w-4 h-4" />
+        },
+        {
+            href: '/interview/new',
+            label: 'New Interview',
+            icon: <PlayCircle className="w-4 h-4" />
         },
         {
             href: '/question-banks',
@@ -45,6 +51,10 @@ export default function Navbar() {
     ];
 
     const isItemActive = (item: NavItem) => {
+        if (item.href === '/trainer') {
+            // Treat any /trainer/* route as active for the dashboard tab.
+            return pathname === '/trainer' || pathname.startsWith('/trainer/');
+        }
         return pathname === item.href;
     };
 
@@ -66,7 +76,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-14">
                     {/* Logo / Brand */}
                     <Link
-                        href={isAuthenticated ? "/dashboard" : "/"}
+                        href={isAuthenticated ? "/trainer" : "/"}
                         className="flex items-center gap-2.5 group"
                     >
                         <div

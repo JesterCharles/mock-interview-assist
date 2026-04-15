@@ -15,6 +15,9 @@ import { getCallerIdentity } from '@/lib/identity';
  * components / route handlers) via auth-server helpers (D-09a).
  */
 
+// /interview covers /interview AND /interview/new (the renamed setup wizard).
+// /dashboard kept as a guarded path so the legacy redirect page itself stays
+// trainer-only — anonymous hits still redirect to /login first.
 const TRAINER_PATHS = ['/dashboard', '/interview', '/review', '/trainer'];
 const ASSOCIATE_PATH = '/associate';
 const PUBLIC_ASSOCIATE_PATHS = ['/associate/login'];

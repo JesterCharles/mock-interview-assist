@@ -14,7 +14,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (isAuthenticated && !isLoading) {
-            router.push('/dashboard');
+            router.push('/trainer');
         }
     }, [isAuthenticated, isLoading, router]);
 
@@ -26,7 +26,7 @@ export default function LoginPage() {
         const success = await login(password);
 
         if (success) {
-            router.push('/dashboard');
+            router.push('/trainer');
         } else {
             setError('Invalid password. Please try again.');
             setPassword('');
