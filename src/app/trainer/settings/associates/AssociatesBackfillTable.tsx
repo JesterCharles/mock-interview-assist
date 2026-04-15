@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type CSSProperties } from 'react'
-import type { AssociateBackfillRow } from './types'
+import type { AssociateBackfillRow } from '@/lib/trainer-types'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 

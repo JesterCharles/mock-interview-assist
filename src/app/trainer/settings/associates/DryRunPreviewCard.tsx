@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type CSSProperties } from 'react'
-import type { BackfillPreview } from './types'
+import type { BackfillPreview } from '@/lib/trainer-types'
 
 export default function DryRunPreviewCard() {
   const [data, setData] = useState<BackfillPreview | null>(null)

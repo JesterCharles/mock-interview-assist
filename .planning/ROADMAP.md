@@ -78,9 +78,9 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
-- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
-- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [x] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [x] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [x] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
 - [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
@@ -98,9 +98,9 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
-- [ ] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
-- [ ] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
+- [x] 17-01-PLAN.md — Schema + idempotent migration + Prisma client regenerate
+- [x] 17-02-PLAN.md — Backfill API routes (list, PATCH email, DELETE orphan, preview) with origin guard
+- [x] 17-03-PLAN.md — /trainer/settings/associates page + table + dry-run preview card
 - [ ] 17-04-PLAN.md — Vitest integration tests for routes + preview math
 **UI hint**: yes
 
@@ -257,7 +257,7 @@ Plans:
 | 14. Design Cohesion | v1.1 | 2/2 | Complete | 2026-04-14 |
 | 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete | 2026-04-14 |
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
-| 17. Schema Prep + Email Backfill | v1.2 | 0/0 | Not started | - |
+| 17. Schema Prep + Email Backfill | v1.2 | 3/4 | In Progress|  |
 | 18. Supabase Auth Install | v1.2 | 0/0 | Not started | - |
 | 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
