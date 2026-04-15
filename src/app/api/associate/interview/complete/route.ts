@@ -4,6 +4,7 @@ import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { getAssociateSession } from '@/lib/auth-server';
 import { runReadinessPipeline } from '@/lib/readinessPipeline';
 import { InterviewSession } from '@/lib/types';
+import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 
 const LOG_PREFIX = '[associate-interview-complete]';
 
@@ -21,6 +22,9 @@ const LOG_PREFIX = '[associate-interview-complete]';
  *     marker so failures are repairable by the sweep (Plan 10-03).
  */
 export async function POST(request: Request) {
+  if (!isAssociateAuthEnabled()) {
+    return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  }
   try {
     const body = await request.json();
     const { fingerprint, session } = body as {
@@ -63,13 +67,12 @@ export async function POST(request: Request) {
     }
 
     // Identity injected from cookie — any client-supplied associateSlug is ignored.
-    const identified: InterviewSession & { mode?: string } = {
+    const identified: InterviewSession = {
       ...session,
       associateSlug: assocSession.slug,
     };
-    identified.mode = 'automated';
 
-    const success = await persistSessionToDb(identified);
+    const success = await persistSessionToDb(identified, { mode: 'automated' });
     if (!success) {
       console.error(`${LOG_PREFIX} persistSessionToDb returned false for session`, session.id);
       return NextResponse.json({ error: 'Failed to persist session' }, { status: 500 });

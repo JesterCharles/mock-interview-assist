@@ -11,7 +11,7 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 vi.mock('@/lib/readinessPipeline', () => ({
-  runReadinessPipeline: vi.fn().mockResolvedValue(undefined),
+  runReadinessPipeline: vi.fn().mockResolvedValue(true),
 }));
 
 import { runReadinessSweep } from '@/lib/readinessSweep';
@@ -26,7 +26,7 @@ describe('runReadinessSweep', () => {
   beforeEach(() => {
     mockFindMany.mockReset();
     mockUpdateMany.mockReset().mockResolvedValue({ count: 0 });
-    mockPipeline.mockReset().mockResolvedValue(undefined);
+    mockPipeline.mockReset().mockResolvedValue(true);
   });
 
   it('Test 1: returns zeros when no pending/failed sessions exist', async () => {
@@ -103,7 +103,7 @@ describe('runReadinessSweep', () => {
     mockPipeline.mockImplementationOnce(async () => {
       throw new Error('boom');
     });
-    mockPipeline.mockResolvedValueOnce(undefined);
+    mockPipeline.mockResolvedValueOnce(true);
 
     const result = await runReadinessSweep();
 

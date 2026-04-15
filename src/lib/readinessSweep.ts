@@ -75,9 +75,17 @@ export async function runReadinessSweep(
     // Most recent session = last in asc list = marker passed to pipeline.
     const markerId = sessionIds[sessionIds.length - 1];
     try {
-      await runReadinessPipeline(associateId, markerId);
-      // Close out any OTHER pending/failed markers for this associate — one
-      // recompute run already covered their readiness state.
+      // runReadinessPipeline swallows its own errors and returns false; an
+      // unexpected throw falls through to the catch block below. Only close
+      // out sibling markers when the pipeline actually succeeded (Codex P2).
+      const ok = await runReadinessPipeline(associateId, markerId);
+      if (!ok) {
+        console.error(
+          `${LOG_PREFIX} associate ${associateId} pipeline returned false — leaving sibling markers for retry`,
+        );
+        failureCount += 1;
+        continue;
+      }
       if (sessionIds.length > 1) {
         await prisma.session.updateMany({
           where: {
@@ -90,11 +98,8 @@ export async function runReadinessSweep(
       }
       successCount += 1;
     } catch (err) {
-      // Pipeline itself catches its errors and transitions marker to 'failed',
-      // but we defend against unexpected throws too. Leave other sessions as-is
-      // so the next sweep can retry them.
       console.error(
-        `${LOG_PREFIX} associate ${associateId} failed (marker session ${markerId}):`,
+        `${LOG_PREFIX} associate ${associateId} threw (marker session ${markerId}):`,
         err,
       );
       failureCount += 1;

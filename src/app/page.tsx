@@ -56,6 +56,7 @@ export default function PublicInterviewPage() {
     const [isLoadingTopics, setIsLoadingTopics] = useState(true);
     const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [associateAuthEnabled, setAssociateAuthEnabled] = useState(false);
 
     // Topic Selection State
     const [availableTopics, setAvailableTopics] = useState<any[]>([]);
@@ -76,6 +77,26 @@ export default function PublicInterviewPage() {
     useEffect(() => {
         setTechPage(1);
     }, [techSearch]);
+
+    // Associate PIN auth is feature-gated until v1.2. When disabled, hide the
+    // "Sign in to track progress" CTA so anonymous users aren't pushed into a
+    // flow that returns 404 server-side.
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/associate/status', { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = (await res.json()) as { enabled?: boolean };
+                if (!cancelled) setAssociateAuthEnabled(!!data.enabled);
+            } catch {
+                // ignore — stays hidden
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     // Interview State
     const [questions, setQuestions] = useState<any[]>([]);
@@ -728,17 +749,19 @@ export default function PublicInterviewPage() {
                         <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 520, margin: '0 auto', lineHeight: 1.6 }}>
                             Select up to 3 topics from our question banks. You will be assessed across 10 questions.
                         </p>
-                        <div className="mt-4 inline-flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
-                            <span>Have a PIN from your trainer?</span>
-                            <a
-                                href="/signin?as=associate"
-                                className="inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded"
-                                style={{ color: 'var(--accent)', outlineColor: 'var(--accent)' }}
-                            >
-                                Sign in to track your progress
-                                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                            </a>
-                        </div>
+                        {associateAuthEnabled && (
+                            <div className="mt-4 inline-flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
+                                <span>Have a PIN from your trainer?</span>
+                                <a
+                                    href="/signin?as=associate"
+                                    className="inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded"
+                                    style={{ color: 'var(--accent)', outlineColor: 'var(--accent)' }}
+                                >
+                                    Sign in to track your progress
+                                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                                </a>
+                            </div>
+                        )}
                         {error && (
                             <div
                                 className="mt-4 inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium animate-slide-up"

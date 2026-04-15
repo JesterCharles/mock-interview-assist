@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/auth-context';
 interface SignInTabsProps {
   initialTab: 'trainer' | 'associate';
   nextPath: string | null;
+  /** When false (default for v1.1 release), hides the Associate tab entirely. */
+  showAssociateTab?: boolean;
 }
 
 const tabBtnBase: React.CSSProperties = {
@@ -35,10 +37,13 @@ const inputBase: React.CSSProperties = {
   fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
 };
 
-export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
+export function SignInTabs({ initialTab, nextPath, showAssociateTab = false }: SignInTabsProps) {
   const router = useRouter();
   const { login } = useAuth();
-  const [tab, setTab] = useState<'trainer' | 'associate'>(initialTab);
+  // If associate tab is hidden, force trainer regardless of initialTab.
+  const [tab, setTab] = useState<'trainer' | 'associate'>(
+    showAssociateTab ? initialTab : 'trainer',
+  );
 
   // Trainer state
   const [password, setPassword] = useState('');
@@ -129,26 +134,28 @@ export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
 
   return (
     <div>
-      <div role="tablist" aria-label="Sign-in role" style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'trainer'}
-          onClick={() => setTab('trainer')}
-          style={{ ...activeStyle(tab === 'trainer'), borderRadius: '8px 0 0 8px' }}
-        >
-          Trainer
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'associate'}
-          onClick={() => setTab('associate')}
-          style={{ ...activeStyle(tab === 'associate'), borderRadius: '0 8px 8px 0' }}
-        >
-          Associate
-        </button>
-      </div>
+      {showAssociateTab && (
+        <div role="tablist" aria-label="Sign-in role" style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'trainer'}
+            onClick={() => setTab('trainer')}
+            style={{ ...activeStyle(tab === 'trainer'), borderRadius: '8px 0 0 8px' }}
+          >
+            Trainer
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'associate'}
+            onClick={() => setTab('associate')}
+            style={{ ...activeStyle(tab === 'associate'), borderRadius: '0 8px 8px 0' }}
+          >
+            Associate
+          </button>
+        </div>
+      )}
 
       {tab === 'trainer' ? (
         <form onSubmit={handleTrainerSubmit} noValidate>

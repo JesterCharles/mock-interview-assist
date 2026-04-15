@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     // Cast-through for strict null assignment — Prisma path treats falsy slug as no linkage
     (sanitized as unknown as { associateSlug: null }).associateSlug = null;
 
-    const success = await persistSessionToDb(sanitized);
+    const success = await persistSessionToDb(sanitized, { mode: 'automated' });
 
     if (!success) {
       return NextResponse.json(

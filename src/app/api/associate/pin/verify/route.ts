@@ -8,6 +8,7 @@ import {
   recordFailure,
   resetAttempts,
 } from '@/lib/pinAttemptLimiter';
+import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 
 const BodySchema = z.object({
   pin: z.string().regex(/^\d{6}$/),
@@ -21,7 +22,25 @@ function unauthorized(): NextResponse {
   return NextResponse.json({ ok: false }, { status: 401 });
 }
 
+// Server-derived caller key. Trusts x-forwarded-for only when the request
+// arrived through the platform's edge (set NLM_TRUSTED_PROXY=true behind GCE
+// load balancer). Otherwise falls back to a static "direct" bucket so an
+// attacker can't spoof IP via header injection on a non-proxied deployment.
+function callerIp(request: Request): string {
+  if (process.env.NLM_TRUSTED_PROXY === 'true') {
+    const xff = request.headers.get('x-forwarded-for') ?? '';
+    const first = xff.split(',')[0]?.trim();
+    if (first) return first;
+  }
+  return 'direct';
+}
+
 export async function POST(request: Request): Promise<NextResponse> {
+  // PIN auth is gated until v1.2 — return 404 in production until full auth lands.
+  if (!isAssociateAuthEnabled()) {
+    return NextResponse.json({ ok: false, error: 'not_found' }, { status: 404 });
+  }
+
   let parsed;
   try {
     const body = await request.json();
@@ -34,18 +53,22 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
   const { pin, fingerprint } = parsed.data;
 
-  if (isRateLimited(fingerprint)) {
+  // Composite limiter key: server-derived IP + client-supplied fingerprint.
+  // Fingerprint alone is client-controlled — an attacker rotating it would
+  // bypass per-fingerprint buckets. Pairing with IP keeps brute force bounded
+  // at the per-IP layer too. We also check an IP-only bucket so a single IP
+  // rotating fingerprints still trips MAX_FAILURES across rotations.
+  const ip = callerIp(request);
+  const compositeKey = `${ip}::${fingerprint}`;
+  const ipKey = `ip::${ip}`;
+
+  if (isRateLimited(compositeKey) || isRateLimited(ipKey)) {
     return NextResponse.json(
       { ok: false, error: 'rate_limited' },
       { status: 429 }
     );
   }
 
-  // PIN-only login (15-02 UX fix). Look up across all associates with an
-  // active PIN. At trainer-managed scale (low hundreds) iterating bcrypt
-  // compares is acceptable; rate limiter bounds brute force per fingerprint.
-  // Collision handling: if two associates somehow share the same PIN, both
-  // matches are rejected (return 401) — trainer must regenerate one.
   const candidates = await prisma.associate.findMany({
     where: { pinHash: { not: null }, pinGeneratedAt: { not: null } },
     select: { id: true, slug: true, pinHash: true, pinGeneratedAt: true },
@@ -60,17 +83,20 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   if (matches.length !== 1) {
-    recordFailure(fingerprint);
+    recordFailure(compositeKey);
+    recordFailure(ipKey);
     return unauthorized();
   }
   const associate = matches[0];
   if (!associate.pinGeneratedAt) {
-    recordFailure(fingerprint);
+    recordFailure(compositeKey);
+    recordFailure(ipKey);
     return unauthorized();
   }
 
-  // Success — reset counter, mint token.
-  resetAttempts(fingerprint);
+  // Success — reset both counters, mint token.
+  resetAttempts(compositeKey);
+  resetAttempts(ipKey);
   const token = await signAssociateToken(associate.id, associate.pinGeneratedAt);
 
   const response = NextResponse.json({ ok: true, slug: associate.slug }, { status: 200 });
