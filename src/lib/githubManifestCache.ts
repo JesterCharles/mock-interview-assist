@@ -50,6 +50,10 @@ const cacheKey = (owner: string, repo: string, branch: string) =>
 
 const store = new Map<string, CacheEntry>();
 const inFlight = new Map<string, Promise<ManifestResult>>();
+// Bumped on every invalidate() call. In-flight fetches capture the generation
+// at start; if it changes before the write, the stale response is discarded
+// instead of resurrecting cleared cache state.
+let generation = 0;
 
 interface TreeEntry {
   path: string;
@@ -132,6 +136,7 @@ export async function getManifest(
     };
   }
 
+  const startGen = generation;
   const promise = (async (): Promise<ManifestResult> => {
     const response = await activeFetcher({
       owner,
@@ -146,6 +151,18 @@ export async function getManifest(
       if (!existing) {
         // Defensive: 304 without a prior entry should not happen.
         throw new Error('[manifest-cache] 304 without prior entry');
+      }
+      if (startGen !== generation) {
+        // Invalidated mid-flight: return the result to the original caller
+        // but do NOT mutate the (already-cleared) cache entry.
+        console.log(
+          `[manifest-cache] discarding stale 304 write key=${key} (invalidated mid-flight)`,
+        );
+        return {
+          files: existing.files,
+          lastSyncedAt: settledAt,
+          etag: existing.etag,
+        };
       }
       existing.lastSyncedAt = settledAt;
       existing.expiresAt = settledAt + MANIFEST_TTL_MS;
@@ -167,6 +184,18 @@ export async function getManifest(
       lastSyncedAt: settledAt,
       expiresAt: settledAt + MANIFEST_TTL_MS,
     };
+    if (startGen !== generation) {
+      // Invalidated mid-flight: honor this fetch for the in-flight caller but
+      // do not write stale-by-policy data back into the cache.
+      console.log(
+        `[manifest-cache] discarding stale 200 write key=${key} (invalidated mid-flight)`,
+      );
+      return {
+        files: entry.files,
+        lastSyncedAt: entry.lastSyncedAt,
+        etag: entry.etag,
+      };
+    }
     store.set(key, entry);
     console.log(
       `[manifest-cache] ${existing ? 'revalidate-200' : 'miss'} key=${key}`,
@@ -189,6 +218,9 @@ export async function getManifest(
 export function invalidate(
   scope?: { owner: string; repo: string; branch: string } | 'all',
 ): number {
+  // Bump generation on every invalidate so any in-flight fetch that started
+  // before this call will discard its write instead of resurrecting cleared state.
+  generation++;
   if (!scope || scope === 'all') {
     const n = store.size;
     store.clear();
@@ -213,6 +245,7 @@ export function __resetAll(): void {
   store.clear();
   inFlight.clear();
   activeFetcher = defaultFetcher;
+  generation = 0;
 }
 
 // Silence unused-constant lints while keeping defaults colocated with caller docs.
