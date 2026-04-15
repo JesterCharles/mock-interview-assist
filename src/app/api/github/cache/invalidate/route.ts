@@ -11,6 +11,24 @@ type InvalidateBody =
   | { scope: { owner: string; repo: string; branch: string } };
 
 export async function POST(request: NextRequest) {
+  // CSRF defense-in-depth: reject cross-origin POSTs before touching the cache.
+  // The nlm_session cookie is SameSite=strict (see src/app/api/auth/route.ts),
+  // but verifying Origin/Referer here blocks same-site subdomain attackers and
+  // any future SameSite relaxation from silently widening blast radius.
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('host');
+  if (origin !== null && host !== null) {
+    let originHost: string | null = null;
+    try {
+      originHost = new URL(origin).host;
+    } catch {
+      originHost = null;
+    }
+    if (originHost !== host) {
+      return NextResponse.json({ error: 'cross-origin' }, { status: 403 });
+    }
+  }
+
   const caller = await getCallerIdentity(request);
   if (caller.type !== 'trainer') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
