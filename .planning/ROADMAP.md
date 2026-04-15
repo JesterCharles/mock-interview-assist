@@ -189,3 +189,4 @@ Plans:
 | 12. Cohort Dashboard Views | v1.1 | 0/2 | Planned | - |
 | 13. Curriculum Schedule | v1.1 | 0/3 | Planned | - |
 | 14. Design Cohesion | v1.1 | 2/2 | Complete   | 2026-04-14 |
+| 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete   | 2026-04-14 |
