@@ -2,13 +2,13 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: DISCOVER in progress — milestone scoped via `/gsd-new-milestone`. PROJECT.md + STATE.md updated + committed (`443d804`). Paused at research decision (4-agent research vs skip).
+- Current stage: DISCOVER in progress — research complete (4 agents + synthesizer, commit `58fc27f`). Paused at open-questions gate before requirements gathering.
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Next action on resume: answer research decision — run 4 parallel researchers (Stack/Features/Architecture/Pitfalls) or skip to requirements gathering.
+Next action on resume: answer 4 open questions from research (Q1 email audit, Q2 Supabase tier, Q4 session provenance, Q5 finalized.html reconcile), then `/gsd-new-milestone` continues to requirements phase.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -30,7 +30,7 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 ## Stages (v1.2)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| discover | in_progress | 2026-04-15 | | Milestone scoped, PROJECT.md + STATE.md committed. Research decision pending. |
+| discover | in_progress | 2026-04-15 | | Research complete (58fc27f). Paused at open-questions gate before requirements. |
 | init | pending | | | Codebase + intel from v1.1 still current; may skip remap. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase for UI-SPEC per frontend phase. |
 | plan | pending | | | |
@@ -46,7 +46,8 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 ## HITL Gates (v1.2)
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
-| Research yes/no | discover | sync | **pending — resume here** | |
+| Research yes/no | discover | sync | done | Run — 4 researchers + synthesizer, commit 58fc27f |
+| Open questions | discover | sync | **pending — resume here** | Q1/Q2/Q4/Q5 answers needed before requirements |
 | Requirements approval | discover | sync | pending | |
 | Roadmap approval | discover | sync | pending | |
 | Design selection | design | sync | pending | finalized.html already locked; expect light ui-phase pass |
@@ -58,6 +59,7 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 ## Artifacts (v1.2)
 - PROJECT.md (updated 2026-04-15)
 - STATE.md (updated 2026-04-15)
+- .planning/research/STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md, SUMMARY.md (58fc27f)
 - `finalized.html` (design ref, external)
 - Previous milestone archives: `.planning/milestones/v1.1-*`
 
