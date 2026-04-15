@@ -59,22 +59,33 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="bg-slate-900/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-50">
+        <nav
+            className="bg-[var(--surface)] border-b border-[var(--border)] sticky top-0 z-50"
+        >
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-14">
                     {/* Logo / Brand */}
-                    <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-                        <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow duration-300">
+                    <Link
+                        href={isAuthenticated ? "/dashboard" : "/"}
+                        className="flex items-center gap-2.5 group"
+                    >
+                        <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center"
+                            style={{ background: 'var(--accent)' }}
+                        >
                             <Zap className="w-4 h-4 text-white" />
                         </div>
-                        <span className="font-bold text-white hidden sm:block tracking-tight">
-                            Next Level <span className="gradient-text-static">Mock</span>
+                        <span
+                            className="hidden sm:block tracking-tight text-[var(--ink)]"
+                            style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16 }}
+                        >
+                            Next Level Mock
                         </span>
                     </Link>
 
                     {/* Show loading state or navigation based on auth */}
                     {isLoading ? (
-                        <div className="text-slate-500 text-sm">Loading...</div>
+                        <div className="text-[var(--muted)] text-sm">Loading...</div>
                     ) : isAuthenticated ? (
                         <>
                             {/* Desktop Navigation */}
@@ -86,9 +97,9 @@ export default function Navbar() {
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${active
-                                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                                                : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${active
+                                                ? 'bg-[var(--highlight)] text-[var(--accent)]'
+                                                : 'text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)]'
                                                 }`}
                                         >
                                             {item.icon}
@@ -98,7 +109,7 @@ export default function Navbar() {
                                 })}
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all duration-200 ml-2"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)] transition-colors duration-150 ml-2"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Logout
@@ -108,7 +119,8 @@ export default function Navbar() {
                             {/* Mobile Menu Button */}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+                                className="md:hidden p-2 text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+                                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                             >
                                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                             </button>
@@ -118,7 +130,7 @@ export default function Navbar() {
                         <div className="flex items-center gap-3">
                             <Link
                                 href="/login"
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/[0.06] border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.15] transition-all duration-200"
+                                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--surface)] border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--highlight)] transition-colors duration-150"
                             >
                                 <LogIn className="w-4 h-4" />
                                 Trainer Login
@@ -129,7 +141,7 @@ export default function Navbar() {
 
                 {/* Mobile Navigation - only when authenticated */}
                 {isAuthenticated && mobileMenuOpen && (
-                    <div className="md:hidden py-2 border-t border-white/[0.06] animate-slide-up">
+                    <div className="md:hidden py-2 border-t border-[var(--border-subtle)] animate-slide-up">
                         {navItems.map((item) => {
                             const active = isItemActive(item);
 
@@ -137,9 +149,9 @@ export default function Navbar() {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${active
-                                        ? 'bg-indigo-500/20 text-indigo-300'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors duration-150 ${active
+                                        ? 'bg-[var(--highlight)] text-[var(--accent)]'
+                                        : 'text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)]'
                                         }`}
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -150,7 +162,7 @@ export default function Navbar() {
                         })}
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] w-full text-left rounded-lg transition-all duration-200"
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)] w-full text-left rounded-md transition-colors duration-150"
                         >
                             <LogOut className="w-4 h-4" />
                             Logout
