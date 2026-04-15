@@ -5,8 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  FileText, Users, Settings, ArrowRight, Check,
-  Search, Github, Loader2, Clock, Brain, UserCheck, ChevronLeft, ChevronRight
+  Users, Search, Github, Loader2, Clock, Brain, UserCheck, ChevronLeft, ChevronRight, Check, ArrowRight
 } from 'lucide-react';
 import { useInterviewStore } from '@/store/interviewStore';
 import { parseInterviewQuestions } from '@/lib/markdownParser';
@@ -17,6 +16,29 @@ import { validateSlug } from '@/lib/slug-validation';
 import { mapGapScoresToWeights, GapScoreResponse } from '@/lib/adaptiveSetup';
 import { filterTechsByCurriculum, filterGapScoresByCurriculum } from '@/lib/curriculumFilter';
 import { CurriculumFilterBadge, TaughtWeek } from '@/components/dashboard/CurriculumFilterBadge';
+
+const displayFont = { fontFamily: 'var(--font-display)' } as const;
+const monoLabel = {
+  fontFamily: 'var(--font-mono)',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase' as const,
+};
+
+// Surface card chrome used throughout the wizard
+const surfaceCardStyle = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
+
+// Input chrome (token-driven)
+const inputClass =
+  'w-full px-4 py-3 rounded-lg text-sm outline-none transition-colors';
+const inputStyle = {
+  background: 'var(--surface-muted)',
+  border: '1px solid var(--border)',
+  color: 'var(--ink)',
+};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -36,7 +58,6 @@ export default function DashboardPage() {
     setupPhase,
     setSetupPhase,
     repoConfig,
-    setRepoConfig,
     interviewLevel,
     setInterviewLevel,
     selectedTechs,
@@ -107,7 +128,6 @@ export default function DashboardPage() {
     try {
       const service = new GitHubService(repoConfig.owner, repoConfig.repo, repoConfig.branch);
       const files = await service.findQuestionBanks('');
-      // Filter out non-matching naming conventions if needed, or just show all MD files
       setAvailableTechs(files);
       if (files.length === 0) {
         setError('No question banks found (looking for .md files).');
@@ -141,11 +161,8 @@ export default function DashboardPage() {
         const service = new GitHubService(repoConfig.owner, repoConfig.repo, repoConfig.branch);
 
         try {
-          // Use Promise.all for parallel fetching
           const promises = selectedTechs.map(async (techFile, index) => {
             const content = await service.getFileContent(techFile.path);
-            // Use the index + 1 as the week number to ensure unique IDs across different files
-            // (e.g. if multiple files have Q1, they will become week1-q1, week2-q1, etc.)
             return parseInterviewQuestions(content, index + 1);
           });
 
@@ -178,29 +195,23 @@ export default function DashboardPage() {
     t.path.toLowerCase().includes(techSearch.toLowerCase())
   );
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredTechs.length / TECHS_PER_PAGE);
   const paginatedTechs = filteredTechs.slice(
     (techPage - 1) * TECHS_PER_PAGE,
     techPage * TECHS_PER_PAGE
   );
 
-  // Reset to page 1 when search changes
   useEffect(() => {
     setTechPage(1);
   }, [techSearch]);
 
   // applyGapScores: cross-references gap scores against availableTechs and pre-populates
-  // D-22: scores should already be filtered to taught slugs before calling this
   const applyGapScores = useCallback((scores: GapScoreResponse['scores']) => {
     const weights = mapGapScoresToWeights(scores);
-    // Build a case-insensitive lookup from gap skill name → weight
-    // Gap scores use skill names like "React", tech paths are like "react/question-bank-v1.md"
     const skillWeightMap = new Map<string, 1 | 2 | 3 | 4 | 5>();
     for (const [skill, weight] of Object.entries(weights)) {
       skillWeightMap.set(skill.toLowerCase(), weight as 1 | 2 | 3 | 4 | 5);
     }
-    // Match tech path against gap skill: extract directory name from path, compare lowercase
     const matchedTechs: typeof availableTechs = [];
     const matchedWeights: Record<string, number> = {};
     for (const tech of availableTechs) {
@@ -211,7 +222,7 @@ export default function DashboardPage() {
         matchedWeights[tech.path] = weight;
       }
     }
-    if (matchedTechs.length === 0) return; // no matching techs — stay manual
+    if (matchedTechs.length === 0) return;
     setSelectedTechs(matchedTechs);
     matchedTechs.forEach(t => setTechWeight(t.path, matchedWeights[t.path]));
     setPrePopulatedPaths(new Set(matchedTechs.map(t => t.path)));
@@ -220,17 +231,15 @@ export default function DashboardPage() {
   }, [availableTechs, setSelectedTechs, setTechWeight]);
 
   // handleSlugLookup: fetches gap scores (+ curriculum if cohort present) on slug blur
-  // D-14: curriculum fetched in parallel with gap scores via Promise.all when cohortId present
   const handleSlugLookup = useCallback(async (slug: string) => {
     const trimmed = slug.trim().toLowerCase();
     if (!trimmed) return;
     setIsLoadingGapScores(true);
     try {
       const res = await fetch(`/api/associates/${encodeURIComponent(trimmed)}/gap-scores`);
-      if (!res.ok) return; // network error — fail silently, stay manual
+      if (!res.ok) return;
       const data: GapScoreResponse = await res.json();
 
-      // Fetch curriculum in parallel when associate has a cohort (D-14)
       let weeks: TaughtWeek[] = [];
       if (data.cohortId) {
         try {
@@ -242,53 +251,45 @@ export default function DashboardPage() {
             weeks = curriculumData;
           }
         } catch {
-          // D-17: curriculum fetch failure → log warn, do NOT filter (show full list)
           console.warn('[curriculum-filter] Failed to fetch curriculum — showing full tech list');
         }
         setTaughtWeeks(weeks);
       } else {
-        // No cohort → reset filter state (D-17 fallback)
         setTaughtWeeks([]);
       }
 
-      // Extract taught slugs for filtering
       const taughtSlugs = weeks.map(w => w.skillSlug);
 
-      // Apply curriculum filter to availableTechs if we have them (D-15)
       if (taughtSlugs.length > 0) {
         if (availableTechs.length > 0) {
           applyCurriculumFilter(availableTechs, taughtSlugs);
         } else {
-          // Defer filter until techs load
           setPendingTaughtSlugs(taughtSlugs);
         }
       }
 
-      // Apply gap-score pre-population (D-22: filter scores to taught slugs first)
-      if (!data.found || data.sessionCount < 3) return; // cold start fallback per D-04
+      if (!data.found || data.sessionCount < 3) return;
       const filteredScores = taughtSlugs.length > 0
         ? filterGapScoresByCurriculum(data.scores, taughtSlugs)
         : data.scores;
       if (availableTechs.length === 0) {
-        setPendingGapScores(filteredScores); // defer until techs load
+        setPendingGapScores(filteredScores);
         return;
       }
       applyGapScores(filteredScores);
     } catch {
-      // Fail silently — stay in manual mode on any fetch/parse error
+      // Fail silently — stay in manual mode
     } finally {
       setIsLoadingGapScores(false);
     }
   }, [availableTechs, applyGapScores, applyCurriculumFilter]);
 
-  // Deferred gap score application: fires when pendingGapScores exists and availableTechs loads
   useEffect(() => {
     if (pendingGapScores && availableTechs.length > 0) {
       applyGapScores(pendingGapScores);
     }
   }, [pendingGapScores, availableTechs, applyGapScores]);
 
-  // Deferred curriculum filter: fires when pendingTaughtSlugs exists and availableTechs loads
   useEffect(() => {
     if (pendingTaughtSlugs && pendingTaughtSlugs.length > 0 && availableTechs.length > 0) {
       applyCurriculumFilter(availableTechs, pendingTaughtSlugs);
@@ -296,7 +297,6 @@ export default function DashboardPage() {
     }
   }, [pendingTaughtSlugs, availableTechs, applyCurriculumFilter]);
 
-  // handleWeightChange: wraps setTechWeight and removes the "auto" badge for that tech
   const handleWeightChange = (path: string, weight: number) => {
     setTechWeight(path, weight);
     setPrePopulatedPaths(prev => {
@@ -339,7 +339,7 @@ export default function DashboardPage() {
     createSession(
       loadedQuestions,
       Math.min(questionCount, loadedQuestions.length),
-      [1], // Placeholder for weeks
+      [1],
       candidateName || undefined,
       interviewerName || undefined,
       interviewLevel,
@@ -355,13 +355,13 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Adaptive Setup — Associate Search + Gap History */}
       <div className="space-y-2">
-        <label className="text-sm font-medium" style={{ color: 'var(--muted)' }}>
-          Associate <span className="text-gray-500 font-normal">(optional — pre-fills from gap history)</span>
+        <label className="text-xs font-medium" style={{ ...monoLabel, color: 'var(--muted)' }}>
+          Associate <span style={{ textTransform: 'none', letterSpacing: 0 }} className="font-normal">(optional — pre-fills from gap history)</span>
         </label>
         <div className="relative">
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--muted)' }} />
               <input
                 type="text"
                 value={associateSlug}
@@ -375,22 +375,25 @@ export default function DashboardPage() {
                 }}
                 onBlur={() => {
                   setSlugInputFocused(false);
-                  // Delay hiding so click on suggestion registers
                   setTimeout(() => setShowSuggestions(false), 150);
                   handleSlugLookup(associateSlug);
                 }}
                 placeholder="Search by name or slug..."
-                className="w-full pl-9 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 text-sm outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg text-sm outline-none transition-colors"
+                style={inputStyle}
               />
             </div>
             {isLoadingGapScores && (
-              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--accent)' }} />
             )}
           </div>
 
           {/* Typeahead suggestions dropdown */}
           {showSuggestions && slugInputFocused && filteredSuggestions.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-gray-900 border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <div
+              className="absolute z-10 mt-1 w-full rounded-lg max-h-48 overflow-y-auto"
+              style={{ ...surfaceCardStyle, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+            >
               {filteredSuggestions.slice(0, 8).map((a) => (
                 <button
                   key={a.slug}
@@ -401,32 +404,47 @@ export default function DashboardPage() {
                     setShowSuggestions(false);
                     handleSlugLookup(a.slug);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-white/10 transition-colors flex items-center justify-between"
+                  className="w-full px-3 py-2 text-left transition-colors flex items-center justify-between hover:bg-[var(--highlight)]"
                 >
-                  <span className="text-white text-sm">{a.displayName}</span>
-                  <span className="text-xs text-gray-500">{a.slug}</span>
+                  <span className="text-sm" style={{ color: 'var(--ink)' }}>{a.displayName}</span>
+                  <span className="text-xs" style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{a.slug}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
+        {slugError && (
+          <p className="text-xs" style={{ color: 'var(--danger)' }}>{slugError}</p>
+        )}
 
         {/* Pre-population summary */}
         {prePopulatedPaths.size > 0 && (
-          <div className="mt-3 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-            <p className="text-xs font-medium text-indigo-300 mb-2">
+          <div
+            className="mt-3 p-3 rounded-lg"
+            style={{
+              background: 'var(--highlight)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <p className="text-xs font-medium mb-2" style={{ color: 'var(--accent)' }}>
               {prePopulatedPaths.size} technologies pre-selected from gap history
             </p>
             <div className="flex flex-wrap gap-2">
               {Array.from(prePopulatedPaths).map(path => {
                 const name = path.replace(/\/question-bank-v1\.md$/, '').replace(/\.md$/, '');
                 const weight = prePopulatedWeights[path] ?? techWeights[path] ?? 1;
+                const weightColor =
+                  weight >= 4 ? 'var(--danger)'
+                  : weight >= 3 ? 'var(--warning)'
+                  : 'var(--success)';
                 return (
-                  <span key={path} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md bg-white/10">
-                    <span className="text-white">{name}</span>
-                    <span className={`font-bold ${weight >= 4 ? 'text-orange-400' : weight >= 3 ? 'text-yellow-400' : 'text-green-400'}`}>
-                      {weight}x
-                    </span>
+                  <span
+                    key={path}
+                    className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md"
+                    style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}
+                  >
+                    <span style={{ color: 'var(--ink)' }}>{name}</span>
+                    <span className="font-bold" style={{ color: weightColor }}>{weight}x</span>
                   </span>
                 );
               })}
@@ -438,25 +456,30 @@ export default function DashboardPage() {
       {/* Assessment Focus & Question Count - Side by Side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Brain className="w-6 h-6 text-indigo-400" />
+          <h3 className="text-xl mb-4 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+            <Brain className="w-6 h-6" style={{ color: 'var(--accent)' }} />
             Assessment Focus
           </h3>
           <div className="flex flex-col gap-3">
-            {['Technical', 'Behavioral'].map((type) => (
-              <button
-                key={type}
-                onClick={() => setAssessmentType(type as 'Technical' | 'Behavioral')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 font-medium ${assessmentType === type
-                  ? 'border-indigo-500 bg-indigo-500/20 text-white'
-                  : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
-                  }`}
-              >
-                {type}
-              </button>
-            ))}
+            {(['Technical', 'Behavioral'] as const).map((type) => {
+              const selected = assessmentType === type;
+              return (
+                <button
+                  key={type}
+                  onClick={() => setAssessmentType(type)}
+                  className="p-4 rounded-lg transition-all duration-200 font-medium text-left"
+                  style={{
+                    border: `2px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
+                    background: selected ? 'var(--highlight)' : 'var(--surface)',
+                    color: selected ? 'var(--ink)' : 'var(--muted)',
+                  }}
+                >
+                  {type}
+                </button>
+              );
+            })}
           </div>
-          <p className="text-sm text-gray-500 mt-3">
+          <p className="text-sm mt-3" style={{ color: 'var(--muted)' }}>
             {assessmentType === 'Technical'
               ? 'Focus on technical knowledge and problem-solving skills'
               : 'Focus on communication, teamwork, and behavioral scenarios'
@@ -465,13 +488,13 @@ export default function DashboardPage() {
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Clock className="w-6 h-6 text-indigo-400" />
+          <h3 className="text-xl mb-4 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+            <Clock className="w-6 h-6" style={{ color: 'var(--accent)' }} />
             Questions
           </h3>
-          <div className="glass-card rounded-xl p-6">
+          <div className="rounded-xl p-6" style={surfaceCardStyle}>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-300">Number of Questions</span>
+              <span className="text-sm" style={{ color: 'var(--muted)' }}>Number of Questions</span>
               <input
                 type="number"
                 min="5"
@@ -485,7 +508,13 @@ export default function DashboardPage() {
                   const val = parseInt(e.target.value) || 10;
                   setQuestionCount(Math.min(30, Math.max(5, val)));
                 }}
-                className="w-16 text-2xl font-bold text-indigo-400 bg-transparent border-b-2 border-indigo-500/50 focus:border-indigo-400 outline-none text-center"
+                className="w-16 text-2xl font-bold bg-transparent outline-none text-center"
+                style={{
+                  color: 'var(--accent)',
+                  borderBottom: '2px solid var(--accent)',
+                  fontVariantNumeric: 'tabular-nums',
+                  fontFamily: 'var(--font-mono)',
+                }}
               />
             </div>
             <input
@@ -495,9 +524,13 @@ export default function DashboardPage() {
               step="1"
               value={questionCount}
               onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-              className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-500 mb-2"
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer mb-2"
+              style={{
+                background: 'var(--surface-muted)',
+                accentColor: 'var(--accent)',
+              }}
             />
-            <p className="text-sm text-gray-400 text-right">
+            <p className="text-sm text-right" style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
               Approx. {questionCount * 2} minutes
             </p>
           </div>
@@ -505,19 +538,19 @@ export default function DashboardPage() {
       </div>
 
       <div>
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <Github className="w-6 h-6 text-indigo-400" />
+        <h3 className="text-xl mb-4 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+          <Github className="w-6 h-6" style={{ color: 'var(--accent)' }} />
           Technology Selection
         </h3>
 
         {/* Curriculum filter badge — visible when associate has cohort with taught weeks */}
         <CurriculumFilterBadge taughtWeeks={taughtWeeks} />
 
-        {/* Repo Config is now obscured/server-side managed */}
         <div className="flex justify-end mb-2">
           <button
             onClick={fetchTechs}
-            className="text-xs text-gray-400 hover:text-white underline transition-colors"
+            className="text-xs underline transition-colors"
+            style={{ color: 'var(--muted)' }}
           >
             Refresh List
           </button>
@@ -525,30 +558,40 @@ export default function DashboardPage() {
 
         {/* Search Bar */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: 'var(--muted)' }} />
           <input
             type="text"
             value={techSearch}
             onChange={(e) => setTechSearch(e.target.value)}
             placeholder="Search technologies..."
-            className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+            className={inputClass + ' pl-10'}
+            style={inputStyle}
           />
         </div>
 
         {/* Tech List */}
         <div className="min-h-[280px] pr-2 space-y-2">
           {isFetchingTechs ? (
-            <div className="flex items-center justify-center h-full text-gray-400 gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
+            <div className="flex items-center justify-center h-full gap-2" style={{ color: 'var(--muted)' }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--accent)' }} />
               Loading repositories...
             </div>
           ) : error ? (
-            <div className="text-red-400 text-center py-4 text-sm">{error}</div>
+            <div
+              className="text-center py-4 text-sm rounded-lg px-3"
+              style={{
+                background: '#FDECEB',
+                border: '1px solid var(--danger)',
+                color: 'var(--danger)',
+              }}
+            >
+              {error}
+            </div>
           ) : filteredTechs.length === 0 ? (
-            <div className="text-gray-500 text-center py-8">No matching technologies found</div>
+            <div className="text-center py-8" style={{ color: 'var(--muted)' }}>No matching technologies found</div>
           ) : (
             paginatedTechs.map((tech) => {
-              const isSelected = selectedTechs.find(t => t.path === tech.path);
+              const isSelected = !!selectedTechs.find(t => t.path === tech.path);
               const weight = techWeights[tech.path] ?? 1;
               const topicName = tech.path.replace('/question-bank-v1.md', '').replace('.md', '');
 
@@ -556,22 +599,33 @@ export default function DashboardPage() {
                 <div key={tech.path} className="space-y-0">
                   <button
                     onClick={() => toggleTech(tech)}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all duration-200 text-left ${isSelected
-                      ? 'border-indigo-500 bg-indigo-500/20 text-white rounded-b-none'
-                      : 'border-white/5 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08]'
-                      }`}
+                    className="w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 text-left"
+                    style={{
+                      border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                      background: isSelected ? 'var(--highlight)' : 'var(--surface)',
+                      color: 'var(--ink)',
+                      borderBottomLeftRadius: isSelected ? 0 : undefined,
+                      borderBottomRightRadius: isSelected ? 0 : undefined,
+                    }}
                   >
-                    <span className="truncate mr-2" title={tech.path}>
+                    <span className="truncate mr-2 text-sm" title={tech.path}>
                       {topicName}
                     </span>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {isSelected && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300">
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={{
+                            background: 'var(--accent)',
+                            color: '#FFFFFF',
+                            fontFamily: 'var(--font-mono)',
+                          }}
+                        >
                           {weight}x
                         </span>
                       )}
                       {isSelected && (
-                        <Check className="w-4 h-4 text-indigo-400" />
+                        <Check className="w-4 h-4" style={{ color: 'var(--accent)' }} />
                       )}
                     </div>
                   </button>
@@ -579,11 +633,16 @@ export default function DashboardPage() {
                   {/* Inline Weight Slider - only visible when selected */}
                   {isSelected && (
                     <div
-                      className="bg-indigo-500/10 border border-t-0 border-indigo-500/30 rounded-b-lg px-3 py-2"
+                      className="rounded-b-lg px-3 py-2"
+                      style={{
+                        background: 'var(--surface-muted)',
+                        border: '1px solid var(--accent)',
+                        borderTop: 0,
+                      }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400 whitespace-nowrap">Weight:</span>
+                        <span className="text-xs whitespace-nowrap" style={{ color: 'var(--muted)' }}>Weight:</span>
                         <input
                           type="range"
                           min="1"
@@ -591,24 +650,31 @@ export default function DashboardPage() {
                           step="1"
                           value={weight}
                           onChange={(e) => handleWeightChange(tech.path, parseInt(e.target.value))}
-                          className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                          className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer"
+                          style={{ background: 'var(--border)', accentColor: 'var(--accent)' }}
                         />
-                        <div className="flex gap-1 text-xs text-gray-500">
-                          {[1, 2, 3, 4, 5].map((w) => (
-                            <button
-                              key={w}
-                              onClick={() => handleWeightChange(tech.path, w)}
-                              className={`w-5 h-5 rounded text-center transition-all ${weight === w
-                                ? 'bg-indigo-500 text-white font-bold'
-                                : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                }`}
-                            >
-                              {w}
-                            </button>
-                          ))}
+                        <div className="flex gap-1 text-xs">
+                          {[1, 2, 3, 4, 5].map((w) => {
+                            const active = weight === w;
+                            return (
+                              <button
+                                key={w}
+                                onClick={() => handleWeightChange(tech.path, w)}
+                                className="w-5 h-5 rounded text-center transition-all font-medium"
+                                style={{
+                                  background: active ? 'var(--accent)' : 'var(--surface)',
+                                  color: active ? '#FFFFFF' : 'var(--muted)',
+                                  border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                                  fontFamily: 'var(--font-mono)',
+                                }}
+                              >
+                                {w}
+                              </button>
+                            );
+                          })}
                         </div>
                         {prePopulatedPaths.has(tech.path) && (
-                          <span className="text-xs font-medium ml-2" style={{ color: 'var(--muted)' }}>
+                          <span className="text-xs font-medium ml-2" style={{ ...monoLabel, color: 'var(--muted)' }}>
                             auto
                           </span>
                         )}
@@ -623,28 +689,32 @@ export default function DashboardPage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-center gap-4 mt-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <button
               onClick={() => setTechPage(p => Math.max(1, p - 1))}
               disabled={techPage === 1}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-2 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ background: 'var(--surface-muted)', color: 'var(--ink)' }}
+              aria-label="Previous page"
             >
-              <ChevronLeft className="w-4 h-4 text-gray-400" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm" style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
               Page {techPage} of {totalPages}
             </span>
             <button
               onClick={() => setTechPage(p => Math.min(totalPages, p + 1))}
               disabled={techPage === totalPages}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-2 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ background: 'var(--surface-muted)', color: 'var(--ink)' }}
+              aria-label="Next page"
             >
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        <p className="text-sm text-gray-400 mt-2 text-right">
+        <p className="text-sm mt-2 text-right" style={{ color: 'var(--muted)' }}>
           {selectedTechs.length} selected {selectedTechs.length > 0 && '• Adjust weights below each selection'}
         </p>
       </div>
@@ -653,7 +723,7 @@ export default function DashboardPage() {
         <button
           onClick={() => setSetupPhase(2)}
           disabled={selectedTechs.length === 0}
-          className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="btn-accent-flat flex items-center gap-2"
         >
           Next Step <ArrowRight className="w-5 h-5" />
         </button>
@@ -664,29 +734,31 @@ export default function DashboardPage() {
   const renderPhase2 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-right duration-500">
       <div>
-        <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <Users className="w-6 h-6 text-indigo-400" />
+        <h3 className="text-xl mb-6 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+          <Users className="w-6 h-6" style={{ color: 'var(--accent)' }} />
           Participant Details
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Candidate Name</label>
+            <label className="text-xs font-medium" style={{ ...monoLabel, color: 'var(--muted)' }}>Candidate Name</label>
             <input
               type="text"
               value={candidateName}
               onChange={(e) => setCandidateName(e.target.value)}
               placeholder="e.g. Jane Doe"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white outline-none focus:border-indigo-500 transition-colors"
+              className={inputClass}
+              style={inputStyle}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Interviewer Name</label>
+            <label className="text-xs font-medium" style={{ ...monoLabel, color: 'var(--muted)' }}>Interviewer Name</label>
             <input
               type="text"
               value={interviewerName}
               onChange={(e) => setInterviewerName(e.target.value)}
               placeholder="e.g. John Smith"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white outline-none focus:border-indigo-500 transition-colors"
+              className={inputClass}
+              style={inputStyle}
             />
           </div>
         </div>
@@ -694,63 +766,65 @@ export default function DashboardPage() {
         {/* Associate ID — read-only, set from Phase 1 search */}
         {associateSlug && (
           <div className="mt-6 space-y-2">
-            <label className="text-sm text-gray-300">Associate ID</label>
-            <div className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 text-sm">
+            <label className="text-xs font-medium" style={{ ...monoLabel, color: 'var(--muted)' }}>Associate ID</label>
+            <div
+              className="w-full px-4 py-3 rounded-lg text-sm"
+              style={{
+                background: 'var(--surface-muted)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--ink)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
               {associateSlug}
             </div>
-            <p className="text-xs text-gray-500">Set in Focus step — go back to change</p>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>Set in Focus step — go back to change</p>
           </div>
         )}
       </div>
 
       <div>
-        <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <UserCheck className="w-6 h-6 text-indigo-400" />
+        <h3 className="text-xl mb-6 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+          <UserCheck className="w-6 h-6" style={{ color: 'var(--accent)' }} />
           Interview Level
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={() => setInterviewLevel('entry')}
-            className={`p-6 rounded-xl border-2 transition-all duration-200 text-left space-y-2 ${interviewLevel === 'entry'
-              ? 'border-green-500 bg-green-500/10 text-white'
-              : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
-              }`}
-          >
-            <div className="font-bold text-lg">New Hire / Entry</div>
-            <p className="text-sm opacity-80">
-              Focuses on foundational knowledge and core concepts.
-              Higher mix of beginner/intermediate questions.
-            </p>
-          </button>
-
-          <button
-            onClick={() => setInterviewLevel('experienced')}
-            className={`p-6 rounded-xl border-2 transition-all duration-200 text-left space-y-2 ${interviewLevel === 'experienced'
-              ? 'border-purple-500 bg-purple-500/10 text-white'
-              : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
-              }`}
-          >
-            <div className="font-bold text-lg">Experienced Hire</div>
-            <p className="text-sm opacity-80">
-              Focuses on system design, advanced concepts, and trade-offs.
-              Higher mix of intermediate/advanced questions.
-            </p>
-          </button>
+          {([
+            { value: 'entry' as const, title: 'New Hire / Entry', desc: 'Focuses on foundational knowledge and core concepts. Higher mix of beginner/intermediate questions.' },
+            { value: 'experienced' as const, title: 'Experienced Hire', desc: 'Focuses on system design, advanced concepts, and trade-offs. Higher mix of intermediate/advanced questions.' },
+          ]).map(({ value, title, desc }) => {
+            const selected = interviewLevel === value;
+            return (
+              <button
+                key={value}
+                onClick={() => setInterviewLevel(value)}
+                className="p-6 rounded-xl transition-all duration-200 text-left space-y-2"
+                style={{
+                  border: `2px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
+                  background: selected ? 'var(--highlight)' : 'var(--surface)',
+                  color: 'var(--ink)',
+                }}
+              >
+                <div className="font-bold text-lg" style={displayFont}>{title}</div>
+                <p className="text-sm" style={{ color: 'var(--muted)' }}>{desc}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="pt-4 flex justify-between">
         <button
           onClick={() => setSetupPhase(1)}
-          className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
+          className="btn-secondary-flat"
         >
           Back
         </button>
         <button
           onClick={() => setSetupPhase(3)}
-          className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors flex items-center gap-2"
+          className="btn-accent-flat flex items-center gap-2"
         >
-          Review & Confirm <ArrowRight className="w-5 h-5" />
+          Review &amp; Confirm <ArrowRight className="w-5 h-5" />
         </button>
       </div>
     </div>
@@ -758,53 +832,67 @@ export default function DashboardPage() {
 
   const renderPhase3 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-right duration-500">
-      <div className="glass-card rounded-2xl p-8 space-y-6">
-        <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <Check className="w-6 h-6 text-green-400" />
+      <div className="rounded-xl p-8 space-y-6" style={surfaceCardStyle}>
+        <h3 className="text-xl mb-6 flex items-center gap-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
+          <Check className="w-6 h-6" style={{ color: 'var(--success)' }} />
           Ready to Start?
         </h3>
 
         <div className="grid grid-cols-2 gap-y-4 text-sm">
-          <span className="text-gray-400">Assessment Type</span>
-          <span className="text-white font-medium">{assessmentType}</span>
+          <span style={{ color: 'var(--muted)' }}>Assessment Type</span>
+          <span className="font-medium" style={{ color: 'var(--ink)' }}>{assessmentType}</span>
 
-          <span className="text-gray-400">Target Level</span>
-          <span className="text-white font-medium capitalize">{interviewLevel} Hire</span>
+          <span style={{ color: 'var(--muted)' }}>Target Level</span>
+          <span className="font-medium capitalize" style={{ color: 'var(--ink)' }}>{interviewLevel} Hire</span>
 
-          <span className="text-gray-400">Candidate</span>
-          <span className="text-white font-medium">{candidateName || 'Not specified'}</span>
+          <span style={{ color: 'var(--muted)' }}>Candidate</span>
+          <span className="font-medium" style={{ color: 'var(--ink)' }}>{candidateName || 'Not specified'}</span>
 
           {associateSlug && (
             <>
-              <span className="text-gray-400">Associate ID</span>
-              <span className="text-white font-medium">{associateSlug}</span>
+              <span style={{ color: 'var(--muted)' }}>Associate ID</span>
+              <span className="font-medium" style={{ color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{associateSlug}</span>
             </>
           )}
 
-          <span className="text-gray-400">Questions</span>
-          <span className="text-white font-medium">{questionCount} (~{questionCount * 2} min)</span>
+          <span style={{ color: 'var(--muted)' }}>Questions</span>
+          <span className="font-medium" style={{ color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+            {questionCount} (~{questionCount * 2} min)
+          </span>
 
-          <span className="text-gray-400">Selected Techs</span>
-          <span className="text-white font-medium">
+          <span style={{ color: 'var(--muted)' }}>Selected Techs</span>
+          <span className="font-medium" style={{ color: 'var(--ink)' }}>
             {selectedTechs.map(t => t.path.replace('/question-bank-v1.md', '').replace('.md', '')).join(', ').substring(0, 60)}
             {selectedTechs.length > 3 ? '...' : ''}
           </span>
         </div>
 
         {loadingQuestions ? (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex items-center gap-3">
-            <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+          <div
+            className="rounded-xl p-4 flex items-center gap-3"
+            style={{
+              background: '#FEF3E0',
+              border: '1px solid var(--warning)',
+            }}
+          >
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--warning)' }} />
             <div className="flex-1">
-              <p className="text-blue-100 font-medium">Loading Questions...</p>
-              <p className="text-blue-300 text-sm">Fetching content from GitHub. This may take a moment.</p>
+              <p className="font-medium" style={{ color: 'var(--warning)' }}>Loading Questions...</p>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>Fetching content from GitHub. This may take a moment.</p>
             </div>
           </div>
         ) : (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
-            <Check className="w-5 h-5 text-green-400" />
+          <div
+            className="rounded-xl p-4 flex items-center gap-3"
+            style={{
+              background: '#E8F5EE',
+              border: '1px solid var(--success)',
+            }}
+          >
+            <Check className="w-5 h-5" style={{ color: 'var(--success)' }} />
             <div className="flex-1">
-              <p className="text-green-100 font-medium">Questions Ready ({loadedQuestions.length})</p>
-              <p className="text-green-300 text-sm">All selected banks have been loaded successfully.</p>
+              <p className="font-medium" style={{ color: 'var(--success)' }}>Questions Ready ({loadedQuestions.length})</p>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>All selected banks have been loaded successfully.</p>
             </div>
           </div>
         )}
@@ -813,14 +901,14 @@ export default function DashboardPage() {
       <div className="pt-4 flex justify-between">
         <button
           onClick={() => setSetupPhase(2)}
-          className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
+          className="btn-secondary-flat"
         >
           Back
         </button>
         <button
           onClick={handleStartInterview}
           disabled={loadingQuestions || loadedQuestions.length === 0 || !!slugError}
-          className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-2"
+          className="btn-accent-flat flex items-center gap-2"
         >
           {loadingQuestions ? 'Please Wait...' : 'Start Interview Now'}
           {!loadingQuestions && <ArrowRight className="w-5 h-5" />}
@@ -831,66 +919,96 @@ export default function DashboardPage() {
 
   // --- Main Render ---
 
+  const steps: { num: 1 | 2 | 3; label: string }[] = [
+    { num: 1, label: 'Focus' },
+    { num: 2, label: 'Details' },
+    { num: 3, label: 'Confirm' },
+  ];
+
   return (
-    <main className="min-h-screen nlm-bg flex flex-col">
+    <main className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col max-w-4xl">
 
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl mb-2" style={{ ...displayFont, fontWeight: 600, color: 'var(--ink)' }}>
             Interview Setup
           </h1>
 
-          {/* Progress Steps - Clickable */}
+          {/* Progress Steps - Clickable (flat, token-driven, no gradient bar) */}
           <div className="flex items-center justify-center gap-4 mt-6">
-            <button
-              onClick={() => setSetupPhase(1)}
-              className={`flex items-center gap-2 ${setupPhase >= 1 ? 'text-indigo-400' : 'text-gray-600'} hover:opacity-80 transition-opacity`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 ${setupPhase >= 1 ? 'border-indigo-400 bg-indigo-400/10' : 'border-gray-600'} ${setupPhase === 1 ? 'ring-2 ring-indigo-400/50' : ''}`}>1</div>
-              <span className="hidden sm:inline font-medium">Focus</span>
-            </button>
-            <div className={`w-12 h-0.5 ${setupPhase >= 2 ? 'bg-indigo-400' : 'bg-gray-700'}`} />
-            <button
-              onClick={() => setSetupPhase(2)}
-              className={`flex items-center gap-2 ${setupPhase >= 2 ? 'text-indigo-400' : 'text-gray-600'} hover:opacity-80 transition-opacity`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 ${setupPhase >= 2 ? 'border-indigo-400 bg-indigo-400/10' : 'border-gray-600'} ${setupPhase === 2 ? 'ring-2 ring-indigo-400/50' : ''}`}>2</div>
-              <span className="hidden sm:inline font-medium">Details</span>
-            </button>
-            <div className={`w-12 h-0.5 ${setupPhase >= 3 ? 'bg-indigo-400' : 'bg-gray-700'}`} />
-            <button
-              onClick={() => setSetupPhase(3)}
-              className={`flex items-center gap-2 ${setupPhase >= 3 ? 'text-indigo-400' : 'text-gray-600'} hover:opacity-80 transition-opacity`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 ${setupPhase >= 3 ? 'border-indigo-400 bg-indigo-400/10' : 'border-gray-600'} ${setupPhase === 3 ? 'ring-2 ring-indigo-400/50' : ''}`}>3</div>
-              <span className="hidden sm:inline font-medium">Confirm</span>
-            </button>
+            {steps.map((s, idx) => {
+              const active = setupPhase >= s.num;
+              const current = setupPhase === s.num;
+              return (
+                <div key={s.num} className="flex items-center gap-4">
+                  <button
+                    onClick={() => setSetupPhase(s.num)}
+                    className="flex items-center gap-2 transition-opacity hover:opacity-80"
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                      style={{
+                        border: `2px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                        background: active ? 'var(--highlight)' : 'var(--surface)',
+                        color: active ? 'var(--accent)' : 'var(--muted)',
+                        outline: current ? '2px solid var(--accent)' : 'none',
+                        outlineOffset: current ? '2px' : undefined,
+                        fontFamily: 'var(--font-mono)',
+                      }}
+                    >
+                      {s.num}
+                    </div>
+                    <span
+                      className="hidden sm:inline text-xs font-medium"
+                      style={{ ...monoLabel, color: active ? 'var(--accent)' : 'var(--muted)' }}
+                    >
+                      {s.label}
+                    </span>
+                  </button>
+                  {idx < steps.length - 1 && (
+                    <div
+                      className="w-12 h-px"
+                      style={{ background: setupPhase > s.num ? 'var(--accent)' : 'var(--border)' }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Previous Active Session Banner */}
         {session && (session.status === 'in-progress' || session.status === 'review') && (
-          <div className={`mb-8 border rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2 ${session.status === 'review'
-            ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-500/30'
-            : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/30'
-            }`}>
+          <div
+            className="mb-8 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2"
+            style={{
+              background: session.status === 'review' ? 'var(--highlight)' : '#FEF3E0',
+              border: `1px solid ${session.status === 'review' ? 'var(--accent)' : 'var(--warning)'}`,
+            }}
+          >
             <div>
-              <h3 className={`font-semibold ${session.status === 'review' ? 'text-indigo-100' : 'text-amber-100'}`}>
+              <h3
+                className="font-semibold"
+                style={{ color: session.status === 'review' ? 'var(--accent)' : 'var(--warning)' }}
+              >
                 {session.status === 'review' ? 'Review In Progress' : 'Active Session in Progress'}
               </h3>
-              <p className={`text-sm ${session.status === 'review' ? 'text-indigo-200/70' : 'text-amber-200/70'}`}>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>
                 {session.candidateName || 'Unnamed'} • {session.status === 'review' ? 'Awaiting score validation' : `Q${session.currentQuestionIndex + 1}`}
               </p>
             </div>
             <div className="flex gap-3">
-              <button onClick={resetSession} className={`text-sm px-3 py-1 ${session.status === 'review' ? 'text-indigo-200 hover:text-white' : 'text-amber-200 hover:text-white'}`}>Discard</button>
+              <button
+                onClick={resetSession}
+                className="text-sm px-3 py-1"
+                style={{ color: 'var(--muted)' }}
+              >
+                Discard
+              </button>
               <button
                 onClick={() => router.push(session.status === 'review' ? '/review' : '/interview')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${session.status === 'review'
-                  ? 'bg-indigo-500 hover:bg-indigo-400'
-                  : 'bg-amber-500 hover:bg-amber-400'
-                  }`}
+                className="btn-accent-flat"
               >
                 {session.status === 'review' ? 'Resume Review' : 'Resume'}
               </button>
@@ -899,7 +1017,10 @@ export default function DashboardPage() {
         )}
 
         {/* Wizard Card */}
-        <div className="glass-card-strong rounded-3xl overflow-hidden flex-1 flex flex-col border border-white/10">
+        <div
+          className="rounded-xl overflow-hidden flex-1 flex flex-col"
+          style={surfaceCardStyle}
+        >
           <div className="p-8 flex-1">
             {setupPhase === 1 && renderPhase1()}
             {setupPhase === 2 && renderPhase2()}
