@@ -6,7 +6,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (password: string) => Promise<boolean>;
-    logout: () => void;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,11 +65,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
-        // Fire-and-forget cookie clear. Local state flips immediately so the
-        // navbar updates without waiting for the round-trip; the cookie clear
-        // ensures a stale cookie can't survive and re-trigger /signin -> /trainer.
-        void fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
+    const logout = async () => {
+        // MUST await — navigation after logout will hit /signin which checks
+        // the cookie server-side. If the cookie clear hasn't landed, /signin
+        // redirects back to /trainer, looking like sign-out 'didn't work'.
+        try {
+            await fetch('/api/auth', { method: 'DELETE' });
+        } catch {
+            // ignore — proceed to local clear regardless
+        }
         localStorage.removeItem(AUTH_KEY);
         setIsAuthenticated(false);
     };

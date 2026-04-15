@@ -87,8 +87,8 @@ export default function Navbar() {
         return pathname === item.href;
     };
 
-    const handleTrainerLogout = () => {
-        logout();
+    const handleTrainerLogout = async () => {
+        await logout();
         window.location.href = '/signin';
     };
 
