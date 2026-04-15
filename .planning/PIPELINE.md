@@ -1,43 +1,80 @@
 # Pipeline Status
 
-## Current Run
-- Started: 2026-04-14
-- Current stage: PIPELINE COMPLETE — v1.1 shipped (PR #3 / 4238e36), tag v1.1 pushed. Reflect + maintain skipped by user choice. Resume routes to /gsd-new-milestone for v1.2 scoping.
-- Mode: autonomous
-- Previous: v1.0 pipeline completed 2026-04-14
+## Current Run — v1.2
+- Started: 2026-04-15
+- Current stage: DISCOVER in progress — milestone scoped via `/gsd-new-milestone`. PROJECT.md + STATE.md updated + committed (`443d804`). Paused at research decision (4-agent research vs skip).
+- Mode: interactive
+- Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
-## Stages
+## Resume Point
+
+Next action on resume: answer research decision — run 4 parallel researchers (Stack/Features/Architecture/Pitfalls) or skip to requirements gathering.
+
+Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
+
+## v1.2 Milestone Scope (locked 2026-04-15)
+
+**Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
+
+**Features:**
+- **A. Trainer Analytics + Reporting** — KPI strip, cohort trends, sparklines in roster, skill gap aggregation, PDF export
+- **B. Dashboard Redesign** — topbar + sidebar layout per `finalized.html` (Overview: Roster/Gap Analysis/Calibration; Actions: New Mock/Reports), KPI cards, enhanced roster, sidebar routes
+- **C. Associate Dashboard Upgrade** — self-view gap trends, recommended next practice area, goals/streaks, book-next-mock action
+- **D. Full Supabase Auth + Bulk Onboarding** — trainer email/password (or OAuth), associate magic link, bulk invite flow (comma-sep emails → cohort + curriculum assignment → magic-link send), migrate Associate → `auth.users` FK, RLS on Session/GapScore/Cohort/CurriculumWeek, full cutover (remove PIN system + `ENABLE_ASSOCIATE_AUTH` flag)
+- **E. Cached Question-Bank Manifest** — TTL or hash invalidation
+
+**Deferred to v1.3 (CI/CD milestone):** prod deploy automation, readiness sweep cron, dark-mode visual QA, Nyquist validation backfill.
+
+**Design reference:** `~/.gstack/projects/JesterCharles-mock-interview-assist/designs/design-system-20260413/finalized.html`
+
+## Stages (v1.2)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| discover | done | 2026-04-14 | 2026-04-14 | Office hours complete. Startup mode. Cohort Readiness System (v1.1) APPROVED. Codex cold read contributed. 3 rounds adversarial review (30 issues fixed). |
-| init | done | 2026-04-14 | 2026-04-14 | Codebase mapped (7 docs), intel generated (5 files), health baseline 8.4/10, dev profile created. Deploy config pending user input. |
-| design | pending | | | |
-| plan | done | 2026-04-14 | 2026-04-14 | All 7 phases planned (18 PLAN.md + 7 CONTEXT.md). Autoplan=HIGH 8.5/10. Codex=MEDIUM, 9 findings. All 9 patched per user approval. Taste gate CLOSED. |
-| execute | done | 2026-04-14 | 2026-04-14 | All 7 phases (8-14) complete, 18/18 plans. Phase 14 verified 4/4 SC (DESIGN-01/02 satisfied). Legacy utilities preserved per Codex finding #8. |
-| review | per-phase | 2026-04-14 | | Phase 11 REVIEW: 0 BLK/0 HI/4 MED/8 LO/4 INFO. 7 in-scope findings fixed. REVIEW-FIX.md committed. |
-| test | per-phase | 2026-04-14 | | Phase 11 VALIDATION: 40/40 green. Full suite 199/199 + 4 skipped. typecheck clean. |
+| discover | in_progress | 2026-04-15 | | Milestone scoped, PROJECT.md + STATE.md committed. Research decision pending. |
+| init | pending | | | Codebase + intel from v1.1 still current; may skip remap. |
+| design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase for UI-SPEC per frontend phase. |
+| plan | pending | | | |
+| execute | pending | | | |
+| review | pending | | | |
+| test | pending | | | |
 | debug | pending | | | |
 | optimize | pending | | | |
-| ship | done | 2026-04-14 | 2026-04-14 | PR #3 merged 4238e36. Codex gate: initial FAIL (2xP1 + 3xP2), fixed in 21187f9, re-merged. Deploy deferred to v1.2 per user. Tag v1.1 local (not pushed). |
-| reflect | skipped | 2026-04-14 | 2026-04-14 | Deferred — user opted to route directly to v1.2 scoping on resume. Run /pipeline-reflect manually if retro desired later. |
-| maintain | skipped | 2026-04-14 | 2026-04-14 | Deferred to v1.2 cycle. |
+| ship | pending | | | |
+| reflect | pending | | | |
+| maintain | pending | | | |
 
-## HITL Gates
+## HITL Gates (v1.2)
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
-| Design selection | design | sync | pending | |
-| Taste decisions | plan | async | closed | Option A: accept all 9 Codex findings → plans patched |
+| Research yes/no | discover | sync | **pending — resume here** | |
+| Requirements approval | discover | sync | pending | |
+| Roadmap approval | discover | sync | pending | |
+| Design selection | design | sync | pending | finalized.html already locked; expect light ui-phase pass |
+| Taste decisions | plan | async | pending | |
 | Review findings | review | async | pending | |
 | Merge approval | ship | sync | pending | |
 | Milestone closure | ship | async | pending | |
 
-## Artifacts
-- PIPELINE-DISCOVER: ~/.gstack/projects/JesterCharles-mock-interview-assist/jestercharles-main-design-20260414-073736.md (APPROVED)
-- PIPELINE-INIT: .planning/PIPELINE-INIT.md
-- Research: .planning/research/ (STACK, FEATURES, ARCHITECTURE, PITFALLS, SUMMARY)
-- Requirements: .planning/REQUIREMENTS.md (14 reqs for v1.1)
-- Roadmap: .planning/ROADMAP.md (Phases 8-14)
-- Plans: .planning/phases/0{8,9}-*, 1{0,1,2,3,4}-* (18 PLAN.md + 7 CONTEXT.md)
-- PIPELINE-PLAN-AUTOPLAN: .planning/PIPELINE-PLAN-AUTOPLAN.md (HIGH 8.5/10)
-- PIPELINE-PLAN-CODEX: .planning/PIPELINE-PLAN-CODEX.md (MEDIUM, 9 findings)
-- PIPELINE-PLAN-FIXES: .planning/PIPELINE-PLAN-FIXES.md (all 9 patched)
+## Artifacts (v1.2)
+- PROJECT.md (updated 2026-04-15)
+- STATE.md (updated 2026-04-15)
+- `finalized.html` (design ref, external)
+- Previous milestone archives: `.planning/milestones/v1.1-*`
+
+---
+
+## v1.1 Archive (completed)
+
+Shipped 2026-04-14 (PR #3 / `4238e36`), tag `v1.1`. Reflect + maintain skipped by user choice. Full history in `.planning/milestones/v1.1-*` + `.planning/reports/MILESTONE_SUMMARY-v1.1.md`.
+
+| Stage | Status | Notes |
+|-------|--------|-------|
+| discover | done | Cohort Readiness System approved. Office hours + codex cold read + 3 rounds adversarial. |
+| init | done | Codebase map (7 docs), intel (5 files), health 8.4/10, dev profile. |
+| plan | done | 7 phases, 18 PLAN.md + 7 CONTEXT.md. Autoplan HIGH 8.5/10. Codex MEDIUM 9 findings, all patched. |
+| execute | done | 7 phases (8-14), 18/18 plans. Phase 14 4/4 SC. |
+| review | per-phase | Phase 11: 0 BLK/0 HI/4 MED/8 LO/4 INFO. 7 fixed. |
+| test | per-phase | Phase 11: 40/40 green. Full suite 199/199 + 4 skipped. |
+| ship | done | PR #3 merged 4238e36. Codex initial FAIL (2xP1 + 3xP2) → fixed 21187f9 → re-merged. |
+| reflect | skipped | Deferred — user routed to v1.2. |
+| maintain | skipped | Deferred to v1.2 cycle. |
