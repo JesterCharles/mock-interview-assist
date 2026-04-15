@@ -1,40 +1,14 @@
 @import "tailwindcss";
 
 /* ========================================
-   Next Level Mock - Design System
+   Next Level Mock — Unified Design System
+   DESIGN.md is the single source of truth.
+   Phase 15-04: legacy tokens, glass/gradient/glow utilities,
+   and kill-list keyframes removed.
    ======================================== */
 
 :root {
-  /* Brand Colors */
-  --nlm-primary: #6366f1;       /* Indigo-500 */
-  --nlm-primary-light: #818cf8; /* Indigo-400 */
-  --nlm-accent: #06b6d4;        /* Cyan-500 */
-  --nlm-accent-light: #22d3ee;  /* Cyan-400 */
-  --nlm-teal: #14b8a6;          /* Teal-500 */
-  --nlm-purple: #a855f7;        /* Purple-500 */
-  --nlm-success: #10b981;       /* Emerald-500 */
-  --nlm-warning: #f59e0b;       /* Amber-500 */
-  --nlm-danger: #ef4444;        /* Red-500 */
-
-  /* Surfaces */
-  --nlm-bg-primary: #0f1525;
-  --nlm-bg-secondary: #151d2e;
-  --nlm-bg-card: rgba(21, 29, 46, 0.7);
-  --nlm-bg-glass: rgba(21, 29, 46, 0.55);
-  --nlm-border: rgba(148, 163, 184, 0.16);
-  --nlm-border-glow: rgba(99, 102, 241, 0.3);
-
-  /* Typography */
-  --background: #0f1525;
-  --foreground: #e2e8f0;
-
-  /* ========================================
-     DESIGN.md Tokens (Phase 14)
-     ADDED ALONGSIDE legacy --nlm-* tokens (Codex finding #8)
-     Consumed by NEW routes: trainer login, /associate/login,
-     /associate/[slug], /associate/[slug]/interview.
-     Legacy /, /interview, /review continue using --nlm-* tokens.
-     ======================================== */
+  /* DESIGN.md tokens — light (default) */
   --bg: #F5F0E8;
   --surface: #FFFFFF;
   --surface-muted: #F0EBE2;
@@ -69,12 +43,7 @@
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
-
-  /* DESIGN.md token mappings for Tailwind utilities (Phase 14) */
+  /* DESIGN.md token mappings for Tailwind utilities */
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
@@ -90,6 +59,7 @@
   --color-highlight: var(--highlight);
   --font-display: var(--font-clash-display);
   --font-sans-new: var(--font-dm-sans);
+  --font-jetbrains-mono: var(--font-jetbrains-mono);
 }
 
 /* ========================================
@@ -101,46 +71,21 @@ html {
 }
 
 body {
-  background: var(--nlm-bg-primary);
-  color: var(--foreground);
-  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
+  background: var(--accent);
   color: #fff;
 }
 
 /* ========================================
-   Keyframe Animations
+   Keyframe Animations (DESIGN.md §Motion — subtle only)
    ======================================== */
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3), 0 0 20px rgba(99, 102, 241, 0.1); }
-  50% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes recording-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-}
 
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(12px); }
@@ -152,69 +97,9 @@ body {
   to { opacity: 1; }
 }
 
-@keyframes progress-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(6, 182, 212, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.6); }
-}
-
-@keyframes border-glow-pulse {
-  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
-  50% { border-color: rgba(99, 102, 241, 0.6); }
-}
-
 /* ========================================
    Utility Classes
    ======================================== */
-
-.glass-card {
-  background: rgba(21, 31, 52, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 1rem;
-}
-
-.glass-card-strong {
-  background: rgba(24, 34, 56, 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 1rem;
-}
-
-.glow-border {
-  border: 1px solid var(--nlm-border-glow);
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.1), inset 0 0 15px rgba(99, 102, 241, 0.05);
-}
-
-.glow-border-cyan {
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.1), inset 0 0 15px rgba(6, 182, 212, 0.05);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, var(--nlm-accent-light), var(--nlm-primary-light), var(--nlm-purple));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 4s ease infinite;
-}
-
-.gradient-text-static {
-  background: linear-gradient(135deg, var(--nlm-accent-light), var(--nlm-primary-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hover-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-}
 
 .animate-slide-up {
   animation: slide-up 0.4s ease-out;
@@ -224,83 +109,24 @@ body {
   animation: fade-in 0.3s ease-out;
 }
 
-.shimmer-bg {
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.05) 25%, rgba(148, 163, 184, 0.12) 50%, rgba(148, 163, 184, 0.05) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
-}
-
-.recording-ring {
-  animation: recording-pulse 1.5s ease infinite;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--nlm-primary), var(--nlm-purple));
-  color: white;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
-}
-.btn-primary:hover {
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4), 0 8px 32px rgba(99, 102, 241, 0.2);
-  transform: translateY(-1px);
-}
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-accent {
-  background: linear-gradient(135deg, var(--nlm-accent), var(--nlm-teal));
-  color: white;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: all 0.25s ease;
-}
-.btn-accent:hover {
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.4), 0 8px 32px rgba(6, 182, 212, 0.2);
-  transform: translateY(-1px);
-}
-
-/* Animated background for main pages */
-.nlm-bg {
-  background: linear-gradient(135deg, #0f1525 0%, #131c30 25%, #1a1335 50%, #131c30 75%, #0f1525 100%);
-  background-size: 400% 400%;
-  animation: gradient-shift 15s ease infinite;
-  min-height: 100vh;
-}
-
-/* Progress bar gradient */
-.progress-gradient {
-  background: linear-gradient(90deg, var(--nlm-accent), var(--nlm-primary), var(--nlm-purple));
-  background-size: 200% 100%;
-  animation: gradient-shift 3s ease infinite;
-}
-
-/* Scrollbar styling */
+/* Scrollbar styling — neutral parchment palette */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--surface-muted);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
+  background: var(--border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+  background: var(--muted);
 }
 
 /* ========================================
-   Phase 14 — DESIGN.md New Button Classes
-   ADDED alongside legacy .btn-primary / .btn-accent.
-   Used by NEW routes only.
+   DESIGN.md Button System
    ======================================== */
 .btn-accent-flat {
   background: var(--accent);
