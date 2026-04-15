@@ -71,7 +71,7 @@ export default async function AssociateLoginPage({ searchParams }: PageProps) {
             lineHeight: 1.5,
           }}
         >
-          Use the slug and 6-digit PIN your trainer provided.
+          Enter the 6-digit PIN your trainer gave you.
         </p>
         <PinEntryForm nextPath={nextPath} />
       </div>

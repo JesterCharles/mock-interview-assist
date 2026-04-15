@@ -16,7 +16,6 @@ interface PinEntryFormProps {
 
 export function PinEntryForm({ nextPath }: PinEntryFormProps) {
   const router = useRouter();
-  const [slug, setSlug] = useState('');
   const [pin, setPin] = useState('');
   const [fingerprint, setFingerprint] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
@@ -43,11 +42,6 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
     if (submitting) return;
     setError(null);
 
-    const trimmedSlug = slug.trim();
-    if (!trimmedSlug) {
-      setError('Slug is required.');
-      return;
-    }
     if (!/^\d{6}$/.test(pin)) {
       setError('PIN must be 6 digits.');
       return;
@@ -62,11 +56,14 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
       const res = await fetch('/api/associate/pin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: trimmedSlug, pin, fingerprint }),
+        body: JSON.stringify({ pin, fingerprint }),
       });
 
       if (res.ok) {
-        const dest = nextPath ?? `/associate/${trimmedSlug}`;
+        const data = (await res.json().catch(() => ({}))) as { slug?: string };
+        const slug = data.slug ?? '';
+        // Redirect straight into the interview, not the profile page (15-02 UX fix).
+        const dest = nextPath ?? (slug ? `/associate/${slug}/interview` : '/');
         router.replace(dest);
         router.refresh();
         return;
@@ -89,44 +86,6 @@ export function PinEntryForm({ nextPath }: PinEntryFormProps) {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div style={{ marginBottom: '20px' }}>
-        <label
-          htmlFor="associate-slug"
-          style={{
-            display: 'block',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: 'var(--ink)',
-            marginBottom: '6px',
-          }}
-        >
-          Associate slug
-        </label>
-        <input
-          id="associate-slug"
-          type="text"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-          disabled={submitting}
-          required
-          style={{
-            width: '100%',
-            padding: '10px 14px',
-            fontSize: '14px',
-            fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
-            color: 'var(--ink)',
-            backgroundColor: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            outline: 'none',
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
-
       <div style={{ marginBottom: '24px' }}>
         <label
           htmlFor="associate-pin"

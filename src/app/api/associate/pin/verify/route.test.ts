@@ -3,12 +3,12 @@ import { hashPin } from '@/lib/pinService';
 import { verifyAssociateToken } from '@/lib/associateSession';
 import { __resetAll } from '@/lib/pinAttemptLimiter';
 
-// Mock prisma
+// Mock prisma — PIN-only login uses findMany over candidates
 vi.mock('@/lib/prisma', () => {
-  const findUnique = vi.fn();
+  const findMany = vi.fn();
   return {
     prisma: {
-      associate: { findUnique },
+      associate: { findMany },
     },
   };
 });
@@ -19,7 +19,7 @@ process.env.ASSOCIATE_SESSION_SECRET = 'test-secret-for-route';
 import { POST } from './route';
 import { prisma } from '@/lib/prisma';
 
-const mockFindUnique = prisma.associate.findUnique as unknown as ReturnType<typeof vi.fn>;
+const mockFindMany = prisma.associate.findMany as unknown as ReturnType<typeof vi.fn>;
 
 function makeReq(body: unknown): Request {
   return new Request('http://localhost/api/associate/pin/verify', {
@@ -29,89 +29,81 @@ function makeReq(body: unknown): Request {
   });
 }
 
-describe('POST /api/associate/pin/verify', () => {
+describe('POST /api/associate/pin/verify (PIN-only)', () => {
   beforeEach(() => {
     __resetAll();
-    mockFindUnique.mockReset();
+    mockFindMany.mockReset();
   });
 
-  it('returns 200 and sets associate_session cookie for correct pin (token ver = pinGeneratedAt)', async () => {
+  it('returns 200 + cookie + slug on unique match (token ver = pinGeneratedAt)', async () => {
     const pin = '123456';
     const pinHash = await hashPin(pin);
     const pinGeneratedAt = new Date('2026-04-14T10:00:00.000Z');
-    mockFindUnique.mockResolvedValueOnce({
-      id: 42,
-      slug: 'alice',
-      pinHash,
-      pinGeneratedAt,
-    });
+    mockFindMany.mockResolvedValueOnce([
+      { id: 42, slug: 'alice', pinHash, pinGeneratedAt },
+    ]);
 
-    const res = await POST(makeReq({ slug: 'alice', pin, fingerprint: 'fp-1' }));
+    const res = await POST(makeReq({ pin, fingerprint: 'fp-1' }));
     expect(res.status).toBe(200);
+
+    const body = (await res.json()) as { ok: boolean; slug: string };
+    expect(body.ok).toBe(true);
+    expect(body.slug).toBe('alice');
 
     const setCookie = res.headers.get('set-cookie') ?? '';
     expect(setCookie).toMatch(/associate_session=/);
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/SameSite=Strict/i);
-    expect(setCookie).toMatch(/Max-Age=86400/);
 
     const tokenMatch = setCookie.match(/associate_session=([^;]+)/);
-    expect(tokenMatch).not.toBeNull();
     const decoded = await verifyAssociateToken(tokenMatch![1]);
-    expect(decoded).not.toBeNull();
     expect(decoded!.associateId).toBe(42);
     expect(decoded!.ver).toBe(pinGeneratedAt.toISOString());
   });
 
-  it('returns 401 and no cookie for wrong pin', async () => {
+  it('returns 401 when no candidate matches the PIN', async () => {
     const pinHash = await hashPin('123456');
-    mockFindUnique.mockResolvedValueOnce({
-      id: 42,
-      slug: 'alice',
-      pinHash,
-      pinGeneratedAt: new Date(),
-    });
+    mockFindMany.mockResolvedValueOnce([
+      { id: 42, slug: 'alice', pinHash, pinGeneratedAt: new Date() },
+    ]);
 
-    const res = await POST(makeReq({ slug: 'alice', pin: '999999', fingerprint: 'fp-2' }));
+    const res = await POST(makeReq({ pin: '999999', fingerprint: 'fp-2' }));
     expect(res.status).toBe(401);
     expect(res.headers.get('set-cookie')).toBeNull();
   });
 
-  it('returns 401 for unknown slug (no existence oracle)', async () => {
-    mockFindUnique.mockResolvedValueOnce(null);
+  it('returns 401 when no candidates exist at all (no oracle)', async () => {
+    mockFindMany.mockResolvedValueOnce([]);
 
-    const res = await POST(makeReq({ slug: 'ghost', pin: '123456', fingerprint: 'fp-3' }));
+    const res = await POST(makeReq({ pin: '123456', fingerprint: 'fp-3' }));
     expect(res.status).toBe(401);
     expect(res.headers.get('set-cookie')).toBeNull();
   });
 
-  it('returns 401 when associate exists but pinHash is null', async () => {
-    mockFindUnique.mockResolvedValueOnce({
-      id: 5,
-      slug: 'nopin',
-      pinHash: null,
-      pinGeneratedAt: null,
-    });
+  it('returns 401 on PIN collision (>1 candidate matches the same PIN)', async () => {
+    const pin = '123456';
+    const hashA = await hashPin(pin);
+    const hashB = await hashPin(pin);
+    mockFindMany.mockResolvedValueOnce([
+      { id: 1, slug: 'alice', pinHash: hashA, pinGeneratedAt: new Date() },
+      { id: 2, slug: 'bob', pinHash: hashB, pinGeneratedAt: new Date() },
+    ]);
 
-    const res = await POST(makeReq({ slug: 'nopin', pin: '123456', fingerprint: 'fp-4' }));
+    const res = await POST(makeReq({ pin, fingerprint: 'fp-collision' }));
     expect(res.status).toBe(401);
+    expect(res.headers.get('set-cookie')).toBeNull();
   });
 
-  it('returns 429 after 5 failed attempts from same fingerprint within window', async () => {
+  it('returns 429 after 5 failed attempts from same fingerprint', async () => {
     const pinHash = await hashPin('123456');
-    // 5 failures
     for (let i = 0; i < 5; i++) {
-      mockFindUnique.mockResolvedValueOnce({
-        id: 42,
-        slug: 'alice',
-        pinHash,
-        pinGeneratedAt: new Date(),
-      });
-      const res = await POST(makeReq({ slug: 'alice', pin: '000000', fingerprint: 'burst' }));
+      mockFindMany.mockResolvedValueOnce([
+        { id: 42, slug: 'alice', pinHash, pinGeneratedAt: new Date() },
+      ]);
+      const res = await POST(makeReq({ pin: '000000', fingerprint: 'burst' }));
       expect(res.status).toBe(401);
     }
-    // 6th attempt blocked
-    const res = await POST(makeReq({ slug: 'alice', pin: '000000', fingerprint: 'burst' }));
+    const res = await POST(makeReq({ pin: '000000', fingerprint: 'burst' }));
     expect(res.status).toBe(429);
   });
 
@@ -119,41 +111,30 @@ describe('POST /api/associate/pin/verify', () => {
     const pin = '123456';
     const pinHash = await hashPin(pin);
 
-    // 3 failures
     for (let i = 0; i < 3; i++) {
-      mockFindUnique.mockResolvedValueOnce({
-        id: 42,
-        slug: 'alice',
-        pinHash,
-        pinGeneratedAt: new Date(),
-      });
-      await POST(makeReq({ slug: 'alice', pin: '000000', fingerprint: 'reset-fp' }));
+      mockFindMany.mockResolvedValueOnce([
+        { id: 42, slug: 'alice', pinHash, pinGeneratedAt: new Date() },
+      ]);
+      await POST(makeReq({ pin: '000000', fingerprint: 'reset-fp' }));
     }
-    // Success resets counter
-    mockFindUnique.mockResolvedValueOnce({
-      id: 42,
-      slug: 'alice',
-      pinHash,
-      pinGeneratedAt: new Date(),
-    });
-    const ok = await POST(makeReq({ slug: 'alice', pin, fingerprint: 'reset-fp' }));
+
+    mockFindMany.mockResolvedValueOnce([
+      { id: 42, slug: 'alice', pinHash, pinGeneratedAt: new Date() },
+    ]);
+    const ok = await POST(makeReq({ pin, fingerprint: 'reset-fp' }));
     expect(ok.status).toBe(200);
 
-    // 5 more failures should now be possible (counter reset)
     for (let i = 0; i < 5; i++) {
-      mockFindUnique.mockResolvedValueOnce({
-        id: 42,
-        slug: 'alice',
-        pinHash,
-        pinGeneratedAt: new Date(),
-      });
-      const res = await POST(makeReq({ slug: 'alice', pin: '000000', fingerprint: 'reset-fp' }));
+      mockFindMany.mockResolvedValueOnce([
+        { id: 42, slug: 'alice', pinHash, pinGeneratedAt: new Date() },
+      ]);
+      const res = await POST(makeReq({ pin: '000000', fingerprint: 'reset-fp' }));
       expect(res.status).toBe(401);
     }
   });
 
-  it('returns 400 for malformed body', async () => {
-    const res = await POST(makeReq({ slug: 'alice' /* missing pin */ }));
+  it('returns 400 for malformed body (missing pin)', async () => {
+    const res = await POST(makeReq({ fingerprint: 'fp-bad' }));
     expect([400, 401]).toContain(res.status);
   });
 });

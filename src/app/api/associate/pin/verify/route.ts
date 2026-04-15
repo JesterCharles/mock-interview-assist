@@ -10,14 +10,13 @@ import {
 } from '@/lib/pinAttemptLimiter';
 
 const BodySchema = z.object({
-  slug: z.string().min(1).max(200),
   pin: z.string().regex(/^\d{6}$/),
   fingerprint: z.string().min(1).max(200),
 });
 
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24h
 
-// Identical 401 for wrong-pin, unknown-slug, null-pinHash — no existence oracle.
+// Identical 401 for wrong-pin / no-match / collision — no existence oracle.
 function unauthorized(): NextResponse {
   return NextResponse.json({ ok: false }, { status: 401 });
 }
@@ -33,7 +32,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: 'invalid_body' }, { status: 400 });
   }
-  const { slug, pin, fingerprint } = parsed.data;
+  const { pin, fingerprint } = parsed.data;
 
   if (isRateLimited(fingerprint)) {
     return NextResponse.json(
@@ -42,18 +41,30 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  const associate = await prisma.associate.findUnique({
-    where: { slug },
+  // PIN-only login (15-02 UX fix). Look up across all associates with an
+  // active PIN. At trainer-managed scale (low hundreds) iterating bcrypt
+  // compares is acceptable; rate limiter bounds brute force per fingerprint.
+  // Collision handling: if two associates somehow share the same PIN, both
+  // matches are rejected (return 401) — trainer must regenerate one.
+  const candidates = await prisma.associate.findMany({
+    where: { pinHash: { not: null }, pinGeneratedAt: { not: null } },
     select: { id: true, slug: true, pinHash: true, pinGeneratedAt: true },
   });
 
-  if (!associate || !associate.pinHash || !associate.pinGeneratedAt) {
+  const matches: Array<typeof candidates[number]> = [];
+  for (const c of candidates) {
+    if (!c.pinHash || !c.pinGeneratedAt) continue;
+    // eslint-disable-next-line no-await-in-loop -- sequential compare is fine at this scale
+    const ok = await verifyPin(pin, c.pinHash);
+    if (ok) matches.push(c);
+  }
+
+  if (matches.length !== 1) {
     recordFailure(fingerprint);
     return unauthorized();
   }
-
-  const ok = await verifyPin(pin, associate.pinHash);
-  if (!ok) {
+  const associate = matches[0];
+  if (!associate.pinGeneratedAt) {
     recordFailure(fingerprint);
     return unauthorized();
   }

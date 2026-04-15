@@ -300,6 +300,18 @@ export default async function AssociateProfilePage({ params }: PageProps) {
         {readiness && (
           <ReadinessSignal score={readiness.score} trend={readiness.trend} size="lg" />
         )}
+
+        {/* Primary action — start an automated interview */}
+        <div style={{ marginTop: '24px' }}>
+          <Link
+            href={`/associate/${associate.slug}/interview`}
+            className="btn-accent-flat"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            Start mock interview
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
       </header>
 
       {/* Session list */}
