@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Next Level Mock — an adaptive technical skills development platform built with Next.js 16 (App Router). Features trainer-led and AI-automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email. The Readiness Loop MVP adds persistent gap tracking per associate, readiness classification (ready/improving/not_ready), a trainer dashboard with roster and trend charts, and adaptive interview setup that pre-populates tech weights based on past performance.
+Next Level Mock — an adaptive technical skills development platform built with Next.js 16 (App Router). Features trainer-led and AI-automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email. The Readiness Loop MVP added persistent gap tracking per associate, readiness classification (ready/improving/not_ready), a trainer dashboard with roster and trend charts, and adaptive interview setup that pre-populates tech weights based on past performance. v1.1 (Cohort Readiness System) added cohort management + per-week curriculum, a curriculum-aware setup filter, a unified role-aware Navbar + `/signin`, a feature-gated PIN-based associate flow, a unified design system (see `DESIGN.md`), and a background readiness sweep.
 
 ## Commands
 
@@ -23,14 +23,19 @@ Docker: `docker compose up` (uses `.env.docker`, maps port 80 → 3000).
 
 ### Interview Flow
 
-1. **Dashboard** (`/dashboard`) — Setup wizard (3 phases): configure GitHub repo → select technologies with weights → set question count and candidate info. Includes associate slug input for identity tracking. When an associate has 3+ sessions, tech weights are adaptively pre-populated from gap scores (weakest skills get highest weights).
+1. **Setup wizard** (`/interview/new`) — 3 phases: configure GitHub repo → select technologies with weights → set question count and candidate info. Associate slug input drives identity tracking. When an associate has 3+ sessions, tech weights are adaptively pre-populated from gap scores (weakest skills get highest weights). When the associate is assigned to a cohort, the tech list is filtered by cohort curriculum (taught `skillSlug` values). `/dashboard` is a legacy redirect to `/interview/new`.
 2. **Interview** (`/interview`) — Trainer conducts interview: 2 starter/behavioral questions → N technical questions with voice input (Web Speech API), keyword tracking, soft skills assessment
 3. **Review** (`/review`) — Validate/override LLM scores, edit assessments
-4. **Completion** — Generate PDF report (`@react-pdf/renderer`), send via Resend email. Session is dual-written to file storage and Supabase, gap scores are computed, and readiness status is recomputed for the associate.
-5. **Trainer Dashboard** (`/trainer`) — Roster view of all associates with readiness badges, sortable table, search. Drill into `/trainer/[slug]` for session history, gap trend charts (recharts), skill filtering, and score calibration view.
-6. **Associate Profile** (`/associate/[slug]`) — Server-rendered public profile showing session history and readiness status.
+4. **Completion** — Generate PDF report (`@react-pdf/renderer`), send via Resend email. Session is dual-written to file storage and Supabase with `Session.mode` set (`trainer-led` or `automated`), gap scores are computed, and readiness status is recomputed for the associate.
+5. **Trainer dashboard** (`/trainer`) — Roster view of all associates with readiness badges, sortable table, search. Drill into `/trainer/[slug]` for session history, gap trend charts (recharts), skill filtering, cohort assignment, and calibration view. Cohort + curriculum management lives under `/trainer/cohorts` and `/trainer/cohorts/[id]/curriculum`.
+6. **Associate profile** (`/associate/[slug]`) — Server-rendered profile showing session history and readiness status. Associate-authenticated interview entry at `/associate/[slug]/interview` (feature-gated).
+7. **Sign in** (`/signin`) — Unified entry point with Trainer and Associate tabs. Legacy `/login` and `/associate/login` redirect here. The Associate tab is hidden when `ENABLE_ASSOCIATE_AUTH` is `false` (default in v1.1).
 
 There is also a public automated interview mode (`/api/public/interview/*`) that uses an AI agent to conduct interviews without a trainer.
+
+### Readiness Sweep
+
+`src/lib/readinessSweep.ts` runs a background sweep that recomputes readiness for associates whose `lastComputedAt` is stale or who have new sessions since last computation. Guarded by `runReadinessPipeline` returning boolean success — sibling markers are only closed when the pipeline actually succeeded.
 
 ### State Management
 
@@ -63,25 +68,39 @@ Questions are parsed from Markdown files fetched from a configurable GitHub repo
 - Cleanup runs on boot + every 12 hours via `src/lib/instrumentation.ts`
 
 **Supabase (Postgres via Prisma)**:
-- `Session` — Full interview session data, linked to Associate via `associateId`
-- `Associate` — Identity (slug, displayName), readiness fields (status, recommendedArea, lastComputedAt)
+- `Session` — Full interview session data, linked to Associate via `associateId`. Carries `mode` (`trainer-led` | `automated`) and optional `cohortId`.
+- `Associate` — Identity (slug, displayName), readiness fields (status, recommendedArea, lastComputedAt), optional `cohortId`, PIN fields (hash + generatedAt) for the feature-gated associate flow
 - `GapScore` — Per-skill recency-weighted scores, unique per (associateId, skill, topic)
 - `Settings` — Singleton trainer config (readiness threshold, default 75%)
+- `Cohort` — Name, startDate, optional endDate/description; has many associates, sessions, and curriculum weeks
+- `CurriculumWeek` — Per-cohort weekly plan (`weekNumber`, `skillName` display, `skillSlug` canonical matcher, `topicTags[]`, `startDate`); unique per (cohortId, weekNumber)
 - `HealthCheck` — Connectivity test table
 
 **Key services**:
-- `src/lib/sessionPersistence.ts` — Dual-write orchestrator (upserts Associate, writes Session)
+- `src/lib/sessionPersistence.ts` — Dual-write orchestrator (upserts Associate, writes Session). Accepts `options.mode` so authenticated/automated routes can tag sessions correctly.
 - `src/lib/gapService.ts` — Pure-function gap scoring (0.8 decay factor, recency-weighted averages)
 - `src/lib/gapPersistence.ts` — Persists gap scores to DB, fire-and-forget from session save
 - `src/lib/readinessService.ts` — Classifies associates as ready/improving/not_ready based on threshold + trend + session count
+- `src/lib/readinessPipeline.ts` / `src/lib/readinessSweep.ts` — Boolean-returning pipeline + background sweep that refreshes stale classifications
 - `src/lib/settingsService.ts` — Read/write trainer settings, triggers bulk readiness recompute on threshold change
 - `src/lib/adaptiveSetup.ts` — Maps gap scores to tech weights (1-5) for setup wizard pre-population
+- `src/lib/curriculumService.ts` / `src/lib/curriculumFilter.ts` — Cohort curriculum CRUD + setup-wizard tech filter (exact `skillSlug` match)
+- `src/lib/featureFlags.ts` — `isAssociateAuthEnabled()` reads `ENABLE_ASSOCIATE_AUTH`
+- `src/lib/pinService.ts` / `src/lib/pinAttemptLimiter.ts` — PIN generation/verification + composite (server-IP + fingerprint) limiter
+- `src/lib/associateSession.ts` / `src/lib/identity.ts` — HMAC-signed associate session cookie + trainer/associate/anonymous caller identity resolution
 - `src/lib/prisma.ts` — Prisma singleton client
 - `src/lib/historyService.ts` — File-based history read/write (extracted from route handler)
 
 ### Authentication
 
-Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`. Middleware (`src/middleware.ts`) protects `/dashboard`, `/interview`, `/review`, and `/trainer` routes.
+Two identity types resolve through `src/lib/identity.ts` (`getCallerIdentity`):
+
+- **Trainer** — Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`.
+- **Associate** (feature-gated behind `ENABLE_ASSOCIATE_AUTH`) — Trainer generates a PIN (`/trainer/[slug]` → `GeneratePinButton`), associate enters it at `/associate/login`, server issues an HMAC-signed `associate_session` cookie (`src/lib/associateSession.ts`, keyed on `ASSOCIATE_SESSION_SECRET`). Cookie version bumps invalidate on PIN regeneration; version check happens at guarded surfaces, not in middleware.
+
+Unified entry point: `/signin` (`SignInTabs.tsx`) with Trainer + Associate tabs. `/login` and `/associate/login` redirect there. The Associate tab is hidden when the flag is off. Middleware (`src/middleware.ts`) guards `/dashboard`, `/interview`, `/review`, `/trainer` (trainer only) and `/associate/*` except `/associate/login` (trainer OR associate). Middleware is cookie-only — no DB work.
+
+PIN verification endpoint is defense-in-depth: the limiter uses a composite (server-IP + client fingerprint) key with a separate IP-only bucket. `NLM_TRUSTED_PROXY=true` opts into parsing `x-forwarded-for` when deployed behind a trusted edge proxy.
 
 ### Key API Routes
 
@@ -98,16 +117,30 @@ Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth con
 | `/api/trainer` | GET roster of all associates with readiness data |
 | `/api/trainer/[slug]` | GET associate detail: sessions, gap scores, trend data |
 | `/api/associates/[slug]/gap-scores` | GET gap scores for adaptive setup pre-population |
+| `/api/cohorts` | Cohort CRUD |
+| `/api/cohorts/[id]` | Cohort detail / update / delete |
+| `/api/cohorts/[id]/curriculum` | List/create curriculum weeks for a cohort |
+| `/api/cohorts/[id]/curriculum/[weekId]` | Update/delete a curriculum week |
+| `/api/associate/pin/generate` | Trainer: generate PIN for an associate (flag-gated, 404 when off) |
+| `/api/associate/pin/verify` | Public: verify PIN, issue associate_session cookie (flag-gated) |
+| `/api/associate/me` | Current associate identity (flag-gated) |
+| `/api/associate/logout` | Clear associate_session cookie (flag-gated) |
+| `/api/associate/status` | Public: reports whether `ENABLE_ASSOCIATE_AUTH` is on |
+| `/api/associate/interview/complete` | Authenticated associate session completion (flag-gated, tagged `mode: automated`) |
+| `/api/admin/readiness-sweep` | Trigger background readiness recompute sweep |
 | `/api/public/interview/start` | Start public automated interview |
 | `/api/public/interview/agent` | Process public interview responses |
-| `/api/public/interview/complete` | Persist public interview session to Supabase |
+| `/api/public/interview/complete` | Persist public interview session to Supabase (`mode: automated`) |
 
 ## Environment Variables
 
 - `OPENAI_API_KEY` — Required for LLM scoring
 - `GITHUB_TOKEN` — GitHub API access for question banks
 - `RESEND_API_KEY` — Email delivery
-- `APP_PASSWORD` — Authentication password
+- `APP_PASSWORD` — Trainer authentication password
+- `ASSOCIATE_SESSION_SECRET` — HMAC secret for associate_session cookies. Required in production. Generate with `openssl rand -hex 32`. Intentionally decoupled from `APP_PASSWORD` so trainer-password rotation does not invalidate associate sessions.
+- `ENABLE_ASSOCIATE_AUTH` — Feature flag for the PIN-based associate flow. Default `false` in v1.1 (flag flips to `true` for v1.2). When off: all PIN endpoints return 404, `/signin` hides the Associate tab, associate-auth CTAs on `/`, `/associate/[slug]`, and `/trainer/[slug]` are hidden. Vitest sets it to `true` to exercise the gated code paths.
+- `NLM_TRUSTED_PROXY` — Set `true` when deployed behind a trusted edge proxy (GCE LB, Cloudflare, etc.). Opts the PIN verify limiter into parsing `x-forwarded-for` for IP-keyed brute-force protection. Leave unset locally.
 - `DATABASE_URL` — Supabase Transaction Pooler connection string (port 6543, `?connection_limit=5&pool_timeout=10`)
 - `DIRECT_URL` — Direct Supabase connection for Prisma migrations (port 5432)
 
@@ -342,7 +375,7 @@ Conventions not yet established. Will populate as patterns emerge during develop
 
 ### Prisma Schema (`prisma/schema.prisma`)
 
-Four models: `Associate` (identity + readiness fields), `Session` (full interview data linked to Associate), `GapScore` (per-skill recency-weighted scores, unique per associate+skill+topic), `Settings` (singleton trainer config). Generated client output: `src/generated/prisma/`.
+Models: `Associate` (identity + readiness + optional PIN + optional cohort), `Session` (full interview data linked to Associate, carries `mode` and optional `cohortId`), `GapScore` (per-skill recency-weighted scores, unique per associate+skill+topic), `Settings` (singleton trainer config), `Cohort` (group of associates with curriculum), `CurriculumWeek` (per-cohort weekly plan, keyed on `skillSlug`), `HealthCheck`. Generated client output: `src/generated/prisma/`. Migrations live in `prisma/migrations/` — `0000_baseline` is idempotent (`IF NOT EXISTS` + DO-block FK guards) so `prisma migrate deploy` is safe over pre-migration production databases.
 
 ### Session Save Pipeline
 
@@ -360,9 +393,13 @@ Three-state cascade (order matters): **ready** (avg >= threshold AND trend >= 0 
 
 `/trainer` — Roster page with sortable table, readiness badges, search. `/trainer/[slug]` — Associate detail with session history list, gap trend chart (recharts `LineChart`), skill filter dropdown, and calibration view. Auth-guarded via middleware + client-side `useAuth()`.
 
-### Adaptive Setup
+### Adaptive Setup + Curriculum Filter
 
-When an associate with 3+ sessions starts a new interview, the dashboard setup wizard fetches gap scores from `/api/associates/[slug]/gap-scores` and pre-populates tech weights via `adaptiveSetup.ts` (weakest skills get weight 5, strongest get weight 1, linear interpolation).
+When an associate with 3+ sessions starts a new interview, the setup wizard (`/interview/new`) fetches gap scores from `/api/associates/[slug]/gap-scores` and pre-populates tech weights via `adaptiveSetup.ts` (weakest skills get weight 5, strongest get weight 1, linear interpolation). When the associate is assigned to a cohort, `curriculumFilter.ts` narrows the visible tech list to skills whose `skillSlug` appears in the cohort's taught curriculum weeks. The wizard tracks `allTechs` (unfiltered source) separately from `availableTechs` (visible) so swapping associate/cohort never compounds filters — unassigned associates restore the full list via `clearCurriculumFilter`.
+
+### Unified Design System
+
+`DESIGN.md` is the single source of truth for typography, color, spacing, motion. All surfaces (`/`, `/signin`, `/interview/new`, `/interview`, `/review`, `/trainer/*`, `/associate/*`, `/pdf`, `/history`, `/question-banks`) use DESIGN tokens defined in `src/app/globals.css`. Legacy `--nlm-*` tokens and decorative animations (`recording-pulse`, `pulse-glow`, `gradient-shift`, etc.) were deleted in Phase 15. Dark mode toggles via a boot script on `<html>` (`suppressHydrationWarning`). `Navbar.tsx` is role-aware (anonymous / trainer / associate); PublicShell-wrapped routes use `AssociateNav` instead.
 
 ### Prisma + Docker
 

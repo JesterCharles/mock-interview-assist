@@ -89,7 +89,7 @@
 
 ## Motion
 - **Approach:** Minimal-functional
-- **Kill list:** gradient-shift, float, pulse-glow, shimmer, recording-pulse, border-glow-pulse, progress-glow (all current animations)
+- **Kill list (REMOVED in Phase 15):** gradient-shift, float, pulse-glow, shimmer, recording-pulse, border-glow-pulse, progress-glow — all keyframes deleted from `globals.css`. Do not reintroduce.
 - **Keep:** slide-up (200ms ease-out) for page transitions, fade-in (150ms ease-out) for async content loading
 - **Easing:** enter(ease-out) exit(ease-in) move(ease-in-out)
 - **Duration:** micro(50-100ms) for hover states, short(150-200ms) for transitions, medium(250-350ms) for layout shifts
@@ -123,3 +123,5 @@ Display readiness as bold typography, not traffic-light badges:
 | 2026-04-13 | Light-first, warm paper default | Category risk: every competitor is dark-mode-first or corporate blue-gray. Warm parchment (#F5F0E8) stands out. "Credible in daylight." |
 | 2026-04-13 | Burnt orange accent (#C85A2E) | No other assessment tool uses orange. Codex: #C65A2E, subagent: #D4440F. Split the difference. Memorable, warm, urgent without alarming. |
 | 2026-04-13 | Readiness as typography not badges | From Claude subagent: "82 ascending" > green dot. More information density, more emotional impact. Treats associates like athletes. |
+| 2026-04-15 | Legacy `--nlm-*` tokens + decorative utilities deleted | v1.1 Phase 15 unified every route on the DESIGN tokens. All `--nlm-*` custom properties, decorative utility classes, and kill-list keyframes removed from `globals.css`. Playwright regression + legacy-deletion specs guard against re-introduction. |
+| 2026-04-15 | Dark mode wired app-wide | v1.1 Phase 15-02 added a boot-time theme script on `<html>` with `suppressHydrationWarning`. All tokens have dark-mode equivalents. Toggle is available in the unified Navbar. |
