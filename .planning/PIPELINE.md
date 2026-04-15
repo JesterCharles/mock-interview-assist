@@ -2,13 +2,13 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: DISCOVER done. Next: PLAN stage → `/gsd-plan-phase 16` (Cached Question-Bank Manifest).
+- Current stage: PLAN done for Phase 16. Next: EXECUTE stage → `/pipeline-execute 16` (or `/gsd-execute-phase 16`).
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Next action on resume: `/gsd-plan-phase 16` to start planning Phase 16 (Cached Question-Bank Manifest). Roadmap covers Phases 16-25, 30 reqs.
+Next action on resume: `/gsd-execute-phase 16` to build Phase 16 (cache module + invalidate route + wizard UI + call-site migration, 5 tasks, 1 wave). CONTEXT+RESEARCH+PLAN committed; plan-checker pass after 1 revision (invalidate scope contract fix + UI anchor pin). Multi-lens review (autoplan/peer/codex) skipped — narrow backend+polish scope. Roadmap Phases 17-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -33,8 +33,8 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | next | | | Phase 16 up first: `/gsd-plan-phase 16`. |
-| execute | pending | | | |
+| plan | in_progress | 2026-04-15 | | Phase 16 PLAN done (5 tasks, 1 wave, plan-checker PASS after 1 revision). Phases 17-25 pending. |
+| execute | next | | | Phase 16 ready: `/gsd-execute-phase 16`. |
 | review | pending | | | |
 | test | pending | | | |
 | debug | pending | | | |
