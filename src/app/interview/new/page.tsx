@@ -40,6 +40,17 @@ const inputStyle = {
   color: 'var(--ink)',
 };
 
+function formatRelative(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const s = Math.max(0, Math.floor(diffMs / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -78,6 +89,8 @@ export default function DashboardPage() {
   const [techSearch, setTechSearch] = useState('');
   const [isFetchingTechs, setIsFetchingTechs] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Local state for Phase 1
   const [assessmentType, setAssessmentType] = useState<'Technical' | 'Behavioral'>('Technical');
@@ -132,9 +145,10 @@ export default function DashboardPage() {
     setError(null);
     try {
       const service = new GitHubService(repoConfig.owner, repoConfig.repo, repoConfig.branch);
-      const files = await service.findQuestionBanks('');
+      const { files, lastSynced: syncedAt } = await service.loadManifest();
       setAllTechs(files);
       setAvailableTechs(files);
+      setLastSynced(syncedAt);
       if (files.length === 0) {
         setError('No question banks found (looking for .md files).');
       }
@@ -166,6 +180,24 @@ export default function DashboardPage() {
   // Initial fetch
   useEffect(() => {
     fetchTechs();
+  }, [fetchTechs]);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/github/cache/invalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scope: 'all' }),
+      });
+      if (!res.ok) throw new Error('Refresh failed');
+      await fetchTechs();
+    } catch (err) {
+      console.error(err);
+      setError('Failed to refresh manifest.');
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchTechs]);
 
   // Trigger loading questions when moving to Phase 2 (or when techs are confirmed)
@@ -567,15 +599,24 @@ export default function DashboardPage() {
         {/* Curriculum filter badge — visible when associate has cohort with taught weeks */}
         <CurriculumFilterBadge taughtWeeks={taughtWeeks} />
 
-        <div className="flex justify-end mb-2">
-          <button
-            onClick={fetchTechs}
-            className="text-xs underline transition-colors"
+        {lastSynced && (
+          <div
+            className="text-xs mt-2 mb-2 flex items-center gap-2"
             style={{ color: 'var(--muted)' }}
+            data-testid="last-synced"
           >
-            Refresh List
-          </button>
-        </div>
+            <span title={lastSynced}>Last synced {formatRelative(lastSynced)}</span>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1 underline hover:no-underline disabled:opacity-50"
+            >
+              {isRefreshing ? 'Refreshing…' : '↻ Refresh'}
+            </button>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="relative mb-4">
