@@ -1,20 +1,39 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, PlayCircle, User } from 'lucide-react';
 
-interface AssociateNavProps {
-  slug: string;
-}
-
 /**
  * Lightweight nav surfaced inside PublicShell when an associate cookie is
- * present. Three actions: profile, start interview, sign out.
+ * present. Three actions: profile, start interview, sign out. Self-fetches
+ * identity from /api/associate/me so PublicShell can stay sync (and safely
+ * importable from client component pages).
  */
-export function AssociateNav({ slug }: AssociateNavProps) {
+export function AssociateNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [slug, setSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/associate/me', { cache: 'no-store' });
+        if (!res.ok) return; // anonymous — render nothing
+        const data = (await res.json()) as { slug?: string };
+        if (!cancelled && data.slug) setSlug(data.slug);
+      } catch {
+        // ignore — render nothing
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  if (!slug) return null;
 
   const profileHref = `/associate/${slug}`;
   const interviewHref = `/associate/${slug}/interview`;
@@ -25,6 +44,7 @@ export function AssociateNav({ slug }: AssociateNavProps) {
     } catch {
       // ignore — still navigate away
     }
+    setSlug(null);
     router.replace('/');
     router.refresh();
   }

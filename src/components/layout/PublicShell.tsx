@@ -2,8 +2,6 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AssociateNav } from '@/components/layout/AssociateNav';
-import { getAssociateIdentity } from '@/lib/auth-server';
-import { prisma } from '@/lib/prisma';
 
 /**
  * PublicShell — shared chrome for NEW public/auth/associate routes.
@@ -32,20 +30,8 @@ interface PublicShellProps {
   ['data-testid']?: string;
 }
 
-export async function PublicShell(props: PublicShellProps) {
+export function PublicShell(props: PublicShellProps) {
   const { children } = props;
-
-  // Look up associate identity (cookie-only) and resolve slug for the nav.
-  // No-op for anonymous + trainer-only callers.
-  const identity = await getAssociateIdentity();
-  let associateSlug: string | null = null;
-  if (identity) {
-    const me = await prisma.associate.findUnique({
-      where: { id: identity.associateId },
-      select: { slug: true },
-    });
-    associateSlug = me?.slug ?? null;
-  }
 
   return (
     <div
@@ -84,7 +70,7 @@ export async function PublicShell(props: PublicShellProps) {
             Next Level Mock
           </Link>
           <div className="flex items-center gap-3">
-            {associateSlug && <AssociateNav slug={associateSlug} />}
+            <AssociateNav />
             <ThemeToggle />
           </div>
         </div>
