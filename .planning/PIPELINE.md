@@ -2,16 +2,18 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 16 EXECUTE + VERIFY done (7/7 must-haves, 247 tests pass). Next: per-phase review+validate OR plan Phase 17.
+- Current stage: Phase 16 EXECUTE + VERIFY + REVIEW + VALIDATE + FIX done (254/254 tests, 0 BLK). Next: plan Phase 17.
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 16 shipped locally: 7 commits (7447b87…2012710), 247/247 tests, tsc clean, VERIFICATION 7/7 PASS. Next options:
-- `/gsd-code-review 16` + `/gsd-validate-phase 16` (parallel per-phase quality) before moving on
+Phase 16 fully hardened: 11 commits (7447b87…51522dc), 254/254 tests, tsc clean, VERIFY 7/7, REVIEW 0 BLK, REVIEW-FIX HI+MED resolved. Next:
 - `/gsd-plan-phase 17` to plan next phase
 - `/pipeline-coordinator --resume` to auto-route
+
+Phase 16 quality artifacts: 16-REVIEW.md, 16-REVIEW-FIX.md, 16-VERIFICATION.md (updated).
+Fix commits: a1e397b (Nyquist) → 6cc37dc (HI-01 generation counter) → b2adfe5 (CSRF Origin/Host) → 51522dc (scoped refresh + error channels).
 
 Roadmap Phases 17-25 still pending plan.
 
@@ -39,9 +41,9 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
 | plan | in_progress | 2026-04-15 | | Phase 16 PLAN done. Phases 17-25 pending. |
-| execute | in_progress | 2026-04-15 | | Phase 16 done (7 commits, 7447b87…2012710, 247 tests, VERIFY 7/7). Phases 17-25 pending. |
-| review | pending | | | |
-| test | pending | | | |
+| execute | in_progress | 2026-04-15 | | Phase 16 done (11 commits, 7447b87…51522dc, 254 tests, VERIFY 7/7). Phases 17-25 pending. |
+| review | per-phase | 2026-04-15 | | Phase 16: 0 BLK / 1 HI / 3 MED / 4 LO / 2 INFO → HI+MED fixed. |
+| test | per-phase | 2026-04-15 | | Phase 16: Nyquist filled 2 gaps (Truth 4/7), +7 tests → 254/254. |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
