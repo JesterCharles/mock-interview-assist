@@ -102,9 +102,6 @@ export default function Navbar() {
         window.location.href = '/';
     };
 
-    // Hide on the unified sign-in route — it has its own clean shell.
-    if (pathname === '/signin') return null;
-
     const brandHref = role === 'trainer' ? '/trainer' : role === 'associate' && associateSlug ? `/associate/${associateSlug}` : '/';
 
     return (
