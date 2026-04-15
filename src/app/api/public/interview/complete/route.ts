@@ -3,6 +3,14 @@ import { checkRateLimit } from '@/lib/rateLimitService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { InterviewSession } from '@/lib/types';
 
+/**
+ * Anonymous automated-interview completion endpoint.
+ *
+ * SECURITY (Codex finding #3): This route is anonymous-only. The client-supplied
+ * `associateSlug` is ALWAYS stripped before persistence. Authenticated associates
+ * must use /api/associate/interview/complete instead; cookies are intentionally
+ * ignored here.
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -45,13 +53,28 @@ export async function POST(request: Request) {
       );
     }
 
-    // DB-only write — public sessions do NOT write to the JSON file
-    // (file history is trainer-facing; public sessions are ephemeral from trainer's POV)
-    const success = await persistSessionToDb(session);
+    // Per Codex finding #3 (T-10-01): NEVER trust client-supplied identity on the
+    // anonymous endpoint. Unconditionally null out associateSlug before persist so
+    // no caller can forge linkage to a real associate via this route.
+    const sanitized: InterviewSession = {
+      ...session,
+      associateSlug: undefined,
+    };
+    // Cast-through for strict null assignment — Prisma path treats falsy slug as no linkage
+    (sanitized as unknown as { associateSlug: null }).associateSlug = null;
+
+    const success = await persistSessionToDb(sanitized);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to persist session' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
-      success,
-      persisted: success ? 'db' : 'none',
+      success: true,
+      persisted: 'db',
     });
   } catch (error) {
     console.error('[public-interview-complete] Error:', error);

@@ -16,15 +16,27 @@ import {
     ChevronUp,
     History as HistoryIcon,
 } from 'lucide-react';
-import { InterviewSession, ParsedQuestion, StarterQuestion } from '@/lib/types';
+import { InterviewSession } from '@/lib/types';
 import { calculateAggregateScores } from '@/lib/langchain';
 import { useInterviewStore } from '@/store/interviewStore';
 import { useAuth } from '@/lib/auth-context';
 
+const displayFont = { fontFamily: 'var(--font-display)' } as const;
+const monoLabel = {
+    fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+};
+const surfaceCardStyle = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
+
 export default function HistoryPage() {
     const router = useRouter();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
-    const { session: currentSession } = useInterviewStore();
+    useInterviewStore();
 
     const [history, setHistory] = useState<InterviewSession[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +89,6 @@ export default function HistoryPage() {
     };
 
     const handleViewPDF = (session: InterviewSession) => {
-        // Store session temporarily and navigate to PDF page
         sessionStorage.setItem('pdf-session', JSON.stringify(session));
         router.push('/pdf?from=history');
     };
@@ -94,51 +105,60 @@ export default function HistoryPage() {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 4) return 'text-green-600';
-        if (score >= 3) return 'text-amber-600';
-        return 'text-red-600';
+        if (score >= 4) return 'var(--success)';
+        if (score >= 3) return 'var(--warning)';
+        return 'var(--danger)';
     };
 
     if (isLoading) {
         return (
-            <div className="min-h-screen nlm-bg flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
             </div>
         );
     }
 
     return (
-        <main className="min-h-screen nlm-bg">
+        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 transition-colors text-sm"
+                        style={{ color: 'var(--muted)' }}
                     >
                         <ArrowLeft className="w-5 h-5" />
                         Back to Home
                     </button>
 
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                        <HistoryIcon className="w-6 h-6 text-indigo-400" />
+                    <h1
+                        className="flex items-center gap-3"
+                        style={{ ...displayFont, fontWeight: 600, fontSize: '28px', color: 'var(--ink)' }}
+                    >
+                        <HistoryIcon className="w-6 h-6" style={{ color: 'var(--accent)' }} />
                         Interview History
                     </h1>
 
-                    <div className="w-24" /> {/* Spacer for alignment */}
+                    <div className="w-24 hidden sm:block" /> {/* Spacer for alignment */}
                 </div>
 
                 {/* Empty State */}
                 {history.length === 0 ? (
-                    <div className="glass-card-strong rounded-xl p-12 text-center">
-                        <HistoryIcon className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-white mb-2">No Interview History</h2>
-                        <p className="text-slate-400 mb-6">
+                    <div className="rounded-xl p-12 text-center" style={surfaceCardStyle}>
+                        <HistoryIcon className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--muted)' }} />
+                        <h2
+                            className="mb-2"
+                            style={{ ...displayFont, fontWeight: 600, fontSize: '28px', color: 'var(--ink)' }}
+                        >
+                            No Interview History
+                        </h2>
+                        <p className="mb-6" style={{ color: 'var(--muted)' }}>
                             Completed interviews will appear here after generating a PDF report.
                         </p>
                         <button
                             onClick={() => router.push('/dashboard')}
-                            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                            className="btn-accent-flat"
                         >
                             Start an Interview
                         </button>
@@ -153,50 +173,71 @@ export default function HistoryPage() {
                             return (
                                 <div
                                     key={session.id}
-                                    className="glass-card-strong rounded-xl overflow-hidden mb-4"
+                                    className="rounded-lg overflow-hidden"
+                                    style={surfaceCardStyle}
                                 >
                                     {/* Header Row */}
                                     <div
-                                        className="p-6 cursor-pointer hover:bg-white/[0.04] transition-colors"
+                                        className="p-4 cursor-pointer transition-colors hover:bg-[var(--highlight)]"
                                         onClick={() => setExpandedId(isExpanded ? null : session.id)}
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-6">
+                                        <div className="flex items-center justify-between flex-wrap gap-3">
+                                            <div className="flex items-center gap-6 flex-wrap">
                                                 {/* Candidate Info */}
                                                 <div>
-                                                    <div className="flex items-center gap-2 text-slate-300 text-sm mb-1">
-                                                        <User className="w-4 h-4" />
+                                                    <div className="flex items-center gap-2 text-sm mb-1" style={{ color: 'var(--ink)' }}>
+                                                        <User className="w-4 h-4" style={{ color: 'var(--muted)' }} />
                                                         {session.candidateName || 'Unnamed Candidate'}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-slate-400 text-xs">
+                                                    <div
+                                                        className="flex items-center gap-2 text-xs"
+                                                        style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}
+                                                    >
                                                         <Calendar className="w-3 h-3" />
                                                         {formatDate(session.date)}
                                                     </div>
                                                 </div>
 
                                                 {/* Score */}
-                                                <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.06] border border-white/[0.08] rounded-lg">
-                                                    <div className="flex items-center gap-1">
-                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                            <Star
-                                                                key={star}
-                                                                className={`w-4 h-4 flex-shrink-0 ${star <= scores.averageScore
-                                                                    ? 'text-amber-400 fill-amber-400'
-                                                                    : 'text-slate-600'
-                                                                    }`}
-                                                            />
-                                                        ))}
+                                                <div
+                                                    className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                                                    style={{
+                                                        background: 'var(--surface-muted)',
+                                                        border: '1px solid var(--border-subtle)',
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-0.5">
+                                                        {[1, 2, 3, 4, 5].map((star) => {
+                                                            const filled = star <= scores.averageScore;
+                                                            return (
+                                                                <Star
+                                                                    key={star}
+                                                                    className="w-4 h-4 flex-shrink-0"
+                                                                    style={{
+                                                                        color: filled ? 'var(--accent)' : 'var(--border)',
+                                                                        fill: filled ? 'var(--accent)' : 'transparent',
+                                                                    }}
+                                                                />
+                                                            );
+                                                        })}
                                                     </div>
-                                                    <span className={`font-bold ${getScoreColor(scores.averageScore)}`}>
+                                                    <span
+                                                        className="font-bold"
+                                                        style={{
+                                                            color: getScoreColor(scores.averageScore),
+                                                            fontFamily: 'var(--font-mono)',
+                                                            fontVariantNumeric: 'tabular-nums',
+                                                        }}
+                                                    >
                                                         {scores.averageScore}/5
                                                     </span>
                                                 </div>
 
                                                 {/* Stats */}
-                                                <div className="text-sm text-slate-400">
+                                                <div className="text-sm" style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
                                                     {scores.completedCount}/{allQuestions.length} questions
                                                     {scores.skippedCount > 0 && (
-                                                        <span className="text-slate-500">
+                                                        <span>
                                                             , {scores.skippedCount} skipped
                                                         </span>
                                                     )}
@@ -210,7 +251,7 @@ export default function HistoryPage() {
                                                         e.stopPropagation();
                                                         handleViewPDF(session);
                                                     }}
-                                                    className="px-4 py-2 bg-indigo-600/80 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 transition-colors flex items-center gap-2 border border-indigo-500/30"
+                                                    className="btn-accent-flat inline-flex items-center gap-2"
                                                 >
                                                     <FileDown className="w-4 h-4" />
                                                     View PDF
@@ -221,18 +262,20 @@ export default function HistoryPage() {
                                                         handleDelete(session.id);
                                                     }}
                                                     disabled={deletingId === session.id}
-                                                    className="p-2 text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                                                    className="btn-secondary-flat inline-flex items-center gap-2 disabled:opacity-50"
+                                                    style={{ color: 'var(--danger)' }}
+                                                    aria-label="Delete session"
                                                 >
                                                     {deletingId === session.id ? (
-                                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
                                                     ) : (
-                                                        <Trash2 className="w-5 h-5" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     )}
                                                 </button>
                                                 {isExpanded ? (
-                                                    <ChevronUp className="w-5 h-5 text-slate-400" />
+                                                    <ChevronUp className="w-5 h-5" style={{ color: 'var(--muted)' }} />
                                                 ) : (
-                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                                                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--muted)' }} />
                                                 )}
                                             </div>
                                         </div>
@@ -240,30 +283,65 @@ export default function HistoryPage() {
 
                                     {/* Expanded Details */}
                                     {isExpanded && (
-                                        <div className="border-t border-white/10 p-6 bg-black/20">
-                                            <div className="grid grid-cols-3 gap-4 mb-6">
-                                                <div className="glass-card p-4 rounded-lg">
-                                                    <p className="text-sm text-slate-400 mb-1">Technical Score</p>
-                                                    <p className={`text-2xl font-bold ${getScoreColor(scores.technicalScore)}`}>
+                                        <div
+                                            className="p-6"
+                                            style={{
+                                                borderTop: '1px solid var(--border-subtle)',
+                                                background: 'var(--surface-muted)',
+                                            }}
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                                <div className="p-4 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)' }}>
+                                                    <p className="text-xs mb-1" style={{ ...monoLabel, color: 'var(--muted)' }}>Technical Score</p>
+                                                    <p
+                                                        className="font-bold"
+                                                        style={{
+                                                            ...displayFont,
+                                                            fontSize: '28px',
+                                                            color: getScoreColor(scores.technicalScore),
+                                                            fontVariantNumeric: 'tabular-nums',
+                                                        }}
+                                                    >
                                                         {scores.technicalScore}/5
                                                     </p>
                                                 </div>
-                                                <div className="glass-card p-4 rounded-lg">
-                                                    <p className="text-sm text-slate-400 mb-1">Soft Skills Score</p>
-                                                    <p className={`text-2xl font-bold ${getScoreColor(scores.softSkillScore)}`}>
+                                                <div className="p-4 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)' }}>
+                                                    <p className="text-xs mb-1" style={{ ...monoLabel, color: 'var(--muted)' }}>Soft Skills Score</p>
+                                                    <p
+                                                        className="font-bold"
+                                                        style={{
+                                                            ...displayFont,
+                                                            fontSize: '28px',
+                                                            color: getScoreColor(scores.softSkillScore),
+                                                            fontVariantNumeric: 'tabular-nums',
+                                                        }}
+                                                    >
                                                         {scores.softSkillScore}/5
                                                     </p>
                                                 </div>
-                                                <div className="glass-card p-4 rounded-lg">
-                                                    <p className="text-sm text-slate-400 mb-1">Weeks Covered</p>
-                                                    <p className="text-2xl font-bold text-white">
+                                                <div className="p-4 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)' }}>
+                                                    <p className="text-xs mb-1" style={{ ...monoLabel, color: 'var(--muted)' }}>Weeks Covered</p>
+                                                    <p
+                                                        className="font-bold"
+                                                        style={{
+                                                            ...displayFont,
+                                                            fontSize: '28px',
+                                                            color: 'var(--ink)',
+                                                            fontVariantNumeric: 'tabular-nums',
+                                                        }}
+                                                    >
                                                         {session.selectedWeeks.join(', ')}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Question List */}
-                                            <h4 className="font-semibold text-white mb-3">Question Feedback</h4>
+                                            <h4
+                                                className="mb-3"
+                                                style={{ ...displayFont, fontWeight: 600, fontSize: '22px', color: 'var(--ink)' }}
+                                            >
+                                                Question Feedback
+                                            </h4>
                                             <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                                                 {allQuestions.map((question, index) => {
                                                     const assessment = session.assessments[question.id];
@@ -272,28 +350,42 @@ export default function HistoryPage() {
                                                     return (
                                                         <div
                                                             key={question.id}
-                                                            className="glass-card p-4 rounded-lg"
+                                                            className="p-4 rounded-lg"
+                                                            style={{
+                                                                background: 'var(--surface)',
+                                                                border: '1px solid var(--border-subtle)',
+                                                            }}
                                                         >
                                                             <div className="flex items-start gap-3">
-                                                                <span className="text-sm font-medium text-slate-400 mt-0.5">
+                                                                <span
+                                                                    className="text-xs font-medium mt-0.5"
+                                                                    style={{ ...monoLabel, color: 'var(--muted)' }}
+                                                                >
                                                                     Q{index + 1}
                                                                 </span>
-                                                                <div className="flex-1">
-                                                                    <p className="font-medium text-slate-200 text-sm mb-2">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p
+                                                                        className="font-medium text-sm mb-2"
+                                                                        style={{ color: 'var(--ink)' }}
+                                                                    >
                                                                         {question.question}
                                                                     </p>
-                                                                    <div className="flex items-center gap-2 mb-2">
-                                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                                            <Star
-                                                                                key={star}
-                                                                                className={`w-3 h-3 ${star <= (assessment.finalScore || 0)
-                                                                                    ? 'text-amber-400 fill-amber-400'
-                                                                                    : 'text-slate-600'
-                                                                                    }`}
-                                                                            />
-                                                                        ))}
+                                                                    <div className="flex items-center gap-1 mb-2">
+                                                                        {[1, 2, 3, 4, 5].map((star) => {
+                                                                            const filled = star <= (assessment.finalScore || 0);
+                                                                            return (
+                                                                                <Star
+                                                                                    key={star}
+                                                                                    className="w-3 h-3"
+                                                                                    style={{
+                                                                                        color: filled ? 'var(--accent)' : 'var(--border)',
+                                                                                        fill: filled ? 'var(--accent)' : 'transparent',
+                                                                                    }}
+                                                                                />
+                                                                            );
+                                                                        })}
                                                                     </div>
-                                                                    <p className="text-slate-400 text-sm leading-relaxed">
+                                                                    <p className="text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
                                                                         {assessment.finalFeedback || assessment.llmFeedback || 'No feedback'}
                                                                     </p>
                                                                 </div>

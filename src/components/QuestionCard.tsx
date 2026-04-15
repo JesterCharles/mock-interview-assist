@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import {
     CheckCircle2,
-    XCircle,
     Eye,
     MessageSquare,
     Brain,
@@ -16,7 +15,6 @@ import {
     ChevronUp
 } from 'lucide-react';
 import { ParsedQuestion, StarterQuestion, QuestionAssessment, SoftSkillsAssessment } from '@/lib/types';
-import { getDifficultyColor } from '@/lib/markdownParser';
 
 interface QuestionCardProps {
     question: ParsedQuestion | StarterQuestion;
@@ -30,6 +28,20 @@ interface QuestionCardProps {
     onSkip: () => void;
     onDidNotGetTo: (value: boolean) => void;
     isProcessing: boolean;
+}
+
+// DESIGN.md difficulty → semantic token color
+function difficultyTone(difficulty: string): string {
+    switch (difficulty) {
+        case 'easy':
+            return 'bg-[var(--surface-muted)] text-[var(--success)] border border-[var(--border)]';
+        case 'medium':
+            return 'bg-[var(--surface-muted)] text-[var(--warning)] border border-[var(--border)]';
+        case 'hard':
+            return 'bg-[var(--surface-muted)] text-[var(--danger)] border border-[var(--border)]';
+        default:
+            return 'bg-[var(--surface-muted)] text-[var(--muted)] border border-[var(--border)]';
+    }
 }
 
 export default function QuestionCard({
@@ -62,33 +74,37 @@ export default function QuestionCard({
         ];
 
     return (
-        <div className="glass-card-strong rounded-xl overflow-hidden animate-fade-in relative">
-            <div className="absolute top-0 right-0 bg-gradient-to-bl from-cyan-500/10 to-transparent w-32 h-32 pointer-events-none" />
-            
+        <div
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden animate-fade-in relative"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        >
             {/* Header */}
-            <div className="border-b border-white/[0.06] px-6 py-4 relative z-10">
+            <div className="border-b border-[var(--border-subtle)] px-6 py-4 relative z-10">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="bg-white/[0.08] text-white px-3 py-1 rounded-full text-sm font-medium border border-white/[0.06]">
+                        <span
+                            className="bg-[var(--surface-muted)] text-[var(--muted)] px-3 py-1 rounded-full text-xs font-medium border border-[var(--border)] uppercase tabular-nums"
+                            style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                        >
                             {questionNumber} / {totalQuestions}
                         </span>
                         {isParsedQuestion && (
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor((question as ParsedQuestion).difficulty)}`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyTone((question as ParsedQuestion).difficulty)}`}>
                                 {(question as ParsedQuestion).difficulty.charAt(0).toUpperCase() + (question as ParsedQuestion).difficulty.slice(1)}
                             </span>
                         )}
                         {isStarterQuestion && (
-                            <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full text-xs font-medium border border-cyan-500/30">
+                            <span className="bg-[var(--surface-muted)] text-[var(--accent)] px-3 py-1 rounded-full text-xs font-medium border border-[var(--border)]">
                                 Starter Question
                             </span>
                         )}
                     </div>
-                    <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer hover:text-white transition-colors">
+                    <label className="flex items-center gap-2 text-[var(--muted)] text-sm cursor-pointer hover:text-[var(--ink)] transition-colors">
                         <input
                             type="checkbox"
                             checked={assessment.didNotGetTo}
                             onChange={(e) => onDidNotGetTo(e.target.checked)}
-                            className="rounded border-white/[0.2] bg-white/[0.1] text-cyan-400 focus:ring-cyan-400/50"
+                            className="rounded border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] focus:ring-[var(--accent)]"
                         />
                         Did Not Get To
                     </label>
@@ -96,19 +112,22 @@ export default function QuestionCard({
             </div>
 
             {/* Question */}
-            <div className="p-6 border-b border-white/[0.06] relative z-10">
-                <h2 className="text-xl font-semibold text-white leading-relaxed">
+            <div className="p-6 border-b border-[var(--border-subtle)] relative z-10">
+                <h2
+                    className="leading-relaxed text-[var(--ink)]"
+                    style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 22 }}
+                >
                     {isParsedQuestion ? (question as ParsedQuestion).question : (question as StarterQuestion).question}
                 </h2>
             </div>
 
             {assessment.didNotGetTo ? (
-                <div className="p-6 glass-card text-center m-6 mb-20 relative z-10">
-                    <SkipForward className="w-12 h-12 text-slate-500 mx-auto mb-2" />
-                    <p className="text-slate-400 text-sm">This question was skipped and will be excluded from scoring.</p>
+                <div className="p-6 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-lg text-center m-6 mb-20 relative z-10">
+                    <SkipForward className="w-12 h-12 text-[var(--muted)] mx-auto mb-2" />
+                    <p className="text-[var(--muted)] text-sm">This question was skipped and will be excluded from scoring.</p>
                     <button
                         onClick={() => onDidNotGetTo(false)}
-                        className="mt-4 text-cyan-400 hover:text-cyan-300 font-medium text-sm transition-colors"
+                        className="mt-4 text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium text-sm transition-colors"
                     >
                         Mark as Attempted
                     </button>
@@ -117,8 +136,11 @@ export default function QuestionCard({
                 <div className="relative z-10">
                     {/* Keywords Section - Only for parsed questions */}
                     {isParsedQuestion && (question as ParsedQuestion).keywords.length > 0 && (
-                        <div className="p-6 border-b border-white/[0.06]">
-                            <h3 className="text-xs font-bold text-slate-400 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <div className="p-6 border-b border-[var(--border-subtle)]">
+                            <h3
+                                className="text-[11px] font-semibold text-[var(--muted)] mb-3 flex items-center gap-2 uppercase"
+                                style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                            >
                                 <MessageSquare className="w-3.5 h-3.5" />
                                 Technical Keywords (click when mentioned)
                             </h3>
@@ -129,20 +151,20 @@ export default function QuestionCard({
                                         <button
                                             key={keyword}
                                             onClick={() => onToggleKeyword(keyword)}
-                                            className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-300 border ${isHit
-                                                    ? 'border-emerald-500/40 bg-emerald-500/[0.15] text-emerald-400 shadow-lg shadow-emerald-500/10'
-                                                    : 'border-white/[0.08] bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]'
+                                            className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors duration-150 border ${isHit
+                                                    ? 'border-[var(--success)] bg-[var(--surface-muted)] text-[var(--success)]'
+                                                    : 'border-[var(--border)] bg-[var(--surface-muted)] text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)]'
                                                 }`}
                                         >
                                             <span className="flex items-center gap-1.5">
-                                                {isHit && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                                                {isHit && <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)]" />}
                                                 {keyword}
                                             </span>
                                         </button>
                                     );
                                 })}
                             </div>
-                            <p className="mt-3 text-xs font-medium text-slate-500">
+                            <p className="mt-3 text-xs font-medium text-[var(--muted)] tabular-nums">
                                 {assessment.keywordsHit.length} of {(question as ParsedQuestion).keywords.length} keywords mentioned
                             </p>
                         </div>
@@ -150,14 +172,17 @@ export default function QuestionCard({
 
                     {/* Starter Question Guidelines */}
                     {isStarterQuestion && (
-                        <div className="p-6 border-b border-white/[0.06]">
-                            <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wide">
+                        <div className="p-6 border-b border-[var(--border-subtle)]">
+                            <h3
+                                className="text-[11px] font-semibold text-[var(--muted)] mb-3 uppercase"
+                                style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                            >
                                 Look for these elements:
                             </h3>
                             <ul className="space-y-2">
                                 {(question as StarterQuestion).guidelines.map((guideline, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-slate-300 text-sm">
-                                        <span className="w-5 h-5 bg-cyan-500/10 text-cyan-400 rounded-full flex items-center justify-center text-xs font-medium border border-cyan-500/20 flex-shrink-0">
+                                    <li key={i} className="flex items-center gap-3 text-[var(--ink)] text-sm">
+                                        <span className="w-5 h-5 bg-[var(--surface-muted)] text-[var(--accent)] rounded-full flex items-center justify-center text-xs font-medium border border-[var(--border)] flex-shrink-0 tabular-nums">
                                             {i + 1}
                                         </span>
                                         {guideline}
@@ -168,8 +193,11 @@ export default function QuestionCard({
                     )}
 
                     {/* Soft Skills Section */}
-                    <div className="p-6 border-b border-white/[0.06]">
-                        <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wide">
+                    <div className="p-6 border-b border-[var(--border-subtle)]">
+                        <h3
+                            className="text-[11px] font-semibold text-[var(--muted)] mb-3 uppercase"
+                            style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                        >
                             Soft Skills Assessment
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -177,9 +205,9 @@ export default function QuestionCard({
                                 <button
                                     key={key}
                                     onClick={() => onToggleSoftSkill(key)}
-                                    className={`p-3 rounded-xl border transition-all duration-300 flex flex-col items-center gap-2 ${assessment.softSkills[key]
-                                            ? 'border-emerald-500/40 bg-emerald-500/[0.1] text-emerald-400 glow-border-emerald'
-                                            : 'border-white/[0.08] bg-white/[0.04] text-slate-400 hover:border-white/[0.15] hover:text-white'
+                                    className={`p-3 rounded-lg border transition-colors duration-150 flex flex-col items-center gap-2 ${assessment.softSkills[key]
+                                            ? 'border-[var(--success)] bg-[var(--surface-muted)] text-[var(--success)]'
+                                            : 'border-[var(--border)] bg-[var(--surface-muted)] text-[var(--muted)] hover:border-[var(--border)] hover:text-[var(--ink)] hover:bg-[var(--highlight)]'
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -191,24 +219,24 @@ export default function QuestionCard({
 
                     {/* Model Answer Section - Only for parsed questions */}
                     {isParsedQuestion && (question as ParsedQuestion).modelAnswer && (
-                        <div className="border-b border-white/[0.06]">
+                        <div className="border-b border-[var(--border-subtle)]">
                             <button
                                 onClick={() => setShowModelAnswer(!showModelAnswer)}
-                                className="w-full p-4 flex items-center justify-between text-left hover:bg-white/[0.04] transition-colors"
+                                className="w-full p-4 flex items-center justify-between text-left hover:bg-[var(--highlight)] transition-colors"
                             >
-                                <span className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                                    <Brain className="w-4 h-4 text-cyan-400" />
+                                <span className="text-sm font-semibold text-[var(--ink)] flex items-center gap-2">
+                                    <Brain className="w-4 h-4 text-[var(--accent)]" />
                                     Reference: Model Answer
                                 </span>
                                 {showModelAnswer ? (
-                                    <ChevronUp className="w-5 h-5 text-slate-500" />
+                                    <ChevronUp className="w-5 h-5 text-[var(--muted)]" />
                                 ) : (
-                                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                                    <ChevronDown className="w-5 h-5 text-[var(--muted)]" />
                                 )}
                             </button>
                             {showModelAnswer && (
                                 <div className="px-6 pb-6 pt-2 animate-slide-up">
-                                    <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5 text-sm text-slate-300 whitespace-pre-wrap max-h-64 overflow-y-auto custom-scrollbar leading-relaxed">
+                                    <div className="bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-lg p-5 text-sm text-[var(--ink)] whitespace-pre-wrap max-h-64 overflow-y-auto custom-scrollbar leading-relaxed">
                                         {(question as ParsedQuestion).modelAnswer}
                                     </div>
                                 </div>
@@ -217,23 +245,26 @@ export default function QuestionCard({
                     )}
 
                     {/* Interviewer Notes */}
-                    <div className="p-6 border-b border-white/[0.06]">
-                        <h3 className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wide">
+                    <div className="p-6 border-b border-[var(--border-subtle)]">
+                        <h3
+                            className="text-[11px] font-semibold text-[var(--muted)] mb-3 uppercase"
+                            style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                        >
                             Interviewer Notes
                         </h3>
                         <textarea
                             value={assessment.interviewerNotes}
                             onChange={(e) => onNotesChange(e.target.value)}
                             placeholder="Quick notes about the candidate's response..."
-                            className="w-full h-24 p-4 bg-white/[0.04] border border-white/[0.08] rounded-xl resize-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/30 text-white placeholder-slate-500 transition-all text-sm outline-none"
+                            className="w-full h-24 p-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg resize-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] text-[var(--ink)] placeholder-[var(--muted)] transition-colors text-sm outline-none"
                         />
                     </div>
 
                     {/* Actions */}
-                    <div className="p-6 bg-white/[0.02] flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="p-6 bg-[var(--surface-muted)] flex flex-col sm:flex-row items-center justify-between gap-4">
                         <button
                             onClick={onSkip}
-                            className="w-full sm:w-auto px-4 py-2.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg font-medium flex items-center justify-center gap-2 transition-all text-sm"
+                            className="w-full sm:w-auto px-4 py-2.5 text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--highlight)] rounded-md font-medium flex items-center justify-center gap-2 transition-colors text-sm"
                         >
                             <SkipForward className="w-4 h-4" />
                             Skip to Next
@@ -241,7 +272,7 @@ export default function QuestionCard({
                         <button
                             onClick={onComplete}
                             disabled={isProcessing}
-                            className="w-full sm:w-auto px-6 py-2.5 btn-accent flex items-center justify-center gap-2 text-sm"
+                            className="btn-accent-flat w-full sm:w-auto flex items-center justify-center gap-2 text-sm"
                         >
                             {isProcessing ? (
                                 <>

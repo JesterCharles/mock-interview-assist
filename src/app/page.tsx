@@ -6,16 +6,47 @@ import { Loader2, ArrowRight, Play, BookOpen, Clock, Download, AlertTriangle, Ch
 import SpeechToText from '@/components/SpeechToText';
 import { PDFReport } from '@/components/PDFReport';
 import ProgressBar from '@/components/ProgressBar';
+import PublicShell from '@/components/layout/PublicShell';
 import { pdf } from '@react-pdf/renderer';
 import { parseInterviewQuestions, selectRandomQuestions } from '@/lib/markdownParser';
 import { calculateAggregateScores } from '@/lib/langchain';
-import { GitHubService, GitHubFile } from '@/lib/github-service';
+import { GitHubService } from '@/lib/github-service';
 
 interface RateLimitInfo {
     allowed: boolean;
     remaining: number;
     nextReset: string;
 }
+
+// DESIGN.md surface card style (reusable)
+const surfaceCard: React.CSSProperties = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 12,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
+
+const surfaceMutedCard: React.CSSProperties = {
+    background: 'var(--surface-muted)',
+    border: '1px solid var(--border-subtle)',
+    borderRadius: 12,
+};
+
+const headingDisplay: React.CSSProperties = {
+    fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
+    color: 'var(--ink)',
+};
+
+const monoLabel: React.CSSProperties = {
+    fontFamily: "var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, monospace",
+    fontSize: 11,
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    color: 'var(--muted)',
+};
 
 export default function PublicInterviewPage() {
     const [step, setStep] = useState<'loading' | 'limit-reached' | 'topics' | 'interview' | 'done'>('loading');
@@ -81,11 +112,11 @@ export default function PublicInterviewPage() {
         const handleInternalClick = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             const anchor = target.closest('a');
-            
+
             if (anchor && anchor.href && anchor.href.startsWith(window.location.origin)) {
                 // Ignore clicks that are meant to be handled by local buttons (like Download)
                 if (anchor.getAttribute('download')) return;
-                
+
                 // If the link is internal and not already handled by a modal or local action
                 e.preventDefault();
                 setShowExitModal(true);
@@ -94,7 +125,7 @@ export default function PublicInterviewPage() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         document.addEventListener('click', handleInternalClick, true);
-        
+
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
             document.removeEventListener('click', handleInternalClick, true);
@@ -339,7 +370,7 @@ export default function PublicInterviewPage() {
                         })
                     });
                     const scoreResult = await r.json();
-                    
+
                     const updatedAssessments = {
                         ...sessionData.assessments,
                         [questionId]: {
@@ -507,7 +538,7 @@ export default function PublicInterviewPage() {
                             })
                         });
                         const scoreResult = await scoreRes.json();
-                        
+
                         const updatedAssessments = {
                             ...sessionData.assessments,
                             [questionId]: {
@@ -625,7 +656,7 @@ export default function PublicInterviewPage() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             setHasDownloadedPDF(true);
 
         } catch (e) {
@@ -648,54 +679,75 @@ export default function PublicInterviewPage() {
 
     if (step === 'loading') {
         return (
-            <div className="nlm-bg flex flex-col items-center justify-center p-4">
-                <div className="flex flex-col items-center animate-fade-in">
-                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
-                        <Loader2 className="w-7 h-7 animate-spin text-white" />
-                    </div>
-                    <h2 className="text-xl font-bold text-white mb-2">Next Level Mock</h2>
-                    <p className="text-slate-400 text-sm">Initializing secure session...</p>
+            <PublicShell>
+                <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
+                    <Loader2 className="w-7 h-7 animate-spin mb-4" style={{ color: 'var(--accent)' }} />
+                    <h2 style={{ ...headingDisplay, fontSize: 22, marginBottom: 6 }}>Next Level Mock</h2>
+                    <p style={{ color: 'var(--muted)', fontSize: 14 }}>Initializing secure session...</p>
                 </div>
-            </div>
+            </PublicShell>
         );
     }
 
     if (step === 'limit-reached') {
         const nextTime = rateInfo?.nextReset ? new Date(rateInfo.nextReset).toLocaleString() : 'tomorrow';
         return (
-            <div className="nlm-bg flex items-center justify-center p-4">
-                <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up">
-                    <div className="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-500/20">
-                        <Clock className="w-7 h-7 text-amber-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Session Limit Reached</h2>
-                    <p className="text-slate-400 mb-6 text-sm leading-relaxed">
-                        You have reached the maximum number of interviews allowed per day.
-                        Come back to continue practicing.
-                    </p>
-                    <div className="glass-card p-4 mb-4">
-                        <p className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Resets at</p>
-                        <p className="font-bold text-white text-lg">{nextTime}</p>
+            <PublicShell>
+                <div className="flex items-center justify-center py-12">
+                    <div className="max-w-md w-full p-8 text-center animate-slide-up" style={surfaceCard}>
+                        <div
+                            className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5"
+                            style={{ background: 'var(--surface-muted)', border: '1px solid var(--border)' }}
+                        >
+                            <Clock className="w-6 h-6" style={{ color: 'var(--warning)' }} />
+                        </div>
+                        <h2 style={{ ...headingDisplay, fontSize: 28, marginBottom: 8 }}>Session Limit Reached</h2>
+                        <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+                            You have reached the maximum number of interviews allowed per day.
+                            Come back to continue practicing.
+                        </p>
+                        <div className="p-4" style={surfaceMutedCard}>
+                            <p style={{ ...monoLabel, marginBottom: 4 }}>Resets at</p>
+                            <p style={{ ...headingDisplay, fontSize: 18 }}>{nextTime}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </PublicShell>
         );
     }
 
     if (step === 'topics') {
         return (
-            <div className="nlm-bg p-6 md:p-12">
-                <div className="max-w-5xl mx-auto space-y-8">
+            <PublicShell>
+                <div className="space-y-8">
                     {/* Header */}
                     <div className="text-center mb-4 animate-slide-up">
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
-                            Next Level <span className="gradient-text">Mock</span>
+                        <h1 style={{ ...headingDisplay, fontSize: 48, marginBottom: 8 }}>
+                            Next Level Mock
                         </h1>
-                        <p className="text-slate-400 text-sm max-w-lg mx-auto leading-relaxed">
+                        <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 520, margin: '0 auto', lineHeight: 1.6 }}>
                             Select up to 3 topics from our question banks. You will be assessed across 10 questions.
                         </p>
+                        <div className="mt-4 inline-flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
+                            <span>Have a PIN from your trainer?</span>
+                            <a
+                                href="/signin?as=associate"
+                                className="inline-flex items-center gap-1 font-medium underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 rounded"
+                                style={{ color: 'var(--accent)', outlineColor: 'var(--accent)' }}
+                            >
+                                Sign in to track your progress
+                                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                            </a>
+                        </div>
                         {error && (
-                            <div className="mt-4 inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl text-red-400 text-sm font-medium animate-slide-up">
+                            <div
+                                className="mt-4 inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium animate-slide-up"
+                                style={{
+                                    background: '#FDECEB',
+                                    border: '1px solid var(--danger)',
+                                    color: 'var(--danger)',
+                                }}
+                            >
                                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                                 {error}
                             </div>
@@ -707,28 +759,29 @@ export default function PublicInterviewPage() {
                         <div className="flex-1 w-full space-y-5">
                             {/* Search */}
                             <div className="relative">
-                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: 'var(--muted)' }} />
                                 <input
                                     type="text"
                                     value={techSearch}
                                     onChange={(e) => setTechSearch(e.target.value)}
                                     placeholder={isLoadingTopics ? "Loading topics..." : "Search topics..."}
                                     disabled={isLoadingTopics}
-                                    className="w-full pl-11 pr-4 py-3 bg-white/[0.06] border border-white/[0.08] rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/30 outline-none transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                                    className="w-full pl-11 pr-4 py-3 rounded-xl outline-none transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                                    style={{
+                                        background: 'var(--surface)',
+                                        border: '1px solid var(--border)',
+                                        color: 'var(--ink)',
+                                    }}
                                 />
                             </div>
 
                             {isLoadingTopics ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {Array.from({ length: 6 }).map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.05] shimmer-bg"
-                                            style={{ animationDelay: `${i * 0.15}s` }}
-                                        >
+                                        <div key={i} className="p-4 animate-fade-in" style={surfaceMutedCard}>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-5 h-5 rounded bg-white/[0.06]" />
-                                                <div className="h-4 rounded bg-white/[0.06] flex-1" />
+                                                <div className="w-5 h-5 rounded" style={{ background: 'var(--border-subtle)' }} />
+                                                <div className="h-4 rounded flex-1" style={{ background: 'var(--border-subtle)' }} />
                                             </div>
                                         </div>
                                     ))}
@@ -736,8 +789,11 @@ export default function PublicInterviewPage() {
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {filteredTechs.length === 0 ? (
-                                        <div className="col-span-1 sm:col-span-2 glass-card p-10 text-slate-500 text-center flex flex-col items-center justify-center">
-                                            <BookOpen className="w-8 h-8 opacity-20 mb-3" />
+                                        <div
+                                            className="col-span-1 sm:col-span-2 p-10 text-center flex flex-col items-center justify-center"
+                                            style={{ ...surfaceCard, color: 'var(--muted)' }}
+                                        >
+                                            <BookOpen className="w-8 h-8 opacity-40 mb-3" />
                                             <span className="text-sm">No matching topics found</span>
                                         </div>
                                     ) : (
@@ -750,14 +806,17 @@ export default function PublicInterviewPage() {
                                                     onClick={() => {
                                                         if (!isConfirming) toggleTopic(topic.path);
                                                     }}
-                                                    className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 hover-lift ${isConfirming && !isSelected ? 'opacity-30 cursor-not-allowed' : ''} ${isSelected
-                                                        ? 'border-cyan-500/40 bg-cyan-500/[0.06] shadow-lg shadow-cyan-500/10 glow-border-cyan'
-                                                        : 'border-white/[0.06] bg-white/[0.05] hover:border-white/[0.15] hover:bg-white/[0.07]'
-                                                    }`}
+                                                    className={`p-4 cursor-pointer transition-colors ${isConfirming && !isSelected ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                    style={{
+                                                        background: isSelected ? 'var(--highlight)' : 'var(--surface)',
+                                                        border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border)',
+                                                        borderRadius: 12,
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                                                    }}
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <BookOpen className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`} />
-                                                        <span className={`font-medium text-sm transition-colors duration-300 ${isSelected ? 'text-white' : 'text-slate-300'}`}>{topicDisplayName}</span>
+                                                        <BookOpen className="w-4 h-4 flex-shrink-0" style={{ color: isSelected ? 'var(--accent)' : 'var(--muted)' }} />
+                                                        <span className="font-medium text-sm" style={{ color: isSelected ? 'var(--ink)' : 'var(--ink)' }}>{topicDisplayName}</span>
                                                     </div>
                                                 </div>
                                             );
@@ -772,19 +831,21 @@ export default function PublicInterviewPage() {
                                     <button
                                         onClick={() => setTechPage(p => Math.max(1, p - 1))}
                                         disabled={techPage === 1}
-                                        className="p-2 rounded-lg bg-white/[0.07] border border-white/[0.06] hover:bg-white/[0.08] disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+                                        className="p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
                                     >
-                                        <ChevronLeft className="w-4 h-4 text-slate-400" />
+                                        <ChevronLeft className="w-4 h-4" style={{ color: 'var(--muted)' }} />
                                     </button>
-                                    <span className="text-xs font-medium text-slate-500">
+                                    <span style={{ ...monoLabel }}>
                                         {techPage} / {totalPages}
                                     </span>
                                     <button
                                         onClick={() => setTechPage(p => Math.min(totalPages, p + 1))}
                                         disabled={techPage === totalPages}
-                                        className="p-2 rounded-lg bg-white/[0.07] border border-white/[0.06] hover:bg-white/[0.08] disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+                                        className="p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
                                     >
-                                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                                        <ChevronRight className="w-4 h-4" style={{ color: 'var(--muted)' }} />
                                     </button>
                                 </div>
                             )}
@@ -792,23 +853,30 @@ export default function PublicInterviewPage() {
 
                         {/* Right Side: Action Panel */}
                         <div className="w-full lg:w-80 flex-shrink-0 sticky top-20">
-                            <div className="glass-card-strong p-6 flex flex-col gap-5">
+                            <div className="p-6 flex flex-col gap-5" style={surfaceCard}>
                                 {rateInfo && (
-                                    <div className="glass-card p-4 text-center">
-                                        <p className="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Sessions remaining</p>
-                                        <p className="text-3xl font-bold gradient-text-static">{rateInfo.remaining}</p>
+                                    <div className="p-4 text-center" style={surfaceMutedCard}>
+                                        <p style={{ ...monoLabel, marginBottom: 4 }}>Sessions remaining</p>
+                                        <p style={{ ...headingDisplay, fontSize: 28, color: 'var(--accent)' }}>{rateInfo.remaining}</p>
                                     </div>
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Name <span className="text-red-400">*</span></label>
+                                    <label style={{ ...monoLabel }}>
+                                        Your Name <span style={{ color: 'var(--danger)' }}>*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         required
                                         value={candidateNameInput}
                                         onChange={(e) => setCandidateNameInput(e.target.value)}
                                         placeholder="Enter your full name"
-                                        className="w-full px-4 py-3 bg-white/[0.06] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/30 outline-none transition-all duration-300 text-sm"
+                                        className="w-full px-4 py-3 rounded-xl outline-none transition-colors text-sm"
+                                        style={{
+                                            background: 'var(--bg)',
+                                            border: '1px solid var(--border)',
+                                            color: 'var(--ink)',
+                                        }}
                                     />
                                 </div>
 
@@ -816,7 +884,7 @@ export default function PublicInterviewPage() {
                                     <button
                                         disabled={selectedTopics.length === 0 || isLoadingQuestions || isLoadingTopics || !candidateNameInput.trim()}
                                         onClick={handleReviewTopics}
-                                        className="mt-1 w-full flex items-center justify-center gap-2 px-6 py-4 btn-primary text-sm"
+                                        className="mt-1 w-full flex items-center justify-center gap-2 btn-accent-flat text-sm"
                                     >
                                         {isLoadingQuestions ? (
                                             <>
@@ -832,10 +900,19 @@ export default function PublicInterviewPage() {
                                 ) : (
                                     <div className="mt-1 space-y-4 animate-slide-up">
                                         <div className="space-y-3">
-                                            <h3 className="text-white font-semibold text-sm">Selected ({selectedTopics.length}/3)</h3>
+                                            <h3 style={{ ...headingDisplay, fontSize: 16 }}>Selected ({selectedTopics.length}/3)</h3>
                                             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                                                 {selectedTopics.map((t, idx) => (
-                                                    <div key={idx} className="flex items-center text-sm text-cyan-300 glass-card px-3 py-2.5 glow-border-cyan">
+                                                    <div
+                                                        key={idx}
+                                                        className="flex items-center text-sm px-3 py-2.5"
+                                                        style={{
+                                                            background: 'var(--highlight)',
+                                                            border: '1px solid var(--accent)',
+                                                            borderRadius: 8,
+                                                            color: 'var(--accent)',
+                                                        }}
+                                                    >
                                                         <div className="flex items-center gap-2 truncate">
                                                             <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
                                                             <span className="truncate">{t.replace('.md', '')}</span>
@@ -845,24 +922,31 @@ export default function PublicInterviewPage() {
                                             </div>
                                         </div>
 
-                                        <div className="glass-card p-4 border-amber-500/20">
+                                        <div
+                                            className="p-4"
+                                            style={{
+                                                background: '#FEF3E0',
+                                                border: '1px solid var(--warning)',
+                                                borderRadius: 12,
+                                            }}
+                                        >
                                             <div className="flex items-center gap-2 mb-2">
-                                                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                                                <span className="font-semibold text-amber-400 text-xs uppercase tracking-wide">Heads Up</span>
+                                                <AlertTriangle className="w-4 h-4" style={{ color: 'var(--warning)' }} />
+                                                <span style={{ ...monoLabel, color: 'var(--warning)' }}>Heads Up</span>
                                             </div>
-                                            <p className="text-xs text-slate-400 leading-relaxed">
-                                                Once you start this cannot be changed and will consume <strong className="text-slate-300">1</strong> of your sessions for the day.
+                                            <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+                                                Once you start this cannot be changed and will consume <strong style={{ color: 'var(--ink)' }}>1</strong> of your sessions for the day.
                                             </p>
                                         </div>
                                         <button
                                             onClick={handleStartInterview}
-                                            className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
+                                            className="w-full flex items-center justify-center gap-2 btn-accent-flat text-sm"
                                         >
                                             Start Interview <Play className="w-4 h-4" fill="currentColor" />
                                         </button>
                                         <button
                                             onClick={() => setIsConfirming(false)}
-                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-500 hover:text-white hover:bg-white/[0.07] rounded-xl transition-all duration-200 text-xs font-medium"
+                                            className="w-full flex items-center justify-center gap-2 btn-secondary-flat text-xs"
                                         >
                                             <ChevronLeft className="w-3.5 h-3.5" /> Go Back
                                         </button>
@@ -872,7 +956,7 @@ export default function PublicInterviewPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </PublicShell>
         );
     }
 
@@ -881,15 +965,27 @@ export default function PublicInterviewPage() {
         const questionIds = questions.map(q => q.id);
 
         return (
-            <div className="nlm-bg">
-                <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col min-h-screen">
+            <PublicShell>
+                <div className="flex flex-col">
                     {/* Header */}
-                    <header className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
+                    <header
+                        className="flex items-center justify-between mb-6 pb-4"
+                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                    >
                         <div className="flex flex-col gap-1">
-                            <span className="text-xs font-bold gradient-text-static uppercase tracking-widest">Next Level Mock</span>
+                            <span style={{ ...monoLabel }}>Next Level Mock</span>
                             <div className="flex items-center gap-2 flex-wrap">
                                 {selectedTopics.map((t, i) => (
-                                    <span key={i} className="text-xs font-medium text-slate-300 bg-white/[0.07] px-2.5 py-1 rounded-md border border-white/[0.06]">
+                                    <span
+                                        key={i}
+                                        className="text-xs font-medium px-2.5 py-1"
+                                        style={{
+                                            background: 'var(--surface-muted)',
+                                            border: '1px solid var(--border-subtle)',
+                                            borderRadius: 6,
+                                            color: 'var(--ink)',
+                                        }}
+                                    >
                                         {formatTopicName(t)}
                                     </span>
                                 ))}
@@ -910,51 +1006,70 @@ export default function PublicInterviewPage() {
                     />
 
                     {/* Question Card */}
-                    <div className="glass-card-strong p-6 md:p-8 mb-6 animate-fade-in relative overflow-hidden">
-                        {/* Question Number Badge */}
-                        <div className="absolute top-0 right-0 bg-gradient-to-bl from-cyan-500/10 to-transparent w-32 h-32 pointer-events-none" />
+                    <div className="p-6 md:p-8 mb-6 animate-fade-in" style={surfaceCard}>
                         <div className="flex items-start gap-4 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/20">
-                                <span className="text-white font-bold text-sm">{currentIndex + 1}</span>
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                style={{ background: 'var(--accent)', color: 'var(--surface)' }}
+                            >
+                                <span className="font-bold text-sm">{currentIndex + 1}</span>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-bold text-white leading-relaxed flex-1">
+                            <h2 style={{ ...headingDisplay, fontSize: 22, lineHeight: 1.4, flex: 1 }}>
                                 {currentQ.question}
                             </h2>
                         </div>
 
                         {/* Follow-up prompt */}
                         {isFollowUp && followUpPrompt && !isSkipped && (
-                            <div className="mb-6 p-4 glass-card glow-border-cyan rounded-xl animate-slide-up">
-                                <p className="text-xs font-bold text-cyan-400 mb-1.5 uppercase tracking-wider">Follow-up</p>
-                                <p className="text-slate-200 text-sm leading-relaxed">{followUpPrompt}</p>
+                            <div
+                                className="mb-6 p-4 animate-slide-up"
+                                style={{
+                                    background: 'var(--highlight)',
+                                    border: '1px solid var(--accent)',
+                                    borderRadius: 12,
+                                }}
+                            >
+                                <p style={{ ...monoLabel, color: 'var(--accent)', marginBottom: 6 }}>Follow-up</p>
+                                <p style={{ color: 'var(--ink)', fontSize: 14, lineHeight: 1.6 }}>{followUpPrompt}</p>
                             </div>
                         )}
 
                         {/* Agent loading phase */}
                         {agentLoading && agentPhase && !isSkipped && (
-                            <div className="mb-6 p-4 glass-card rounded-xl flex items-center gap-3 animate-fade-in">
-                                <Loader2 className="w-4 h-4 text-cyan-400 animate-spin flex-shrink-0" />
-                                <span className="text-slate-400 text-sm font-medium">{agentPhase}</span>
+                            <div
+                                className="mb-6 p-4 flex items-center gap-3 animate-fade-in"
+                                style={surfaceMutedCard}
+                            >
+                                <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" style={{ color: 'var(--accent)' }} />
+                                <span style={{ color: 'var(--muted)', fontSize: 14, fontWeight: 500 }}>{agentPhase}</span>
                             </div>
                         )}
 
                         {/* Skipped: show model answer */}
                         {isSkipped ? (
-                            <div className="mb-4 p-6 glass-card relative overflow-hidden animate-slide-up border-emerald-500/20">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500" />
-                                <h3 className="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2 uppercase tracking-wider">
+                            <div className="mb-4 p-6 animate-slide-up" style={surfaceMutedCard}>
+                                <h3 className="mb-3 flex items-center gap-2" style={{ ...monoLabel, color: 'var(--success)' }}>
                                     <CheckCircle2 className="w-4 h-4" />
                                     Ideal Response
                                 </h3>
-                                <div className="text-slate-300 leading-relaxed text-sm whitespace-pre-wrap">
+                                <div style={{ color: 'var(--ink)', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                                     {currentQ.modelAnswer || "No ideal response provided for this question."}
                                 </div>
                                 {currentQ.keywords && currentQ.keywords.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                                        <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Key Concepts</p>
+                                    <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                                        <p style={{ ...monoLabel, marginBottom: 8 }}>Key Concepts</p>
                                         <div className="flex flex-wrap gap-2">
                                             {currentQ.keywords.map((kw: string, i: number) => (
-                                                <span key={i} className="px-2.5 py-1 text-xs rounded-lg bg-white/[0.07] text-slate-400 border border-white/[0.06]">
+                                                <span
+                                                    key={i}
+                                                    className="px-2.5 py-1 text-xs"
+                                                    style={{
+                                                        background: 'var(--surface)',
+                                                        border: '1px solid var(--border-subtle)',
+                                                        borderRadius: 6,
+                                                        color: 'var(--muted)',
+                                                    }}
+                                                >
                                                     {kw}
                                                 </span>
                                             ))}
@@ -964,12 +1079,14 @@ export default function PublicInterviewPage() {
                             </div>
                         ) : sessionData.assessments[currentQ.id] && ['scoring', 'validated', 'ready'].includes(sessionData.assessments[currentQ.id]?.status) ? (
                             /* Locked: question already submitted */
-                            <div className="mt-2 p-4 glass-card rounded-xl text-center">
-                                <p className="text-slate-400 text-sm font-medium">Response submitted. {sessionData.assessments[currentQ.id]?.status === 'validated' ? 'Scored.' : 'Scoring in progress...'}</p>
+                            <div className="mt-2 p-4 text-center" style={surfaceMutedCard}>
+                                <p style={{ color: 'var(--muted)', fontSize: 14, fontWeight: 500 }}>
+                                    Response submitted. {sessionData.assessments[currentQ.id]?.status === 'validated' ? 'Scored.' : 'Scoring in progress...'}
+                                </p>
                                 {currentIndex < activeQuestionIndex && (
                                     <button
                                         onClick={() => setCurrentIndex(activeQuestionIndex)}
-                                        className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 btn-primary text-xs"
+                                        className="mt-3 mx-auto btn-accent-flat text-xs"
                                     >
                                         Return to Current Question <ArrowRight className="w-3.5 h-3.5" />
                                     </button>
@@ -995,7 +1112,8 @@ export default function PublicInterviewPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
                         <button
                             onClick={handleFinish}
-                            className="text-slate-600 hover:text-slate-300 text-xs font-medium transition-colors duration-200"
+                            className="text-xs font-medium transition-colors hover:underline"
+                            style={{ color: 'var(--muted)' }}
                         >
                             Finish Early
                         </button>
@@ -1005,7 +1123,7 @@ export default function PublicInterviewPage() {
                                 <button
                                     onClick={handleSkip}
                                     disabled={agentLoading}
-                                    className="px-4 py-3 bg-white/[0.07] border border-white/[0.06] text-slate-400 font-medium rounded-xl hover:bg-white/[0.08] hover:text-white transition-all duration-200 disabled:opacity-30 text-sm"
+                                    className="btn-secondary-flat text-sm"
                                 >
                                     Skip (1 left)
                                 </button>
@@ -1014,7 +1132,7 @@ export default function PublicInterviewPage() {
                             {isSkipped ? (
                                 <button
                                     onClick={handleNextAfterSkip}
-                                    className="flex items-center gap-2 px-6 py-3 btn-accent text-sm"
+                                    className="flex items-center gap-2 btn-accent-flat text-sm"
                                 >
                                     {currentIndex === questions.length - 1 ? 'Finish Interview' : 'Next Question'}
                                     <ArrowRight className="w-4 h-4" />
@@ -1023,7 +1141,7 @@ export default function PublicInterviewPage() {
                                 <button
                                     onClick={handleSubmitAnswer}
                                     disabled={agentLoading || !transcript.trim()}
-                                    className="flex items-center gap-2 px-6 py-3 btn-primary text-sm"
+                                    className="flex items-center gap-2 btn-accent-flat text-sm"
                                 >
                                     {agentLoading ? (
                                         <>
@@ -1041,7 +1159,7 @@ export default function PublicInterviewPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </PublicShell>
         );
     }
 
@@ -1053,20 +1171,21 @@ export default function PublicInterviewPage() {
         const answeredQs = questions.filter(q => validAssessments[q.id]);
 
         return (
-            <div className="nlm-bg p-4 md:p-8 min-h-screen">
-                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">
-                    <div className="glass-card-strong p-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-gradient-to-bl from-emerald-500/10 to-transparent w-24 h-24 pointer-events-none" />
-                        
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-2 gap-6">
+            <PublicShell>
+                <div className="space-y-8 animate-fade-in pb-12">
+                    <div className="p-6" style={surfaceCard}>
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             {/* Left Section: Icon & Status */}
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
-                                    <CheckCircle2 className="w-6 h-6 text-white" />
+                                <div
+                                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                                    style={{ background: 'var(--success)', color: 'var(--surface)' }}
+                                >
+                                    <CheckCircle2 className="w-6 h-6" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h2 className="text-xl font-bold text-white leading-tight">Interview Complete</h2>
-                                    <p className="text-slate-400 text-xs font-medium">
+                                    <h2 style={{ ...headingDisplay, fontSize: 22 }}>Interview Complete</h2>
+                                    <p style={{ color: 'var(--muted)', fontSize: 13 }}>
                                         Great work, {sessionData.candidateName}. {aggregateScores.completedCount} questions analyzed.
                                     </p>
                                 </div>
@@ -1076,7 +1195,7 @@ export default function PublicInterviewPage() {
                             <div className="flex items-center gap-3 w-full md:w-auto">
                                 <button
                                     onClick={() => handleDownloadPDF(sessionData)}
-                                    className="flex-1 md:flex-none h-10 px-5 bg-cyan-600 hover:bg-cyan-500 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-200 text-sm shadow-lg shadow-cyan-500/20"
+                                    className="flex-1 md:flex-none btn-accent-flat text-sm"
                                 >
                                     <Download className="w-4 h-4" /> Download
                                 </button>
@@ -1088,7 +1207,7 @@ export default function PublicInterviewPage() {
                                             if (typeof window !== 'undefined') window.location.reload();
                                         }
                                     }}
-                                    className="flex-1 md:flex-none h-10 px-5 text-slate-300 hover:text-white bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] font-medium rounded-xl transition-all duration-200 text-sm"
+                                    className="flex-1 md:flex-none btn-secondary-flat text-sm"
                                 >
                                     New Session
                                 </button>
@@ -1096,25 +1215,34 @@ export default function PublicInterviewPage() {
                         </div>
 
                         {/* Bottom Section: Score Summary */}
-                        <div className="mt-8 pt-6 border-t border-white/[0.05] flex justify-center">
-                            <div className="glass-card px-6 py-3 border-emerald-500/20 flex items-center gap-4">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Aggregate Score</span>
-                                <div className="h-4 w-[1px] bg-white/10" />
-                                <span className="text-2xl font-bold text-white">{aggregateScores.averageScore.toFixed(1)} <span className="text-xs text-slate-400 font-normal">/ 5.0</span></span>
+                        <div className="mt-8 pt-6 flex justify-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                            <div className="px-6 py-3 flex items-center gap-4" style={surfaceMutedCard}>
+                                <span style={{ ...monoLabel }}>Aggregate Score</span>
+                                <div className="h-4 w-px" style={{ background: 'var(--border)' }} />
+                                <span style={{ ...headingDisplay, fontSize: 28, fontVariantNumeric: 'tabular-nums' }}>
+                                    {aggregateScores.averageScore.toFixed(1)}
+                                    <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 400 }}> / 5.0</span>
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     {/* Custom Confirmation Modal */}
                     {showExitModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                            <div className="max-w-md w-full glass-card-strong p-8 text-center animate-slide-up relative border-amber-500/20 shadow-2xl shadow-amber-500/10">
-                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
-                                    <AlertTriangle className="w-8 h-8 text-amber-500" />
+                        <div
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in"
+                            style={{ background: 'rgba(26,26,26,0.6)' }}
+                        >
+                            <div className="max-w-md w-full p-8 text-center animate-slide-up" style={surfaceCard}>
+                                <div
+                                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                                    style={{ background: '#FEF3E0', border: '1px solid var(--warning)' }}
+                                >
+                                    <AlertTriangle className="w-8 h-8" style={{ color: 'var(--warning)' }} />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-3">Unsaved Results</h3>
-                                <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                                    You have not downloaded your PDF report yet. If you start a new session, you will <span className="text-amber-400 font-semibold">permanently lose</span> this feedback.
+                                <h3 style={{ ...headingDisplay, fontSize: 22, marginBottom: 12 }}>Unsaved Results</h3>
+                                <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 32, lineHeight: 1.6 }}>
+                                    You have not downloaded your PDF report yet. If you start a new session, you will <span style={{ color: 'var(--warning)', fontWeight: 600 }}>permanently lose</span> this feedback.
                                 </p>
                                 <div className="flex flex-col gap-3">
                                     <button
@@ -1122,7 +1250,7 @@ export default function PublicInterviewPage() {
                                             setShowExitModal(false);
                                             handleDownloadPDF(sessionData);
                                         }}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-4 btn-accent text-sm"
+                                        className="w-full flex items-center justify-center gap-2 btn-accent-flat text-sm"
                                     >
                                         <Download className="w-4 h-4" /> Download Now
                                     </button>
@@ -1130,13 +1258,15 @@ export default function PublicInterviewPage() {
                                         onClick={() => {
                                             if (typeof window !== 'undefined') window.location.reload();
                                         }}
-                                        className="w-full px-6 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 font-medium rounded-xl transition-all duration-200 text-sm"
+                                        className="w-full px-6 py-3 font-medium rounded-lg transition-colors text-sm"
+                                        style={{ color: 'var(--danger)' }}
                                     >
                                         Discard and Exit
                                     </button>
                                     <button
                                         onClick={() => setShowExitModal(false)}
-                                        className="w-full px-6 py-3 text-slate-500 hover:text-white font-medium text-xs transition-all duration-200"
+                                        className="w-full px-6 py-3 font-medium text-xs transition-colors"
+                                        style={{ color: 'var(--muted)' }}
                                     >
                                         Go Back
                                     </button>
@@ -1146,49 +1276,79 @@ export default function PublicInterviewPage() {
                     )}
 
                     <div className="space-y-6">
-                        <h3 className="text-xl font-bold text-white mb-4">Detailed Question Breakdown</h3>
+                        <h3 style={{ ...headingDisplay, fontSize: 22, marginBottom: 16 }}>Detailed Question Breakdown</h3>
                         {answeredQs.map((q, idx) => {
                             const evalData: any = validAssessments[q.id];
                             return (
-                                <div key={idx} className="glass-card-strong p-4 md:p-6 relative overflow-hidden border-indigo-500/10">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-cyan-400" />
-                                    
+                                <div key={idx} className="p-4 md:p-6 relative" style={surfaceCard}>
                                     {/* Score at top right */}
-                                    <div className="absolute top-4 right-4 px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded-lg">
-                                        <span className="text-[10px] uppercase tracking-wider text-indigo-300 font-semibold mr-1.5">Score</span>
-                                        <span className="text-white font-bold text-sm">{evalData.finalScore || evalData.llmScore || 'N/A'}/5</span>
+                                    <div
+                                        className="absolute top-4 right-4 px-2.5 py-1"
+                                        style={{
+                                            background: 'var(--highlight)',
+                                            border: '1px solid var(--accent)',
+                                            borderRadius: 6,
+                                        }}
+                                    >
+                                        <span style={{ ...monoLabel, color: 'var(--accent)', marginRight: 6 }}>Score</span>
+                                        <span style={{ ...headingDisplay, fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>
+                                            {evalData.finalScore || evalData.llmScore || 'N/A'}/5
+                                        </span>
                                     </div>
 
-                                    <h4 className="text-base font-bold text-white mb-3 pr-20 leading-relaxed">
-                                        <span className="text-cyan-400 mr-2 border border-cyan-500/30 bg-cyan-500/10 px-1.5 py-0.5 rounded text-xs uppercase tracking-tighter">Q{idx + 1}</span> 
+                                    <h4 style={{ ...headingDisplay, fontSize: 18, marginBottom: 12, paddingRight: 80, lineHeight: 1.5 }}>
+                                        <span
+                                            className="mr-2 px-1.5 py-0.5 text-xs"
+                                            style={{
+                                                background: 'var(--highlight)',
+                                                border: '1px solid var(--accent)',
+                                                borderRadius: 4,
+                                                color: 'var(--accent)',
+                                                fontFamily: "var(--font-jetbrains-mono), ui-monospace, monospace",
+                                                fontWeight: 500,
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em',
+                                            }}
+                                        >
+                                            Q{idx + 1}
+                                        </span>
                                         {q.question}
                                     </h4>
 
                                     {evalData.interviewerNotes && (
                                         <div className="mb-4">
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Your Transcript</p>
-                                            <div className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.04]">
-                                                <p className="text-xs text-slate-400 italic leading-relaxed">
-                                                    {evalData.interviewerNotes.includes('Candidate Transcript:\n') 
-                                                        ? evalData.interviewerNotes.split('Agent Reasoning:')[0].replace('Candidate Transcript:\n', '').trim() 
+                                            <p style={{ ...monoLabel, marginBottom: 6 }}>Your Transcript</p>
+                                            <div className="p-3" style={surfaceMutedCard}>
+                                                <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                                                    {evalData.interviewerNotes.includes('Candidate Transcript:\n')
+                                                        ? evalData.interviewerNotes.split('Agent Reasoning:')[0].replace('Candidate Transcript:\n', '').trim()
                                                         : evalData.interviewerNotes}
                                                 </p>
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="pl-0">
-                                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">AI Feedback</p>
-                                        <p className="text-sm text-slate-300 leading-relaxed">
+                                    <div>
+                                        <p style={{ ...monoLabel, marginBottom: 6 }}>AI Feedback</p>
+                                        <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6 }}>
                                             {evalData.finalFeedback || evalData.llmFeedback || 'No feedback available.'}
                                         </p>
                                     </div>
-                                    
+
                                     {evalData.keywordsHit?.length > 0 && (
-                                        <div className="mt-4 pt-4 border-t border-white/[0.05]">
+                                        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                                             <div className="flex flex-wrap gap-2">
                                                 {evalData.keywordsHit.map((kw: string, i: number) => (
-                                                    <span key={i} className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/5 text-emerald-400/70 border border-emerald-500/10">
+                                                    <span
+                                                        key={i}
+                                                        className="px-2 py-0.5 text-xs"
+                                                        style={{
+                                                            background: '#E8F5EE',
+                                                            border: '1px solid var(--success)',
+                                                            borderRadius: 4,
+                                                            color: 'var(--success)',
+                                                        }}
+                                                    >
                                                         ✓ {kw}
                                                     </span>
                                                 ))}
@@ -1200,10 +1360,9 @@ export default function PublicInterviewPage() {
                         })}
                     </div>
                 </div>
-            </div>
+            </PublicShell>
         );
     }
 
     return null;
 }
-

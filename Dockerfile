@@ -69,6 +69,13 @@ RUN mkdir -p ./data && chown -R nextjs:nodejs ./data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy Prisma CLI, engine, and migrations so `prisma migrate deploy` can run at container start.
+# Migrations run at RUNTIME (not build time) because the build env has no DB credentials (D-04).
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+
 # Switch to non-root user
 USER nextjs
 
@@ -95,4 +102,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Start the application
-CMD ["node", "server.js"]
+# Applies any pending Prisma migrations against DIRECT_URL before starting the Next server (D-04).
+# DIRECT_URL must be set at runtime via docker compose / env — migrations use port 5432 (not pooler).
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]

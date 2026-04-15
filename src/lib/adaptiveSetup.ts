@@ -27,6 +27,12 @@ export interface GapScoreResponse {
   sessionCount: number;
   /** Skill-level gap scores (topic: null in DB) */
   scores: SkillGapScore[];
+  /**
+   * Cohort the associate belongs to, if any.
+   * Used by the setup wizard to fetch curriculum weeks (D-14).
+   * null = associate has no cohort → show full tech list (D-17).
+   */
+  cohortId: number | null;
 }
 
 /**

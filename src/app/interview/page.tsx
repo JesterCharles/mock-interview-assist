@@ -109,11 +109,12 @@ export default function InterviewPage() {
 
     if (!session || !currentQuestion || !currentAssessment) {
         return (
-            <div className="nlm-bg flex flex-col items-center justify-center p-4 min-h-screen">
+            <div
+                className="flex flex-col items-center justify-center p-4 min-h-screen"
+                style={{ background: 'var(--bg)' }}
+            >
                 <div className="flex flex-col items-center animate-fade-in">
-                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-indigo-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
-                        <Loader2 className="w-7 h-7 animate-spin text-white" />
-                    </div>
+                    <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--accent)' }} />
                 </div>
             </div>
         );
@@ -123,13 +124,17 @@ export default function InterviewPage() {
     const isLastQuestion = progress.current === progress.total;
 
     return (
-        <main className="nlm-bg min-h-screen">
+        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col">
                 {/* Header */}
-                <header className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
+                <header
+                    className="flex items-center justify-between mb-6 pb-4"
+                    style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                >
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                        className="flex items-center gap-2 transition-colors text-sm font-medium hover:underline"
+                        style={{ color: 'var(--muted)' }}
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Exit Interview
@@ -137,8 +142,27 @@ export default function InterviewPage() {
 
                     {session.candidateName && (
                         <div className="flex flex-col items-end gap-1">
-                            <span className="text-xs font-bold gradient-text-static uppercase tracking-widest">Interviewing</span>
-                            <span className="text-sm font-medium text-slate-300 bg-white/[0.07] px-3 py-1.5 rounded-md border border-white/[0.06]">
+                            <span
+                                style={{
+                                    fontFamily: "var(--font-jetbrains-mono), ui-monospace, monospace",
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.08em',
+                                    color: 'var(--muted)',
+                                }}
+                            >
+                                Interviewing
+                            </span>
+                            <span
+                                className="text-sm font-medium px-3 py-1.5"
+                                style={{
+                                    background: 'var(--surface-muted)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 6,
+                                    color: 'var(--ink)',
+                                }}
+                            >
                                 {session.candidateName}
                             </span>
                         </div>
@@ -174,7 +198,7 @@ export default function InterviewPage() {
                     <button
                         onClick={previousQuestion}
                         disabled={session.currentQuestionIndex === 0}
-                        className="px-4 py-2.5 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-medium"
+                        className="btn-secondary-flat text-sm disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Previous
@@ -184,7 +208,7 @@ export default function InterviewPage() {
                         {!isLastQuestion ? (
                             <button
                                 onClick={nextQuestion}
-                                className="px-4 py-2.5 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all text-sm font-medium"
+                                className="btn-secondary-flat text-sm"
                             >
                                 Next
                                 <ArrowRight className="w-4 h-4" />
@@ -192,7 +216,7 @@ export default function InterviewPage() {
                         ) : (
                             <button
                                 onClick={handleFinishInterview}
-                                className="btn-accent px-6 py-2.5 text-sm"
+                                className="btn-accent-flat text-sm"
                             >
                                 <Flag className="w-4 h-4" />
                                 Finish Interview

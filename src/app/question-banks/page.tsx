@@ -8,7 +8,6 @@ import {
     FileText,
     Upload,
     Trash2,
-    Download,
     Eye,
     Loader2,
     Plus,
@@ -19,6 +18,19 @@ import {
 import { parseInterviewQuestions } from '@/lib/markdownParser';
 import { ParsedQuestion } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
+
+const displayFont = { fontFamily: 'var(--font-display)' } as const;
+const monoLabel = {
+    fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+};
+
+const surfaceCardStyle = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
 
 interface QuestionBank {
     id: string;
@@ -117,7 +129,6 @@ export default function QuestionBanksPage() {
     };
 
     const loadBuiltInCounts = async () => {
-        // Load question counts for built-in banks
         const updatedBuiltIn = await Promise.all(
             BUILT_IN_BANKS.map(async (bank) => {
                 try {
@@ -228,14 +239,75 @@ export default function QuestionBanksPage() {
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
+    const renderBankCard = (bank: QuestionBank, withActions: boolean) => (
+        <div
+            key={bank.id}
+            className="rounded-lg p-5 transition-colors hover:bg-[var(--highlight)]"
+            style={surfaceCardStyle}
+        >
+            <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                    <h3
+                        className="mb-1 truncate"
+                        style={{ ...displayFont, fontWeight: 600, fontSize: '22px', color: 'var(--ink)' }}
+                    >
+                        {bank.name}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm flex-wrap" style={{ color: 'var(--muted)' }}>
+                        <span className="flex items-center gap-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                            <Hash className="w-3 h-3" />
+                            {bank.questionCount} questions
+                        </span>
+                        {withActions && (
+                            <>
+                                <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {formatDate(bank.createdAt)}
+                                </span>
+                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatSize(bank.size)}</span>
+                            </>
+                        )}
+                    </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                        onClick={() => handlePreview(bank)}
+                        className="p-2 transition-colors rounded-md hover:bg-[var(--surface-muted)]"
+                        style={{ color: 'var(--muted)' }}
+                        title="Preview questions"
+                        aria-label={`Preview ${bank.name}`}
+                    >
+                        <Eye className="w-5 h-5" />
+                    </button>
+                    {withActions && (
+                        <button
+                            onClick={() => handleDelete(bank)}
+                            className="p-2 transition-colors rounded-md hover:bg-[var(--surface-muted)]"
+                            style={{ color: 'var(--muted)' }}
+                            title="Delete"
+                            aria-label={`Delete ${bank.name}`}
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
     return (
-        <main className="min-h-screen nlm-bg">
+        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Question Banks</h1>
-                        <p className="text-gray-400">Manage interview question markdown files</p>
+                        <h1
+                            className="mb-2"
+                            style={{ ...displayFont, fontWeight: 600, fontSize: '48px', color: 'var(--ink)' }}
+                        >
+                            Question Banks
+                        </h1>
+                        <p style={{ color: 'var(--muted)' }}>Manage interview question markdown files</p>
                     </div>
 
                     <div>
@@ -249,7 +321,7 @@ export default function QuestionBanksPage() {
                         />
                         <label
                             htmlFor="upload-bank"
-                            className={`px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition-colors cursor-pointer flex items-center gap-2 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                            className={`btn-accent-flat cursor-pointer inline-flex items-center gap-2 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                         >
                             {isUploading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -263,101 +335,51 @@ export default function QuestionBanksPage() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
                     </div>
                 ) : (
                     <div className="space-y-8">
                         {/* Built-in Banks */}
                         <div>
-                            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-indigo-400" />
+                            <h2
+                                className="mb-4 flex items-center gap-2"
+                                style={{ ...displayFont, fontWeight: 600, fontSize: '28px', color: 'var(--ink)' }}
+                            >
+                                <FileText className="w-5 h-5" style={{ color: 'var(--accent)' }} />
                                 Curriculum Question Banks
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {builtInBanks.map(bank => (
-                                    <div
-                                        key={bank.id}
-                                        className="glass-card rounded-xl p-5 hover:bg-white/[0.08] transition-colors border border-white/10"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-white mb-1">{bank.name}</h3>
-                                                <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                    <span className="flex items-center gap-1">
-                                                        <Hash className="w-3 h-3" />
-                                                        {bank.questionCount} questions
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => handlePreview(bank)}
-                                                className="p-2 text-gray-400 hover:text-indigo-400 transition-colors"
-                                                title="Preview questions"
-                                            >
-                                                <Eye className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                                {builtInBanks.map(bank => renderBankCard(bank, false))}
                             </div>
                         </div>
 
                         {/* Custom Banks */}
                         <div>
-                            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                <Upload className="w-5 h-5 text-purple-400" />
+                            <h2
+                                className="mb-4 flex items-center gap-2"
+                                style={{ ...displayFont, fontWeight: 600, fontSize: '28px', color: 'var(--ink)' }}
+                            >
+                                <Upload className="w-5 h-5" style={{ color: 'var(--accent)' }} />
                                 Uploaded Question Banks
                             </h2>
 
                             {customBanks.length === 0 ? (
-                                <div className="glass-card border border-dashed border-white/20 rounded-xl p-8 text-center">
-                                    <Upload className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-                                    <p className="text-gray-400 mb-2">No custom question banks uploaded yet</p>
-                                    <p className="text-sm text-gray-500">
+                                <div
+                                    className="rounded-xl p-8 text-center"
+                                    style={{
+                                        background: 'var(--surface)',
+                                        border: '1px dashed var(--border)',
+                                    }}
+                                >
+                                    <Upload className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--muted)' }} />
+                                    <p className="mb-2" style={{ color: 'var(--ink)' }}>No custom question banks uploaded yet</p>
+                                    <p className="text-sm" style={{ color: 'var(--muted)' }}>
                                         Upload a markdown file with interview questions to get started
                                     </p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {customBanks.map(bank => (
-                                        <div
-                                            key={bank.id}
-                                            className="glass-card rounded-xl p-5 hover:bg-white/[0.08] transition-colors border border-white/10"
-                                        >
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-white mb-1">{bank.name}</h3>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                        <span className="flex items-center gap-1">
-                                                            <Hash className="w-3 h-3" />
-                                                            {bank.questionCount} questions
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            <Calendar className="w-3 h-3" />
-                                                            {formatDate(bank.createdAt)}
-                                                        </span>
-                                                        <span>{formatSize(bank.size)}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => handlePreview(bank)}
-                                                        className="p-2 text-gray-400 hover:text-indigo-400 transition-colors"
-                                                        title="Preview questions"
-                                                    >
-                                                        <Eye className="w-5 h-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(bank)}
-                                                        className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    {customBanks.map(bank => renderBankCard(bank, true))}
                                 </div>
                             )}
                         </div>
@@ -366,13 +388,32 @@ export default function QuestionBanksPage() {
 
                 {/* Preview Modal */}
                 {previewBank && (
-                    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                        <div className="glass-card-strong rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden border border-white/10">
-                            <div className="flex items-center justify-between p-4 border-b border-white/10">
-                                <h3 className="text-lg font-semibold text-white">{previewBank.name}</h3>
+                    <div
+                        className="fixed inset-0 flex items-center justify-center z-50 p-4"
+                        style={{ background: 'rgba(26,26,26,0.45)' }}
+                    >
+                        <div
+                            className="rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden"
+                            style={{
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border)',
+                                boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+                            }}
+                        >
+                            <div
+                                className="flex items-center justify-between p-4"
+                                style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                            >
+                                <h3
+                                    style={{ ...displayFont, fontWeight: 600, fontSize: '22px', color: 'var(--ink)' }}
+                                >
+                                    {previewBank.name}
+                                </h3>
                                 <button
                                     onClick={() => setPreviewBank(null)}
-                                    className="p-1 text-gray-400 hover:text-white"
+                                    className="p-1 transition-colors rounded-md hover:bg-[var(--surface-muted)]"
+                                    style={{ color: 'var(--muted)' }}
+                                    aria-label="Close preview"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -380,28 +421,71 @@ export default function QuestionBanksPage() {
                             <div className="p-4 overflow-y-auto max-h-[60vh]">
                                 {isLoadingPreview ? (
                                     <div className="flex items-center justify-center py-12">
-                                        <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                                        <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--accent)' }} />
                                     </div>
                                 ) : previewQuestions.length === 0 ? (
-                                    <p className="text-gray-400 text-center py-8">No questions found in this file</p>
+                                    <p className="text-center py-8" style={{ color: 'var(--muted)' }}>No questions found in this file</p>
                                 ) : (
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {previewQuestions.map((q, index) => (
-                                            <div key={q.id} className="glass-card rounded-lg p-4 border border-white/5">
+                                            <div
+                                                key={q.id}
+                                                className="py-3"
+                                                style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                                            >
                                                 <div className="flex items-start gap-3">
-                                                    <span className="bg-indigo-600 text-white text-sm font-bold w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <span
+                                                        className="text-sm font-bold w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                        style={{
+                                                            background: 'var(--accent)',
+                                                            color: '#FFFFFF',
+                                                            fontFamily: 'var(--font-mono)',
+                                                        }}
+                                                    >
                                                         {index + 1}
                                                     </span>
-                                                    <div className="flex-1">
-                                                        <p className="text-white mb-2">{q.question}</p>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p
+                                                            className="mb-2"
+                                                            style={{ ...displayFont, fontWeight: 600, fontSize: '22px', color: 'var(--ink)' }}
+                                                        >
+                                                            {q.question}
+                                                        </p>
+                                                        <div className="text-sm mb-2" style={{ color: 'var(--muted)' }}>
+                                                            {q.difficulty && (
+                                                                <span
+                                                                    className="inline-block px-2 py-0.5 rounded-full text-xs font-medium mr-2"
+                                                                    style={{
+                                                                        ...monoLabel,
+                                                                        background:
+                                                                            q.difficulty === 'beginner' ? '#E8F5EE'
+                                                                            : q.difficulty === 'intermediate' ? '#FEF3E0'
+                                                                            : '#FDECEB',
+                                                                        color:
+                                                                            q.difficulty === 'beginner' ? 'var(--success)'
+                                                                            : q.difficulty === 'intermediate' ? 'var(--warning)'
+                                                                            : 'var(--danger)',
+                                                                    }}
+                                                                >
+                                                                    {q.difficulty}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <div className="flex flex-wrap gap-1">
                                                             {q.keywords.slice(0, 5).map((kw, i) => (
-                                                                <span key={i} className="px-2 py-0.5 bg-slate-600 text-gray-300 text-xs rounded">
+                                                                <span
+                                                                    key={i}
+                                                                    className="px-2 py-0.5 text-xs rounded-full"
+                                                                    style={{
+                                                                        background: 'var(--surface-muted)',
+                                                                        color: 'var(--muted)',
+                                                                    }}
+                                                                >
                                                                     {kw}
                                                                 </span>
                                                             ))}
                                                             {q.keywords.length > 5 && (
-                                                                <span className="px-2 py-0.5 text-gray-400 text-xs">
+                                                                <span className="px-2 py-0.5 text-xs" style={{ color: 'var(--muted)' }}>
                                                                     +{q.keywords.length - 5} more
                                                                 </span>
                                                             )}

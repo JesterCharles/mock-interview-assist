@@ -13,6 +13,12 @@ export interface RosterAssociate {
 
 // For the detail page (Plan 02)
 export interface AssociateDetail extends RosterAssociate {
+  /** Numeric DB id — required for trainer-only actions like PIN generation (Plan 09-03) */
+  id: number
+  /** Current cohort id, null when unassigned (Plan 11-03 / D-05) */
+  cohortId: number | null
+  /** Current cohort name for display, null when unassigned (Plan 11-03 / D-05) */
+  cohortName: string | null
   sessions: SessionSummary[]
   gapScores: GapScoreEntry[]
 }
@@ -36,4 +42,20 @@ export interface GapScoreEntry {
 export interface GapDataPoint {
   session: string
   score: number
+}
+
+// Aggregate readiness counts returned alongside a cohort-scoped roster.
+// Opt-in: returned only when callers pass `?includeSummary=true` on /api/trainer.
+export interface CohortSummary {
+  ready: number
+  improving: number
+  notReady: number
+}
+
+// Wrapped response shape used ONLY by callers that explicitly set
+// `includeSummary=true`. Default /api/trainer callers continue to receive
+// a raw `RosterAssociate[]` array (v1.0 contract).
+export interface RosterResponse {
+  associates: RosterAssociate[]
+  summary: CohortSummary
 }

@@ -24,10 +24,20 @@ export default function ProgressBar({
     }).length;
 
     return (
-        <div className="glass-card p-4 mb-6">
+        <div
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 mb-6"
+            style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+        >
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-200 tracking-wide">Progress</h3>
-                <span className="text-xs font-medium text-slate-400 bg-white/[0.04] px-2.5 py-1 rounded-full">
+                <h3
+                    className="text-xs font-semibold text-[var(--muted)] uppercase"
+                    style={{ fontFamily: 'var(--font-jetbrains-mono)', letterSpacing: '0.08em' }}
+                >
+                    Progress
+                </h3>
+                <span
+                    className="text-xs font-medium text-[var(--muted)] bg-[var(--surface-muted)] px-2.5 py-1 rounded-full tabular-nums"
+                >
                     {currentIndex + 1} / {totalQuestions}
                 </span>
             </div>
@@ -42,22 +52,27 @@ export default function ProgressBar({
                     const isProcessing = assessment?.status === 'processing';
                     const isScoring = assessment?.status === 'scoring';
 
+                    const base = 'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-150 border';
+                    let tone: string;
+                    if (isCurrent) {
+                        tone = 'bg-[var(--accent)] text-white border-[var(--accent)]';
+                    } else if (isSkipped) {
+                        tone = 'bg-[var(--surface-muted)] text-[var(--muted)] border-[var(--border)]';
+                    } else if (isCompleted) {
+                        tone = 'bg-[var(--surface)] text-[var(--success)] border-[var(--success)]';
+                    } else if (isScoring) {
+                        tone = 'bg-[var(--surface)] text-[var(--warning)] border-[var(--warning)]';
+                    } else if (isProcessing) {
+                        tone = 'bg-[var(--surface)] text-[var(--accent)] border-[var(--accent)]';
+                    } else {
+                        tone = 'bg-[var(--surface-muted)] text-[var(--muted)] border-[var(--border-subtle)] hover:bg-[var(--highlight)] hover:text-[var(--ink)]';
+                    }
+
                     return (
                         <button
                             key={`${id}-${index}`}
                             onClick={() => onNavigate(index)}
-                            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isCurrent
-                                ? 'bg-gradient-to-br from-cyan-400 to-indigo-500 text-white scale-110 shadow-lg shadow-cyan-500/30 ring-2 ring-cyan-400/40'
-                                : isSkipped
-                                    ? 'bg-slate-800 text-slate-600 border border-slate-700'
-                                    : isCompleted
-                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                        : isScoring
-                                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'
-                                            : isProcessing
-                                                ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 animate-pulse'
-                                                : 'bg-white/[0.04] text-slate-500 border border-white/[0.06] hover:bg-white/[0.08] hover:text-slate-300'
-                                }`}
+                            className={`${base} ${tone}`}
                             title={`Question ${index + 1}${isSkipped ? ' (Skipped)' : isCompleted ? ' (Completed)' : isScoring ? ' (Scoring...)' : ''}`}
                         >
                             {isSkipped ? (
@@ -67,19 +82,19 @@ export default function ProgressBar({
                             ) : isScoring ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                                <span className="text-xs font-semibold">{index + 1}</span>
+                                <span className="text-xs font-semibold tabular-nums">{index + 1}</span>
                             )}
                         </button>
                     );
                 })}
             </div>
 
-            {/* Progress bar */}
-            <div className="mt-3 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+            {/* Progress bar — flat accent fill on muted track */}
+            <div className="mt-3 h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
                 <div
-                    className="h-full progress-gradient rounded-full transition-all duration-700 ease-out"
+                    className="h-full rounded-full transition-all duration-300 ease-out bg-[var(--accent)]"
                     style={{
-                        width: `${((completedCount) / totalQuestions) * 100}%`,
+                        width: `${(completedCount / totalQuestions) * 100}%`,
                     }}
                 />
             </div>

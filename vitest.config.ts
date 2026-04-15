@@ -6,7 +6,12 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     passWithNoTests: true,
-    exclude: ['**/node_modules/**', '**/.next/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/.next/**',
+      'tests/e2e/**',
+      'tests/visual/**',
+    ],
   },
   resolve: {
     alias: {

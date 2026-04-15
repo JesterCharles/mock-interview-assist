@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { isAuthenticatedSession } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
-import { RosterAssociate } from '@/lib/trainer-types'
+import { CohortSummary, RosterAssociate, RosterResponse } from '@/lib/trainer-types'
 
 // Validate readinessStatus from DB before casting to union type (WR-03)
 const VALID_READINESS_STATUSES = new Set(['ready', 'improving', 'not_ready'])
@@ -11,14 +11,37 @@ function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_re
     : 'not_ready'
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   // Auth check — use shared helper for consistency (T-06-01, CR-02)
   if (!(await isAuthenticatedSession())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Parse OPTIONAL query params (Plan 12-01).
+  // - cohortId: filter roster to a single cohort. "all" or empty is treated as no filter.
+  // - includeSummary=true: opt-in wrapped response `{ associates, summary }`.
+  //   Only honored when a cohortId is actually scoped — summary on the full
+  //   roster is noisy and not part of the cohort dashboard UX (D-04).
+  const url = new URL(request.url)
+  const cohortIdParam = url.searchParams.get('cohortId')
+  const includeSummary = url.searchParams.get('includeSummary') === 'true'
+  // Cohort FK is Int in the Prisma schema — parse and reject non-numeric values
+  // (including "all" and "") to the unfiltered path.
+  let cohortId: number | null = null
+  if (cohortIdParam && cohortIdParam !== 'all' && cohortIdParam !== '') {
+    const parsed = Number.parseInt(cohortIdParam, 10)
+    if (Number.isInteger(parsed)) {
+      cohortId = parsed
+    }
+  }
+
   try {
+    // `where: undefined` preserves v1.0 behavior — associates with cohortId = null
+    // continue to appear in the default (unfiltered) roster (D-02).
+    const where = cohortId ? { cohortId } : undefined
+
     const associates = await prisma.associate.findMany({
+      where,
       include: {
         _count: {
           select: { sessions: true },
@@ -42,6 +65,23 @@ export async function GET() {
       sessionCount: a._count.sessions,
       lastSessionDate: a.sessions[0]?.date ?? null,
     }))
+
+    // Wrapped response is OPT-IN and only when cohort-scoped. All other paths
+    // return a raw array to preserve the v1.0 contract consumed by
+    // /trainer (page.tsx) and /dashboard (associate typeahead).
+    if (includeSummary && cohortId) {
+      const summary: CohortSummary = rosterData.reduce<CohortSummary>(
+        (acc, a) => {
+          if (a.readinessStatus === 'ready') acc.ready += 1
+          else if (a.readinessStatus === 'improving') acc.improving += 1
+          else acc.notReady += 1
+          return acc
+        },
+        { ready: 0, improving: 0, notReady: 0 },
+      )
+      const payload: RosterResponse = { associates: rosterData, summary }
+      return NextResponse.json(payload)
+    }
 
     return NextResponse.json(rosterData)
   } catch (error) {

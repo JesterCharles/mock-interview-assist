@@ -133,7 +133,10 @@ exports.Prisma.AssociateScalarFieldEnum = {
   updatedAt: 'updatedAt',
   readinessStatus: 'readinessStatus',
   recommendedArea: 'recommendedArea',
-  lastComputedAt: 'lastComputedAt'
+  lastComputedAt: 'lastComputedAt',
+  pinHash: 'pinHash',
+  pinGeneratedAt: 'pinGeneratedAt',
+  cohortId: 'cohortId'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -153,6 +156,9 @@ exports.Prisma.SessionScalarFieldEnum = {
   assessments: 'assessments',
   techMap: 'techMap',
   associateId: 'associateId',
+  cohortId: 'cohortId',
+  mode: 'mode',
+  readinessRecomputeStatus: 'readinessRecomputeStatus',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -171,6 +177,26 @@ exports.Prisma.SettingsScalarFieldEnum = {
   id: 'id',
   readinessThreshold: 'readinessThreshold',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CohortScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CurriculumWeekScalarFieldEnum = {
+  id: 'id',
+  cohortId: 'cohortId',
+  weekNumber: 'weekNumber',
+  skillName: 'skillName',
+  skillSlug: 'skillSlug',
+  topicTags: 'topicTags',
+  startDate: 'startDate'
 };
 
 exports.Prisma.SortOrder = {
@@ -209,7 +235,9 @@ exports.Prisma.ModelName = {
   Associate: 'Associate',
   Session: 'Session',
   GapScore: 'GapScore',
-  Settings: 'Settings'
+  Settings: 'Settings',
+  Cohort: 'Cohort',
+  CurriculumWeek: 'CurriculumWeek'
 };
 
 /**
