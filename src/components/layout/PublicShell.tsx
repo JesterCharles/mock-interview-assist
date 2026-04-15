@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 
 /**
  * PublicShell — shared chrome for NEW public/auth/associate routes.
@@ -51,17 +52,20 @@ export function PublicShell(props: PublicShellProps) {
           className="mx-auto px-6 py-6 flex items-center justify-between"
           style={{ maxWidth: '1120px' }}
         >
-          <span
+          <Link
+            href="/"
+            aria-label="Back to Next Level Mock home"
             style={{
               fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
               fontWeight: 600,
               fontSize: '22px',
               letterSpacing: '-0.01em',
               color: 'var(--ink)',
+              textDecoration: 'none',
             }}
           >
             Next Level Mock
-          </span>
+          </Link>
         </div>
       </header>
 
