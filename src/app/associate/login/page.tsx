@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { isAssociateAuthenticated } from '@/lib/auth-server';
+import { getAssociateIdentity } from '@/lib/auth-server';
+import { prisma } from '@/lib/prisma';
 import { PinEntryForm } from './PinEntryForm';
 import { PublicShell } from '@/components/layout/PublicShell';
 
@@ -27,14 +28,21 @@ export default async function AssociateLoginPage({ searchParams }: PageProps) {
   const { next } = await searchParams;
   const nextPath = safeNext(next);
 
-  const associate = await isAssociateAuthenticated();
-
   // Only bounce already-authenticated associates. Trainers can view the page
   // (e.g., to demo the flow or generate-then-test a PIN) without being redirected
   // back to the public root, which causes an apparent "click does nothing" bug
   // when the trainer cookie is present.
-  if (associate) {
-    redirect(nextPath ?? '/');
+  const identity = await getAssociateIdentity();
+  if (identity) {
+    if (nextPath) redirect(nextPath);
+    // No ?next provided: send the signed-in associate straight into their
+    // interview entry instead of bouncing back to /, which feels like the
+    // CTA did nothing.
+    const me = await prisma.associate.findUnique({
+      where: { id: identity.associateId },
+      select: { slug: true },
+    });
+    redirect(me ? `/associate/${me.slug}/interview` : '/');
   }
 
   return (
