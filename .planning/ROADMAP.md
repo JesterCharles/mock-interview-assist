@@ -60,7 +60,9 @@
   3. Wizard displays a "last synced {time}" timestamp for the active repo+branch
   4. Trainer-only "Refresh" button calls `/api/github/cache/invalidate` and the next load fetches fresh
   5. Conditional GET via `If-None-Match` returns 304 and resets TTL without re-downloading the body
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 16-01-PLAN.md — Manifest cache module + /api/github?type=manifest + invalidate route + wizard UI + call-site migration
 
 ### Phase 17: Schema Prep + Email Backfill
 **Goal**: Database schema is ready for Supabase identity linkage; existing Associate rows have trainer-curated emails (or are deleted) before auth cutover.
