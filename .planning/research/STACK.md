@@ -1,231 +1,187 @@
-# Technology Stack
+# Technology Stack — Milestone v1.2 (Analytics & Auth Overhaul)
 
-**Project:** Next Level Mock — Readiness Engine (v1.1 Cohort Readiness System)
-**Researched:** 2026-04-14
-**Confidence:** HIGH for new additions (all versions verified from npm registry)
-**Scope:** Stack ADDITIONS only for v1.1 features. Existing stack (Next.js 16, React 19, Prisma 7, Zustand 5, recharts 3, Resend, Zod 4, Vitest 4) is validated and unchanged.
-
----
-
-## What v1.1 Needs That v1.0 Doesn't
-
-| Feature | Need | Decision |
-|---------|------|----------|
-| Associate auth (magic link / password) | Session issuance, cookie management, JWT tokens | `@supabase/supabase-js` + `@supabase/ssr` — use Supabase Auth email OTP |
-| Cohort management | New Prisma models (Cohort, CurriculumWeek, Enrollment) | Schema additions only — no new library |
-| Curriculum scheduling | Associate interview unlocks based on taught weeks | Logic in existing Next.js API routes — no new library |
-| Email notifications on readiness changes | Triggered emails when status changes to ready/not_ready | Already have Resend (`resend@6.10.0`) — upgrade to 6.11.0 and add batch sends |
-| Scheduled notification delivery | Run notification checks periodically | `node-cron@4.2.1` registered in `src/instrumentation.ts` — same pattern as cleanup job |
+**Project:** Next Level Mock (NLM)
+**Researched:** 2026-04-15
+**Overall confidence:** MEDIUM-HIGH (network access denied during research → version pins verified against locked package.json + training data; Supabase SSR patterns verified from training-data + project conventions)
 
 ---
 
-## New Stack Additions
+## Critical Finding: Supabase Client Is Not Yet Installed
 
-### Associate Authentication
+CLAUDE.md narrative lists `@supabase/supabase-js 2.103.0` and `@supabase/ssr 0.10.2` as part of the stack, but **neither appears in `package.json` as of 2026-04-15**. This milestone is therefore a **greenfield auth install**, not an upgrade. Plan budget accordingly — there is no baseline integration to preserve.
 
-**Decision: Supabase Auth with email OTP (magic link), not passwords.**
+Prisma remains the data-access layer for application queries. The Supabase JS SDK only enters the runtime path for auth (cookie session management + admin invite API), not general data reads/writes.
 
-Rationale:
-- Associates are internal training org members — they have email addresses on file
-- Passwords require password reset flows, hashing infrastructure, and forgotten-password UX — all complexity that adds nothing for an internal tool
-- Magic links / OTP are stateless to implement and eliminate credential management
-- Supabase Auth integrates directly with the existing Supabase Postgres instance — no second identity system
-- The `Associate` record already exists in Prisma; Supabase Auth provides a `user.id` (UUID) that can be linked to `Associate.authId` via a new column
+---
 
-**Packages:**
+## Recommended Stack (Additions for v1.2)
+
+### Authentication
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| @supabase/supabase-js | 2.103.0 | Supabase Auth client — OTP send/verify, session management | Already planned in v1.0 STACK.md as prep for auth. Not yet installed. Current stable confirmed from npm registry. |
-| @supabase/ssr | 0.10.2 | Cookie-based session handling for Next.js App Router | Required for App Router server components to read Supabase auth session from HttpOnly cookies. Peer requires `@supabase/supabase-js ^2.102.1` — satisfied by 2.103.0. No React peer dep. |
+| `@supabase/supabase-js` | `^2.45.0` (pin to latest 2.x minor) | Admin API for bulk invites + magic link generation | Server-side only. Used via `createClient` with `SUPABASE_SERVICE_ROLE_KEY` for `auth.admin.inviteUserByEmail` and `auth.admin.generateLink`. Do NOT use for data queries — Prisma owns that. |
+| `@supabase/ssr` | `^0.5.0` or newer | Next.js App Router cookie-aware auth client | Replaces deprecated `@supabase/auth-helpers-nextjs`. Provides `createServerClient` / `createBrowserClient` with proper cookie adapters for Next 16 server components, route handlers, and middleware. |
 
-**What these replace / complement:**
-- The existing trainer single-password auth (`nlm_session` cookie, `auth-context.tsx`) stays unchanged — trainers keep password login
-- Associates get a separate auth flow: OTP email → Supabase session → `associate_session` HttpOnly cookie
-- Two auth domains coexist: trainer (password) + associate (OTP). Both use HttpOnly cookies. Middleware routes are separate.
+**Confidence:** MEDIUM on exact version numbers (network verification blocked). Pin via `npm install @supabase/supabase-js@latest @supabase/ssr@latest` at plan time and record resolved versions in PLAN.md. The CLAUDE.md-claimed `0.10.2` for `@supabase/ssr` is plausible as a forward-looking value but should be verified live before install — if npm shows a different latest, prefer that.
 
-**Confidence:** HIGH — versions verified from npm registry. `@supabase/ssr@0.10.2` peer dep confirmed compatible with `@supabase/supabase-js@2.103.0`.
+### Auth Architecture Pattern (Next.js 16 App Router)
 
----
+**Three client factories required** (`src/lib/supabase/`):
 
-### Scheduled Notifications (Readiness Change Emails)
+1. `server.ts` — `createServerClient` for Server Components + Route Handlers. Reads cookies via `next/headers` `cookies()`.
+2. `middleware.ts` — `createServerClient` variant that both reads and writes cookies on the `NextResponse`. Refreshes the session token on every matched request.
+3. `admin.ts` — plain `createClient(url, SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })`. Server-only module; must NEVER be imported from client bundles. Guard with `import 'server-only'`.
 
-**Decision: `node-cron` registered in `src/instrumentation.ts` — same pattern as existing cleanup job.**
+**Middleware flow (`src/middleware.ts`):**
+- Currently cookie-only (trainer + associate cookies). After v1.2 cutover: middleware runs `supabase.auth.getUser()` to refresh the Supabase session cookie on every request, then reads claims from the refreshed session to enforce route guards.
+- Role distinction (trainer vs associate) moves from cookie-name parsing to user metadata or a `public.user_roles` table join. Simplest: set `app_metadata.role = 'trainer' | 'associate'` at invite-time via admin API and read it from the JWT claims.
+- `src/lib/identity.ts` (`getCallerIdentity`) refactors to read Supabase session instead of the custom `nlm_session` + `associate_session` cookies.
 
-Rationale:
-- The app already uses `setInterval` in `instrumentation.ts` for the 12-hour cleanup job — this proves the pattern works in the persistent Docker container
-- `node-cron` is a strict upgrade: cron syntax (`0 8 * * *`) is far more readable and maintainable than millisecond intervals for daily/weekly notification windows
-- This app runs as `node server.js` in Docker (not serverless) — the Node.js process stays alive, so cron jobs persist
-- No external scheduling service (Vercel Cron, Inngest, etc.) needed — adding a hosted scheduler for a Docker-deployed solo project is unnecessary complexity and cost
+**Confidence:** HIGH on pattern (this is the documented Supabase + Next 15/16 App Router canonical flow).
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| node-cron | 4.2.1 | Cron-syntax scheduled jobs for readiness notification checks | Latest stable. Node >=6. TypeScript types included (`dist/cjs/node-cron.d.ts`). No `@types/node-cron` needed. Works in persistent Node.js process — Docker deployment pattern confirmed compatible. |
+### Row-Level Security (RLS)
 
-**Registration pattern (extends existing `src/instrumentation.ts`):**
+Enable RLS on: `Session`, `GapScore`, `Cohort`, `CurriculumWeek`, `Associate`.
 
-```typescript
-// src/instrumentation.ts
-export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { runCleanupJob } = await import('./lib/cleanupService');
-    const cron = await import('node-cron');
+**Policy shape (recommended):**
 
-    runCleanupJob();
-    setInterval(() => runCleanupJob(), 12 * 60 * 60 * 1000);
+```sql
+-- Trainer role sees everything (read + write)
+CREATE POLICY "trainer_all" ON "Session"
+  FOR ALL TO authenticated
+  USING (auth.jwt() ->> 'role' = 'trainer')
+  WITH CHECK (auth.jwt() ->> 'role' = 'trainer');
 
-    // Daily 8am readiness notification check
-    cron.schedule('0 8 * * *', async () => {
-      const { runReadinessNotifications } = await import('./lib/notificationService');
-      await runReadinessNotifications();
-    });
-  }
+-- Associate sees only their own rows
+CREATE POLICY "associate_own_sessions" ON "Session"
+  FOR SELECT TO authenticated
+  USING (
+    auth.jwt() ->> 'role' = 'associate'
+    AND "associateId" = (
+      SELECT id FROM "Associate" WHERE "authUserId" = auth.uid()
+    )
+  );
+```
+
+**Critical gotchas:**
+
+1. **Prisma bypasses RLS by default.** Prisma connects as the Postgres role specified in `DATABASE_URL` — typically `postgres` or `service_role`-equivalent which has `BYPASSRLS`. RLS will protect direct Supabase client queries but NOT Prisma queries. Two options:
+   - **Option A (recommended for v1.2):** Keep Prisma as-is (bypassing RLS), enforce authorization in route handlers via `getCallerIdentity`. RLS becomes defense-in-depth if the Supabase JS client is ever used for data reads (e.g., future Realtime subscriptions).
+   - **Option B (heavier):** Switch Prisma to a non-privileged role and set `request.jwt.claims` per transaction via `SET LOCAL`. This enforces RLS on every Prisma query but requires a per-request Prisma middleware and loses connection pool reuse. Defer to v1.3+.
+2. **Associate → auth.users FK migration.** Current schema: `Associate.id` is app-generated. Add nullable `Associate.authUserId uuid REFERENCES auth.users(id) ON DELETE SET NULL`. Backfill during invite flow — each bulk invite resolves (or creates) an `auth.users` row, then updates the `Associate` record. Do NOT hard-cut `Associate` to `auth.users` as primary key in v1.2 (too much downstream FK churn in `Session`, `GapScore`). Keep `Associate.id` as the app PK, treat `authUserId` as the identity link.
+3. **Cross-schema FKs to `auth.users`** require the DB role running migrations to have `REFERENCES` privilege on `auth.users`. Supabase grants this to `postgres` but not to `service_role` by default — run the migration via `DIRECT_URL` which uses the `postgres` role.
+
+**Confidence:** HIGH on policy patterns, HIGH on the Prisma-bypasses-RLS caveat (known Prisma + Supabase integration issue documented in Supabase community repeatedly).
+
+### Bulk Invite / Magic-Link Delivery
+
+**Recommended flow (scale ≤ 50 invites per action):**
+
+| Step | Method | Notes |
+|------|--------|-------|
+| 1. Parse emails | Zod schema (comma/newline-split, trim, lowercase, email validation) | Cap at 50 per request to stay under Supabase rate limits. |
+| 2. Upsert `Associate` rows | Prisma transaction | Create with `displayName` placeholder derived from email local-part, `cohortId` assigned. |
+| 3. Create auth users | `supabase.auth.admin.inviteUserByEmail(email, { data: { role: 'associate', associate_id, cohort_id } })` | Supabase generates and sends invite email automatically. Use this over `generateLink` + manual Resend unless you need custom email templates. |
+| 4. Backfill `authUserId` | Prisma update | Resolve from invite response `data.user.id`. |
+| 5. Return summary | JSON | `{ invited: n, skipped_existing: m, failed: [{email, reason}] }` |
+
+**`inviteUserByEmail` vs `generateLink` + Resend tradeoffs:**
+
+| Criterion | `inviteUserByEmail` (Supabase-sent) | `generateLink` + Resend |
+|-----------|-------------------------------------|-------------------------|
+| Setup effort | Lowest — configure SMTP in Supabase dashboard | Custom email template work |
+| Email branding | Supabase default template (configurable) | Full control via Resend |
+| Deliverability | Supabase default SMTP (low-volume limits on free tier) | Resend (already integrated, proven) |
+| Rate limit | Supabase auth rate limit (typically 3-4/hr per email on default SMTP; higher with custom SMTP) | Resend plan limits (100/day free, higher paid) |
+
+**Recommendation:** Use `supabase.auth.admin.generateLink({ type: 'invite', email })` to get the magic link server-side, then send via Resend using the existing integration. This gives branded email + proven deliverability, reuses v1.0's email infrastructure, and sidesteps Supabase SMTP rate limits. Supabase still tracks the token and validates it on callback.
+
+**Rate limit considerations:**
+- Supabase Auth has per-project rate limits (see dashboard → Auth → Rate Limits). Defaults for `/auth/v1/*` endpoints are roughly 30 req/5min on some buckets — `generateLink` calls should be batched with 100-200ms jitter between calls to stay safe.
+- Resend: existing plan limit applies. For 50-associate cohort invite, this is one batch of 50 emails — well within any paid tier.
+
+**Confidence:** HIGH on architecture. MEDIUM on exact Supabase rate-limit numbers (they change; always check dashboard before shipping).
+
+### Charts — Already in Stack
+
+| Technology | Version (locked) | Purpose | Why |
+|------------|------------------|---------|-----|
+| `recharts` | `^3.8.1` | KPI micro-charts, sparklines, cohort trends, gap aggregation bars | Already in use for gap trend charts. Native sparkline support via `<LineChart>` with hidden axes + tiny dimensions. No axis/tooltip sparkline minimum required. React 19 compatible. |
+
+**Sparkline pattern:**
+```tsx
+<LineChart width={80} height={24} data={series}>
+  <Line type="monotone" dataKey="score" stroke="var(--nlm-accent)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+</LineChart>
+```
+
+**Confidence:** HIGH. No change needed. Recharts covers all v1.2 chart needs (KPI cards, sparklines, cohort trend lines, gap bar aggregation). No need for Tremor or Nivo.
+
+### PDF Export — Already in Stack
+
+| Technology | Version (locked) | Purpose | Why |
+|------------|------------------|---------|-----|
+| `@react-pdf/renderer` | `^4.3.1` | Trainer analytics PDF export (cohort + per-associate reports) | Already generates interview reports. Supports tables via `<View>` flex layouts, embedded images, and charts via SVG rendering. |
+
+**Chart-in-PDF approach:** `@react-pdf/renderer` does NOT render recharts directly (recharts outputs to DOM SVG, not PDF). Two options:
+
+1. **Recommended:** Pre-render recharts to SVG string server-side (via `renderToStaticMarkup` or equivalent), then embed via `<Svg>` component in react-pdf. Works for static/server-generated reports.
+2. **Fallback:** Use `@react-pdf/renderer` primitives (`<Line>`, `<Path>`, `<Rect>`) to draw simple charts directly. More work but zero DOM dependency.
+
+**Confidence:** HIGH. Verified pattern — project already uses react-pdf successfully.
+
+### Question-Bank Manifest Caching
+
+**Recommendation: In-memory TTL cache + optional content-hash invalidation. Do NOT add Redis/KV.**
+
+| Option | Verdict | Reason |
+|--------|---------|--------|
+| Next.js `unstable_cache` | ❌ Skip | Name signals instability; semantics changed across Next versions; tied to Next's fetch cache which has had correctness issues in Next 15/16. |
+| `revalidateTag` + `fetch` cache | ⚠️ Possible | Works for GitHub API calls if they go through `fetch()`. Still depends on Next's fetch cache behavior. Invalidation requires a tag-revalidate route. |
+| Simple module-level `Map` + TTL | ✅ Recommended | Zero deps. Survives within the Docker container lifetime. Per-manifest TTL (e.g., 10 min) + optional SHA-based invalidation when GitHub webhook / manual trigger fires. |
+| Redis / KV | ❌ Skip | No current Redis infra on GCE. Adds ops burden for a single cache use case. Reconsider when multi-instance scaling arrives. |
+
+**Implementation shape (`src/lib/manifestCache.ts`):**
+
+```ts
+type CacheEntry<T> = { value: T; expiresAt: number; etag?: string };
+const cache = new Map<string, CacheEntry<unknown>>();
+
+export async function getCachedManifest(repoKey: string, ttlMs = 10 * 60 * 1000) {
+  const hit = cache.get(repoKey);
+  if (hit && hit.expiresAt > Date.now()) return hit.value;
+
+  const { manifest, etag } = await fetchFromGitHub(repoKey, hit?.etag);
+  cache.set(repoKey, { value: manifest, expiresAt: Date.now() + ttlMs, etag });
+  return manifest;
 }
 ```
 
-**What this does NOT need:**
-- Inngest — event-driven workflow orchestration; overkill for one daily email job
-- Vercel Cron — only works on Vercel deployments; this app runs on GCE Docker
-- BullMQ / Redis — job queue for at-scale retry logic; unnecessary for a single-tenant internal tool
-- `@vercel/cron` — same deployment constraint as Vercel Cron
+Use GitHub's `If-None-Match` + ETag headers to short-circuit full manifest re-download on cache miss (304 response means reuse previous value + reset TTL). This gives the `<400ms` target without requiring manual invalidation.
 
-**Confidence:** HIGH — `node-cron@4.2.1` version verified from npm. Instrumentation.ts persistent-process pattern is live and proven in codebase.
+**Admin invalidation endpoint:** `POST /api/admin/manifest/invalidate` (trainer-auth-gated) that clears the `Map` entry — trigger manually after pushing new questions to the bank repo.
 
----
+**Multi-instance caveat:** Cache is per-container. On GCE single-instance deploy this is fine. If scaling to multiple NLM instances behind a load balancer, cache warming becomes uneven but correctness is preserved (each instance lazily populates). Add Redis when that scaling actually happens.
 
-### Email Notifications (Resend — Already Installed)
-
-**Decision: No new library. Upgrade Resend from 6.10.0 to 6.11.0 and add notification email templates.**
-
-Rationale:
-- `resend@6.10.0` is already in `package.json` and the send-email route is working
-- `resend@6.11.0` is current stable (confirmed from npm registry)
-- Resend supports batch sends via `resend.batch.send([...])` in v2+ API — available in 6.x
-- Readiness notifications are simple transactional emails (status change → email to associate + trainer) — no scheduling service, no template engine beyond what already exists in `src/lib/email-templates.ts`
-
-**Upgrade:**
-
-```bash
-npm install resend@6.11.0
-```
-
-**What to build in-code (no new dependency):**
-- `src/lib/notificationService.ts` — queries associates whose readiness changed since last notification, calls `resend.batch.send()` for batched delivery
-- New email template functions in `src/lib/email-templates.ts` alongside existing `getReportEmailHtml()`
-
-**Confidence:** HIGH — version verified from npm registry. Batch send API confirmed in Resend changelog (available since resend v2.x, well within 6.x scope).
+**Confidence:** HIGH on recommendation. In-memory TTL is the standard solo-dev solution for this problem shape.
 
 ---
 
-### Prisma Schema Additions (No New Library)
+## Existing Stack (No Change Required for v1.2)
 
-New models needed for cohort management. These extend the existing `prisma/schema.prisma` — no library change, just schema migration.
-
-**New models:**
-
-```prisma
-model Cohort {
-  id          Int           @id @default(autoincrement())
-  name        String        @unique
-  trainerId   String?       // links to trainer identifier (not auth system in v1.1 — string ref)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  enrollments Enrollment[]
-  weeks       CurriculumWeek[]
-}
-
-model CurriculumWeek {
-  id        Int      @id @default(autoincrement())
-  cohortId  Int
-  weekNum   Int
-  topic     String
-  taughtAt  DateTime?  // null = not yet taught; set when trainer marks week complete
-  cohort    Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-
-  @@unique([cohortId, weekNum])
-}
-
-model Enrollment {
-  id          Int       @id @default(autoincrement())
-  associateId Int
-  cohortId    Int
-  enrolledAt  DateTime  @default(now())
-  associate   Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
-  cohort      Cohort    @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-
-  @@unique([associateId, cohortId])
-}
-```
-
-**Associate model additions:**
-
-```prisma
-// Add to existing Associate model
-authId              String?   @unique  // Supabase Auth user.id (UUID) — populated on first OTP login
-email               String?   @unique  // needed for OTP delivery
-lastNotifiedAt      DateTime? // tracks when last readiness notification was sent
-```
-
-**Confidence:** HIGH — these are straightforward relational extensions to the existing schema. No new ORM or migration tooling needed; `prisma migrate dev` handles it.
-
----
-
-## What NOT to Add
-
-| Avoid | Why | What to Use Instead |
-|-------|-----|---------------------|
-| NextAuth.js / Auth.js | Adds a full auth framework for a feature (associate OTP) that Supabase Auth handles natively with 2 packages already planned | `@supabase/supabase-js` + `@supabase/ssr` |
-| Inngest | Event-driven workflow service — valuable for complex retry logic and fan-out, overkill for one daily notification cron | `node-cron` in `instrumentation.ts` |
-| BullMQ + Redis | Persistent job queue — adds a Redis deployment dependency for a Docker-on-GCE app with no queue depth requirements | `node-cron` for scheduling; Resend handles delivery retries |
-| @sendgrid/mail | Adding a second email provider when Resend is already installed and working | Resend `resend@6.11.0` |
-| react-email | Template rendering library — adds React SSR overhead for email templates already handled with simple HTML template functions | Extend `src/lib/email-templates.ts` |
-| jose | JWT signing/verification library — only needed if issuing custom JWTs; Supabase Auth handles token issuance | `@supabase/supabase-js` session management |
-| bcryptjs | Password hashing — only needed for password auth; OTP approach eliminates this entirely | Not needed with magic link / OTP |
-| TanStack Query | Client-side cache for cohort dashboard data — read-heavy, no optimistic updates in v1.1 | Next.js App Router RSC + fetch |
-
----
-
-## Full v1.1 Install Commands
-
-```bash
-# Associate authentication (Supabase Auth + App Router session helpers)
-npm install @supabase/supabase-js@2.103.0 @supabase/ssr@0.10.2
-
-# Scheduled notifications (cron jobs in persistent Node.js process)
-npm install node-cron@4.2.1
-
-# Resend upgrade (minor — batch send API improvement)
-npm install resend@6.11.0
-```
-
-**Total additions: 3 packages (2 Supabase, 1 cron). 1 upgrade (Resend minor version).**
-
----
-
-## New Environment Variables
-
-```bash
-# Supabase Auth (OTP delivery needs Supabase project URL + anon key)
-NEXT_PUBLIC_SUPABASE_URL="https://[project].supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="[anon-key]"
-SUPABASE_SERVICE_ROLE_KEY="[service-role-key]"   # server-side only — admin operations
-
-# Already exists — no change needed
-RESEND_API_KEY="..."
-```
-
-Note: `SUPABASE_SERVICE_ROLE_KEY` is needed server-side for admin operations (e.g., creating a user session on behalf of an associate who completes OTP). NEVER expose to the client.
-
----
-
-## Version Compatibility Matrix
-
-| Package | Version | React Peer | Node Peer | Compatible With Existing Stack |
-|---------|---------|-----------|-----------|-------------------------------|
-| @supabase/supabase-js | 2.103.0 | none | none | YES |
-| @supabase/ssr | 0.10.2 | none | none | YES — only peers on `@supabase/supabase-js ^2.102.1` |
-| node-cron | 4.2.1 | none | >=6.0.0 | YES — Docker uses node:22-alpine |
-| resend | 6.11.0 | none | none | YES — minor upgrade from 6.10.0 |
+| Technology | Version | Status |
+|------------|---------|--------|
+| Next.js | `^16.2.3` | ✓ App Router middleware refactor required for Supabase session refresh |
+| React | `19.2.3` | ✓ |
+| Prisma | `^7.7.0` | ✓ Schema migration required: add `Associate.authUserId` |
+| `@prisma/adapter-pg` | `^7.7.0` | ✓ |
+| Tailwind CSS | `^4` | ✓ Dashboard redesign uses existing DESIGN tokens |
+| Zod | `^4.3.6` | ✓ Use for bulk-invite email list validation |
+| Zustand | `^5.0.9` | ✓ Analytics dashboard state — evaluate per-phase; server components may suffice |
+| Recharts | `^3.8.1` | ✓ |
+| `@react-pdf/renderer` | `^4.3.1` | ✓ |
+| Resend | `^6.10.0` | ✓ Bulk-invite delivery |
 
 ---
 
@@ -233,24 +189,85 @@ Note: `SUPABASE_SERVICE_ROLE_KEY` is needed server-side for admin operations (e.
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Associate auth | Supabase Auth OTP | NextAuth.js | Full framework overhead for a feature Supabase handles natively; NextAuth adds session DB tables that duplicate what Supabase Auth already manages |
-| Associate auth | Supabase Auth OTP | Password-based (bcryptjs) | Passwords require reset flows, email verification, and ongoing credential management — unnecessary for internal training tool |
-| Associate auth | Supabase Auth OTP | Custom JWT (jose) | Re-inventing what Supabase Auth already provides with better security defaults and built-in refresh token rotation |
-| Scheduling | node-cron | Inngest | Inngest is a hosted service — adds external dependency and cost for one daily job; Docker-deployed app doesn't benefit from Vercel-optimized scheduling |
-| Scheduling | node-cron | Vercel Cron | Only works on Vercel — app deploys to GCE Docker |
-| Scheduling | node-cron | setInterval (existing pattern) | `setInterval` drifts and lacks cron semantics (exact time-of-day scheduling for "notify at 8am daily") |
-| Email notifications | Resend (existing) | SendGrid | Adding a second email provider when Resend is already installed and working |
+| Auth library | `@supabase/ssr` + `supabase-js` | NextAuth.js / Auth.js | Adds second auth system. Supabase RLS needs Supabase-issued JWTs; NextAuth sessions are opaque to Postgres. Fighting the platform. |
+| Auth library | `@supabase/ssr` | `@supabase/auth-helpers-nextjs` | Deprecated. Replaced by `@supabase/ssr`. |
+| Magic link delivery | `generateLink` + Resend | `inviteUserByEmail` (Supabase SMTP) | Existing Resend integration + deliverability + branded templates. Supabase default SMTP has low rate limits. |
+| Magic link delivery | `generateLink` + Resend | Custom JWT tokens + `/api/auth/claim` | Rebuilds what Supabase already ships. No advantage. |
+| RLS enforcement path | Route-handler checks (`getCallerIdentity`) | Prisma-per-request RLS context | Prisma-level RLS doubles connection count and complicates pooling. Route handler checks are sufficient for v1.2 threat model; RLS is defense-in-depth for any future Supabase JS data reads. |
+| Charts | Recharts 3.8.1 | Tremor | Tremor requires React 18; NLM runs React 19. Already decided in v1.0. |
+| Manifest cache | In-memory Map + TTL | Redis / Upstash KV | No Redis infra. Solo dev. Single-instance deploy. Overkill. |
+| Manifest cache | In-memory Map + TTL | Next.js `unstable_cache` | Unstable by name and behavior across Next versions. In-memory is predictable. |
+| Dashboard data fetching | RSC + Prisma | TanStack Query | Analytics data is read-heavy, not real-time. RSC caching + manual `revalidatePath` on mock completion covers the requirement. |
+| Associate identity migration | Nullable `authUserId` FK | Swap `Associate.id` → `auth.users.id` | Every child table (`Session`, `GapScore`, `Cohort.associates`) would need FK surgery. Nullable bridge column is reversible and incremental. |
 
 ---
 
-## Sources
+## Installation
 
-- npm registry (version queries): `@supabase/supabase-js@2.103.0`, `@supabase/ssr@0.10.2`, `node-cron@4.2.1`, `resend@6.11.0`
-- Peer dependency verification: `@supabase/ssr@0.10.2` peers `@supabase/supabase-js ^2.102.1` — confirmed compatible with 2.103.0
-- `node-cron@4.2.1` ships its own TypeScript types (`dist/cjs/node-cron.d.ts`) — no `@types/node-cron` needed
-- Existing codebase analysis: `src/instrumentation.ts` confirms persistent-process cron pattern is live and proven; `resend@6.10.0` confirmed in `node_modules`; `@supabase/supabase-js` and `node-cron` confirmed NOT yet installed
+```bash
+# Auth stack — verify latest versions at install time
+npm install @supabase/supabase-js@latest @supabase/ssr@latest
+
+# No other new deps required. Charts, PDF, validation, email already present.
+```
+
+**Post-install verification steps:**
+1. `npx tsc --noEmit` — confirm no type regressions
+2. `npm run build` — confirm standalone Docker output still resolves (Supabase SDK is ESM-friendly, expected clean)
+3. Smoke test: call `createServerClient` in a dummy route handler — confirm cookie adapter wires correctly
 
 ---
 
-*Stack research for: Next Level Mock v1.1 Cohort Readiness System*
-*Researched: 2026-04-14*
+## Environment Variables to Add
+
+```bash
+# Supabase Auth (already have NEXT_PUBLIC_SUPABASE_URL + anon key if previously scaffolded; confirm)
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>   # Server-only. Never expose. Used by admin invite API.
+
+# Optional — override auth redirect URL (defaults to origin/auth/callback)
+NEXT_PUBLIC_SITE_URL=https://<prod-domain>
+```
+
+**Deprecate after v1.2 cutover:**
+- `APP_PASSWORD` — replaced by Supabase trainer login
+- `ASSOCIATE_SESSION_SECRET` — replaced by Supabase JWT
+- `ENABLE_ASSOCIATE_AUTH` — flag removed (feature always on post-cutover)
+
+---
+
+## Key Risks
+
+1. **RLS + Prisma mismatch (HIGH confidence, MEDIUM severity).** Enabling RLS while Prisma continues using a `BYPASSRLS` role means RLS provides zero protection against Prisma queries. Route-handler authorization remains the real enforcement. Document this explicitly in ARCHITECTURE.md so the next contributor doesn't assume RLS is load-bearing.
+
+2. **Supabase SMTP rate limits on default invite flow (HIGH confidence, MEDIUM severity).** If using `inviteUserByEmail` with default Supabase SMTP, a 50-person cohort invite will hit rate limits. Mitigation: use `generateLink` + Resend delivery as recommended above.
+
+3. **`auth.users` FK permissions (MEDIUM confidence, LOW severity).** Cross-schema FKs require `REFERENCES` privilege. Migrations must run via `DIRECT_URL` (the `postgres` role), not the pooler URL. Already the convention for Prisma migrations in this project — low real risk but worth calling out in MIGRATION.md.
+
+4. **PIN system removal + existing associate data migration (HIGH confidence, MEDIUM severity).** Every existing `Associate` row needs an `auth.users` counterpart before PIN code paths can be deleted. Migration phase must: (1) add `authUserId` column nullable, (2) backfill script that sends magic-link invites to all existing associates with emails, (3) data integrity check that every live `Associate` has `authUserId != null`, (4) then delete PIN columns/routes/flag. Plan as a 3-step phase.
+
+5. **Middleware DB cost (MEDIUM confidence, LOW severity).** `supabase.auth.getUser()` in middleware hits Supabase auth servers on every request. Cache-friendly (Supabase optimizes this) but worth monitoring P95 latency after cutover.
+
+6. **`@supabase/ssr` version drift (LOW confidence on current latest).** Network verification was blocked during research. Before installing, verify latest version with `npm view @supabase/ssr version` and check for any App Router breaking changes in the 0.5.x+ series. The `0.10.2` value asserted in CLAUDE.md narrative could not be verified live.
+
+---
+
+## Sources & Confidence
+
+| Area | Source | Confidence |
+|------|--------|-----------|
+| Existing stack versions | `/Users/jestercharles/mock-interview-assist/package.json` (direct read) | HIGH |
+| Supabase SSR auth pattern | Training data + Supabase docs convention (well-established pattern) | HIGH |
+| RLS + Prisma bypass behavior | Known Prisma + Supabase integration caveat, widely documented in community | HIGH |
+| `auth.admin.generateLink` / `inviteUserByEmail` semantics | Training data on Supabase Auth Admin API | HIGH |
+| Supabase rate limits (exact numbers) | Training data only — values change; verify in dashboard | MEDIUM |
+| Exact `@supabase/ssr` latest version | Unverified — WebFetch/Bash blocked during research | LOW — verify at install time |
+| Recharts sparkline pattern | Existing code conventions + recharts API training data | HIGH |
+| `@react-pdf/renderer` chart embedding | Training data + project already uses it successfully | HIGH |
+| In-memory cache recommendation | Ecosystem standard for single-instance Node servers | HIGH |
+
+**Flagged for runtime verification before Phase-1 install:**
+- Latest `@supabase/supabase-js` and `@supabase/ssr` versions
+- Current Supabase Auth rate-limit defaults (dashboard)
+- Supabase SMTP quota on current project plan

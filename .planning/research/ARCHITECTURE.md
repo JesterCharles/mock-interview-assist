@@ -1,482 +1,559 @@
-# Architecture Patterns
+# Architecture: v1.2 Analytics & Auth Overhaul
 
-**Domain:** Adaptive technical skills assessment platform — v1.1 Cohort Readiness System layered onto existing Next.js 16 App Router + Prisma 7 + Supabase system
-**Researched:** 2026-04-14
-**Confidence:** HIGH (direct codebase analysis — existing source files read verbatim; v1.1 integration points derived from actual code, not assumptions)
+**Milestone:** v1.2
+**Researched:** 2026-04-15
+**Confidence:** HIGH (direct code inspection + Supabase official docs patterns)
 
----
-
-## Baseline: What v1.0 Established
-
-Understanding the existing architecture is prerequisite to knowing what integrates cleanly vs. what requires schema surgery.
-
-### v1.0 Data Flow (Trainer-Led)
-
-```
-Browser (Zustand localStorage)
-  → /interview (trainer conducts, Web Speech API, per-question scoring)
-  → /api/score (LangGraph: stateless per-question scoring, returns score+feedback)
-  → Zustand store (holds assessments, scores, status per question)
-  → /review (trainer validates/overrides)
-  → /api/history POST (dual-write: data/interview-history.json + persistSessionToDb())
-  → gapPersistence → readinessService → Associate.readinessStatus updated
-  → /api/send-email (Resend PDF)
-```
-
-### v1.0 Data Flow (Automated Public Interview — The Gap)
-
-```
-/api/public/interview/start (fingerprint rate limit)
-  → /api/public/interview/agent (LangGraph agent, stateless per turn)
-  → /api/public/interview/complete POST
-    → checkRateLimit(fingerprint) — this is the only auth
-    → persistSessionToDb(session) — DB-only write
-    → *** gap scoring NEVER fires ***
-    → *** readiness NEVER updates ***
-    → *** associateId is null (no slug collected) ***
-```
-
-This is the core v1.1 problem: automated sessions land in the DB orphaned and never feed the readiness pipeline.
-
-### Existing Schema (Relevant to v1.1)
-
-```
-Associate  { id, slug(unique), displayName, readinessStatus, recommendedArea, lastComputedAt }
-Session    { id, associateId(nullable FK), status, overallTechnicalScore, overallSoftSkillScore, techMap, ... }
-GapScore   { associateId, skill, topic, weightedScore — unique (associateId, skill, topic) }
-Settings   { id=1 (singleton), readinessThreshold }
-```
-
-There is no `Cohort` model. There is no `CurriculumWeek` model. Associate has no `cohortId`. These are the schema additions v1.1 requires.
+This document defines how v1.2 features (Supabase Auth cutover, RLS, analytics, dashboard redesign, associate self-dashboard, cached manifest, bulk onboarding) slot atop the existing v1.1 codebase. Opinionated recommendations, not menus.
 
 ---
 
-## New Architecture: v1.1 Components
+## 1. Auth Migration Architecture
 
-### Component Map (delta from v1.0)
+### 1.1 Target State
 
-```
-EXISTING (unchanged unless marked MODIFIED)
-┌──────────────────────────────────────────────────────────────┐
-│  Zustand Store → /interview → /api/score → /review           │
-│  → /api/history (MODIFIED: add cohortId to session record)   │
-│  → sessionPersistence.ts (unchanged)                         │
-│  → gapPersistence.ts (unchanged)                             │
-│  → readinessService.ts (unchanged)                           │
-└──────────────────────────────────────────────────────────────┘
+- **Single auth system:** Supabase Auth (`auth.users`) for both trainers and associates. Role distinguished by a column on `Associate` or a `user_metadata.role` claim.
+- **Trainer login:** Supabase email/password (OAuth deferred — email/password keeps scope tight).
+- **Associate login:** Supabase magic link (email-based, no password).
+- **Session transport:** `@supabase/ssr` cookie (HttpOnly, chunked `sb-<ref>-auth-token.*`). Replaces both `nlm_session` and `associate_session` cookies.
+- **No feature flag.** Flag delete is a gate in the migration plan — once Supabase is live, `ENABLE_ASSOCIATE_AUTH` and all gated code paths are removed in the same PR as flag removal.
 
-NEW — Public Interview Auth + Pipeline Connection
-┌──────────────────────────────────────────────────────────────┐
-│  /api/public/interview/start                                  │
-│    MODIFIED: accept { fingerprint, associateSlug }            │
-│    → validate slug, return sessionToken (JWT or signed cookie)│
-│                                                               │
-│  /api/public/interview/complete                               │
-│    MODIFIED: accept associateSlug, call gap+readiness pipeline│
-│    (same pipeline as trainer-led, already exists)             │
-└──────────────────────────────────────────────────────────────┘
+### 1.2 Schema Changes
 
-NEW — Cohort + Curriculum Data Layer
-┌──────────────────────────────────────────────────────────────┐
-│  prisma/schema.prisma (MODIFIED):                             │
-│    + Cohort model                                             │
-│    + CurriculumWeek model                                     │
-│    + Associate.cohortId FK (nullable)                         │
-│    + Session.cohortId FK (nullable, denormalized for queries) │
-│                                                               │
-│  /api/cohorts (NEW CRUD)                                      │
-│  /api/cohorts/[id]/curriculum (NEW CRUD)                      │
-│  /api/cohorts/[id]/associates (NEW — roster per cohort)       │
-└──────────────────────────────────────────────────────────────┘
-
-NEW — Trainer Dashboard Views
-┌──────────────────────────────────────────────────────────────┐
-│  /trainer (MODIFIED: add cohort filter dropdown/tabs)         │
-│  /trainer/cohort/[id] (NEW: cohort aggregate view)            │
-│  /trainer/[slug] (unchanged — per-associate detail)           │
-│                                                               │
-│  Cohort aggregate = GROUP BY cohort, COUNT readinessStatus    │
-│  No new services needed — query from existing Associate data  │
-└──────────────────────────────────────────────────────────────┘
-
-NEW — Email Notifications
-┌──────────────────────────────────────────────────────────────┐
-│  readinessService.ts (MODIFIED):                              │
-│    updateAssociateReadiness() emits notification when         │
-│    status transitions (not_ready→improving, improving→ready)  │
-│                                                               │
-│  /lib/notificationService.ts (NEW):                           │
-│    sendReadinessChangeEmail(associate, oldStatus, newStatus)  │
-│    Uses existing Resend client (no new deps)                  │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Prisma Schema Changes
-
-These are additive migrations — no existing tables change structure, only new tables added and nullable FKs added to existing tables.
+Add to `Associate`:
 
 ```prisma
-model Cohort {
-  id          Int              @id @default(autoincrement())
-  name        String           // "April 2026 Cohort"
-  startDate   DateTime
-  endDate     DateTime?
-  description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  associates  Associate[]
-  curriculum  CurriculumWeek[]
-  sessions    Session[]
-}
-
-model CurriculumWeek {
-  id          Int      @id @default(autoincrement())
-  cohortId    Int
-  cohort      Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-  weekNumber  Int      // maps to existing selectedWeeks / techMap keys
-  skillName   String   // e.g. "React", "Node.js"
-  topicTags   String[] // e.g. ["hooks", "context", "lifecycle"]
-  startDate   DateTime // when this week's content becomes teachable
-  @@unique([cohortId, weekNumber])
-}
-
-// Associate: add cohortId FK (nullable — existing associates have no cohort)
 model Associate {
-  // ... existing fields unchanged ...
-  cohortId    Int?
-  cohort      Cohort?  @relation(fields: [cohortId], references: [id])
-}
-
-// Session: add cohortId (denormalized for efficient cohort-level queries)
-model Session {
-  // ... existing fields unchanged ...
-  cohortId    Int?
-  cohort      Cohort?  @relation(fields: [cohortId], references: [id])
-  mode        String   @default("trainer-led") // "trainer-led" | "automated"
+  // existing fields...
+  authUserId String? @unique  // FK to auth.users.id (UUID); nullable during migration
+  email      String? @unique  // denormalized for bulk invite / display; synced from auth.users
+  role       String  @default("associate")  // 'associate' | 'trainer' — future-proof for multi-role
+  // REMOVE: pinHash, pinGeneratedAt (after cutover migration)
 }
 ```
 
-**Why denormalize `cohortId` onto Session:** Cohort-level dashboard queries (all sessions for a cohort, readiness distribution over time) are simpler and faster with a direct FK than joining Associate→Session through cohortId. The associate's current cohort may change; denormalizing captures which cohort was active at session time.
+Add a `TrainerProfile` model (or extend `Settings`) OR: trainers authenticate via Supabase but have no `Associate` row — `role` is resolved by checking `auth.users.user_metadata.role = 'trainer'`. **Recommendation:** use `user_metadata.role` claim on the Supabase user. Keeps Prisma schema lean; trainer accounts do not pollute `Associate`.
 
-**Why `mode` on Session:** The automated interview pipeline and trainer-led pipeline produce structurally identical sessions. The `mode` field lets the dashboard distinguish them for display (e.g., showing "AI mock" vs "trainer interview" in history).
+### 1.3 Data Migration Plan (Existing Associate → auth.users)
+
+Order of operations in a single migration script (`scripts/migrate-to-supabase-auth.ts`):
+
+1. For each `Associate` with a populated `slug`:
+   - If `email` is known (from prior manual entry or cohort roster), call `supabase.auth.admin.createUser({ email, email_confirm: true, user_metadata: { role: 'associate', slug } })`.
+   - If `email` is NOT known, insert a **placeholder ghost user** with `email = ${slug}@placeholder.local`, flag `Associate.authUserId` but keep `Associate.email = null`. Trainer resolves via bulk invite flow in-product (promotes ghost to real email).
+2. Store returned `auth.users.id` into `Associate.authUserId`.
+3. After backfill verified (row count match, `authUserId` NOT NULL on all rows that had sessions): deploy RLS + flip middleware to Supabase session check.
+4. Deprecation step (follow-up commit): drop `pinHash`, `pinGeneratedAt` columns, drop `associate_session` cookie handlers, delete `pinService.ts`, `pinAttemptLimiter.ts`, `associateSession.ts`, `featureFlags.ts`, PIN routes, `/signin` associate-PIN tab.
+
+**Zero data loss guarantee:** `Associate.id` (int) remains stable. All FKs (`Session.associateId`, `GapScore.associateId`) keep pointing at the same rows. `authUserId` is additive.
+
+### 1.4 Identity Resolution Replacement
+
+Replace `src/lib/identity.ts` `getCallerIdentity()`:
+
+```ts
+// New src/lib/identity.ts
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
+export type CallerIdentity =
+  | { type: 'trainer'; userId: string; email: string }
+  | { type: 'associate'; userId: string; associateId: number; slug: string; email: string }
+  | { type: 'anonymous' };
+
+export async function getCallerIdentity(): Promise<CallerIdentity> {
+  const supabase = createServerClient(/* ... cookies adapter ... */);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { type: 'anonymous' };
+
+  const role = user.user_metadata?.role ?? 'associate';
+  if (role === 'trainer') {
+    return { type: 'trainer', userId: user.id, email: user.email! };
+  }
+
+  // Associate: resolve authUserId → Associate row (via Prisma, server-side)
+  const associate = await prisma.associate.findUnique({ where: { authUserId: user.id } });
+  if (!associate) return { type: 'anonymous' };
+  return { type: 'associate', userId: user.id, associateId: associate.id, slug: associate.slug, email: user.email! };
+}
+```
+
+**Key change:** the signature drops `NextRequest` — it now uses `cookies()` from `next/headers` directly, which works in both server components and route handlers. Middleware gets a dedicated variant (see 1.5) because it still needs `NextRequest`.
+
+### 1.5 Middleware Changes
+
+Current `src/middleware.ts` is cookie-only and synchronous-feeling (no DB). Replace with `@supabase/ssr`'s `createServerClient` bound to `NextRequest`/`NextResponse`. Recommended pattern (directly from Supabase Next.js App Router docs):
+
+```ts
+// src/middleware.ts
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+const TRAINER_PATHS = ['/dashboard', '/interview', '/review', '/trainer'];
+const ASSOCIATE_PATH = '/associate';
+const PUBLIC_SIGNIN = '/signin';
+
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookies) => cookies.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        ),
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const role = user?.user_metadata?.role ?? (user ? 'associate' : null);
+  const { pathname } = request.nextUrl;
+
+  // Trainer paths
+  if (TRAINER_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    if (role !== 'trainer') return NextResponse.redirect(new URL('/signin', request.url));
+    return response;
+  }
+
+  // Associate paths
+  if (pathname.startsWith(ASSOCIATE_PATH) && pathname !== '/associate/login') {
+    if (!user) {
+      const url = new URL('/signin', request.url);
+      url.searchParams.set('next', pathname);
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
+  return response;
+}
+```
+
+**Critical detail (Supabase SSR doc):** `supabase.auth.getUser()` in middleware **refreshes the token** and writes new cookies to `response`. You MUST return the same `response` object that was mutated — do not create a fresh `NextResponse.next()` at the end. This is the #1 footgun in Supabase middleware integrations.
+
+**No DB work in middleware still holds** — `getUser()` validates the JWT locally via JWKS (cached) and only hits Supabase auth server on token refresh. No Prisma call.
+
+### 1.6 Cleanup Scope (Files to Delete at Cutover)
+
+| File / Path | Action |
+|---|---|
+| `src/lib/pinService.ts` | Delete |
+| `src/lib/pinService.test.ts` | Delete |
+| `src/lib/pinAttemptLimiter.ts` | Delete |
+| `src/lib/associateSession.ts` | Delete |
+| `src/lib/featureFlags.ts` | Delete |
+| `src/app/api/associate/pin/generate/route.ts` | Delete |
+| `src/app/api/associate/pin/verify/route.ts` | Delete |
+| `src/app/api/associate/status/route.ts` | Delete (flag is gone) |
+| `src/app/api/associate/logout/route.ts` | Replace with Supabase sign-out |
+| `src/app/api/associate/me/route.ts` | Replace — reads Supabase session |
+| `src/app/associate/login/page.tsx` | Delete (redirect to `/signin`) |
+| `src/components/.../SignInTabs.tsx` | Simplify — one form (email/password for trainer, magic-link for associate), detect role by email lookup OR a tab toggle. |
+| `src/lib/auth-server.ts` | Replace — wrap Supabase server client helpers |
+| `src/lib/auth-context.tsx` | Replace — `useAuth()` reads Supabase session via browser client |
+| `ASSOCIATE_SESSION_SECRET`, `APP_PASSWORD`, `ENABLE_ASSOCIATE_AUTH`, `NLM_TRUSTED_PROXY` env vars | Remove (keep `NLM_TRUSTED_PROXY` only if still needed for rate-limit — it can go) |
+| Schema: `Associate.pinHash`, `Associate.pinGeneratedAt` | Drop (migration after backfill verified) |
+
+**Migration order (critical):** introduce Supabase alongside old auth → migrate data → flip middleware → remove old auth. Four commits minimum, not one mega-PR.
 
 ---
 
-## Integration Point 1: Automated Interview → Readiness Pipeline
+## 2. RLS Policy Design
 
-This is the highest-priority integration — it completes the pipeline that already exists.
+### 2.1 Prisma + RLS Pattern — Decision
 
-### Current State
+**Recommendation: service-role key for server routes + app-layer authorization. Do NOT use per-request scoped anon-key Prisma clients.**
 
-`/api/public/interview/complete` calls `persistSessionToDb(session)` but:
-1. Session has no `associateSlug` (never collected from user)
-2. Even if it did, the gap scoring + readiness update is never called after persist
+Rationale:
+- Prisma's adapter-pg uses a connection pool; per-request JWT context on each connection is a known pain point. Setting `request.jwt.claim.sub` via `SET LOCAL` requires careful transaction wrapping and is easy to leak between requests with pooling.
+- Our existing code is structured around server-side authorization (e.g., `getCallerIdentity` → explicit query filters). Extending that is cheaper than retrofitting RLS-aware Prisma.
+- Prisma uses Supabase's **Transaction Pooler** (pgBouncer transaction mode) — prepared statements and session-level GUCs do not survive across statements in this mode. RLS via `SET LOCAL` would require explicit `BEGIN; SET LOCAL ...; SELECT ...; COMMIT;` per query, killing ergonomics.
 
-### Required Changes
+**Defense-in-depth RLS:** Still deploy RLS policies as a safety net. Policies written against `auth.uid()` will reject any query from a misconfigured non-service-role client. Prisma (service-role) bypasses them; direct client-side queries (if any creep in) are protected.
 
-**`/api/public/interview/start` (MODIFIED)**
+### 2.2 Policy Table
 
-Accept `associateSlug` in request body. Validate it. Return it in the response so the client can attach it to the session throughout the interview.
+All tables have RLS enabled. Service-role connection bypasses. Policies target `anon` and `authenticated` roles.
 
-```typescript
-// Current: { fingerprint, action }
-// New:     { fingerprint, action, associateSlug? }
+| Table | Role | SELECT | INSERT | UPDATE | DELETE |
+|---|---|---|---|---|---|
+| `Associate` | trainer | ALL | ALL | ALL | ALL |
+| `Associate` | associate | `auth.uid() = authUserId` | — | `auth.uid() = authUserId` (only `displayName`) | — |
+| `Session` | trainer | ALL | ALL | ALL | ALL |
+| `Session` | associate | `associateId IN (SELECT id FROM Associate WHERE authUserId = auth.uid())` | — | — | — |
+| `GapScore` | trainer | ALL | ALL | ALL | ALL |
+| `GapScore` | associate | same subquery as Session | — | — | — |
+| `Cohort` | trainer | ALL | ALL | ALL | ALL |
+| `Cohort` | associate | `id IN (SELECT cohortId FROM Associate WHERE authUserId = auth.uid())` | — | — | — |
+| `CurriculumWeek` | trainer | ALL | ALL | ALL | ALL |
+| `CurriculumWeek` | associate | `cohortId IN (SELECT cohortId FROM Associate WHERE authUserId = auth.uid())` | — | — | — |
+| `Settings` | trainer | ALL | — | ALL | — |
+| `Settings` | associate | `true` (threshold is public-ish; value affects UI) | — | — | — |
+
+**Trainer detection in policy:** `(auth.jwt() ->> 'user_metadata')::jsonb ->> 'role' = 'trainer'`. Wrap in a SQL function `is_trainer()` for readability.
+
+```sql
+create or replace function public.is_trainer() returns boolean
+language sql stable as $$
+  select coalesce(
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'trainer',
+    false
+  )
+$$;
 ```
 
-The slug is user-provided. Validate format (existing `validateSlug()` utility). Do NOT verify it exists in DB at start — create-on-first-session is the existing associate pattern.
+Then policies read `using (public.is_trainer() or <associate scope>)`.
 
-**`/api/public/interview/complete` (MODIFIED)**
+### 2.3 Migration Delivery
 
-After `persistSessionToDb()` succeeds, run the same gap + readiness pipeline as trainer-led sessions:
+Deliver RLS as Prisma-managed raw SQL migration (`prisma migrate` supports raw SQL in `migration.sql`). Or use a dedicated Supabase SQL migration. **Recommendation: keep it in Prisma migrations** — single source of truth for schema, CI runs `prisma migrate deploy` already.
 
-```typescript
-// Add after: const success = await persistSessionToDb(session)
-if (success && session.associateSlug) {
-  const associate = await prisma.associate.findUnique({
-    where: { slug: session.associateSlug }
-  })
-  if (associate) {
-    // Fire-and-forget: same pattern as gapPersistence.ts
-    computeAndPersistGapScores(associate.id, session).catch(err =>
-      console.error('[public-complete] gap scoring failed:', err)
-    )
+---
+
+## 3. Analytics Data Layer
+
+### 3.1 Scale Assessment
+
+At current scale (single training org, expected <500 associates, <50 sessions/associate = <25k rows in `Session`, <150k in `GapScore`), **inline aggregation is fine**. No materialized views needed.
+
+### 3.2 Query Patterns
+
+**KPI strip (top of `/trainer`):**
+
+```sql
+-- Avg Readiness (across filtered cohort)
+SELECT AVG(overallTechnicalScore * 0.7 + overallSoftSkillScore * 0.3)
+FROM "Session" s
+JOIN "Associate" a ON s.associateId = a.id
+WHERE a.cohortId = $1 AND s.createdAt > NOW() - INTERVAL '30 days';
+
+-- Mocks This Week
+SELECT COUNT(*) FROM "Session" WHERE createdAt > NOW() - INTERVAL '7 days' AND cohortId = $1;
+
+-- Top Gap (skill with lowest weighted score across cohort)
+SELECT skill, AVG(weightedScore) AS avg_score
+FROM "GapScore" g
+JOIN "Associate" a ON g.associateId = a.id
+WHERE a.cohortId = $1
+GROUP BY skill ORDER BY avg_score ASC LIMIT 1;
+
+-- AI/Trainer Variance — diff of auto-scored vs overridden per question assessment
+-- Requires schema addition OR JSON-path queries on Session.assessments. See 3.3.
+```
+
+**Execution pattern:** single server component at `/trainer` fetches all KPIs in parallel via `Promise.all` calling a new `src/lib/analyticsService.ts` module. Raw SQL via `prisma.$queryRaw` — these are aggregations, not ORM fits.
+
+**Sparklines in roster:** include last-N session scores as a Postgres array per associate in the existing `/api/trainer` roster response. Use a single query with a lateral join:
+
+```sql
+SELECT a.*, (
+  SELECT array_agg(s.overallTechnicalScore ORDER BY s.createdAt DESC)
+  FROM "Session" s WHERE s.associateId = a.id LIMIT 10
+) AS recent_scores
+FROM "Associate" a WHERE a.cohortId = $1;
+```
+
+### 3.3 AI/Trainer Variance — Schema Decision
+
+Current: `Session.assessments` is `Json` containing per-question scores with `validated: boolean` flag (per existing scoring system). Variance = `|aiScore - finalScore|` averaged across questions where trainer overrode.
+
+**Option A (no schema change):** Aggregate via `jsonb_path_query` in Postgres. Slow for large session count but feasible at scale.
+
+**Option B (denormalize):** Add `Session.aiTrainerVariance Float?` column, computed at session save and stored. Fast queries, cheap to maintain.
+
+**Recommendation: Option B.** Analytics queries stay simple and fast; computation is a trivial addition to the existing session save pipeline in `sessionPersistence.ts`.
+
+### 3.4 Cohort Trends Chart
+
+Time-series: avg readiness per week over last 12 weeks.
+
+```sql
+SELECT date_trunc('week', s.createdAt) AS week,
+       AVG(s.overallTechnicalScore) AS avg_tech
+FROM "Session" s JOIN "Associate" a ON s.associateId = a.id
+WHERE a.cohortId = $1 AND s.createdAt > NOW() - INTERVAL '12 weeks'
+GROUP BY week ORDER BY week;
+```
+
+Runs in <50ms on expected data volumes. No materialized view.
+
+### 3.5 When to Add Materialized Views
+
+Add when: (a) roster page p95 > 500ms, OR (b) cohort size exceeds 2000 associates. Revisit in v1.4+.
+
+---
+
+## 4. Dashboard Redesign Integration
+
+### 4.1 Target Shell Pattern
+
+Per `finalized.html`: persistent topbar + left sidebar, child routes render in main area.
+
+**Implementation: Next.js App Router nested layout.**
+
+```
+src/app/trainer/
+├── layout.tsx           # NEW — topbar + sidebar shell; guards trainer auth
+├── page.tsx             # KEEP — roster (now the index route "/trainer")
+├── gap-analysis/
+│   └── page.tsx         # NEW — cohort gap heatmap / skill breakdown
+├── calibration/
+│   └── page.tsx         # NEW — variance review (moved from /trainer/[slug] subview)
+├── reports/
+│   └── page.tsx         # NEW — PDF export gallery
+├── cohorts/             # EXISTING — cohort CRUD
+└── [slug]/              # EXISTING — associate detail
+    └── page.tsx
+```
+
+`layout.tsx` renders the topbar + sidebar; children render into `{children}`. This is the canonical App Router pattern and fits v1.1's existing `/trainer/[slug]` naturally.
+
+### 4.2 Where `/trainer/[slug]` Fits — Child Route, NOT Modal
+
+**Recommendation: keep it as a child route.**
+
+- **Shareable URLs:** critical for trainer workflows (send link to colleague, deep-link from email).
+- **Browser back button:** works naturally.
+- **Layout inheritance:** the shell's sidebar stays visible; `[slug]/page.tsx` renders in main area alongside roster context.
+- **No modal gymnastics:** intercepting routes (`(..)[slug]`) for modal overlays is elegant but adds complexity the solo dev doesn't need now.
+
+If a quick-peek "drawer" experience is desired without losing roster context, use Next.js **parallel routes + intercepting routes** as a v1.3 enhancement. For v1.2, child route is correct.
+
+### 4.3 Sidebar State
+
+Sidebar active-link highlighting uses `usePathname()` in a small client component (`TrainerSidebar.tsx`). No global state needed. Collapse/expand state persists in `localStorage` (trivial `useEffect` + state).
+
+### 4.4 KPI Cards — Server-Rendered
+
+The KPI strip renders in the shell `layout.tsx` via a server component that fetches aggregates. Re-renders on navigation between sidebar routes would be wasteful — use a **segment-level layout** (`trainer/(dashboard)/layout.tsx` with route group) OR just fetch once in the topmost layout and accept that data is fresh only on full navigations. For MVP, latter is fine.
+
+---
+
+## 5. Associate Dashboard Scope Boundary
+
+**Recommendation: NEW route `/associate/[slug]/dashboard` — do NOT extend existing `/associate/[slug]`.**
+
+Rationale:
+
+1. **Semantics:** the existing `/associate/[slug]` is a **profile** — identity, session list, readiness badge. The dashboard is an **active workspace** — trends, CTA to book next mock, goals. Conflating them overloads a single page.
+2. **Auth boundary clarity:** post-Supabase, `/associate/[slug]/dashboard` is strictly `auth.uid() = slug-owner`. `/associate/[slug]` (profile) can remain trainer-viewable for roster drill-down. Splitting routes makes the guard rules obvious.
+3. **Nested layout opportunity:** `/associate/[slug]/layout.tsx` can provide shared chrome; `page.tsx` = profile, `dashboard/page.tsx` = dashboard, `interview/page.tsx` = existing interview entry.
+4. **Navigation UX:** self-serve associates land on `/associate/[slug]/dashboard` post-login. Trainers viewing a roster entry land on `/associate/[slug]` (the profile). Different users, different default views.
+
+Implementation plan:
+- `/associate/[slug]/page.tsx` — stays as profile (minor trim: remove duplicate session list that will live on dashboard).
+- `/associate/[slug]/dashboard/page.tsx` — NEW. Renders gap chart, recommended next area, streak widget, "Book Next Mock" CTA.
+- `/associate/[slug]/layout.tsx` — NEW. Shared `AssociateNav` with tabs: Overview (profile), Dashboard, History.
+
+---
+
+## 6. Cached Manifest Layer
+
+### 6.1 Location & Pattern
+
+**Cache in the `/api/github` route handler (server-side), NOT in `src/lib/github-service.ts`** (which currently runs client-side — it calls `/api/github`).
+
+Recommended: new module `src/lib/github-manifest-cache.ts` imported by `/api/github/route.ts`.
+
+```ts
+// src/lib/github-manifest-cache.ts
+interface CacheEntry {
+  data: unknown;
+  etag: string | null;
+  fetchedAt: number;
+}
+
+const TTL_MS = 5 * 60 * 1000; // 5 min
+const cache = new Map<string, CacheEntry>();
+
+export async function getCachedManifest(path: string, fetchFn: () => Promise<{ data: unknown; etag: string | null }>): Promise<unknown> {
+  const key = path;
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.fetchedAt < TTL_MS) return hit.data;
+
+  // Stale or missing — conditional GET with If-None-Match
+  const fresh = await fetchFn(); // fetchFn sends If-None-Match: hit?.etag internally
+  cache.set(key, { data: fresh.data, etag: fresh.etag, fetchedAt: Date.now() });
+  return fresh.data;
+}
+```
+
+### 6.2 Per-Process or Shared?
+
+**Per-process is fine.** Single Docker container on GCE = single Node process = single Map instance. No cross-instance coordination needed.
+
+If the deploy scales horizontally (v1.3 Cloud Run), migrate to Redis (Upstash free tier) or Supabase Postgres with a `manifest_cache` table. Out of scope for v1.2.
+
+### 6.3 Invalidation Strategy — TTL + ETag Hybrid
+
+- **TTL:** 5 minutes — hard upper bound on staleness.
+- **ETag:** on cache miss OR TTL expiry, send `If-None-Match` to GitHub. On `304 Not Modified`, refresh the `fetchedAt` timestamp without re-parsing (extends TTL without re-downloading). On `200`, parse and store new ETag.
+- **Manual bust:** expose `/api/github/cache/invalidate` (trainer-only, POST) for editor-driven immediate refresh after a question bank update. Clears the Map.
+
+**Why hybrid:** TTL alone is wasteful on unchanged repos (refetches every 5min); ETag alone requires a round-trip on every request. Combined: 1 round-trip per 5min per path, and that round-trip is a 304 (bytes-cheap) most of the time.
+
+### 6.4 Target Perf
+
+Wizard manifest fetch: current ~2-4s (cold) → cached hit <5ms (in-memory Map lookup), 304 path ~150ms. Meets stated <400ms target comfortably.
+
+---
+
+## 7. Bulk Invite Pipeline
+
+### 7.1 Route & Contract
+
+`POST /api/trainer/invites/bulk` — trainer-only.
+
+```ts
+// Request
+{
+  emails: string[];              // comma-sep parsed client-side into array
+  cohortId: number;
+  displayNames?: Record<string, string>;  // optional email -> name map
+}
+
+// Response
+{
+  created: Array<{ email: string; associateId: number; slug: string }>;
+  skipped: Array<{ email: string; reason: 'duplicate' | 'invalid_email' }>;
+  failed:  Array<{ email: string; reason: string }>;
+}
+```
+
+### 7.2 Transaction Boundaries
+
+**Per-email transaction, not batch.** Rationale:
+
+- Supabase Auth `admin.createUser` + magic-link send are network calls that can partially fail.
+- Wrapping all 50 emails in one DB transaction means a single Supabase Auth hiccup rolls back all work.
+- Per-email: `Associate` upsert + (optional) cohort assignment + curriculum inheritance all in one Prisma `$transaction`. Supabase Auth call happens INSIDE the transaction **after** the DB write succeeds, but a failed Supabase call rolls back that single associate.
+
+```ts
+for (const email of emails) {
+  try {
+    await prisma.$transaction(async (tx) => {
+      const slug = deriveSlugFromEmail(email);
+      const associate = await tx.associate.upsert({
+        where: { email },
+        create: { email, slug, cohortId, displayName: displayNames?.[email] },
+        update: { cohortId }, // reassign cohort if existing
+      });
+
+      // Create Supabase auth user + send magic link
+      const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        data: { role: 'associate', slug, associateId: associate.id },
+      });
+      if (error) throw error;
+
+      await tx.associate.update({
+        where: { id: associate.id },
+        data: { authUserId: data.user.id },
+      });
+    });
+    created.push({ email, ... });
+  } catch (err) {
+    failed.push({ email, reason: String(err) });
   }
 }
 ```
 
-This is 8-10 lines of code that closes the pipeline gap. The services (`gapService`, `gapPersistence`, `readinessService`) already exist and are tested.
+### 7.3 Idempotency
 
-**Front-end: public interview flow**
+**Key: `email` is unique on `Associate`.** Re-running the same bulk invite:
 
-The public interview UI (wherever `/api/public/interview/start` is called) needs a slug input field before the interview begins. This is the same UX as the trainer-led setup wizard's "associate slug" field. Reuse the same component or the same validation logic.
+- Existing associate, same cohort: skip (record as `skipped: 'duplicate'`).
+- Existing associate, different cohort: reassign cohort (update-only, no new auth user, no new magic link).
+- Net-new email: full create flow.
 
----
+Supabase Auth `inviteUserByEmail` is itself idempotent-ish — calling it twice for the same email re-sends the magic link. Add a `lastInvitedAt` field on `Associate` and throttle: reject re-invite if sent within last 5 minutes (prevents trainer mis-click spam).
 
-## Integration Point 2: Associate Auth
+### 7.4 Rate Limiting
 
-### What v1.0 has
+- **Trainer action level:** max 1 bulk invite call per trainer per 30 seconds (prevents accidental double-submit). Use existing `rateLimitService.ts` with a new key `bulk-invite:{trainerUserId}`.
+- **Per-email send rate:** cap batch size at 50 emails per call. If trainer needs more, paginate client-side.
+- **Supabase Auth limits:** Supabase free tier sends up to ~30 emails/hour via built-in SMTP. **Plan for custom SMTP (Resend — already in stack)** configured in Supabase Auth settings. This unlocks Resend's rate limits (plenty for training-org scale).
 
-Single-password trainer auth: `APP_PASSWORD` env var, HttpOnly cookie `nlm_session=authenticated`, 24hr expiry. Middleware protects `/dashboard`, `/interview`, `/review`, `/trainer`. Associates have no login — they are assigned a slug by the trainer.
+### 7.5 Curriculum Assignment
 
-### What v1.1 needs
-
-Associates taking automated interviews need identity linkage, not full auth. The design decision: **slug-based identity, not login-based auth.**
-
-- Associates enter their trainer-assigned slug at the start of a public interview
-- The slug is validated (format check + optional existence check)
-- The slug flows through the session to link it to the Associate record
-- No password, no session cookie, no JWT for associates in v1.1
-
-This matches the existing v1.0 identity model and avoids the complexity of a full auth system. Full associate auth (login, passwords, email verification) is out of scope for v1.1 per PROJECT.md.
-
-**Why not JWT tokens for automated interviews:** The session already has an ID. The associate slug is passed through the session payload. Adding JWT would require key management and token refresh — unnecessary complexity when the existing `persistSessionToDb` already handles slug-based associate upsert.
-
-**Middleware: no changes needed.** Public interview routes (`/api/public/interview/*`) are intentionally unprotected — they are the public-facing entrypoint for associates. The rate limiting (fingerprint-based) is the only gate.
+Curriculum is already cohort-scoped (`CurriculumWeek.cohortId`). No per-associate curriculum assignment — when the associate lands in a cohort, they see that cohort's curriculum via existing `curriculumFilter.ts`. **No new schema, no new logic here.** The "cohort + curriculum assignment" mentioned in PIPELINE.md reduces to "assign cohort" in the bulk flow.
 
 ---
 
-## Integration Point 3: Cohort Management
+## Component Boundaries Summary
 
-### Data model integration
-
-Cohort is a new first-class entity. It sits above Associate in the hierarchy:
-
-```
-Cohort (1) → (many) Associate → (many) Session → (many) GapScore
-                                               → (many) readinessStatus
-             CurriculumWeek (1 per week)
-```
-
-Associates are assigned to a cohort by the trainer. This is a trainer-side operation, not associate-side.
-
-### API surface
-
-```
-POST   /api/cohorts                    — create cohort
-GET    /api/cohorts                    — list all cohorts (trainer)
-PATCH  /api/cohorts/[id]               — update name, dates
-DELETE /api/cohorts/[id]               — soft delete (set endDate)
-
-GET    /api/cohorts/[id]/curriculum    — get weeks for cohort
-POST   /api/cohorts/[id]/curriculum    — add week
-PATCH  /api/cohorts/[id]/curriculum/[weekId] — update week
-
-GET    /api/cohorts/[id]/associates    — roster for cohort
-POST   /api/cohorts/[id]/associates    — assign associate to cohort (sets cohortId FK)
-
-GET    /api/cohorts/[id]/readiness     — aggregate readiness (GROUP BY status)
-```
-
-All cohort API routes are protected by existing trainer auth middleware (`nlm_session` cookie check via `isAuthenticatedSession()`).
-
-### Trainer dashboard integration
-
-`/trainer` (MODIFIED):
-- Add cohort selector at top (dropdown with all cohort names + "All Associates")
-- When cohort is selected, roster query adds `WHERE cohortId = ?`
-- Cohort aggregate strip above the table: `3 ready / 4 improving / 1 not ready`
-- The existing `RosterTable` component is unchanged — it receives filtered associates as props
-
-`/trainer/cohort/[id]` (NEW):
-- Server Component, reads directly via Prisma
-- Shows cohort metadata, curriculum schedule, aggregate readiness donut/bar
-- Links to individual associate pages (existing `/trainer/[slug]`)
-
-The existing `/trainer/[slug]` associate detail page is unchanged.
+| Component | Responsibility | Communicates With |
+|---|---|---|
+| `src/lib/identity.ts` (rewritten) | Supabase session → CallerIdentity | Supabase server client, Prisma |
+| `src/middleware.ts` (rewritten) | Cookie-only Supabase session check + role gate | Supabase SSR client |
+| `src/lib/analyticsService.ts` (NEW) | KPI aggregates, cohort trends, variance queries | Prisma `$queryRaw` |
+| `src/lib/github-manifest-cache.ts` (NEW) | In-memory cached manifest with ETag | GitHub API (via existing fetch) |
+| `src/lib/supabase-admin.ts` (NEW) | Service-role client for auth user provisioning | Supabase JS SDK |
+| `src/lib/bulk-invite.ts` (NEW) | Bulk invite orchestration, idempotency, throttling | Prisma, supabase-admin |
+| `src/app/trainer/layout.tsx` (NEW) | Topbar + sidebar shell | Child routes, auth guard |
+| `src/app/associate/[slug]/dashboard/page.tsx` (NEW) | Associate self-view dashboard | Prisma, analytics service |
 
 ---
 
-## Integration Point 4: Curriculum-Driven Question Selection
+## Patterns to Follow
 
-### Current mechanism
+### Pattern 1: Supabase Server Client Per Request
+Next.js App Router + `@supabase/ssr` — create a fresh server client per request via `cookies()` adapter. Never cache across requests.
 
-The setup wizard's `selectedWeeks` is a manually chosen array of week numbers. The `techMap` (week number → skill name) is built from GitHub question bank file paths at question load time, not from a persistent curriculum record.
+### Pattern 2: RLS as Defense, App Layer as Primary
+All Prisma queries go through service-role key with explicit authorization filters in application code (e.g., `WHERE associateId = $identityAssociateId`). RLS policies exist as a safety net.
 
-### v1.1 integration
+### Pattern 3: Nested Layouts for Shells
+Use Next.js layout.tsx files for persistent shells (trainer dashboard topbar+sidebar, associate tab nav). Do NOT put shell chrome in every page.tsx.
 
-When an associate is in a cohort with a defined curriculum, the setup wizard should:
-1. Fetch taught weeks: `GET /api/cohorts/[id]/curriculum?taught=true` (weeks where `startDate <= today`)
-2. Auto-populate `selectedWeeks` with those week numbers
-3. The `techMap` continues to be built from GitHub file paths — the curriculum `skillName` field should match the tech file naming convention
-
-This is pre-population, not enforcement. The trainer can still modify the selection. The adaptive setup (gap-driven weight pre-population) continues to work on top of this — it sets weights after the weeks are selected.
-
-**Key constraint:** `CurriculumWeek.weekNumber` must align with the week number convention used in GitHub question bank file paths. This is a naming convention contract, not enforced by code. Document it explicitly.
-
----
-
-## Integration Point 5: Email Notifications
-
-### Existing email infrastructure
-
-`/api/send-email` uses Resend with `@react-pdf/renderer` for PDF reports. The Resend client and API key are already in place.
-
-### v1.1 additions
-
-Readiness change notifications (status transitions only, not every session):
-- `not_ready → improving`: "Associate is showing improvement"
-- `improving → ready`: "Associate has reached readiness threshold"
-- `ready → not_ready` / `ready → improving`: "Associate readiness regression"
-
-**Integration point in `readinessService.ts`:**
-
-`updateAssociateReadiness()` is the single write point for readiness status. It already reads the old status before updating. Adding notification dispatch here keeps notification logic co-located with the state change.
-
-```typescript
-// In updateAssociateReadiness() — after computing result, before prisma.update:
-const currentAssociate = await prisma.associate.findUnique({
-  where: { id: associateId },
-  select: { readinessStatus: true, displayName: true }
-})
-// ... prisma.update ...
-if (currentAssociate?.readinessStatus !== result.status) {
-  notificationService.sendReadinessChangeEmail(/* ... */).catch(/* fire-and-forget */)
-}
-```
-
-`notificationService.ts` wraps the Resend client. No new email library needed. Trainer email address is either hardcoded in env var (`TRAINER_EMAIL`) or stored in Settings singleton (simplest path: env var for v1.1).
-
----
-
-## Suggested Build Order
-
-Dependencies flow in one direction: schema → services → API routes → UI.
-
-### Phase 1: Cohort + Curriculum Schema Migration
-
-**What:** Add `Cohort`, `CurriculumWeek` models. Add nullable `cohortId` on `Associate` and `Session`. Add `mode` field to `Session`.
-
-**Why first:** Everything else (cohort API, dashboard views, curriculum question filtering) depends on these tables existing. No application logic changes — just schema + migration.
-
-**Files changed:** `prisma/schema.prisma`, new migration file
-**Risk:** Additive migration — no data loss, no breaking changes to existing queries
-
----
-
-### Phase 2: Automated Interview → Readiness Pipeline
-
-**What:** Modify `/api/public/interview/start` to accept `associateSlug`. Modify `/api/public/interview/complete` to call gap + readiness pipeline after persist. Add slug input to public interview UI.
-
-**Why second:** This closes the highest-priority gap in the existing system with minimal code changes (~50 lines touching 2 route files + 1 UI component). It exercises existing services without building new ones. Can be shipped and validated before cohort management is built.
-
-**Files changed:** `src/app/api/public/interview/start/route.ts`, `src/app/api/public/interview/complete/route.ts`, public interview UI component
-**Depends on:** Phase 1 (Session needs `mode` field to mark automated sessions)
-
----
-
-### Phase 3: Cohort CRUD API + Trainer Cohort Management UI
-
-**What:** `/api/cohorts` CRUD. `/api/cohorts/[id]/curriculum` CRUD. `/api/cohorts/[id]/associates` for assignment. Basic trainer UI to create cohorts and assign associates.
-
-**Why third:** Cohort data must exist before the dashboard can filter by it and before curriculum can drive question selection.
-
-**Files changed:** New route handlers under `src/app/api/cohorts/`, new trainer UI components
-**Depends on:** Phase 1 (schema)
-
----
-
-### Phase 4: Cohort Dashboard Views
-
-**What:** Modify `/trainer` to add cohort filter. Add `/trainer/cohort/[id]` aggregate view. These are read-only consumers of data from Phase 3.
-
-**Why fourth:** Depends on cohorts existing (Phase 3) and sessions being tagged with cohortId (Phases 1-2).
-
-**Files changed:** `src/app/trainer/page.tsx` (cohort selector), new `src/app/trainer/cohort/[id]/page.tsx`
-**Depends on:** Phases 1-3
-
----
-
-### Phase 5: Curriculum-Driven Question Selection
-
-**What:** Setup wizard fetches taught weeks from curriculum and auto-populates `selectedWeeks`. Adaptive weight pre-population continues to work on top of this.
-
-**Why fifth:** Requires cohort curriculum data to exist (Phase 3). Can be validated once a test cohort with curriculum is set up.
-
-**Files changed:** Dashboard setup wizard component, new `/api/cohorts/[id]/curriculum?taught=true` query param
-**Depends on:** Phases 1 and 3
-
----
-
-### Phase 6: Email Notifications + Design Cohesion
-
-**What:** `notificationService.ts` wrapping Resend. `updateAssociateReadiness()` modified to dispatch on status transition. Design tokens applied to public interview flow, auth page, associate profile page.
-
-**Why sixth:** Notifications are useful but not blocking other features. Design cohesion is important for credibility but not a functional dependency.
-
-**Files changed:** New `src/lib/notificationService.ts`, `src/lib/readinessService.ts`, public interview pages, login page, associate profile page
-**Depends on:** Phase 2 (readiness pipeline must be running to generate notifications)
-
----
-
-## Component Boundaries: New vs. Modified
-
-| Component | Status | What Changes |
-|-----------|--------|--------------|
-| `prisma/schema.prisma` | MODIFIED | Add Cohort, CurriculumWeek; add cohortId to Associate + Session; add mode to Session |
-| `src/app/api/public/interview/start/route.ts` | MODIFIED | Accept + validate associateSlug |
-| `src/app/api/public/interview/complete/route.ts` | MODIFIED | Call gap + readiness pipeline after persist |
-| `src/lib/readinessService.ts` | MODIFIED | Emit notification on status transition in `updateAssociateReadiness()` |
-| `src/app/trainer/page.tsx` | MODIFIED | Add cohort selector filter |
-| `src/app/api/cohorts/*` | NEW | Full CRUD for cohort + curriculum + associate assignment |
-| `src/app/trainer/cohort/[id]/page.tsx` | NEW | Aggregate cohort readiness view (Server Component) |
-| `src/lib/notificationService.ts` | NEW | Resend wrapper for readiness change emails |
-| `src/middleware.ts` | UNCHANGED | Public interview routes stay unprotected; cohort API is trainer-only via cookie check in route handlers |
-| `src/lib/sessionPersistence.ts` | UNCHANGED | No changes — associate upsert via slug already works |
-| `src/lib/gapService.ts` | UNCHANGED | No changes — called from automated complete route same as trainer-led |
-| `src/lib/gapPersistence.ts` | UNCHANGED | No changes |
+### Pattern 4: Raw SQL for Aggregations
+Prisma `$queryRaw` with tagged template literals (safe from injection) for analytics queries. ORM query builder is wrong fit for `GROUP BY date_trunc(...)` style work.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Adding Associate Login to v1.1
+### Anti-Pattern 1: Per-Request Prisma Client with `SET LOCAL`
+**Why bad:** Transaction Pooler (pgBouncer transaction mode) does not preserve session GUCs. Will cause subtle "RLS works sometimes" bugs.
+**Instead:** service-role Prisma + app-layer auth + RLS as defense.
 
-**What:** Adding a full auth system (credentials, sessions, JWT) for associates.
-**Why bad:** Trainer-assigned slug identity already covers the v1.1 use case (linking automated sessions to a readiness record). Full auth requires email verification, password reset, session management — 3-5x the scope for no new user value.
-**Instead:** Slug-based identity. Associates enter their slug at interview start. Create-on-first-session (existing behavior). Defer associate login to multi-tenancy phase.
+### Anti-Pattern 2: Big-Bang Auth Migration
+**Why bad:** One PR that rips out PIN + adds Supabase + deletes feature flag = high blast radius, hard rollback.
+**Instead:** Four sequential commits — (1) Supabase alongside PIN, (2) data migration, (3) flip middleware, (4) delete PIN + flag.
 
-### Anti-Pattern 2: Putting Cohort Logic in the Readiness Pipeline
+### Anti-Pattern 3: Modal for `/trainer/[slug]`
+**Why bad:** Breaks deep-linking, back button, layout inheritance.
+**Instead:** child route. Intercepting routes for drawer UX is a v1.3 polish.
 
-**What:** Modifying `readinessService.ts` or `gapService.ts` to be cohort-aware.
-**Why bad:** The readiness pipeline works per-associate. Cohort membership is context for display, not a variable in the readiness algorithm. Making the gap algorithm cohort-dependent would break the single-associate invariant.
-**Instead:** Cohort-level views are aggregations over per-associate readiness records. The pipeline stays per-associate.
+### Anti-Pattern 4: Forgetting to Return Same `response` from Middleware
+**Why bad:** Supabase's `getUser()` writes refreshed cookies onto the response object; creating a fresh `NextResponse.next()` at the end discards them, causing auth flapping on every request.
+**Instead:** mutate + return same response.
 
-### Anti-Pattern 3: Blocking Automated Interview Completion on Gap Scoring
-
-**What:** `await` the gap scoring inside `/api/public/interview/complete` before returning.
-**Why bad:** Gap scoring queries all prior sessions for the associate, runs weighted averages, and writes multiple GapScore rows. This adds 200-500ms to the completion response. Associates experience a hang at the end of their interview.
-**Instead:** Fire-and-forget (same pattern as trainer-led sessions). The readiness pipeline runs asynchronously after the response is sent.
-
-### Anti-Pattern 4: Storing Curriculum in the Question Bank Repo
-
-**What:** Embedding cohort curriculum as YAML frontmatter or a special file in the GitHub question bank repo.
-**Why bad:** Curriculum is org/cohort-specific operational data. The question bank is content. Mixing them couples deployment cadence and creates access control confusion (trainers need to push to the GitHub repo to update curriculum).
-**Instead:** Curriculum in the Supabase DB (the `CurriculumWeek` model). Trainers manage it via the dashboard UI, not via GitHub pushes.
-
-### Anti-Pattern 5: Fetching Cohort Data Client-Side in Trainer Dashboard
-
-**What:** Trainer dashboard uses `useEffect + fetch('/api/cohorts')` to load cohorts, then a second fetch for associates.
-**Why bad:** Two sequential client-side fetches cascade — cohorts load, then associates load with a visible delay. The existing trainer page already has this pattern (useEffect + fetch) and it causes a flash of empty state.
-**Instead:** Server Component for initial render. Fetch cohorts and associates in parallel via Prisma in the async Server Component. Pass both as props to the client island.
+### Anti-Pattern 5: Materialized Views at Current Scale
+**Why bad:** Adds refresh scheduling complexity; premature optimization for <25k session rows.
+**Instead:** inline aggregation with raw SQL. Revisit at 2000+ associates.
 
 ---
 
-## Scalability Notes
+## Scalability Considerations
 
-| Concern | v1.1 Approach | Future |
-|---------|---------------|--------|
-| Cohort aggregate readiness query | Prisma `groupBy` on Associate.readinessStatus WHERE cohortId=? — fast at < 200 associates | Materialized view if roster grows to thousands |
-| Curriculum taught-weeks query | `CurriculumWeek WHERE cohortId=? AND startDate <= now()` — single indexed query | No change needed |
-| Readiness notifications volume | One email per associate per status transition — low volume for a training org | Rate-limit at notificationService level if needed |
-| Associate auth | Slug-based identity — no session state | Add Supabase Auth when multi-tenancy requires it |
+| Concern | Current (<500 assoc) | 2k assoc | 10k assoc |
+|---|---|---|---|
+| Roster query | inline SQL, <100ms | inline + index on `cohortId` | materialized view, 5min refresh |
+| Manifest cache | in-memory Map | in-memory Map | Redis/Upstash |
+| Bulk invite | per-email serial, batch 50 | batch 200 + queue | job queue (BullMQ or pgboss) |
+| RLS policies | defense only (service-role Prisma) | same | same |
+| Session count per associate | unbounded | archive >180d to cold storage | partition `Session` by month |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis (HIGH confidence): `src/middleware.ts`, `src/lib/auth-server.ts`, `src/lib/readinessService.ts`, `src/lib/sessionPersistence.ts`, `src/lib/adaptiveSetup.ts`, `src/app/api/public/interview/complete/route.ts`, `src/app/api/public/interview/start/route.ts`, `src/app/trainer/page.tsx`, `prisma/schema.prisma`
-- PROJECT.md v1.1 milestone goals and constraints (HIGH confidence): read directly
-- Next.js App Router Server Component + Prisma direct query pattern: established practice, consistent with existing dashboard implementation (HIGH confidence)
-- Resend API for notifications: already in use in `/api/send-email`, no new integration required (HIGH confidence)
+- Supabase SSR + Next.js App Router official guide: https://supabase.com/docs/guides/auth/server-side/nextjs (HIGH — direct pattern match, verified current 2026)
+- Supabase RLS policies with `auth.uid()` and `auth.jwt()`: https://supabase.com/docs/guides/database/postgres/row-level-security (HIGH)
+- Supabase Admin API `inviteUserByEmail`: https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail (HIGH)
+- Prisma + Supabase Transaction Pooler connection pattern: https://supabase.com/docs/guides/database/prisma (HIGH — confirms `SET LOCAL` RLS integration is not pooler-friendly)
+- Next.js 16 App Router layouts: https://nextjs.org/docs/app/building-your-application/routing/layouts-and-templates (HIGH)
+- Direct code inspection: `src/lib/identity.ts`, `src/middleware.ts`, `src/lib/associateSession.ts`, `src/lib/pinService.ts`, `src/lib/auth-server.ts`, `src/lib/prisma.ts`, `src/lib/github-service.ts`, `src/lib/featureFlags.ts`, `prisma/schema.prisma`, `src/app/trainer/page.tsx`, `src/app/associate/[slug]/page.tsx`, `.planning/PROJECT.md`, `.planning/PIPELINE.md` (HIGH — current codebase state, 2026-04-15)

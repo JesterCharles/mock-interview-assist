@@ -1,285 +1,385 @@
-# Pitfalls Research
+# Domain Pitfalls — v1.2 Analytics & Auth Overhaul
 
-**Domain:** Adaptive skills assessment platform — adding associate auth, cohort management, curriculum scheduling, automated interview pipeline integration, cohort dashboard views, design cohesion, and email notifications to an existing Next.js 16 app with dual-write migration and single-password trainer auth
-**Researched:** 2026-04-14
-**Confidence:** HIGH (derived from direct codebase analysis of all affected files + established patterns for auth layering, cohort data modeling, and pipeline extension)
+**Domain:** Supabase Auth cutover + RLS + bulk magic-link onboarding + dashboard redesign + analytics + cached manifest
+**Researched:** 2026-04-15
+**Confidence:** HIGH (Supabase Auth/SSR/RLS pitfalls are well-documented and directly mapped to existing code paths)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, broken existing flows, or silent data corruption in this codebase specifically.
+### 1. Prisma silently bypasses RLS (the #1 Supabase + Prisma footgun)
+
+**What goes wrong:** RLS policies on `Session`, `GapScore`, `Cohort`, `CurriculumWeek` appear correct in SQL, but every Prisma query still returns all rows regardless of the authenticated user.
+
+**Why it happens:** Prisma connects via a single pooled Postgres role (the one in `DATABASE_URL`). By default that role is either the Supabase `postgres` superuser-equivalent or a role with `BYPASSRLS`. Even when RLS is enabled on a table, `auth.uid()` inside policies evaluates to `NULL` because no JWT is attached to the connection — PostgREST/`supabase-js` inject the JWT per request via `SET LOCAL role` + `SET LOCAL request.jwt.claims`, but **Prisma does none of that**.
+
+**Consequences:**
+- "We have RLS" becomes a false sense of security in code review / audit. Cross-tenant data leak risk at moment of multi-tenant expansion.
+- On the flip side, enabling RLS without compensating Prisma can silently return **zero** rows in production when a policy is strict and `auth.uid()` is null — looks like an outage, not a security bug.
+
+**Prevention (decision required in planning):**
+- **Option A (recommended for solo-dev timeline):** Treat RLS as defense-in-depth only. Keep all queries server-side through Prisma (service-role-equivalent), enforce tenancy in **application code** (every query filters by `associateId` / `cohortId` resolved from the Supabase session). Document loudly that RLS is not the enforcement boundary.
+- **Option B (true RLS):** Every Prisma call wraps a transaction that does `SET LOCAL role authenticated; SET LOCAL request.jwt.claims = '{...}';` using the verified Supabase JWT. Requires a custom Prisma middleware/extension. High complexity.
+- **Option C:** Read through `@supabase/supabase-js` server client (which DOES propagate JWT → RLS), writes through Prisma. Bifurcated data access layer — high maintenance cost, confusing.
+
+**Detection:** Write a failing test that connects as user A and queries `prisma.session.findMany()` expecting only A's sessions. If it returns everyone's sessions, Option A is what you actually have.
+
+**File references:**
+- `src/lib/prisma.ts` — singleton Prisma client, no JWT plumbing
+- `src/lib/sessionPersistence.ts`, `src/lib/gapPersistence.ts`, `src/lib/trainerService.ts` — every read/write happens here without tenancy filters in some paths (e.g., roster listing assumes "trainer sees everyone")
 
 ---
 
-### Pitfall 1: Single Middleware Guarding Both Auth Systems Simultaneously
+### 2. Supabase SSR cookie-jar confusion (request vs response) — silent session loss
 
-**What goes wrong:** The current `src/middleware.ts` checks a single cookie (`nlm_session === 'authenticated'`) for all protected paths. When associate auth is added, the middleware must distinguish between "a trainer is logged in" (existing cookie) and "an associate is logged in" (new associate token). The failure mode is writing a guard like `if (trainerCookie || associateCookie)` that allows associates into `/trainer` routes or allows trainers into associate-only paths without scoping. Worse: both cookies present simultaneously creates ambiguous identity — the wrong user's data is loaded in server components.
+**What goes wrong:** Users appear logged in but every server component sees them as anonymous. Or conversely, sessions refresh correctly on first load but never get re-persisted, so the user is logged out after 60 minutes.
 
-**Why it happens:** The existing middleware is 20 lines with a simple string check. It looks trivially easy to extend. The guard feels done when the 401 stops returning, but the identity context downstream (which user are we?) is never resolved.
+**Why it happens:** `@supabase/ssr` requires you to supply both a `getAll` reader (from `request.cookies`) **and** a `setAll` writer (to `response.cookies`). The exact object you must write to differs in three contexts:
+1. Middleware — write to `NextResponse.next()` response (not request)
+2. Route handler — write via `cookies()` from `next/headers`
+3. Server component — read-only; `setAll` must be a no-op or throw (Next.js forbids cookie writes from server components)
 
-**Consequences:** Associates view other associates' data. Trainers inadvertently trigger associate-scoped sessions. Routes that check `isAuthenticatedSession()` in `auth-server.ts` have no concept of "which kind of authenticated" — they return `true` for both, so all protected route handlers break their authorization model.
+If middleware refreshes the token but doesn't propagate the new cookie onto the response, the refreshed JWT is lost and the client keeps sending the old (soon-expired) token.
 
-**How to avoid:** Before adding associate auth, explicitly enumerate route permission matrix:
-- `/dashboard`, `/interview`, `/review`, `/trainer/*` — trainer only (existing `nlm_session`)
-- `/associate/*`, `/interview/public/*` — associate only (new `associate_session` cookie)
-- Shared: none (no route serves both roles)
+**Consequences:** Intermittent 401s, "why does my session drop?" bug reports, can't repro locally.
 
-Keep trainer and associate cookies entirely separate. Middleware should call `getCallerIdentity(request)` that returns `{ type: 'trainer' | 'associate' | 'anonymous', id?: string }` and route-specific guards use this. Never chain the two auth checks with `||` on a shared protected-paths list.
+**Prevention:**
+- Follow the exact pattern from Supabase's official Next.js App Router guide. Do not improvise.
+- Middleware MUST call `supabase.auth.getUser()` (not `getSession()`) to trigger refresh, and MUST return the response whose cookies were mutated.
+- Put ALL Supabase session refresh logic in a single helper (`src/lib/supabase/middleware.ts`). Import from middleware. Don't duplicate.
 
-**Warning signs:** A test where you log in as an associate and directly navigate to `/trainer` — if it redirects to login instead of returning 403, the guard is ambiguous rather than correct.
+**File references:**
+- `src/middleware.ts:29-58` — current middleware is cookie-read-only; v1.2 needs to insert Supabase session refresh BEFORE the identity check.
 
-**Phase to address:** Associate Auth (first phase of v1.1)
-
----
-
-### Pitfall 2: Associate Auth Breaks the Existing Zustand Store's `associateSlug` Pattern
-
-**What goes wrong:** The Zustand store (`interviewStore.ts`) accepts `associateSlug` as an optional parameter to `createSession()`. This is a trainer-entered string during setup — the trainer types the associate's slug and it flows into the session. When associate auth exists, the slug is known at login time and must come from the auth token, not from trainer input. If both pathways coexist — trainer can still type a slug AND an authenticated associate's slug is present — sessions can be created with a mismatched or missing `associateSlug` when an associate self-initiates, because the store's `createSession` call doesn't know to pull from the auth context instead.
-
-**Why it happens:** The store was designed for trainer-driven setup. Adding a second identity source (auth context) without refactoring `createSession` means two different code paths that can produce sessions with different slug origins — or with no slug at all if the auto-population is wired incorrectly.
-
-**Consequences:** Associate-initiated automated interviews complete but their sessions are not linked to the Associate row in the DB (no `associateId` on the Session), so gap scores and readiness are never computed. Sessions appear in the DB but are orphaned. The associate's readiness record never updates despite them completing interviews.
-
-**How to avoid:** When associate auth lands, add a `setAssociateContext(slug: string)` action to the store that populates `associateSlug` from the auth token immediately after login. The `createSession` call should read from the store's existing `associateSlug` field rather than accepting it as a parameter. Trainer-entered slug should be a separate field (e.g., `trainerEnteredSlug`) so the two can never collide. Wire validation: if an authenticated associate session exists and `trainerEnteredSlug` disagrees, use the auth token value and warn.
-
-**Warning signs:** After an authenticated associate completes an interview, query `SELECT * FROM "Session" WHERE "associateId" IS NULL AND "date" > (now - 1hr)` — any rows here mean the slug is not being carried through.
-
-**Phase to address:** Associate Auth
+**Source:** https://supabase.com/docs/guides/auth/server-side/nextjs (confidence HIGH — official docs, version-aware)
 
 ---
 
-### Pitfall 3: Public Interview Complete Endpoint Has No Identity — Adding Auth to It Is a Breaking Change
+### 3. Middleware ordering: Supabase refresh must run before route guards
 
-**What goes wrong:** `/api/public/interview/complete` (route.ts) is currently guarded only by fingerprint-based rate limiting. The session payload it receives may include `associateSlug` (set by the associate during public interview flow), but the endpoint does not validate that the slug belongs to the caller — any caller can submit any slug. When associate auth is added, the intent is for authenticated associates to have their public interviews attributed to their readiness record. But retrofitting auth onto this endpoint is a breaking change: existing clients (unauthenticated browsers) will immediately fail with 401.
+**What goes wrong:** Every protected route bounces to `/signin` on the exact moment the JWT expires, because the guard reads `auth.uid()` before `supabase.auth.getUser()` refreshes the cookie.
 
-**Why it happens:** "Make it work, then make it secure" thinking during MVP. The endpoint was built as fire-and-forget. Now it needs to serve two roles: unauthenticated anonymous users AND authenticated associates.
+**Why it happens:** In our current middleware (`src/middleware.ts:37`), `getCallerIdentity` runs first and returns `anonymous` for a stale Supabase cookie. The route guard redirects before the Supabase client has a chance to auto-refresh.
 
-**Consequences:** If the endpoint requires auth, all existing anonymous interviews break. If auth is optional but the endpoint trusts a slug from an unauthenticated payload, a malicious caller can pollute any associate's readiness record by submitting their slug with fabricated scores (the existing code accepts full session objects from untrusted clients).
+**Prevention:** Rewrite middleware flow:
+1. Create Supabase server client bound to `request` + `response`
+2. `await supabase.auth.getUser()` — this may refresh + write new cookies to `response`
+3. THEN run `getCallerIdentity` (rewritten to use the Supabase user)
+4. Return the `response` (not `NextResponse.next()` fresh) so refreshed cookies propagate
 
-**How to avoid:** Treat this as two separate flows at the controller level:
-1. Anonymous: existing endpoint unchanged, sessions persist without associateId (no readiness pipeline triggered).
-2. Authenticated associate: new endpoint `/api/associate/interview/complete` that requires the `associate_session` cookie and uses the auth token's slug — ignores any slug in the payload body.
+**Detection:** Test with `JWT_EXPIRY=60` in a staging Supabase project — log in, wait 65 seconds, click a protected link. If you're bounced to `/signin`, middleware order is wrong.
 
-Never add optional auth to the same endpoint (the `if token exists, trust it` pattern is an IDOR vulnerability). The slug must come from the verified token, not the payload.
-
-**Warning signs:** Searching for `associateSlug` in the public/interview/complete request body being trusted without token verification — this is the injection point.
-
-**Phase to address:** Associate Auth + Automated Interview Pipeline Integration
+**File references:** `src/middleware.ts` (full rewrite required)
 
 ---
 
-### Pitfall 4: Cohort Adds a Foreign Key to Associate — Existing `persistSessionToDb` Upserts Break
+### 4. Associate → auth.users migration: email conflicts + associates without emails
 
-**What goes wrong:** Currently `persistSessionToDb` upserts an Associate by slug with only `displayName`. When Cohort is added and every Associate needs a `cohortId` foreign key, the upsert's `create` block becomes invalid — it creates an Associate without a cohort, violating any non-nullable FK constraint. If `cohortId` is nullable (to keep upsert working), orphaned associates accumulate outside any cohort and the cohort roster is incomplete.
+**What goes wrong:** Existing `Associate` rows have `slug` + `displayName` but no `email`. Migrating to `auth.users` FK requires every associate to have a unique email. Options:
+- Backfill fake emails (e.g., `slug@placeholder.local`) → associates can't actually log in until a trainer sets a real email → bulk invite flow must be re-run for every existing associate
+- Skip migration for emailless associates → orphaned rows, split schema (some associates have `authUserId`, some don't)
+- Require trainer to paste email for every existing associate before cutover → manual toil
 
-**Why it happens:** The upsert was written for the minimal Associate model. Adding a FK feels like a simple schema change. The consequence on the upsert logic is non-obvious until the constraint fires at runtime.
+**Email collision risk:** If two associates share an email (rare but plausible — family members, trainers using personal email for testing), `auth.users.email` unique constraint fails the migration mid-run.
 
-**Consequences:** Trainer-led sessions for associates not yet assigned to a cohort fail at the DB write step. The error is caught by the try/catch in `persistSessionToDb` and returns `false`, but the file-based write already succeeded — divergence enters the system silently (known debt: INT-02 pattern repeating).
+**Prevention:**
+- Audit existing Associate rows BEFORE planning cutover: `SELECT id, slug, displayName FROM "Associate"` — eyeball count, check for expected emails elsewhere (session candidateName?)
+- Decide: (a) hard cutover with email backfill from a trainer-provided CSV, or (b) soft migration where `authUserId` is nullable and PIN auth remains for emailless associates until they're invited
+- Migration script must be idempotent and must SELECT FOR UPDATE the email before INSERT into `auth.users` (or use Supabase Admin API `createUser` with error-on-conflict)
+- Pre-migration dry run: emit a report of "N associates ready, M missing email, K email collisions"
 
-**How to avoid:** Make `cohortId` nullable on Associate with a clear semantic: `null` means "unassigned." Add a cohort assignment step in the trainer flow separately from session creation. Never require cohort assignment for session persistence to succeed. Document that unassigned associates appear in a special "Unassigned" group in the cohort dashboard, not as an error.
-
-**Warning signs:** After adding Cohort schema, run the sync-check endpoint (`/api/sync-check`) — any sessions missing from DB that are present in file history indicate the upsert is failing.
-
-**Phase to address:** Cohort Management (schema design step)
-
----
-
-### Pitfall 5: Curriculum Scheduling Filter Applied at Question Selection Time Without Cache — Degrades Every Setup Page Load
-
-**What goes wrong:** Curriculum-driven question selection means the setup wizard must know "which topics have been taught by today's date." This requires querying the curriculum schedule (a new DB table) on every setup page load to determine which question bank files are available for selection. If this query runs synchronously during the setup wizard's GitHub file listing step, it adds a serial DB round-trip to a flow that already awaits the GitHub API. At 200ms GitHub API + 50ms DB query, the setup wizard's tech selection phase now takes 250ms minimum — but in practice queries compose and the user perceives the delay as the wizard being "slow."
-
-**Why it happens:** The curriculum filter is conceptually a WHERE clause on the question bank list — it feels natural to apply it at fetch time. The latency impact is invisible in dev (localhost DB, mock GitHub API).
-
-**Consequences:** Setup wizard feels noticeably slower. On the Supabase free tier with connection pool constraints, the extra query during setup also consumes a connection slot during the interview peak hours when connections are most scarce.
-
-**How to avoid:** Compute the "currently unlocked topics" set once per trainer session login and cache it server-side (Next.js route handler cache or a simple in-memory TTL cache). The curriculum schedule is not real-time — topics unlock by date, so a 15-minute cache is semantically correct. Do not fetch curriculum state per-request in the setup wizard's question loading path.
-
-**Warning signs:** Adding `console.time('setup-wizard')` shows > 300ms to reach tech selection step after curriculum integration. The GitHub API fetch and curriculum fetch happen serially rather than in parallel via `Promise.all`.
-
-**Phase to address:** Curriculum Scheduling
+**File references:**
+- `prisma/schema.prisma:16-33` — `Associate` has no `email` column today
+- Migration must add `email String? @unique` + `authUserId String? @unique` before cutover
 
 ---
 
-### Pitfall 6: Email Notifications Sent on Every Readiness Recomputation, Not Just on Status Change
+### 5. RLS policy recursion on Cohort ↔ CurriculumWeek ↔ Associate ↔ Session
 
-**What goes wrong:** The current readiness pipeline runs `updateAssociateReadiness` at the end of every session save. When email notifications are added for readiness changes (e.g., "Alex is now Ready"), the naive implementation adds a `sendEmail()` call inside `updateAssociateReadiness`. Every session completion sends an email. If an associate completes 5 sessions in one day (plausible for associates doing practice sprints), the trainer receives 5 emails, 4 of which say "Alex is still Ready." Email fatigue causes trainers to disable notifications, defeating the feature.
+**What goes wrong:** Writing a policy like "associate can read their cohort's curriculum" requires a subquery against `Associate`. If `Associate` itself has a policy "associate can read own row" that references `Cohort`, and `Cohort` policy references `Associate.cohortId`, you can hit Postgres `infinite recursion detected in rules for relation` or a policy that never terminates for service-role-bypassed writes.
 
-**Why it happens:** The event "readiness recomputed" is fired on every session completion. It feels like the right hook for notification. The code path `computeReadiness → updateAssociate → sendEmail` is linear and obvious.
+**Why it happens:** RLS policies run as SQL subqueries under the same role. If policy A references table B, policy B must be evaluatable under the same role without triggering A again unboundedly.
 
-**Consequences:** Email volume overwhelms Resend's free tier (100 emails/day). Trainers stop trusting or reading notification emails. Potential Resend rate limit errors in the session save pipeline if the email call is synchronous (currently `/api/send-email` is an HTTP call, not a direct Resend SDK call in the pipeline).
+**Prevention:**
+- Keep policies flat: use `auth.uid()` directly, not JOINs through other RLS-protected tables.
+- Define a SQL function `get_my_associate_id()` marked `SECURITY DEFINER` (runs as owner, bypasses RLS) that returns `associateId` for the current `auth.uid()`. Use that function in every policy.
+- Explicitly test each policy in isolation with `SET LOCAL role authenticated; SET LOCAL request.jwt.claims '{...}'; SELECT ...`.
 
-**How to avoid:** Compare the new readiness status against the previous readiness status stored in `associate.readinessStatus` before sending. Only send when `oldStatus !== newStatus`. The `Associate` row already stores `readinessStatus` — read it before calling `computeReadiness`, then compare after. Implement this comparison inside `updateAssociateReadiness` before the `prisma.associate.update` call.
-
-```typescript
-const previous = await prisma.associate.findUnique({
-  where: { id: associateId },
-  select: { readinessStatus: true }
-});
-const result = await computeReadiness(associateId, threshold);
-if (previous?.readinessStatus !== result.status) {
-  await sendReadinessChangeNotification(associateId, result.status);
-}
-```
-
-**Warning signs:** Setting up email notifications and immediately receiving duplicate emails during a test session that completes multiple times (re-review flow).
-
-**Phase to address:** Email Notifications
+**File references:** Policies to write for `Session`, `GapScore`, `Cohort`, `CurriculumWeek`, `Associate`. All need to resolve current associate without cross-table recursion.
 
 ---
 
-### Pitfall 7: `recomputeAllReadiness` Called on Cohort Bulk Operations — Blocks Under Load
+### 6. Magic-link bulk send: Supabase invite rate limits + partial failures
 
-**What goes wrong:** `readinessService.ts` exports `recomputeAllReadiness(threshold)` which iterates sequentially over all associates (`for...of` loop with `await` inside). It was designed for the settings threshold change. When cohort management introduces bulk operations — assigning 20 associates to a cohort, importing a cohort roster, bulk-enrolling in a curriculum — any code that triggers a readiness recomputation for all affected associates will serialize 20 DB round-trips sequentially. At ~50ms per associate (gap score fetch + readiness computation + associate update), a 20-associate cohort takes 1 second minimum for the bulk operation to complete. The Next.js route handler times out at the Vercel/GCE default (if configured) or the UI appears frozen for 1+ seconds.
+**What goes wrong:** Trainer pastes 50 emails, clicks "Invite cohort," the first 30 succeed, requests 31-50 return `429 Too Many Requests`. Half the cohort has accounts, the trainer doesn't know which half.
 
-**Why it happens:** The sequential loop was explicitly documented in the code as "safe for MVP (<200 associates)" — but cohort bulk operations were not anticipated as a trigger at the time of writing.
+**Why it happens:**
+- Supabase Auth has an **email rate limit** (default: ~2 emails/hour on free tier, higher on Pro but still rate-limited). Using `supabase.auth.admin.inviteUserByEmail` in a loop will trip the limiter.
+- No built-in batch API. Idempotency is manual.
+- If you swap to sending magic links through custom SMTP (Resend, already in the stack), you bypass Supabase's email limit but must implement your own idempotency, token generation happens server-side via `supabase.auth.admin.generateLink({ type: 'magiclink', email })` which is NOT rate-limited the same way.
 
-**Consequences:** Cohort creation/assignment operations time out or produce partial state (some associates recomputed, others not) if the loop is interrupted. The UI shows a spinner for > 1 second on what should be an instant action.
+**Consequences:**
+- Silent partial failures in UI — trainer sees "Invited!" but 20 associates never got an email
+- Double-invites when trainer clicks retry (Supabase creates `auth.users` row on first invite; second invite for same email returns error but email is already in `auth.users` — need to handle "user already exists, resend link" path separately)
 
-**How to avoid:** Cohort bulk operations should NOT trigger synchronous bulk readiness recomputation. Instead, mark affected associates as `readinessStale: true` (add a boolean flag to the Associate model) and recompute lazily on next dashboard load for that associate. Alternatively, use `Promise.all` for parallel recomputation — but respect the Supabase connection pool (max 5 in current config) by batching in groups of 5.
+**Prevention:**
+- Use Supabase **Admin API** (`createUser` or `generateLink`) + **send the email ourselves via Resend**. Completely sidesteps Supabase email rate limit.
+- Make the bulk endpoint **idempotent**: for each email, `UPSERT` (email) into `auth.users`; if user exists, skip creation and just generate a fresh magic link.
+- Return a structured result: `[{ email, status: 'invited' | 'already-registered' | 'sent-new-link' | 'failed', error? }, ...]`. UI renders a table.
+- Extend magic-link expiry: default is **1 hour** — too short for bulk onboarding where associates check email later. Set to 24h minimum via Supabase dashboard auth settings OR use `email_otp` with `expires_in` parameter.
+- Queue sends with a 250ms delay between Resend calls to stay under Resend's rate limit (10 req/s on free tier).
 
-**Warning signs:** Creating a cohort with multiple associates takes > 500ms server response time. Checking the DB shows partial updates — some associates have updated readiness, others have stale timestamps.
-
-**Phase to address:** Cohort Management + Email Notifications
-
----
-
-## Technical Debt Patterns
-
-Shortcuts that seem reasonable but create long-term problems specific to this codebase.
-
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Making `cohortId` required on Associate | Cleaner data model | Breaks `persistSessionToDb` upsert for sessions with unassigned associates | Never — keep nullable |
-| Adding associate auth to existing `/api/public/interview/*` endpoints with optional token | Single endpoint handles both flows | IDOR: slug in payload trusted without verification; anonymous flow and auth flow share logic that diverges | Never — split into separate endpoints |
-| Sending notification emails synchronously inside the session save pipeline | Simple linear code | Blocks session save on Resend API latency/failure; inflates save response time by 50-200ms | Never — fire-and-forget or queue |
-| Reusing `nlm_session` cookie for associate auth by adding a role field | No new cookie infrastructure | Single cookie namespace means trainer-session and associate-session can collide; middleware logic becomes a tangle of role checks | Never — separate cookie names per identity type |
-| Computing curriculum-unlocked topics inside the setup wizard's question fetch | No additional state to manage | Serial DB + GitHub API call per page load; 200ms+ latency added to critical path | Only if curriculum table has <10 rows and is heavily cached |
-| Storing cohort assignments in Zustand persist | Cohort info available offline | Stale cohort data persists across sessions; associates appear in wrong cohort after reassignment | Never — cohort is DB-authoritative, never in localStorage |
-| Triggering bulk readiness recompute on every cohort mutation | Readiness always current | Sequential await loop serializes DB calls; blocks route handler for 1+ seconds at 20 associates | Only if explicitly batched with `Promise.all` and pool-size limited |
+**Source:** Supabase Auth rate limits documented at https://supabase.com/docs/guides/auth/auth-smtp (confidence HIGH). Resend rate limits at https://resend.com/docs/api-reference/api-rate-limit.
 
 ---
 
-## Integration Gotchas
+### 7. Email deliverability: magic links land in spam
 
-Common mistakes when connecting v1.1 features to this specific system.
+**What goes wrong:** Associates never see the magic-link email. It lands in spam because Resend's default `onboarding@resend.dev` sender has no DMARC alignment with the organization's domain, or because the subject line ("Sign in to Next Level Mock") + single-link body triggers spam filters.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Associate auth + existing `isAuthenticatedSession()` | Returning `true` from `isAuthenticatedSession` for associate cookies (both are "authenticated") | `isAuthenticatedSession` should remain trainer-only; add separate `isAssociateAuthenticated()` that checks the associate cookie |
-| Cohort FK + `persistSessionToDb` upsert | Making `cohortId` non-nullable on Associate, causing upsert to fail for unassigned associates | `cohortId` nullable; unassigned associates are valid; cohort assignment is a separate operation |
-| Email notifications + existing Resend `/api/send-email` route | Calling `/api/send-email` as an internal fetch from `updateAssociateReadiness` (server → server HTTP call in Docker) | Use Resend SDK directly in a `notificationService.ts` lib — avoid internal HTTP calls from server code |
-| Curriculum schedule + question bank selection | Fetching curriculum state and GitHub files serially in the setup wizard | `Promise.all([fetchCurriculumState(), fetchGitHubFiles()])` — parallel fetch, combine results |
-| Public interview + associate auth | Adding auth as optional middleware on `/api/public/interview/*` | Split: public flow stays public, authenticated flow uses new `/api/associate/interview/*` endpoints |
-| Cohort dashboard + existing trainer roster | Conditionally filtering the existing `/api/trainer` endpoint by cohort via query param | Keep existing endpoint unchanged; add `/api/trainer/cohorts/[cohortId]` for scoped roster — don't add query params that change the shape of an existing response |
-| Automated interview pipeline + gap scoring | Wiring gap scoring into the existing fire-and-forget path at `/api/public/interview/complete` | The existing endpoint must remain anonymous; gap scoring should only run when an authenticated associate session is present via the new endpoint |
+**Why it happens:**
+- Resend + Supabase both recommend sending from a verified domain (`auth@nextlevelmock.example.com`) with SPF + DKIM + DMARC records published on DNS. If not configured, Gmail/Outlook heavily penalize.
+- Magic-link emails are inherently spammy in content shape (short, single link, action-oriented verbiage). Without reputation, they fail Bayesian filters.
 
----
+**Prevention:**
+- Verify sending domain in Resend dashboard BEFORE v1.2 ships. Publish SPF (`v=spf1 include:amazonses.com ~all`), DKIM (Resend provides the DKIM key), DMARC (`v=DMARC1; p=none; rua=mailto:postmaster@...`).
+- Use a plausible "from" address matching the domain.
+- Add plaintext alternative + reasonable body copy (not just a button).
+- Test deliverability: send to a Gmail account, a Yahoo account, an Outlook.com account, AND a corporate-O365 tenant. Check spam folders.
+- Stagger sends (see Pitfall 6) so spam filters don't flag as bulk-blast.
 
-## Performance Traps
-
-Patterns that work at small scale but fail as cohort data grows.
-
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Fetching all associates then filtering by cohort in JS | Cohort dashboard loads slowly; unnecessary data transferred | Add `WHERE cohortId = ?` to the `/api/trainer` cohort variant at the DB query level | ~50+ associates |
-| Loading full session JSON (assessments JSONB blob) for roster view | Roster page slow; high memory per request | Select only scalar fields (`overallTechnicalScore`, `readinessStatus`) for roster; reserve full JSONB load for drill-down | ~20 associates with 10+ sessions each |
-| Sequential `Promise.all` gap score upserts per session | Session save grows linearly with question count | Current code already uses `Promise.all` for upsert — maintain this; do not convert to sequential for curriculum topic tracking additions | ~50+ questions per session |
-| `recomputeAllReadiness` called on settings change with large cohort | Settings save blocks for seconds | Batch in chunks of 5 (match pool size) or move to background job | ~20+ associates |
-| Curriculum schedule fetched per request without cache | Setup wizard latency spikes | Cache unlocked topics per trainer session (15min TTL) | Any scale — it's a serial DB call in the hot path |
+**Source:** Resend deliverability guide https://resend.com/docs/dashboard/domains/introduction (confidence HIGH).
 
 ---
 
-## Security Mistakes
+### 8. Removing `ENABLE_ASSOCIATE_AUTH` — dangling references crash at runtime
 
-Domain-specific security issues for v1.1.
+**What goes wrong:** Flag is removed from `featureFlags.ts`, but `isAssociateAuthEnabled()` calls in server components, API routes, and tests reference it — TypeScript compiles (flag becomes always-true constant), tests pass, but prod crashes when a code path expects the old PIN endpoint to return 404 and instead gets a 500.
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Accepting `associateSlug` from unauthenticated request body and using it to trigger gap/readiness pipeline | Any anonymous caller can pollute any associate's readiness record with fabricated scores | Slug must come from verified auth token only; public endpoint never triggers readiness pipeline |
-| Issuing associate auth cookies without an expiry or rotation mechanism | A stolen cookie provides permanent access | Set `Max-Age` (recommend 8 hours for interview sessions); use `HttpOnly` + `SameSite=Strict`; rotate on each interview completion |
-| Curriculum schedule accessible without trainer auth | Anonymous callers can enumerate what topics are taught and when | Add `isAuthenticatedSession()` guard to curriculum management API routes; curriculum data is business-sensitive |
-| Associate seeing another associate's gap scores via slug enumeration on `/associate/[slug]` | Associates can compare their readiness to others or confirm slugs exist | Add auth guard to `/associate/[slug]` route: only the authenticated associate for that slug (or a trainer) may view |
-| Email notifications containing readiness classification sent to wrong recipient | Trainer misconfigures notification email; wrong party receives associate data | Never include associate PII in notification subject line; confirm recipient is a trainer account before sending |
+**Files with references (from grep):**
+- `src/lib/featureFlags.ts` — function to delete
+- `src/app/api/associate/pin/verify/route.ts` — entire file to delete
+- `src/app/api/associate/pin/generate/route.ts` — entire file to delete
+- `src/app/api/associate/interview/complete/route.ts` — currently flag-gated
+- `src/app/api/associate/logout/route.ts` — associate logout, replace with Supabase signOut
+- `src/app/api/associate/me/route.ts` — replace with Supabase getUser
+- `src/app/api/associate/status/route.ts` — entire endpoint becomes obsolete
+- `src/lib/identity.ts` — remove associate branch, replace with Supabase user resolution
+- `src/lib/auth-server.ts` — remove `resolveAssociate` + `verifyAssociateToken` path
+- `src/lib/associateSession.ts` — **entire file deletable post-cutover**
+- `src/lib/pinService.ts` — **entire file deletable post-cutover**
+- `src/lib/pinAttemptLimiter.ts` — deletable
+- UI: `/signin` tabs, `GeneratePinButton.tsx`, any "PIN" copy
+- DB migration: `ALTER TABLE "Associate" DROP COLUMN pinHash, DROP COLUMN pinGeneratedAt`
 
----
+**Tests to rewrite:**
+- `src/middleware.test.ts`
+- `src/lib/identity.test.ts`
+- `src/lib/auth-server.test.ts`
+- `src/lib/pinService.test.ts` (delete)
+- `src/app/api/associate/pin/verify/route.test.ts` (delete)
+- `src/app/api/public/interview/complete/route.test.ts` — adjust
 
-## UX Pitfalls
-
-Common user experience mistakes specific to these features.
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Associate auth login is the same URL as trainer login | Associates and trainers land on the same form, creating confusion about what credentials to enter | Separate login pages: `/login` (trainer, existing), `/associate/login` (associates) with clearly different visual treatment |
-| Cohort dashboard shows "No Data" for associates < 3 sessions without explanation | Trainers think something is broken for new cohort members | Show "Needs 3 sessions to unlock readiness signal — N/3 complete" per associate in the roster |
-| Curriculum schedule shows all topics including future ones | Associates (or trainers) select a question bank for topics not yet taught; students are tested on material they haven't seen | Default to hiding future-dated topics; add a "preview future topics" toggle for trainers only |
-| Email notification arrives with no action link | Trainer reads "Alex is now Ready" but doesn't know where to go | Every notification email includes a deep link to `/trainer/[slug]` |
-| Design cohesion pass changes button colors/spacing in the interview flow mid-session | Associates in the middle of an interview notice visual changes between questions if any CSS is applied inconsistently | Apply design cohesion pass only to pages outside the interview flow first; interview pages (`/interview`, `/review`) are highest-risk for mid-session visual breakage |
-
----
-
-## "Looks Done But Isn't" Checklist
-
-Things that appear complete but are missing critical pieces.
-
-- [ ] **Associate auth:** Associate can log in and complete an interview — but verify the session's `associateSlug` in the DB matches the auth token's slug (not the payload's slug) before declaring pipeline attribution working.
-- [ ] **Cohort creation:** Cohort row created in DB — but verify that existing sessions for associates added to the cohort are retrospectively visible in the cohort dashboard (cohort assignment is not retroactive by default).
-- [ ] **Curriculum scheduling:** Question bank filter applies during setup — but verify that changing the curriculum date does not retroactively change what question banks were available for past sessions (curriculum state is point-in-time, not retroactive).
-- [ ] **Automated interview pipeline integration:** Public interview session persists to DB — but verify gap scores and readiness actually recomputed for the associate (INT-02 tech debt from v1.0 — fire-and-forget path is confirmed to skip the gap pipeline).
-- [ ] **Email notifications:** Email sends on first test — but verify no duplicate sends when the same session is saved twice (the re-review flow calls `POST /api/history` multiple times for the same session ID).
-- [ ] **Design cohesion:** All pages render with DESIGN.md tokens — but verify that Tailwind's JIT compile didn't purge design-system classes that only appear in dynamically constructed strings (common with color interpolation like `text-${status}-500`).
-- [ ] **Cohort dashboard:** Roster filtered by cohort renders correctly — but verify the "All Associates" view (existing `/trainer` page) still works and is not accidentally scoped to the first cohort.
+**Prevention:**
+- Do cutover in TWO phases: (a) stop READING the flag (hard-code to true in code, migrate users to Supabase while PIN system is still present as fallback), (b) delete PIN code + columns only after a grace period and after every session in production has a Supabase-auth'd counterpart.
+- Write a grep-based pre-ship check: `rg -n "ENABLE_ASSOCIATE_AUTH|pinHash|pinGeneratedAt|associate_session|verifyAssociateToken|isAssociateAuthEnabled" src/` must return zero before column-drop migration.
+- Migration `DROP COLUMN` must be separate, reversible, and guarded — production runs it only after step (a) has been live for at least one full associate session cycle.
 
 ---
 
-## Recovery Strategies
+### 9. Active PIN sessions at cutover moment — mass-logout UX
 
-When pitfalls occur despite prevention.
+**What goes wrong:** Deploy happens Monday 9am, 30 associates are mid-interview or logged in with `associate_session` cookies. Cutover invalidates those cookies instantly. Mid-interview sessions lose state, associates see "sign in" screen, panic.
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Middleware conflates trainer/associate auth | MEDIUM | Add route-level auth check as a secondary guard in each trainer route handler — middleware fix alone is not sufficient because sessions may already be mixed |
-| Associate sessions persisted without associateId (orphaned) | MEDIUM | Write a one-time migration script: for orphaned Sessions with a non-null `candidateName`, attempt slug lookup from `data/interview-history.json`; manually re-link via `prisma.session.update({ where: { id }, data: { associateId } })` |
-| Cohort FK causes upsert failures in production | LOW | Make `cohortId` nullable via `prisma migrate` — a non-breaking schema change; no data migration needed |
-| Duplicate notification emails sent | LOW | Add `notificationSentAt` timestamp to Associate row; check before sending; deduplicate by (associateId, newStatus, date) |
-| Curriculum filter breaks question bank loading entirely | MEDIUM | Curriculum filter should be additive (whitelist), never exclusive (blacklist that returns empty). If filter produces empty list, fall back to full question bank and log a warning |
-| Design tokens purged by Tailwind JIT | LOW | Add dynamic color classes to `safelist` in `tailwind.config.ts`; run `npm run build` and inspect CSS output for missing classes |
+**Why it happens:** The HMAC cookie (`associate_session` signed with `ASSOCIATE_SESSION_SECRET`, `src/lib/associateSession.ts:24-39`) is verified by `verifyAssociateToken`. Removing that verifier on cutover day = every cookie is instantly invalid.
+
+**Prevention:**
+- **Schedule cutover for a known-quiet window** (weekend, between cohorts).
+- **Grace-period plan:** Keep `verifyAssociateToken` + `resolveAssociate` alive for ONE deploy cycle. Middleware accepts EITHER Supabase session OR legacy HMAC cookie. Banner in UI: "We've upgraded sign-in — your next login will use email magic link." After 2 weeks, delete legacy path.
+- **Preserve interview state:** Zustand store persists to localStorage (`src/store/interviewStore.ts`). Even if cookie dies, the interview-in-progress survives page reload. Verify this manually before cutover.
+- Drop `ASSOCIATE_SESSION_SECRET` from env ONLY after legacy verifier is deleted.
 
 ---
 
-## Pitfall-to-Phase Mapping
+### 10. OAuth / redirect URL misconfiguration per environment
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Middleware conflating trainer/associate auth (Pitfall 1) | Associate Auth | Navigate to `/trainer` while holding only an associate session cookie — must get 403, not 200 or redirect to login |
-| Zustand store slug origin collision (Pitfall 2) | Associate Auth | After associate login + interview complete, query `Session WHERE associateId IS NULL AND date > now-1hr` — must return 0 rows |
-| Public interview endpoint IDOR / breaking change (Pitfall 3) | Associate Auth + Automated Interview Pipeline | Confirm `/api/public/interview/complete` unchanged; new `/api/associate/interview/complete` exists; anonymous test still completes without 401 |
-| Cohort FK breaking associate upsert (Pitfall 4) | Cohort Management — schema design | Run `persistSessionToDb` for an associate with no cohort assigned — must succeed |
-| Curriculum filter serial latency (Pitfall 5) | Curriculum Scheduling | Setup wizard phase 2 (tech selection) loads in < 400ms with curriculum filter active; verify with `console.time` |
-| Email notification on every session, not on status change (Pitfall 6) | Email Notifications | Complete 3 sessions for same associate without status change — confirm 0 emails sent; then trigger status change — confirm exactly 1 email |
-| Bulk readiness recompute blocking cohort operations (Pitfall 7) | Cohort Management + Email Notifications | Create a cohort with 10 associates — route handler response time must be < 500ms; readiness recomputation must not be in the critical path |
+**What goes wrong:** Magic link in email points to `http://localhost:3000/auth/callback` in production, because the `emailRedirectTo` was hard-coded during dev and never env-scoped. Associates click the link → browser shows `ERR_CONNECTION_REFUSED`.
+
+**Why it happens:** Supabase sends whatever URL you pass to `signInWithOtp({ options: { emailRedirectTo } })`. If you pass `http://localhost:3000/...`, that's what ends up in the email. Also: Supabase dashboard has an **allowlist** of redirect URLs — any URL not on the list is rejected, and the default after a new project is created is only `http://localhost:3000/**`.
+
+**Prevention:**
+- Compute `emailRedirectTo` from `NEXT_PUBLIC_SITE_URL` env var (set per environment: local, staging, prod).
+- In Supabase dashboard → Authentication → URL Configuration, add both `https://nextlevelmock.example.com/**` AND `http://localhost:3000/**` (for local dev) AND any preview-deploy URL pattern.
+- Add a boot-time assert in server code: if `NODE_ENV === 'production'` and `NEXT_PUBLIC_SITE_URL` starts with `http://localhost`, throw.
+
+---
+
+## Moderate Pitfalls
+
+### 11. N+1 queries on roster sparklines
+
+**What goes wrong:** Roster page renders 50 associates, each with a sparkline of last-10-session scores. Naive implementation: one query per associate for their sessions = 51 queries per page load. Page takes 3+ seconds.
+
+**Prevention:**
+- Single query: `SELECT associateId, date, overallTechnicalScore FROM "Session" WHERE associateId IN (...) ORDER BY date DESC LIMIT 10 PER associateId` — Postgres window function: `ROW_NUMBER() OVER (PARTITION BY associateId ORDER BY date DESC)`.
+- Or compute sparkline data into a materialized denormalized column on Associate (`lastTenScores Float[]`) updated by the readiness pipeline.
+- Add index on `Session(associateId, date DESC)` if not already present (schema currently indexes `cohortId` and `readinessRecomputeStatus` — check — `prisma/schema.prisma:60-61`).
+
+---
+
+### 12. PDF analytics export memory blowup with recharts SVG
+
+**What goes wrong:** Cohort analytics PDF includes 10 sparklines + 1 gap-aggregation bar chart + 1 readiness-trend line chart. Each recharts component renders to SVG, then `@react-pdf/renderer` converts to its internal primitives. On a GCE `e2-micro` (1 GB RAM), the node process OOM-kills mid-render.
+
+**Prevention:**
+- Don't render recharts inside the PDF pipeline. Either: (a) server-generate simple SVG directly with a tiny helper (200 lines of `<polyline>` math), (b) use `@react-pdf/renderer`'s native chart primitives if they exist, or (c) render charts client-side, export PNG via `html-to-image`, embed PNG in PDF.
+- Option (a) is cheapest: pre-v1.2 spike to write `sparkline(points: number[]): string` returning `<svg>...</svg>` takes ~1 hour.
+- Memory cap: set Docker `mem_limit: 768m` on node container, test with a full cohort PDF.
+
+---
+
+### 13. Cache staleness on question-bank manifest
+
+**What goes wrong:** Trainer pushes new questions to the GitHub repo. Setup wizard doesn't show them. Trainer reports a bug. Actual cause: in-memory manifest cache TTL is 1 hour.
+
+**Prevention:**
+- Use **hash-based invalidation**, not TTL. Fetch GitHub `ref` commit SHA cheaply (single GraphQL call or `GET /repos/{o}/{r}/commits/{branch}` returns SHA in <50ms). Cache key = SHA. If SHA changed → invalidate.
+- OR: TTL of 5 minutes + explicit "Refresh" button in trainer UI that clears the cache.
+- Surface cache age in the wizard ("Questions last synced 2 min ago") so trainer understands staleness.
+
+---
+
+### 14. Multi-worker cache divergence
+
+**What goes wrong:** If Docker ever scales to 2 replicas, each has its own in-memory manifest cache. Worker A refetches at T=0, Worker B at T=30s. Trainer's "refresh" request hits A; next request hits B with stale data.
+
+**Prevention:**
+- Today NLM runs single-container on GCE. Document "single replica assumption" in code comment at the cache site.
+- When scaling: move cache to Redis (Upstash free tier) or Supabase itself (table with single row + `updatedAt`).
+- Trivially: skip the cache, always fetch from GitHub — 300ms overhead on wizard load is acceptable for now.
+
+---
+
+### 15. KPI staleness vs real-time tradeoff
+
+**What goes wrong:** KPI strip shows "Mocks This Week: 12" but a trainer just completed the 13th interview 30 seconds ago. They refresh — still 12. Confusion.
+
+**Prevention:**
+- KPI queries are cheap aggregates (`SELECT COUNT(*) FROM Session WHERE date >= ...`). Compute on every request — no cache needed.
+- Use Next.js `dynamic = 'force-dynamic'` or `revalidate = 0` on the analytics dashboard route to defeat RSC output caching.
+- If perf becomes an issue later, add Postgres materialized view refreshed by the readiness sweep.
+
+---
+
+### 16. Sidebar layout shift on route change
+
+**What goes wrong:** Clicking "Gap Analysis" in sidebar causes the sidebar to flicker / reflow because it's rendered inside the page component instead of a shared App Router layout.
+
+**Prevention:**
+- Put sidebar in `src/app/trainer/layout.tsx` (or `src/app/(dashboard)/layout.tsx` route group). App Router preserves layout across navigations — only the `page.tsx` re-renders.
+- Sidebar must be a Server Component or Client Component with stable key; avoid `key={pathname}` which forces remount.
+
+---
+
+### 17. Mobile sidebar: touch/gesture + focus trap
+
+**What goes wrong:** Off-canvas sidebar opens on hamburger tap, but users can't dismiss it by tapping the backdrop, or Tab-key focus escapes to the hidden page behind it.
+
+**Prevention:**
+- Use a known-good primitive: Radix UI `Dialog` in sheet mode, or shadcn/ui `Sheet` (wraps Radix). Handles focus trap, backdrop click, Escape key, scroll lock.
+- Test with a screen reader; announce drawer open/close.
+
+---
+
+### 18. URL / bookmark preservation across dashboard redesign
+
+**What goes wrong:** Trainers have `/trainer/alice-smith` bookmarked. Redesign moves it to `/dashboard/associates/alice-smith`. Bookmarks 404.
+
+**Prevention:**
+- Keep `/trainer` + `/trainer/[slug]` URLs. Redesign is a layout/styling change, not a URL change.
+- If URLs MUST change, add `next.config.ts` redirects (`{ source: '/trainer/:slug', destination: '/dashboard/associates/:slug', permanent: true }`).
+
+---
+
+### 19. DESIGN.md token drift during redesign
+
+**What goes wrong:** New dashboard components use hard-coded Tailwind classes (`bg-orange-500`, `text-slate-900`) instead of DESIGN.md tokens. Six months later, dark-mode palette change requires grepping 40 files.
+
+**Prevention:**
+- Pre-redesign audit: enumerate every token the new design needs. If `finalized.html` uses a color not in DESIGN.md, decide: add to DESIGN.md, or change the design.
+- Codex review gate: any PR that introduces hard-coded hex / non-token color FAILS review.
+- Keep DESIGN.md as the style guide; `globals.css` as the token source; components reference `var(--nlm-...)` or Tailwind theme tokens only.
+
+---
+
+## Minor Pitfalls
+
+### 20. `auth.uid()` returns null in service-role context
+
+**What goes wrong:** Service-role clients (the one Prisma uses) have `auth.uid()` = NULL. Policies written like `USING (associate_id = auth.uid())` will silently return no rows when accessed via service role — easy to mistake for "RLS is working."
+
+**Prevention:** When testing RLS, always use an authenticated client with a real JWT. Never test RLS via `psql` + service-role.
+
+### 21. Session-cookie version bump on PIN rotation — carried over incorrectly
+
+**What goes wrong:** Current code (`src/lib/auth-server.ts:40`) compares cookie `ver` to `Associate.pinGeneratedAt`. Post-cutover, `pinGeneratedAt` is dropped → version check dies → type errors hidden by Supabase taking over.
+
+**Prevention:** Delete version-check code in same PR as column drop. Don't leave orphaned references to `pinGeneratedAt`.
+
+### 22. Forgetting to delete `ASSOCIATE_SESSION_SECRET` from prod env
+
+**What goes wrong:** After cutover, the env var is no longer used but remains in `.env.docker`, `docker-compose.yml`, `.env.example`. Clutter + security surface (it's a live HMAC key sitting idle).
+
+**Prevention:** Delete from all env files in the same commit as the code that references it. Rotate prod secret management.
+
+### 23. Bulk-invite uses wrong cohort
+
+**What goes wrong:** Trainer selects "Cohort Fall-2026" in the dropdown, pastes 50 emails, submits. UI state got stale — actually sent to "Cohort Spring-2026". 50 associates are in the wrong cohort.
+
+**Prevention:**
+- Confirmation step: "You are about to invite 50 associates to **Cohort Fall-2026** with curriculum **React/Node/Postgres**. Proceed?" — shows cohort name + week count as a receipt.
+- Reversibility: after submit, show a "Undo (deletes invites)" option for 60 seconds.
+
+### 24. Associate dashboard exposes other associates' data
+
+**What goes wrong:** Associate dashboard calls `/api/trainer/[slug]` by accident (copy-paste from trainer code), returns another associate's gap scores. Trainer-only endpoint never checked the caller.
+
+**Prevention:**
+- Audit every `/api/associate/*` route post-v1.2 to confirm `getAssociateIdentity()` (renamed to Supabase equivalent) is called and the slug in the URL matches.
+- Unit test: GET `/api/associate/alice/...` with Bob's session → expect 403.
+
+### 25. Magic link in email client preview = auto-consumed
+
+**What goes wrong:** Outlook / corporate security scanners follow every link in an email to check for malware. Supabase magic-link is single-use — scanner consumes it, real click fails "Link already used."
+
+**Prevention:**
+- Supabase supports **PKCE flow** for magic links — scanner fetch doesn't complete sign-in because the code-verifier is only in the user's browser. Enable PKCE in Supabase Auth config.
+- Alternative: send a "click to sign in" landing page URL that, on click, fires the real magic-link request — keeps the consumed URL off the email.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Supabase Auth adoption | Middleware order (Pitfall 3) + SSR cookies (Pitfall 2) | Copy Supabase's official Next.js App Router template verbatim, don't improvise |
+| RLS policies | Prisma bypass (Pitfall 1) | Decide Option A vs B in PLAN before writing SQL; document in PROJECT.md |
+| Associate migration | Email backfill (Pitfall 4) | Dry-run migration script reports conflicts; trainer approves CSV before hard cutover |
+| Bulk magic-link | Rate limits + idempotency (Pitfall 6, 7) | Admin API + Resend SMTP + per-email result table in UI |
+| PIN removal | Dangling refs (Pitfall 8) + active sessions (Pitfall 9) | Two-phase removal; grep-gate in CI; grace period |
+| Dashboard redesign | URL preservation (Pitfall 18) + layout shift (Pitfall 16) | Keep `/trainer` URLs; use App Router layout groups |
+| Analytics PDF | recharts OOM (Pitfall 12) | Don't render recharts inside react-pdf; pre-render as SVG strings |
+| Cached manifest | Stale data (Pitfall 13) | Hash-based invalidation using commit SHA, not TTL |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis:
-  - `src/middleware.ts` — current auth logic, single-cookie pattern
-  - `src/lib/auth-server.ts` — `isAuthenticatedSession()` implementation
-  - `src/store/interviewStore.ts` — `associateSlug` parameter in `createSession`
-  - `src/app/api/public/interview/complete/route.ts` — fingerprint-only auth, slug from payload
-  - `src/app/api/public/interview/start/route.ts` — rate limit only, no identity
-  - `src/lib/sessionPersistence.ts` — upsert logic, `associateId` linking
-  - `src/lib/readinessService.ts` — `recomputeAllReadiness` sequential loop pattern
-  - `src/lib/gapPersistence.ts` — `saveGapScores` pipeline
-  - `src/app/api/history/route.ts` — dual-write pattern, fire-and-forget gap pipeline
-  - `prisma/schema.prisma` — current Associate model, nullable fields, FK structure
-- Project documentation:
-  - `.planning/PROJECT.md` — v1.1 target features, constraints, decisions
-  - `.planning/milestones/v1.0-MILESTONE-AUDIT.md` — known tech debt INT-02 (public interviews skip gap pipeline), FLOW-01 (no settings UI), 11 tracked debt items
-  - `CLAUDE.md` — architecture overview, dual-write design, auth pattern
-- Confidence note: All pitfalls derived from direct code inspection of this repository. No external web sources were available. Confidence is HIGH for pitfalls grounded in the actual code (auth middleware, upsert logic, readiness loop). Confidence is MEDIUM for performance thresholds (e.g., "breaks at 50 associates") — these are reasonable estimates based on Supabase free tier limits (60 connections, ~50ms query latency) documented in training data.
-
----
-*Pitfalls research for: Next Level Mock v1.1 Cohort Readiness System*
-*Researched: 2026-04-14*
+- Supabase SSR for Next.js — https://supabase.com/docs/guides/auth/server-side/nextjs (HIGH confidence, official, version-current)
+- Supabase Auth rate limits — https://supabase.com/docs/guides/auth/auth-smtp (HIGH)
+- Supabase RLS guide — https://supabase.com/docs/guides/database/postgres/row-level-security (HIGH)
+- Prisma + RLS discussion — https://github.com/prisma/prisma/issues/5128 (MEDIUM — open issue, community consensus is "Prisma bypasses RLS unless you wrap transactions")
+- Resend deliverability — https://resend.com/docs/dashboard/domains/introduction (HIGH)
+- PKCE flow for magic links — https://supabase.com/docs/guides/auth/server-side/oauth-with-pkce-flow (HIGH)
+- Existing code references (cited inline) — `src/middleware.ts`, `src/lib/identity.ts`, `src/lib/auth-server.ts`, `src/lib/associateSession.ts`, `src/lib/pinService.ts`, `src/lib/featureFlags.ts`, `prisma/schema.prisma`

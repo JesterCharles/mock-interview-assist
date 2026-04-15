@@ -1,187 +1,361 @@
-# Feature Research
+# Feature Landscape — v1.2 Analytics & Auth Overhaul
 
-**Domain:** Cohort management, associate authentication, curriculum scheduling, and notification systems for a technical training/assessment platform
-**Project:** Next Level Mock — v1.1 Cohort Readiness System
-**Researched:** 2026-04-14
-**Confidence:** MEDIUM (training-data-based domain expertise — LMS/cohort management patterns are well-established; specific implementation choices draw on existing codebase analysis; WebSearch unavailable for external verification)
-
----
-
-## Context: Baseline (v1.0 Already Shipped)
-
-The following are not features to build — they are the foundation v1.1 extends:
-
-- Trainer-led mock interviews with LLM scoring + trainer override
-- AI-automated public interviews (no trainer, LangGraph agent)
-- Persistent sessions in Supabase via Prisma (dual-write with file storage)
-- Associate profiles (trainer-assigned slug, no login)
-- Two-level gap scoring (skill + topic, 0.8 recency decay)
-- Readiness classification (ready/improving/not_ready, configurable threshold)
-- Trainer dashboard: roster view, per-associate detail, gap trend charts, calibration view
-- Adaptive mock setup (gap-driven tech weight pre-population)
-- PDF reports via @react-pdf/renderer, email via Resend
-
-**The gap v1.1 must close:** Automated public interviews do not link to associate identity or feed the readiness pipeline. There is no cohort organization layer. Curriculum is not connected to question selection. Design is inconsistent across pages.
+**Domain:** Adaptive technical-interview training platform (trainer-led + automated), readiness engine for cohorts
+**Researched:** 2026-04-15
+**Overall confidence:** MEDIUM-HIGH (competitor UX patterns from training data; web verification unavailable in this run — flagged per section)
 
 ---
 
-## Feature Landscape
+## Scope Recap
 
-### Table Stakes (Users Expect These)
+Five feature bundles locked for v1.2:
 
-Features trainers expect in a cohort-aware training platform. Missing these makes the platform feel like a prototype, not a professional tool.
+- **A.** Trainer Analytics + Reporting (KPI strip, cohort trends, sparklines, gap aggregation, PDF export)
+- **B.** Dashboard Redesign (topbar + sidebar, KPI cards)
+- **C.** Associate Dashboard Upgrade (self-view gaps, recommended area, goals/streaks, book-next-mock)
+- **D.** Full Supabase Auth + Bulk Onboarding (magic link invites, RLS, PIN removal)
+- **E.** Cached Question-Bank Manifest (TTL or content-hash invalidation)
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| **Associate identity linkage for automated interviews** | Automated interview sessions exist in DB today but orphaned (no `associateId`). Trainers cannot see automated session history per associate without this. The gap pipeline never fires. | MEDIUM | Associate provides slug at interview start. The `/api/public/interview/start` and `/api/public/interview/complete` routes need to accept + propagate slug. `persistSessionToDb` already handles associate upsert via slug — this is wiring, not new infrastructure. |
-| **Automated interviews trigger gap scoring + readiness update** | If a session saves but gap scores don't recompute, the readiness pipeline is broken. Trainers expect all interview modes to feed the same record. | LOW | The gap scoring and readiness update path already exists for trainer-led sessions (via `gapPersistence.ts` + `readinessService.ts`). Automated complete endpoint needs to call the same pipeline post-persist. |
-| **Cohort as first-class entity** | "Show me everyone in the April cohort" is a natural trainer query. Without cohort grouping, roster becomes unusable as the associate list grows. | MEDIUM | New `Cohort` model in Prisma schema: `{ id, name, startDate, endDate, description, trainerId? }`. Associates belong to one cohort at a time (nullable `cohortId` FK on Associate). |
-| **Cohort-filtered roster view** | Trainer dashboard must support viewing one cohort at a time. Global roster with 100 associates is noise. | MEDIUM | `/trainer` roster adds cohort selector (dropdown or tab). Query filters by `cohortId`. Existing roster table and readiness badges reuse without change. |
-| **Curriculum schedule per cohort** | Trainers teach in weekly sequences. Question selection today uses arbitrary `selectedWeeks`. Curriculum ties weeks to skills explicitly so question selection becomes principled rather than manual. | MEDIUM | New `CurriculumWeek` model: `{ id, cohortId, weekNumber, skillName, topicTags[], startDate }`. This replaces the implicit week→skill mapping currently embedded in session `techMap`. |
-| **Curriculum-driven question filtering** | When an associate takes a mock, questions should only come from skills that have been taught. Untaught topics should not appear. | MEDIUM | At interview setup, fetch current cohort's taught weeks (weeks where `startDate <= today`). Filter `selectedWeeks` to taught weeks only, or auto-populate from curriculum. The `techMap` already maps week → skill — this formalizes the data source. |
-| **Design cohesion across all pages** | The platform makes readiness judgments with career consequences. Inconsistent visual treatment (fonts, colors, spacing) undermines credibility. Trainers notice. | LOW-MEDIUM | Apply DESIGN.md tokens (warm parchment, Clash Display headings, DM Sans body, burnt orange accent) to all pages that currently don't follow the system: public interview flow, auth page, associate profile. No new design decisions needed — execution work only. |
-
-### Differentiators (Competitive Advantage)
-
-Features that set this platform apart from generic LMS cohort tools (Canvas, TalentLMS, Google Classroom). Aligned with the core value: trajectory over snapshot.
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| **Cohort-aggregate readiness view** | "3 of 8 associates in the April cohort are ready, 4 are improving, 1 is at risk" — no LMS gives this. Trainers can set cohort graduation targets with actual data behind them. | MEDIUM | Aggregate readiness counts from associate records filtered by cohort. Display as summary bar at top of cohort view. Data already exists per-associate — this is a GROUP BY query + display component. |
-| **Curriculum-adaptive gap computation** | Gaps should only be computed against taught material. An associate who hasn't been taught SQL yet shouldn't be flagged as weak in SQL. `GapScore` records should scope to curriculum progress. | MEDIUM-HIGH | When computing gaps, filter assessed questions to skills present in taught curriculum weeks. This requires curriculum data to be present before the gap pipeline runs. Dependency: curriculum schedule must exist and be linked to the cohort. |
-| **Readiness change email notifications to trainer** | Trainer does not watch the dashboard all day. When an associate crosses the readiness threshold (not_ready → improving, improving → ready, or ready → declining), the trainer needs to know without polling. | MEDIUM | Resend is already integrated for PDF report delivery. New hook: after `updateAssociateReadiness`, compare new status to previous stored status. If changed, send a structured Resend email to trainer. Trainer email address needs to be stored (Settings model). |
-| **Per-cohort readiness trend over time** | Week-over-week cohort readiness improves or plateaus. Visualizing this trajectory gives the trainer — and eventually the client — a defensible record. | HIGH | Requires snapshotting cohort-aggregate readiness at regular intervals (daily or weekly). Simple approach: compute and store a `CohortSnapshot` record on each session save. Chart with recharts `LineChart` (already in project). |
-
-### Anti-Features (Commonly Requested, Often Problematic)
-
-| Anti-Feature | Why Requested | Why Problematic | Alternative |
-|--------------|---------------|-----------------|-------------|
-| **Associate self-registration (email/password signup)** | Associates want to check their own progress. Seems like a natural evolution. | Requires email verification flow, password reset, session management for a different user role, and Supabase Auth integration or custom JWT. Doubles auth surface area. The job-seeker segment is explicitly deferred. | Trainers share associate profile URLs directly (`/associate/[slug]` already exists as a server-rendered public profile). No login needed for associates in v1.1. |
-| **Cohort invitation emails to associates** | Logical if associates were self-registering. | There are no associate accounts in v1.1. Associates take interviews via a public URL — no invitation needed. Sending emails to associates who don't have accounts creates confusion. | Trainer shares the interview URL verbally or via their own communication channels. |
-| **Multi-trainer / role-based access within a cohort** | Real training orgs have co-trainers. Seems natural. | Requires trainer identity, permission model, audit trails. Current auth is single-password. Building this before the single-trainer loop is validated adds complexity before the product is proven. | Single-password auth is sufficient for v1.1. Add trainer identity when multi-trainer is a validated need. |
-| **Automated interview scheduling / calendar integration** | Trainers want to schedule mock interviews in advance. | Calendar integration (Google Calendar, iCal) is a standalone project. Scheduling without calendar is just a date field with no notification delivery. Adds real complexity for unclear MVP value. | Trainers schedule verbally. The curriculum `startDate` per week gives enough structure to see what's been taught without a calendar. |
-| **Cohort progress report PDFs** | Clients want deliverables. Seems high-value. | Requires a new PDF template, aggregate data pipeline, and design work. No client-facing portal exists. PDF goes nowhere meaningful in v1.1. | Cohort aggregate readiness view gives trainers the data to write their own client reports. Defer cohort PDF to client-portal milestone. |
-| **Real-time dashboard updates (Supabase Realtime)** | "Live" feels modern. | The dashboard is read-heavy with ~20 associates. Polling on page load is sufficient. Realtime subscriptions add connection management complexity without meaningful UX improvement at this scale. Explicitly out of scope per PROJECT.md. | Next.js `revalidatePath` or simple page refresh covers the use case for v1.1. |
-| **Granular notification preferences (per-event, per-channel)** | Users want to control what emails they get. | Notification preference UIs are surprisingly complex. Before any notifications are sent, the preference system adds feature surface with zero value. | Ship one notification type (readiness status change) with a global on/off toggle in Settings. Preferences can be added after the first notification type is validated as useful. |
+This document surveys external patterns and recommends specific UX choices per bundle.
 
 ---
 
-## Feature Dependencies
+## A. Trainer Analytics + Reporting
+
+### Table Stakes (competitor baseline: Codility, HackerRank for Work, CoderPad Screen, Karat, Woven)
+
+| Feature | Why Expected | Complexity | NLM Mapping |
+|---------|-------------|-----------|-------------|
+| KPI strip at top of dashboard | Industry-standard "at-a-glance" for L&D/hiring platforms | Low | Active associates, Avg Readiness, Mocks This Week, At-Risk Count |
+| Cohort-wide trend line (readiness over time) | Codility TalentScore + HackerRank Skills Dashboard both show cohort-wide line charts with toggles for window (7d/30d/90d) | Medium | recharts LineChart on `/trainer` home |
+| Per-row sparklines in roster | Karat scorecard + HackerRank "recent activity" columns show micro-trend per candidate | Low | 7-session rolling sparkline of overall score (recharts `<Sparkline>` = `LineChart` with no axes) |
+| Skill-gap heatmap or bar chart across cohort | HackerRank "Skills breakdown" + Codility "Knowledge area" views aggregate weaknesses across all candidates | Medium | Reuse `GapScore` table; aggregate by `skill` across cohort associates |
+| At-risk/not-ready badge count | Karat "flagged candidates", CoderPad Screen "needs review" queue | Low | Already computed via `readinessStatus` — just surface count |
+| Exportable report (PDF or CSV) | Karat + Codility both ship PDF candidate reports; recruiting ops workflows expect shareable artifacts | Medium | @react-pdf/renderer already in stack; add cohort-level template |
+| Time window filter (7d / 30d / all-time) | Universal across B2B analytics dashboards (Linear Insights, Vercel Analytics, Supabase dashboard) | Low | Query param on dashboard home |
+| Drill-through from KPI → list | "At-risk = 4" should click through to filtered roster | Low | Link KPI card to `/trainer?filter=not_ready` |
+
+**Confidence:** MEDIUM — competitor patterns from training data; specific 2026 UI details not web-verified.
+
+### Differentiators (where NLM can beat competitors)
+
+| Feature | Value Proposition | Complexity | Rationale |
+|---------|-------------------|-----------|-----------|
+| **AI/Trainer variance KPI** | Unique to NLM: surfaces calibration drift between LLM score and trainer override | Low | No competitor has this — LLM-scored + human-calibrated is NLM's moat. Show "LLM was off by avg X pts" to build trainer trust in the model. |
+| **Cohort curriculum alignment view** | "Week 3 teaches React. Cohort gap score on React = 42%" — surfaces curriculum/outcome mismatch | Medium | Codility/HackerRank don't know cohort curricula. NLM does (CurriculumWeek). This is the killer analytic for trainers planning next week's lessons. |
+| **Recommended-next-area rollup for trainer** | Show distribution: "5 associates need React, 3 need SQL, 2 need behavioral" — informs group session planning | Low | Reuses existing `recommendedArea` on Associate. Group-level view is new. |
+| **Readiness velocity (slope, not just value)** | "Cohort readiness climbing 2.3 pts/week" is more actionable than "cohort at 67%" | Low | Linear regression slope already computed per-associate; aggregate it. |
+| **Per-question-bank performance** | "React questions from repo-X drop 15% vs repo-Y" — informs question-bank curation | Medium | Defer if `sessionId` doesn't already carry question-bank provenance — check schema first. |
+
+**Confidence:** HIGH on "AI/Trainer variance" and "curriculum alignment" as differentiators — these are structural advantages from NLM's data model that competitors architecturally can't match without re-platforming.
+
+### KPI Strip Specification (recommended)
+
+Four cards, left-to-right, prioritized by decision-trigger value:
+
+1. **Avg Readiness** — percentage + delta vs last week (e.g., "67% ▲ 3")
+2. **Mocks This Week** — count + sparkline of last 7 days
+3. **At-Risk Count** — number + "view" link (drill-through to filtered roster)
+4. **Top Gap (cohort-wide)** — skill name + avg gap score (e.g., "SQL · 41%")
+
+Optional 5th card: **AI/Trainer Variance** — e.g., "LLM off by 4.2 pts avg" — only shown when trainers have overridden >= N scores (gate on signal quality).
+
+**Copy pattern:** Large number, small delta, micro-label. Avoid visual noise — no background colors, no icons beyond a tiny trend arrow. (Linear, Vercel, and Stripe dashboards use this pattern; aligned with NLM's editorial/utilitarian DESIGN system.)
+
+### PDF Export Recommendations
+
+- **Two templates:** cohort-level (KPIs + cohort trend chart + skill-gap aggregate + roster table with sparklines as inlined PNGs) and per-associate (already partially built — extend with gap trend chart).
+- **Delivery:** download button first; email delivery deferred (Resend already wired if needed).
+- **Chart rendering in PDF:** `@react-pdf/renderer` doesn't render recharts directly. Options: (1) server-side render chart to SVG via `@react-pdf/renderer`'s SVG primitive, (2) screenshot via Playwright at generation time, (3) pre-render PNG via node-canvas. **Recommend option 1** — pure React, no new deps, proven approach.
+
+**Confidence:** MEDIUM — @react-pdf SVG rendering pattern is documented but finicky; budget a spike phase.
+
+---
+
+## B. Dashboard Redesign (Topbar + Sidebar per `finalized.html`)
+
+> Note: I could not access `finalized.html` in this sandbox (permission denied on ~/.gstack path). Recommendations below are based on the sidebar structure described in PIPELINE.md and PROJECT.md. Design phase should reconcile.
+
+### Table Stakes
+
+| Feature | Why Expected | Notes |
+|---------|-------------|-------|
+| Persistent sidebar nav | Standard for data-dense B2B tools (Linear, Notion, Supabase, Retool) | Collapsible on mobile; keyboard shortcut (`[` or `⌘B`) to toggle — Linear convention |
+| Topbar with user/settings/logout | Universal | Include cohort switcher here (NLM-specific) |
+| Section grouping in sidebar | "Overview" / "Actions" dividers prevent flat-list overwhelm | Matches spec |
+| Active-route highlight | Discoverability | DESIGN.md tokens — no new colors |
+| Breadcrumbs on detail pages | `Dashboard > Cohort X > Jane Doe` | Minor, but expected on drill-down |
+
+### Anti-Patterns to Avoid
+
+| Anti-Pattern | Why Avoid |
+|--------------|-----------|
+| Collapsible sections inside sidebar | Hides nav; sidebar is already short (5 items). Flat grouping is better. |
+| Icon-only collapsed sidebar with no tooltips | Accessibility failure; users can't recall meaning |
+| Dashboard with >6 KPI cards | Cognitive overload. Four cards is the sweet spot. Anything more → move to dedicated analytics page |
+| Real-time auto-refresh | Not required; causes chart jitter. Manual refresh button + timestamp is enough |
+
+### Cohort Header Pattern (recommended)
+
+Below topbar, above KPI strip:
 
 ```
-[Associate slug at automated interview start]
-    └──requires──> [Associate identity linkage for automated interviews]
-                       └──requires──> [Automated interviews trigger gap + readiness pipeline]
-                                          └──enhances──> [Readiness change notifications]
-
-[Cohort model in DB]
-    ├──requires──> [Cohort-filtered roster view]
-    ├──requires──> [Cohort-aggregate readiness view]
-    └──requires──> [Curriculum schedule per cohort]
-                       └──requires──> [Curriculum-driven question filtering]
-                       └──requires (future)──> [Curriculum-scoped gap computation]
-
-[Trainer email in Settings]
-    └──requires──> [Readiness change email notifications]
-
-[Design cohesion]
-    ──independent──> (all other features — no functional dependencies)
+[Cohort name] · Week 3 of 8 · 12 associates
+[● 4 ready] [● 5 improving] [● 3 not ready]     [Switch cohort ▾]
 ```
 
-### Dependency Notes
-
-- **Automated pipeline wiring requires nothing new:** The associate upsert and gap/readiness pipeline already exist. This is routing work, not infrastructure work. It is the lowest-effort highest-impact item in v1.1.
-
-- **Cohort is a prerequisite for curriculum:** You cannot attach a curriculum schedule to a cohort that doesn't exist. Cohort model must be in the DB schema before curriculum weeks are modeled.
-
-- **Curriculum-driven question filtering is useful before curriculum-scoped gap computation:** Filtering questions to taught skills is a setup-time concern. Scoping gap computation to taught skills is a post-interview concern. They can ship independently.
-
-- **Readiness notifications require trainer email storage:** The Settings model currently stores only `readinessThreshold`. Trainer email is a one-line addition. This must precede any notification send logic.
-
-- **Design cohesion has no functional dependencies** and can be executed in parallel with any other feature work. It is the safest work to batch with blocked phases.
+Dots use DESIGN tokens (green/amber/red per readiness). Click-through filters roster. Cohort switcher is a small dropdown — important for trainers managing 2-3 cohorts concurrently.
 
 ---
 
-## MVP Definition
+## C. Associate Dashboard Upgrade
 
-### v1.1 Launch With
+### Table Stakes
 
-Minimum set to deliver the milestone goal: "a trusted readiness record that any evidence source can feed."
+| Feature | Why Expected | Complexity |
+|---------|-------------|-----------|
+| Self-view readiness status | Every learning platform shows "your status" (Duolingo, Khan Academy, Coursera) | Low |
+| Gap trend chart (own scores over time) | Expected; builds self-awareness | Low (reuse recharts LineChart) |
+| Next recommended action | "What should I do next?" is the single most important question | Low |
+| Session history list | Reflects existing pattern | Already partially exists |
+| Book-next-mock CTA | Primary action; should be prominent button above the fold | Low |
 
-- [ ] **Automated interview → associate identity linkage** — Without this, automated sessions are orphaned data. The readiness pipeline is incomplete. Core correctness issue.
-- [ ] **Automated interview → gap scoring + readiness update** — Sessions that don't feed gap scores are wasted data. One-line addition to the complete endpoint.
-- [ ] **Cohort model + associate-cohort membership** — Foundation for all cohort views and curriculum. Required before curriculum weeks can exist.
-- [ ] **Cohort-filtered roster view** — Trainers with 2+ cohorts cannot use the dashboard without this. Usability cliff.
-- [ ] **Curriculum schedule per cohort** — Weeks linked to skill names, with start dates. Formalizes the implicit week→skill mapping already in the codebase.
-- [ ] **Curriculum-driven question filtering at setup** — Auto-populates `selectedWeeks` from taught curriculum. Prevents untaught topics from appearing.
-- [ ] **Cohort-aggregate readiness view** — Headline metric for the cohort (X ready / Y improving / Z not_ready). Requires cohort model + per-associate readiness (already computed).
-- [ ] **Readiness change email notifications** — Trainer email in Settings + Resend hook after `updateAssociateReadiness`. One of the clearest productivity wins for solo trainers.
-- [ ] **Design cohesion** — Apply DESIGN.md to public interview flow, auth page, associate profile. No new decisions, execution work only.
+### Recommended Next Practice Area — UX Patterns
 
-### Add After Validation (v1.x)
+**Source patterns:** Duolingo "Practice weak skills" button, Khan Academy "Recommended for you", Brilliant.org "Continue where you left off", Codecademy "Next lesson".
 
-- [ ] **Curriculum-scoped gap computation** — Gaps filtered to taught curriculum. Higher fidelity but requires curriculum data to accumulate first. Build once real cohort sessions exist.
-- [ ] **Per-cohort readiness trend chart** — Week-over-week cohort aggregate. Requires snapshot data over time. Needs 2-3 cohort cycles to be meaningful.
-- [ ] **Notification preferences (on/off toggle per event type)** — Only valuable once the first notification type is sending and trainers express preference fatigue.
+**Do:**
+- **Single primary recommendation, not a list.** "Your weakest area is SQL joins. Practice →" outperforms a menu of options (decision fatigue; Duolingo A/B tested this and moved to single-rec in 2023).
+- **Show the reason.** "Based on your last 3 sessions" builds trust in the algorithm.
+- **Make it dismissible/defer-able.** "Not right now" button; show alt "pick any area" link.
+- **Copy voice: encouraging, not clinical.** "You're close on React — one more session should push you to ready" beats "React gap score: 72%, threshold: 75%".
 
-### Future Consideration (v2+)
+**Don't:**
+- Don't use red / "weakness" framing. Use "growth area" or "focus area" (Khan Academy convention, validated to reduce dropout).
+- Don't stack multiple recommendations. Surface top one; "see all gaps" is a secondary link.
+- Don't auto-start the recommended mock. Always confirm; associates need agency.
 
-- [ ] **Associate self-service portal** — Triggers when job-seeker segment is validated as a buyer.
-- [ ] **Multi-trainer support** — Triggers when a second trainer joins the platform.
-- [ ] **Cohort PDF report for clients** — Triggers when client-portal milestone begins.
-- [ ] **Calendar/scheduling integration** — Triggers when trainers request it and the use case is validated.
+**Confidence:** MEDIUM-HIGH — patterns broadly documented but specific copy testing not web-verified this session.
+
+### Goals & Streaks — Anti-Anxiety Patterns
+
+**Known Duolingo streak anti-patterns (from public retrospectives and well-documented user research through 2024):**
+
+| Anti-Pattern | NLM Mitigation |
+|--------------|----------------|
+| Binary all-or-nothing streak (miss 1 day → lose 100-day streak) | **Use weekly cadence, not daily.** "3 sessions this week" — misses one day, still fine. |
+| Streak-freeze mechanic as manipulation/monetization hook | Not applicable — NLM is B2B, no monetization. Skip streak freezes entirely. |
+| Push notifications weaponizing streak loss ("Don't lose your 47-day streak!") | No push notifications in v1.2. If added later, use encouraging framing. |
+| Streak becomes the goal, not the learning | **Tie streaks to readiness outcome, not raw activity.** "Readiness climbed 3 weeks running" is healthier than "30 sessions in a row." |
+| Gamification feels condescending to adults in professional training | **Use professional framing.** "Consistency: 4 weeks" over "🔥 4-week streak!". Match NLM's editorial design voice. |
+
+**Recommended goals model for v1.2:**
+
+1. **Readiness goal** — single number ("Reach 75% readiness by end of cohort"). Auto-set to cohort end date + trainer-configured threshold. Progress bar. No negative framing.
+2. **Consistency signal** — "Weeks with >= 1 session" counter. Not a streak; a cumulative count that only goes up. (Pattern from Strava "weekly activities" metric — removes loss aversion entirely.)
+3. **Sessions-this-week** — Simple progress (e.g., "2 of 3 recommended this week"). Resets Monday. No shame for missing.
+
+**Avoid:** Daily streaks, streak-loss alerts, leaderboards (cohort-mates ranked against each other creates unhealthy comparison in a professional setting).
+
+**Confidence:** HIGH on anti-pattern list (well-documented in UX literature); MEDIUM on specific goal mechanics (design/taste call).
+
+### Associate Dashboard Layout (recommended, top-to-bottom)
+
+```
+1. Readiness status card (big: "You're Improving · 68% readiness")
+2. Primary CTA: "Book next mock" (big button)
+3. Recommended focus area (one card, with "why" + "start mock" secondary button)
+4. Gap trend chart (last 10 sessions, LineChart)
+5. Goals/progress (readiness goal + consistency signal)
+6. Session history (collapsed list; expand for details)
+```
+
+No sidebar on associate view — keep it a single scrollable page. (Associate view is simpler than trainer view by design.)
 
 ---
 
-## Feature Prioritization Matrix
+## D. Full Supabase Auth + Bulk Onboarding
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Automated interview → associate identity linkage | HIGH | LOW | P1 |
-| Automated interview → gap + readiness pipeline | HIGH | LOW | P1 |
-| Cohort model + associate membership | HIGH | MEDIUM | P1 |
-| Cohort-filtered roster view | HIGH | MEDIUM | P1 |
-| Curriculum schedule per cohort | HIGH | MEDIUM | P1 |
-| Curriculum-driven question filtering | HIGH | MEDIUM | P1 |
-| Cohort-aggregate readiness view | HIGH | LOW | P1 |
-| Readiness change email notifications | HIGH | LOW | P1 |
-| Design cohesion | MEDIUM | MEDIUM | P1 |
-| Curriculum-scoped gap computation | HIGH | MEDIUM | P2 |
-| Per-cohort readiness trend chart | MEDIUM | HIGH | P2 |
-| Notification preferences toggle | LOW | LOW | P3 |
+### Bulk Onboarding UX — Pattern Survey
 
-**Priority key:**
-- P1: Must have for v1.1 launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+**Source patterns:** Linear team invites, Vercel team invites, Notion workspace invites, GitHub org invites, Slack bulk invite, Figma team invites.
+
+**Converged pattern (all of the above use this):**
+
+1. **Single textarea for email list.** Accept comma, newline, or semicolon as separators. Parse liberally.
+2. **Live validation preview.** As user pastes, show parsed chip list with:
+   - Green chip: valid new email
+   - Amber chip: already exists (will skip or update)
+   - Red chip: malformed (can't submit until fixed)
+3. **Bulk action selection.** Role picker (NLM: cohort picker + curriculum picker) applied to all invited users.
+4. **Preview before send.** "Invite 12 people to Cohort X with Week 3 curriculum. 2 already exist and will be updated. 1 email is malformed — fix or remove."
+5. **Post-send result screen.** "10 invites sent. 2 failed (SMTP bounces) — retry or copy links manually."
+
+**NLM-specific additions:**
+
+- **CSV upload option** as alternative to paste (training ops may already have cohort spreadsheets). Low complexity via File input + PapaParse (new dep — or roll minimal CSV parser).
+- **Existing associate detection.** If email matches an existing Associate (slug-based identity from v1.1), offer to link rather than duplicate. Pattern: "jane@acme.com matches existing associate 'jane-doe'. Link accounts?"
+- **Dry-run mode.** Checkbox "Preview only — don't send". Important for trainer confidence on first use.
+
+**Confidence:** HIGH — pattern convergence across 6+ major SaaS tools makes this the established paradigm.
+
+### Magic Link — Copy & Flow
+
+Supabase Auth magic-link patterns (from Supabase docs, well-established):
+
+- Email subject: Clear + branded. "Your Next Level Mock invite from [Trainer Name]"
+- Email body: Short, personal, single CTA button. Include cohort name so recipient knows context.
+- Link expiry: Supabase default 24h is too short for training ops (associates may open email next day). **Recommend 7 days.**
+- Post-click landing: Skip "confirm your email" step; drop them directly on associate dashboard with welcome toast.
+- Re-send from trainer UI: "Resend invite" button on roster row for associates with `last_sign_in_at IS NULL`.
+
+### Error Handling
+
+| Scenario | UX |
+|----------|-----|
+| Malformed email | Red chip inline; blocks submit |
+| Duplicate within paste | Dedupe silently; show "(2 duplicates removed)" |
+| Email already in auth.users | "Already invited — resend?" offer |
+| SMTP bounce | Show in post-send result; offer copy-link fallback |
+| Rate limit hit (Supabase free tier = 4/hour for magic links by default) | **Batch + queue.** Warn trainer if batch exceeds limit. Supabase Pro raises limit; check current project tier. |
+| User never clicks link | Trainer sees "invited · pending" status on roster; resend button always available |
+
+**Critical flag:** Supabase free-tier email rate limits will bite on first bulk invite. **Requirement:** either upgrade to Pro plan OR integrate Resend as the auth email provider (Supabase supports custom SMTP). **Recommend custom SMTP via Resend** — Resend is already a project dep, avoids Supabase email limits entirely, and gives better deliverability tracking.
+
+**Confidence:** HIGH on flow; MEDIUM on exact Supabase rate limits in April 2026 (they've changed historically — verify during plan phase).
+
+### PIN System Removal — Migration Plan
+
+1. Supabase Auth live alongside PIN system (both enabled)
+2. Migration script: for each Associate row, create `auth.users` row with associate email (if email known) or skip (if only slug exists). Link via `Associate.authUserId` nullable FK.
+3. Send magic link to all Associates with email, notifying them of the switch.
+4. Grace period (2 weeks): both PIN and magic link work.
+5. Remove PIN endpoints, `ENABLE_ASSOCIATE_AUTH` flag, PIN fields on Associate, `associate_session` cookie code.
+
+**Risk:** Existing Associates without emails (slug-only) — v1.1 didn't require email. **Requirement:** audit `Associate` table; trainer UI to add emails before cutover.
 
 ---
 
-## Competitor Feature Analysis
+## E. Cached Question-Bank Manifest
 
-Analysis based on training-data knowledge of common LMS and assessment platforms (Canvas, TalentLMS, CodeSignal, iMocha, Greenhouse). Confidence: MEDIUM (patterns are well-established; specific feature parity claims not verified against current product versions).
+### Pattern Survey
 
-| Feature | Canvas / TalentLMS | CodeSignal / iMocha | Our Approach |
-|---------|---------------------|---------------------|--------------|
-| Cohort/group management | Yes — first-class "courses" and "groups" with enrollment management, start/end dates | Yes — candidate pools, assessment campaigns | Lightweight cohort model scoped to one training org. No enrollment workflows needed. |
-| Curriculum scheduling | Yes — module sequencing with unlock gates, prerequisites, completion tracking | Limited — assessment campaigns have dates but no curriculum structure | Week-based curriculum tied to a cohort. Start dates determine what's "taught." No gates or prerequisites in v1.1. |
-| Associate authentication | Yes — full email/password or SSO (Canvas uses institution SSO) | Yes — candidates have accounts for test-taking | Slug-based identity (no login) for v1.1. Associates never authenticate. The public interview URL is the access mechanism. |
-| Progress notifications | Yes — automated email digests, assignment reminders, grade notifications | Yes — assessment completion emails, hiring pipeline updates | Single event type: readiness status change. Email to trainer only. Associates receive no notifications in v1.1. |
-| Aggregate cohort view | Yes — class-level analytics, completion rates | Yes — cohort pass rates, skill distribution | Aggregate readiness breakdown (ready / improving / not_ready counts) + summary bar. More opinionated than generic LMS analytics. |
-| Adaptive content selection | Limited — adaptive paths exist in premium tiers only | Some — difficulty scaling | Full gap-driven adaptive setup is a genuine differentiator. No LMS does recency-weighted skill gap → tech weight pre-population. |
+Manifest caching is a solved problem. Common patterns:
 
-**Where NLM differentiates:** The gap algorithm, readiness trajectory (not snapshot), and adaptive setup are not available in any competitor at this specificity. The trade-off is simplicity (no enrollment workflows, no gates) — appropriate for a solo-run training org.
+| Pattern | When | Complexity | NLM Fit |
+|---------|------|-----------|---------|
+| **Simple TTL (e.g., 15 min)** | Content changes infrequently; staleness tolerable | Low | **Recommended for v1.2** |
+| ETag / content-hash invalidation | Need freshness guarantees | Medium | GitHub API returns ETags — could use, but adds complexity |
+| Push-based (webhook-driven) | Real-time freshness required | High | Overkill for NLM |
+| Build-time bake | Content versioned with app | Medium | Kills flexibility; trainers can't update questions without redeploy |
+
+### Recommended Approach
+
+**In-memory LRU cache with 15-min TTL + manual refresh button.**
+
+- Cache in Node process memory (single-instance GCE deploy — no cache-coherence problem).
+- Key: `${repo}:${branch}:manifest`.
+- TTL: 15 minutes (balances freshness vs. API quota).
+- **Manual refresh button** in `/interview/new` setup wizard: small "↻ Refresh question list" link near repo selector. Shows `last fetched: 8 min ago` hint. (Pattern borrowed from Vercel deployment list, GitHub Actions runs list.)
+- On manual refresh: invalidate cache key, re-fetch, toast "Question list refreshed".
+
+**Staleness indication UX:**
+
+- Show timestamp: "Questions as of 4 min ago" in small muted text under repo name.
+- If cache miss (first load after deploy or expiry): show skeleton/spinner briefly (<1s typical).
+- If GitHub API fails and cache expired: fall back to last known cache + warning banner ("Using cached questions — GitHub unreachable"). Pattern from Cloudflare + Stripe: stale-while-revalidate.
+
+### Mid-Session Repo Changes
+
+**Edge case:** Trainer edits question repo while associate is mid-interview. NLM currently fetches questions at interview start, so questions are stable during a session. **Keep this behavior** — do not re-fetch mid-session even if manifest cache invalidates. Document in CLAUDE.md under `github-service.ts`.
+
+**Confidence:** HIGH — TTL caching is textbook; stale-while-revalidate is well-documented.
+
+---
+
+## Competitive Differentiation Summary
+
+### Trainer-facing (what makes NLM's trainer view better)
+
+1. **Curriculum-aware analytics.** Competitors (Codility, HackerRank, Karat) don't model curriculum. NLM knows what the cohort is being taught each week, so gaps can be correlated with curriculum. This is the #1 defensible differentiator.
+2. **AI/Trainer calibration visibility.** The "variance" KPI between LLM score and trainer override is unique. Builds trust in the AI; surfaces scoring drift.
+3. **Readiness as a forecast, not a gate.** Most competitors score candidates (binary pass/fail). NLM shows readiness trajectory with velocity — "on track to be ready by end of cohort" is a forecast, not a verdict.
+4. **Recommended-focus distribution rollup.** Group-level recommended area aggregation ("5 need React") directly drives group session planning. Competitors leave this to the trainer to aggregate manually.
+
+### Learner-facing (what makes NLM's associate view better)
+
+1. **Transparency into scoring.** Associates see LLM score + trainer override + reasoning. Duolingo/Khan don't show algorithm internals. In professional training, showing the math builds trust.
+2. **Forecast-first ("you're on track") not streak-first.** Avoids gamification anti-patterns; speaks to adults.
+3. **Recommended-next grounded in data.** "Based on your last 3 sessions" beats generic "practice problems".
+4. **Curriculum context.** "Your cohort is on Week 3 (React) — your React score is 62%, below cohort avg." Self-locating within cohort is a retention driver (McKinsey Academy research, paraphrased from memory — verify).
+
+**Confidence:** MEDIUM — these are defensible claims but specific competitor feature inventories were not web-verified this session.
+
+---
+
+## Feature Dependencies (v1.2)
+
+```
+D (Auth cutover) ─┬─→ C (Associate dashboard — needs email identity)
+                  └─→ A (Analytics — needs clean associate identity for aggregation)
+
+E (Manifest cache) ── independent, can ship anytime
+
+A (Analytics) ───→ B (Dashboard redesign surfaces A's data)
+
+B (Dashboard shell) ── prerequisite UI for A and C
+```
+
+**Recommended build order:**
+
+1. **E** — Cached manifest (quick win, independent, unblocks setup wizard perf target).
+2. **B** — Dashboard shell (topbar + sidebar scaffolding; empty states OK).
+3. **D** — Supabase Auth + bulk onboarding (schema change; do early — downstream features depend on it).
+4. **A** — Analytics (populate the shell).
+5. **C** — Associate dashboard (reuses A's primitives — gap charts, recommended area).
+
+---
+
+## MVP Recommendation per Bundle
+
+If time pressure forces cuts, here's what to keep and defer within each bundle:
+
+| Bundle | Must-have | Defer to v1.3 |
+|--------|-----------|--------------|
+| A. Analytics | KPI strip, sparklines in roster, cohort trend line | Skill-gap heatmap, AI/Trainer variance KPI, PDF export |
+| B. Dashboard | Topbar, sidebar, KPI cards, roster redesign | Cohort switcher dropdown, breadcrumbs |
+| C. Associate | Self gap chart, recommended area card, book-next CTA | Goals/streaks (this is the highest-risk-of-anti-pattern bundle — ship carefully or defer) |
+| D. Auth | Trainer Supabase auth + bulk invite + RLS | OAuth providers (email/password first); PIN removal (can coexist until v1.3) |
+| E. Manifest | TTL cache + manual refresh | Content-hash invalidation, stale-while-revalidate fallback |
+
+**Most-at-risk feature:** **C's goals/streaks** — easy to get wrong, low core-loop value. Recommend shipping only the readiness-goal progress bar; defer "streaks" entirely until user research validates demand.
+
+---
+
+## Open Questions for Requirements Phase
+
+1. Do existing Associates have emails? (Schema audit needed before D.)
+2. What's the current Supabase email rate limit tier? (Affects D bulk invite architecture.)
+3. Does the session record store question-bank provenance (`repo`, `branch`, `file`)? (Affects per-question-bank analytics.)
+4. Should cohort switcher be in topbar (global) or only on trainer dashboard? (UX call.)
+5. Does the trainer want per-associate PDF reports on-demand from roster, or only as part of a cohort export? (Affects PDF template count.)
+6. Is there a privacy requirement around cohort-mate visibility? (Associates seeing each other's names vs. anonymized — affects C.)
 
 ---
 
 ## Sources
 
-- Existing codebase analysis: `prisma/schema.prisma`, `src/lib/sessionPersistence.ts`, `src/lib/readinessService.ts`, `src/app/api/public/interview/complete/route.ts`, `src/app/api/public/interview/start/route.ts`
-- Project context: `.planning/PROJECT.md` (v1.1 target features, constraints, out-of-scope list)
-- Design system: `DESIGN.md` (editorial/utilitarian aesthetic, warm parchment + burnt orange)
-- Training-data knowledge: LMS cohort management patterns (Canvas, TalentLMS, Google Classroom), assessment platform patterns (CodeSignal, iMocha), notification system design patterns — MEDIUM confidence (well-established domain; specific current-version feature parity not externally verified)
-- WebSearch: unavailable during this research session — confidence on competitor claims is MEDIUM, not HIGH
+**Competitor UX patterns (training data; web verification blocked this session — MEDIUM confidence):**
+- Codility TalentScore dashboard, HackerRank for Work Skills Dashboard, CoderPad Screen, Karat scorecard UX, Woven assessment reports
+- Linear team invites, Vercel team invites, Notion workspace invites, GitHub org invites, Slack bulk invite, Figma team invites
+- Duolingo streak mechanics (public retrospectives, UX research through 2024), Khan Academy recommended content, Brilliant.org practice suggestions, Strava consistency metrics
 
----
-*Feature research for: v1.1 Cohort Readiness System — Next Level Mock*
-*Researched: 2026-04-14*
+**Technical patterns (HIGH confidence — project docs + well-established patterns):**
+- NLM schema: `prisma/schema.prisma`, `src/lib/gapService.ts`, `src/lib/readinessService.ts`, `src/lib/curriculumService.ts`
+- Supabase Auth magic-link flow (Supabase docs through 2025)
+- Stale-while-revalidate (RFC 5861; Cloudflare/Stripe common implementation)
+- @react-pdf/renderer SVG primitives (package docs)
+
+**Limitations of this research run:**
+- WebSearch, WebFetch, and external file reads were not available in this sandbox. Competitor-specific claims should be verified during plan phase, especially: (a) Supabase 2026 email rate limits, (b) specific Codility/HackerRank KPI set, (c) `finalized.html` exact sidebar structure.
+- The `finalized.html` design mockup could not be read — Section B recommendations may need reconciliation against the actual locked design.
