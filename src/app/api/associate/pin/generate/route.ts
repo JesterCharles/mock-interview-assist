@@ -3,12 +3,18 @@ import { z } from 'zod';
 import { isAuthenticatedSession } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
 import { generatePin, hashPin } from '@/lib/pinService';
+import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 
 const BodySchema = z.object({
   associateId: z.number().int().positive(),
 });
 
 export async function POST(request: Request): Promise<NextResponse> {
+  // PIN auth gated until v1.2 (full auth integration).
+  if (!isAssociateAuthEnabled()) {
+    return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  }
+
   // Trainer-auth guard (D-14)
   const authed = await isAuthenticatedSession();
   if (!authed) {

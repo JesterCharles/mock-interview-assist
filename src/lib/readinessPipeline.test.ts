@@ -84,7 +84,7 @@ describe('runReadinessPipeline', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockSaveGapScores.mockRejectedValueOnce(new Error('gap boom'));
 
-    await expect(runReadinessPipeline(1, 'sess-200')).resolves.toBeUndefined();
+    await expect(runReadinessPipeline(1, 'sess-200')).resolves.toBe(false);
 
     const calls = mockSessionUpdate.mock.calls;
     expect(calls[0][0]).toEqual({ where: { id: 'sess-200' }, data: { readinessRecomputeStatus: 'pending' } });
@@ -98,7 +98,7 @@ describe('runReadinessPipeline', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockUpdateReadiness.mockRejectedValueOnce(new Error('readiness boom'));
 
-    await expect(runReadinessPipeline(1, 'sess-300')).resolves.toBeUndefined();
+    await expect(runReadinessPipeline(1, 'sess-300')).resolves.toBe(false);
 
     const calls = mockSessionUpdate.mock.calls;
     expect(calls[calls.length - 1][0]).toEqual({ where: { id: 'sess-300' }, data: { readinessRecomputeStatus: 'failed' } });
@@ -118,7 +118,9 @@ describe('runReadinessPipeline', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockSessionUpdate.mockRejectedValue(new Error('marker db hiccup'));
 
-    await expect(runReadinessPipeline(1, 'sess-400')).resolves.toBeUndefined();
+    // Marker update throws but the core pipeline (saveGapScores + readiness)
+    // succeeded, so we return true — sweep can close siblings.
+    await expect(runReadinessPipeline(1, 'sess-400')).resolves.toBe(true);
 
     expect(mockSaveGapScores).toHaveBeenCalled();
     expect(mockUpdateReadiness).toHaveBeenCalled();

@@ -41,7 +41,7 @@ async function markStatus(
 export async function runReadinessPipeline(
   associateId: number,
   sessionId?: string,
-): Promise<void> {
+): Promise<boolean> {
   await markStatus(sessionId, 'pending');
 
   let threshold = DEFAULT_THRESHOLD;
@@ -58,9 +58,12 @@ export async function runReadinessPipeline(
     await saveGapScores(associateId);
     await updateAssociateReadiness(associateId, threshold);
     await markStatus(sessionId, 'done');
+    return true;
   } catch (err) {
     console.error(`${LOG_PREFIX} failed for associate ${associateId} session ${sessionId}:`, err);
     await markStatus(sessionId, 'failed');
-    // Do NOT re-throw — caller is fire-and-forget.
+    // Do NOT re-throw — caller is fire-and-forget. Boolean tells the sweep
+    // (Codex P2) whether to close out other markers or leave them for retry.
+    return false;
   }
 }

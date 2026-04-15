@@ -23,6 +23,22 @@ export default function AssociateDetailPage() {
   const [detail, setDetail] = useState<AssociateDetail | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // PIN auth is feature-gated until v1.2 — hide Generate PIN when disabled.
+  const [associateAuthEnabled, setAssociateAuthEnabled] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/associate/status', { cache: 'no-store' })
+        if (!res.ok) return
+        const data = (await res.json()) as { enabled?: boolean }
+        if (!cancelled) setAssociateAuthEnabled(!!data.enabled)
+      } catch {
+        // ignore — stays hidden
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   // Auth guard — matching existing /trainer and /dashboard pattern exactly (D-06, T-06-02)
   useEffect(() => {
@@ -177,12 +193,14 @@ export default function AssociateDetailPage() {
                 score={detail.readinessScore}
                 status={detail.readinessStatus}
               />
-              <div style={{ marginTop: '16px' }}>
-                <GeneratePinButton
-                  associateId={detail.id}
-                  associateName={detail.displayName}
-                />
-              </div>
+              {associateAuthEnabled && (
+                <div style={{ marginTop: '16px' }}>
+                  <GeneratePinButton
+                    associateId={detail.id}
+                    associateName={detail.displayName}
+                  />
+                </div>
+              )}
               <div style={{ marginTop: '20px' }}>
                 <AssociateCohortSelect
                   slug={detail.slug}

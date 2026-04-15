@@ -69,6 +69,11 @@ export default function DashboardPage() {
   } = useInterviewStore();
 
   const [loadedQuestions, setLoadedQuestions] = useState<ParsedQuestion[]>([]);
+  // `allTechs` is the unfiltered GitHub-fetched list — source of truth.
+  // `availableTechs` is what the user sees; may be filtered by curriculum.
+  // Always re-filter from `allTechs`, never from `availableTechs` — otherwise
+  // filters compose and hidden techs never return (Codex P2).
+  const [allTechs, setAllTechs] = useState<GitHubFile[]>([]);
   const [availableTechs, setAvailableTechs] = useState<GitHubFile[]>([]);
   const [techSearch, setTechSearch] = useState('');
   const [isFetchingTechs, setIsFetchingTechs] = useState(false);
@@ -128,6 +133,7 @@ export default function DashboardPage() {
     try {
       const service = new GitHubService(repoConfig.owner, repoConfig.repo, repoConfig.branch);
       const files = await service.findQuestionBanks('');
+      setAllTechs(files);
       setAvailableTechs(files);
       if (files.length === 0) {
         setError('No question banks found (looking for .md files).');
@@ -135,17 +141,27 @@ export default function DashboardPage() {
     } catch (err) {
       console.error(err);
       setError('Failed to fetch from GitHub. Check repository details.');
+      setAllTechs([]);
       setAvailableTechs([]);
     } finally {
       setIsFetchingTechs(false);
     }
   }, [repoConfig]);
 
-  // applyCurriculumFilter: filters availableTechs to taught slugs and updates state (D-15)
-  const applyCurriculumFilter = useCallback((files: GitHubFile[], taughtSlugs: string[]) => {
-    const filtered = filterTechsByCurriculum(files, taughtSlugs);
+  // applyCurriculumFilter: filters the PROVIDED source list to taught slugs
+  // and updates the visible `availableTechs`. Callers MUST pass `allTechs`
+  // (the unfiltered source), never `availableTechs` — passing the filtered
+  // list causes filters to compose and hidden techs never come back when
+  // associates or cohorts are swapped (Codex P2).
+  const applyCurriculumFilter = useCallback((source: GitHubFile[], taughtSlugs: string[]) => {
+    const filtered = filterTechsByCurriculum(source, taughtSlugs);
     setAvailableTechs(filtered);
   }, []);
+
+  // Clear any active curriculum filter — restore the full unfiltered list.
+  const clearCurriculumFilter = useCallback(() => {
+    setAvailableTechs(allTechs);
+  }, [allTechs]);
 
   // Initial fetch
   useEffect(() => {
@@ -261,11 +277,16 @@ export default function DashboardPage() {
       const taughtSlugs = weeks.map(w => w.skillSlug);
 
       if (taughtSlugs.length > 0) {
-        if (availableTechs.length > 0) {
-          applyCurriculumFilter(availableTechs, taughtSlugs);
+        if (allTechs.length > 0) {
+          applyCurriculumFilter(allTechs, taughtSlugs);
         } else {
           setPendingTaughtSlugs(taughtSlugs);
         }
+      } else {
+        // Unassigned associate or cohort with no curriculum — restore the
+        // full tech list so a prior filter doesn't linger (Codex P2).
+        clearCurriculumFilter();
+        setPendingTaughtSlugs(null);
       }
 
       if (!data.found || data.sessionCount < 3) return;
@@ -282,7 +303,7 @@ export default function DashboardPage() {
     } finally {
       setIsLoadingGapScores(false);
     }
-  }, [availableTechs, applyGapScores, applyCurriculumFilter]);
+  }, [allTechs, availableTechs, applyGapScores, applyCurriculumFilter, clearCurriculumFilter]);
 
   useEffect(() => {
     if (pendingGapScores && availableTechs.length > 0) {
@@ -291,11 +312,11 @@ export default function DashboardPage() {
   }, [pendingGapScores, availableTechs, applyGapScores]);
 
   useEffect(() => {
-    if (pendingTaughtSlugs && pendingTaughtSlugs.length > 0 && availableTechs.length > 0) {
-      applyCurriculumFilter(availableTechs, pendingTaughtSlugs);
+    if (pendingTaughtSlugs && pendingTaughtSlugs.length > 0 && allTechs.length > 0) {
+      applyCurriculumFilter(allTechs, pendingTaughtSlugs);
       setPendingTaughtSlugs(null);
     }
-  }, [pendingTaughtSlugs, availableTechs, applyCurriculumFilter]);
+  }, [pendingTaughtSlugs, allTechs, applyCurriculumFilter]);
 
   const handleWeightChange = (path: string, weight: number) => {
     setTechWeight(path, weight);

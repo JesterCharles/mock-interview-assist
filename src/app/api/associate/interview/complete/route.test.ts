@@ -129,7 +129,9 @@ describe('POST /api/associate/interview/complete', () => {
     mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(200);
-    const persisted = mockPersist.mock.calls[0][0];
-    expect(persisted.mode).toBe('automated');
+    // mode is now passed via the options arg, not stamped onto the session
+    // payload — prevents it getting lost when persistSessionToDb writes columns.
+    const options = mockPersist.mock.calls[0][1];
+    expect(options).toEqual({ mode: 'automated' });
   });
 });

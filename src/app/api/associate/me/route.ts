@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAssociateIdentity } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
+import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 
 /**
  * Returns the authenticated associate's slug (and id) for client-side chrome
@@ -8,6 +9,9 @@ import { prisma } from '@/lib/prisma';
  * client treats that as anonymous and renders nothing.
  */
 export async function GET(): Promise<NextResponse> {
+  if (!isAssociateAuthEnabled()) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
   const identity = await getAssociateIdentity();
   if (!identity) {
     return NextResponse.json({ ok: false }, { status: 401 });

@@ -3,13 +3,24 @@ import { Prisma } from '@/generated/prisma';
 import { InterviewSession } from '@/lib/types';
 import { validateSlug } from '@/lib/slug-validation';
 
+type SessionMode = 'trainer-led' | 'automated';
+
 /**
  * Persist an InterviewSession to Supabase.
  * If the session includes an associateSlug, upserts the Associate record
  * and links the session via associateId.
  * Returns true on success, false on failure (caller decides how to handle).
+ *
+ * `mode` defaults to "trainer-led" (matches schema default) so existing
+ * trainer-led callers don't need to pass it. The associate authenticated
+ * automated entry passes 'automated' so reporting and the readiness sweep
+ * can distinguish (Codex finding P2).
  */
-export async function persistSessionToDb(session: InterviewSession): Promise<boolean> {
+export async function persistSessionToDb(
+  session: InterviewSession,
+  options: { mode?: SessionMode } = {}
+): Promise<boolean> {
+  const mode: SessionMode = options.mode ?? 'trainer-led';
   try {
     let associateId: number | null = null;
 
@@ -57,6 +68,7 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
         assessments: session.assessments as unknown as Prisma.InputJsonValue,
         techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         associateId,
+        mode,
       },
       update: {
         candidateName: session.candidateName ?? null,
@@ -74,6 +86,7 @@ export async function persistSessionToDb(session: InterviewSession): Promise<boo
         assessments: session.assessments as unknown as Prisma.InputJsonValue,
         techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         ...(associateId !== null ? { associateId } : {}),
+        mode,
       },
     });
     return true;

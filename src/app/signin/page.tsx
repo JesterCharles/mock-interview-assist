@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { isAuthenticatedSession, getAssociateIdentity } from '@/lib/auth-server';
 import { prisma } from '@/lib/prisma';
+import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 import { SignInTabs } from './SignInTabs';
 import { PublicShell } from '@/components/layout/PublicShell';
 
@@ -22,21 +23,27 @@ function safeNext(raw: string | undefined): string | null {
 export default async function SignInPage({ searchParams }: PageProps) {
   const { as, next } = await searchParams;
   const nextPath = safeNext(next);
-  const initialTab: 'trainer' | 'associate' = as === 'associate' ? 'associate' : 'trainer';
+  const associateEnabled = isAssociateAuthEnabled();
+  // Initial tab: respect ?as= only when associate auth is enabled; otherwise
+  // always land on Trainer (the only available path).
+  const initialTab: 'trainer' | 'associate' =
+    associateEnabled && as === 'associate' ? 'associate' : 'trainer';
 
   // Bounce if already signed in.
   const trainer = await isAuthenticatedSession();
   if (trainer) {
     redirect(nextPath ?? '/trainer');
   }
-  const identity = await getAssociateIdentity();
-  if (identity) {
-    if (nextPath) redirect(nextPath);
-    const me = await prisma.associate.findUnique({
-      where: { id: identity.associateId },
-      select: { slug: true },
-    });
-    redirect(me ? `/associate/${me.slug}/interview` : '/');
+  if (associateEnabled) {
+    const identity = await getAssociateIdentity();
+    if (identity) {
+      if (nextPath) redirect(nextPath);
+      const me = await prisma.associate.findUnique({
+        where: { id: identity.associateId },
+        select: { slug: true },
+      });
+      redirect(me ? `/associate/${me.slug}/interview` : '/');
+    }
   }
 
   return (
@@ -65,7 +72,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
         >
           Sign in
         </h1>
-        <SignInTabs initialTab={initialTab} nextPath={nextPath} />
+        <SignInTabs initialTab={initialTab} nextPath={nextPath} showAssociateTab={associateEnabled} />
       </div>
     </PublicShell>
   );
