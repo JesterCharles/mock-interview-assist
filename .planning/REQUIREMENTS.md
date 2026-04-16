@@ -26,8 +26,8 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 ## Bulk Invite (Phase 4)
 
 - [x] **INVITE-01**: Trainer posts comma-separated (or newline-separated) email list to `/trainer/onboarding`. Live validation chips flag malformed/duplicate emails before submit. Per-batch cap 50; UI blocks larger submissions with clear error.
-- [ ] **INVITE-02**: Submit picks target cohort + auto-assigns curriculum from cohort. Preview screen shows per-email action (new / reassign cohort / skip — same cohort / skip — invalid). Trainer confirms to execute.
-- [ ] **INVITE-03**: `/api/trainer/invites/bulk` runs per-email transaction: upsert Associate by email → set cohortId → `admin.generateLink` → Resend send → write result. Partial failures don't roll back siblings. Response body is a result table (email, status, error if any). `lastInvitedAt` throttle = 5 min.
+- [x] **INVITE-02**: Submit picks target cohort + auto-assigns curriculum from cohort. Preview screen shows per-email action (new / reassign cohort / skip — same cohort / skip — invalid). Trainer confirms to execute.
+- [x] **INVITE-03**: `/api/trainer/invites/bulk` runs per-email transaction: upsert Associate by email → set cohortId → `admin.generateLink` → Resend send → write result. Partial failures don't roll back siblings. Response body is a result table (email, status, error if any). `lastInvitedAt` throttle = 5 min.
 
 ## Middleware Cutover + RLS (Phase 5)
 
@@ -107,8 +107,8 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | AUTH-07 | Phase 18 | Pending |
 | AUTH-08 | Phase 18 | Pending |
 | INVITE-01 | Phase 19 | Complete |
-| INVITE-02 | Phase 19 | Pending |
-| INVITE-03 | Phase 19 | Pending |
+| INVITE-02 | Phase 19 | Complete |
+| INVITE-03 | Phase 19 | Complete |
 | AUTH-09 | Phase 20 | Pending |
 | AUTH-10 | Phase 20 | Pending |
 | SHELL-01 | Phase 21 | Pending |

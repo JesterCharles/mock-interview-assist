@@ -40,7 +40,7 @@
 - [x] **Phase 16: Cached Question-Bank Manifest** -- in-memory cache + ETag short-circuit + manual refresh, hits <400ms wizard target (completed 2026-04-15)
 - [x] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI (completed 2026-04-15)
 - [x] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery) (completed 2026-04-16)
-- [ ] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap)
+- [x] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap) (completed 2026-04-16)
 - [ ] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth
 - [ ] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization
 - [ ] **Phase 22: Trainer Analytics** -- KPI strip, sparklines, cohort trends, gap aggregation, calibration view
@@ -119,7 +119,7 @@ Plans:
 
 Plans:
 - [x] 19-01-PLAN.md — Email parser pure function + EmailChipInput component
-- [ ] 19-02-PLAN.md — Preview classification + onboarding page wiring + human verify
+- [x] 19-02-PLAN.md — Preview classification + onboarding page wiring + human verify
 - [x] 19-03-PLAN.md — inviteAssociate helper extraction + bulk API route + integration tests
 **UI hint**: yes
 
@@ -222,7 +222,7 @@ Plans:
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
-| 19. Bulk Invite | v1.2 | 2/3 | In Progress|  |
+| 19. Bulk Invite | v1.2 | 3/3 | Complete   | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
