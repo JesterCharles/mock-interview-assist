@@ -380,22 +380,25 @@ if (associate.lastInvitedAt) {
 | A3 | `/associate/[slug]/dashboard` stub page is the right forward-compat approach | Architecture Patterns (Pattern 7) | If planner defers stub to Phase 23, magic links from P19 land on existing `/associate/[slug]` instead |
 | A4 | `ip` field in bulk AuthEvent records should use request `x-forwarded-for` header | Code Examples | Audit trail won't correctly attribute to trainer IP if wrong header used |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Slug auto-generation strategy for new associates**
    - What we know: `Associate.slug` is `@unique`, required (not nullable)
    - What's unclear: No existing pattern for auto-generating slugs from email; existing associates have human-entered slugs
    - Recommendation: `{local-part}-{4-char-random}` e.g. `jsmith-x4k2`. Collision retry on P2002.
+   - **RESOLVED:** Adopted in Plan 03 Task 2. `inviteHelper.ts` uses `generateSlug(email)` = local-part + 4-char hex suffix with P2002 retry.
 
 2. **Dashboard redirect target for Phase 19 magic links**
    - What we know: SC 6 says `/associate/[slug]/dashboard`; exchange route currently goes to `/associate/[slug]`; Phase 23 builds the real dashboard
    - What's unclear: Whether trainer accepts `/associate/[slug]` as acceptable landing for now
    - Recommendation: Add stub `page.tsx` in Phase 19 that renders or redirects to `/associate/[slug]` — satisfies SC literally, zero-cost.
+   - **RESOLVED:** Adopted in Plan 03 Task 1. Stub `src/app/associate/[slug]/dashboard/page.tsx` redirects to `/associate/[slug]`. Exchange route updated to redirect to `/associate/${slug}/dashboard`.
 
 3. **AuthEvent-based daily limit scoping**
    - What we know: Single-invite route uses `caller.email ?? 'trainer'` as the `ip` field to namespace rate limits; D-13 says "per trainer" daily limit
    - What's unclear: In single-trainer deployments this doesn't matter; in multi-trainer future it does
    - Recommendation: Use `caller.email ?? 'trainer'` as filter on AuthEvent.ip for the daily count, matching single-invite pattern.
+   - **RESOLVED:** Adopted in Plan 03 Tasks 2-3. Bulk route filters `AuthEvent` by `ip = caller.email ?? "trainer"` for per-trainer daily count.
 
 ## Environment Availability
 
