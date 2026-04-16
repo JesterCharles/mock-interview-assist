@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Analytics & Auth Overhaul
 status: executing
-last_updated: "2026-04-16T09:19:45.952Z"
-last_activity: 2026-04-16 -- Phase 25 planning complete
+last_updated: "2026-04-16T09:25:27.106Z"
+last_activity: 2026-04-16
 progress:
   total_phases: 10
   completed_phases: 9
   total_plans: 26
-  completed_plans: 24
-  percent: 92
+  completed_plans: 25
+  percent: 96
 ---
 
 # v1.2 — Analytics & Auth Overhaul (started 2026-04-15)
@@ -41,14 +41,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15 — v1.2 milestone active)
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Phase 24 — PDF Analytics Export
+**Current focus:** Phase 25 — PIN Removal + Cleanup
 
 ## Current Position
 
-Phase: 25
-Plan: Not started
+Phase: 25 (PIN Removal + Cleanup) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 25 planning complete
+Last activity: 2026-04-16
 
 ## Performance Metrics
 
@@ -103,5 +103,5 @@ Last activity: 2026-04-16 -- Phase 25 planning complete
 
 ## Session Continuity
 
-Last session: 2026-04-16T09:12:04.457Z
+Last session: 2026-04-16T09:25:27.103Z
 Resume with: `/gsd-plan-phase 16`

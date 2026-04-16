@@ -219,7 +219,7 @@ Plans:
   5. App boots and all auth flows function with only Supabase env vars present
 **Plans**: 2 plans
 Plans:
-- [ ] 25-01-PLAN.md — Delete PIN code + update dependents + grep-gate test
+- [x] 25-01-PLAN.md — Delete PIN code + update dependents + grep-gate test
 - [ ] 25-02-PLAN.md — Schema migration + env/doc cleanup + build verification
 
 ## Progress
@@ -250,4 +250,4 @@ Plans:
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 24. PDF Analytics Export | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 25. PIN Removal + Cleanup | v1.2 | 0/2 | In progress | - |
+| 25. PIN Removal + Cleanup | v1.2 | 1/2 | In Progress|  |
