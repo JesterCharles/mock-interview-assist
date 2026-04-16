@@ -222,7 +222,7 @@ Plans:
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
-| 19. Bulk Invite | v1.2 | 3/3 | Complete   | 2026-04-16 |
+| 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
