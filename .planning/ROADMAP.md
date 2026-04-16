@@ -136,7 +136,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — RLS migration (is_trainer() function + policies on 5 tables)
+- [x] 20-01-PLAN.md — RLS migration (is_trainer() function + policies on 5 tables)
 - [ ] 20-02-PLAN.md — Route handler audit annotations + PROJECT.md BYPASSRLS documentation
 
 ### Phase 21: App Shell Redesign
@@ -227,7 +227,7 @@ Plans:
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 20. Middleware Cutover + RLS | v1.2 | 0/2 | Not started | - |
+| 20. Middleware Cutover + RLS | v1.2 | 1/2 | In Progress|  |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
