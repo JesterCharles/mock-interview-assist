@@ -28,8 +28,8 @@ describe('assertProductionEnv', () => {
     beforeEach(() => {
       (process.env as Record<string, string>).NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://abc.supabase.co';
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key';
-      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key';
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'anon-key';
+      process.env.SUPABASE_SECRET_KEY = 'service-role-key';
       process.env.NEXT_PUBLIC_SITE_URL = 'https://nlm.example.com';
     });
 
@@ -62,13 +62,13 @@ describe('assertProductionEnv', () => {
       expect(() => assertProductionEnv()).toThrow('[FATAL]');
     });
 
-    it('throws when NEXT_PUBLIC_SUPABASE_ANON_KEY is missing', () => {
-      delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    it('throws when NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is missing', () => {
+      delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
       expect(() => assertProductionEnv()).toThrow('[FATAL]');
     });
 
-    it('throws when SUPABASE_SERVICE_ROLE_KEY is missing', () => {
-      delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    it('throws when SUPABASE_SECRET_KEY is missing', () => {
+      delete process.env.SUPABASE_SECRET_KEY;
       expect(() => assertProductionEnv()).toThrow('[FATAL]');
     });
 
