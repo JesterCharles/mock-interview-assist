@@ -1,87 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { useEffect } from 'react';
 
 /**
- * /auth/callback — handles magic link and password reset callbacks.
+ * /auth/callback — thin client that extracts hash tokens and forwards to server.
  *
- * Magic links from admin.generateLink use implicit flow (tokens in URL hash).
- * @supabase/ssr's createBrowserClient does NOT auto-detect hash fragments,
- * so we manually extract tokens and call setSession().
+ * Magic links from admin.generateLink use implicit flow (#access_token in hash).
+ * Server can't read hash fragments, so this page extracts them and redirects
+ * to a server route that sets httpOnly session cookies properly.
  */
 export default function AuthCallbackPage() {
-  const router = useRouter();
-  const [status, setStatus] = useState('Completing sign-in...');
-
   useEffect(() => {
-    async function handleCallback() {
-      const supabase = createSupabaseBrowserClient();
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    const type = params.get('type');
 
-      // Parse hash fragment: #access_token=...&refresh_token=...&type=magiclink
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      const type = params.get('type');
+    // Also check query params for PKCE flow
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
 
-      // Also check query params for PKCE flow (code=...)
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-
-      if (code) {
-        // PKCE flow
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          router.replace('/signin?error=invalid-link');
-          return;
-        }
-      } else if (accessToken && refreshToken) {
-        // Implicit flow — manually set session from hash tokens
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        if (error) {
-          console.error('[auth/callback] setSession error:', error.message);
-          router.replace('/signin?error=invalid-link');
-          return;
-        }
-      } else {
-        // No tokens at all
-        router.replace('/signin?error=missing-code');
-        return;
-      }
-
-      // Recovery flow → update-password page
-      if (type === 'recovery') {
-        router.replace('/auth/update-password');
-        return;
-      }
-
-      // Verify session is set before calling server
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace('/signin?error=invalid-link');
-        return;
-      }
-
-      // Session established — call server for authUserId linkage + redirect
-      setStatus('Linking account...');
-
-      try {
-        const res = await fetch('/api/auth/callback-link', { method: 'POST' });
-        const data = await res.json();
-        // Full page navigation to ensure middleware gets fresh cookies
-        window.location.href = data.redirect ?? '/';
-      } catch {
-        window.location.href = '/signin?error=invalid-link';
-      }
+    if (code) {
+      // PKCE flow — forward code to server
+      window.location.href = `/api/auth/exchange?code=${encodeURIComponent(code)}&type=${type ?? ''}`;
+    } else if (accessToken && refreshToken) {
+      // Implicit flow — forward tokens to server
+      window.location.href = `/api/auth/exchange?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&type=${type ?? ''}`;
+    } else {
+      window.location.href = '/signin?error=missing-code';
     }
-
-    handleCallback();
-  }, [router]);
+  }, []);
 
   return (
     <div style={{
@@ -92,7 +41,7 @@ export default function AuthCallbackPage() {
       fontFamily: 'var(--font-body)',
       color: 'var(--text-primary)',
     }}>
-      <p>{status}</p>
+      <p>Completing sign-in...</p>
     </div>
   );
 }
