@@ -1,198 +1,119 @@
-# Research Synthesis — Milestone v1.2 (Analytics & Auth Overhaul)
+# Project Research Summary
 
-**Synthesized:** 2026-04-15
-**Inputs:** STACK.md · FEATURES.md · ARCHITECTURE.md · PITFALLS.md
-**Overall confidence:** MEDIUM-HIGH (Supabase SSR/RLS patterns are HIGH; exact package versions + Supabase rate limits flagged for install-time verification)
-
----
+**Project:** Next Level Mock — v1.3 UX Unification & Polish
+**Domain:** Education/training SaaS — shell unification, auth polish, associate-facing data viz
+**Researched:** 2026-04-16
+**Confidence:** HIGH
 
 ## Executive Summary
 
-v1.2 is a **greenfield Supabase Auth install** (not an upgrade — `@supabase/supabase-js` and `@supabase/ssr` are absent from `package.json` as of 2026-04-15) combined with an analytics layer, dashboard shell redesign, associate self-dashboard, and a cached question-bank manifest. The auth cutover is the load-bearing work: every other bundle either depends on clean Supabase identity (Analytics, Associate Dashboard) or is incidentally coupled (Dashboard shell hosts the KPIs). The manifest cache is fully independent and is the natural quick-win opener.
+v1.3 is a focused UX/polish milestone with zero new dependencies. All required capabilities (recharts components, Supabase auth APIs, Tailwind token system) are already installed and functional. The work is component-level refactoring and new composition, not infrastructure additions. The highest-complexity item is the `TrainerShell → AppShell` refactor — it must be done first and done carefully, as it gates all associate-shell work and risks breaking the trainer layout if role-default behavior isn't guarded.
 
-The dominant technical decision — converged across all four research docs — is **RLS as defense-in-depth, app-layer authorization as primary enforcement**. Prisma connects via a `BYPASSRLS` service role through Supabase's Transaction Pooler, which makes session-scoped `SET LOCAL` RLS infeasible without breaking pooling. This is a locked architectural choice; do not revisit during planning. Policies still get written (safety net against any future direct `supabase-js` data reads), but every Prisma query must filter explicitly by the identity resolved from `getCallerIdentity()`.
+The recommended approach is to sequence work by dependency chain: DESIGN.md tokens first (unblocks chart work), shell refactor second (unblocks associate layout), then build associate surfaces (data viz + curriculum) in parallel, and run dark mode QA last as a sweep pass. Sign-in redesign is independent and can run parallel to shell work.
 
-The single highest-risk thread is the PIN-to-Supabase migration: existing `Associate` rows have `slug` + `displayName` but **no `email` column** yet, so bulk onboarding depends on a trainer-driven email backfill before cutover. All four docs flag this as the first blocker for requirements. Magic-link delivery should go through `supabase.auth.admin.generateLink` + existing Resend integration (not Supabase's default SMTP) to dodge rate limits and reuse proven deliverability. PIN removal is staged as a four-commit sequence, not a big-bang PR.
-
----
-
-## Cross-Doc Agreements (what all 4 converge on)
-
-| Decision | Agreed Sources | Status |
-|----------|---------------|--------|
-| `@supabase/ssr` + `supabase-js` (admin) as the auth stack | STACK, ARCH, PITFALLS | **Locked** |
-| Supabase Auth is greenfield (not installed) | STACK, ARCH, PITFALLS | **Locked** |
-| RLS is defense-in-depth; app-layer auth is primary | STACK, ARCH, PITFALLS | **Locked — Option A** |
-| Prisma keeps using service-role / Transaction Pooler | STACK, ARCH, PITFALLS | **Locked** |
-| `Associate.authUserId` is additive nullable FK (not PK swap) | STACK, ARCH, PITFALLS | **Locked** |
-| Magic links via `generateLink` + Resend (not Supabase SMTP) | STACK, FEATURES, ARCH, PITFALLS | **Locked** |
-| PIN removal is staged (4 commits min, not one PR) | ARCH, PITFALLS | **Locked** |
-| In-memory `Map` + TTL for manifest cache; no Redis | STACK, FEATURES, ARCH, PITFALLS | **Locked** |
-| Nested App Router layout (`trainer/layout.tsx`) for shell | FEATURES, ARCH | **Locked** |
-| `/trainer/[slug]` stays as child route (not modal) | FEATURES, ARCH | **Locked** |
-| Associate dashboard is a NEW route, not an extension of profile | FEATURES, ARCH | **Locked** |
-| Recharts stays (React 19 compatible); no Tremor/Nivo | STACK, FEATURES | **Locked** |
-| 4 KPI cards max (Avg Readiness, Mocks/Week, At-Risk, Top Gap) | FEATURES, ARCH | **Locked** |
-| Middleware must run `getUser()` BEFORE route guard, return same mutated response | ARCH, PITFALLS | **Locked** |
-| Trainer role via `user_metadata.role = 'trainer'` (not separate table) | ARCH, PITFALLS | **Locked** |
-| No streaks / no leaderboards / no push notifications | FEATURES | **Locked** |
-| Bulk invite batch size cap = 50; per-email transaction | STACK, FEATURES, ARCH | **Locked** |
-| Magic-link expiry = 7 days | FEATURES, PITFALLS | **Locked** |
-| PKCE flow enabled | PITFALLS | **Locked** |
-| Hash-based + TTL hybrid manifest invalidation (ETag via `If-None-Match`) | STACK, ARCH, PITFALLS | **Locked** |
-| Recharts must NOT render inside `@react-pdf/renderer`; pre-render SVG server-side | FEATURES, ARCH, PITFALLS | **Locked** |
+The primary risk is the shell refactor introducing trainer regressions. Prevention is low-effort: default the `role` prop to `'trainer'` so existing layouts require no changes, and test trainer routes after each incremental shell change. The dark mode pitfall (recharts tooltip white box, hardcoded hex) is fully understood and mechanical to fix — build all new components with CSS vars from day one rather than relying on the final sweep to catch violations.
 
 ---
 
-## Cross-Doc Conflicts (resolved)
+## Key Findings
 
-### Conflict 1: Manifest cache TTL duration
-- STACK: 10min · FEATURES: 15min · ARCH: 5min · PITFALLS: prefers hash-based
+### Recommended Stack
 
-**Resolution:** **5-minute TTL + ETag short-circuit + manual "Refresh" button + `/api/github/cache/invalidate`.** ARCH's tightest bound; ETag (304) resets TTL without re-download.
+No new packages required. recharts 3.8.1 already ships `AreaChart`, `Area`, and `ReferenceLine` — all needed for associate trend charts. `supabase.auth.updateUser({ password })` handles the password upgrade flow for magic-link associates. The CSS custom property token system in `globals.css` is complete; dark mode failures are caused by hardcoded hex in component files, not missing infrastructure.
 
-### Conflict 2: Magic-link delivery mechanism
-- STACK/ARCH/PITFALLS: `generateLink` + Resend · FEATURES: custom SMTP via Resend in Supabase
+**Core additions within existing packages:**
+- `AreaChart` / `Area` — trajectory/trend fill view, already in recharts 3.8.1
+- `ReferenceLine` — readiness threshold marker (y=75), already in recharts 3.8.1
+- `supabase.auth.updateUser({ password })` — first-login password upgrade, already available
+- CSS var tokens for chart colors — migration from hardcoded hex, no new tokens needed
 
-**Resolution:** **`generateLink` server-side + send via Resend.** Keeps orchestration code in control of rate/idempotency/retry. Don't configure custom SMTP in Supabase.
+### Expected Features
 
-### Conflict 3: Bulk-invite existing-email behavior
-- STACK/FEATURES: skip + record duplicate · ARCH: reassign cohort if different; skip if same
+**Must have (P1):**
+- Unified app shell — associates get topbar+sidebar matching trainer UX
+- Sign-in redesign — no tabs, stacked buttons, single page for both auth methods
+- DESIGN.md data-viz section — chart token palette, gates all chart work
+- Skill list with score bars + trend arrows — core associate feedback surface
+- Focus area hero card — promote `recommendedArea` above the fold
+- Dark mode consistency sweep — all surfaces must respect `[data-theme="dark"]`
 
-**Resolution:** **ARCH wins.** Different cohort = reassign (common training-ops flow). Same cohort = skip. Add `Associate.lastInvitedAt` + 5-min re-invite throttle.
+**Should have (P2):**
+- Per-skill trend LineChart — trajectory over sessions with skill filter
+- Associate curriculum view — cohort schedule, read-only, current week highlighted
+- Password upgrade prompt — first-login banner after magic-link sign-in
 
-### Conflict 4: Goals & streaks scope
-- FEATURES main body: progress bar + weekly counter · FEATURES MVP table: defer entirely
+**Defer (v1.4+):**
+- OAuth providers (Google, GitHub)
+- Leaderboard / cohort comparison views
+- Associate-editable profile / avatar upload
 
-**Resolution:** **Readiness-goal progress bar only in v1.2.** Defer consistency counter. Highest anti-pattern-risk bundle; minimize surface area.
+### Architecture Approach
 
-### Conflict 5: Cohort switcher placement
-**Resolution:** **Topbar (global).** Matches locked shell; trainers manage multiple concurrent cohorts.
+The shell unification renames `TrainerShell` → `AppShell` with a `role` prop that drives sidebar config. Trainer config is unchanged; associate config adds two sidebar nodes (Dashboard, Interviews). `PublicShell` and `AssociateNav` are deleted after migration. Gap score history for trend charts is computed at query time from existing `Session` records (no new table needed for MVP; session counts per associate are low). A new read-only `/api/associate/curriculum` route exposes cohort curriculum to authenticated associates, deriving cohort ID from the session — never from query params.
 
-### Conflict 6: PIN removal grace period
-- FEATURES/PITFALLS: 2 weeks · ARCH: single deploy cycle
+**Major components:**
+1. `AppShell.tsx` — unified shell, role-driven sidebar config, replaces TrainerShell + AssociateNav
+2. `SignInPage.tsx` — replaces SignInTabs, stacked buttons, inline form expansion
+3. `StrengthWeaknessList.tsx` / `FocusAreaHero.tsx` / `SkillTrendChart.tsx` — associate data viz
+4. `CurriculumTimeline.tsx` — read-only cohort schedule with current-week highlight
+5. `/api/associate/curriculum` — new auth-guarded read-only endpoint
 
-**Resolution:** **2-week grace + grep-gate.** ARCH's single-cycle too aggressive for prod sessions. PITFALLS's grep rule (`rg "ENABLE_ASSOCIATE_AUTH|pinHash|pinGeneratedAt|associate_session|verifyAssociateToken|isAssociateAuthEnabled" src/` returns zero) becomes a required pre-ship CI check before `DROP COLUMN`.
+### Critical Pitfalls
 
----
-
-## Locked Decisions (DO NOT revisit)
-
-1. **Auth stack:** `@supabase/ssr` + `@supabase/supabase-js` admin. No NextAuth. No custom JWT.
-2. **RLS enforcement:** Option A — app-layer primary, RLS defense-in-depth. Prisma on service-role + Transaction Pooler.
-3. **Identity linkage:** `Associate.authUserId` nullable FK to `auth.users`. `Associate.id` stays as app PK. No FK surgery on `Session`/`GapScore`.
-4. **Trainer role marker:** `auth.users.user_metadata.role`. No separate `TrainerProfile` table.
-5. **Magic-link flow:** `admin.generateLink` + Resend. PKCE enabled. 7-day expiry.
-6. **Charts:** Recharts 3.8.1. No Tremor/Nivo/chart.js.
-7. **Manifest cache:** in-memory `Map` + 5-min TTL + ETag + manual invalidate endpoint. No Redis.
-8. **Dashboard shell:** nested `src/app/trainer/layout.tsx`. URLs preserved (`/trainer`, `/trainer/[slug]`).
-9. **Associate dashboard:** NEW route `/associate/[slug]/dashboard`. Profile stays at `/associate/[slug]`. Sibling `layout.tsx` provides `AssociateNav`.
-10. **KPI strip:** 4 cards — Avg Readiness, Mocks This Week, At-Risk Count, Top Gap. AI/Trainer Variance optional 5th (gated on override volume).
-11. **Gamification:** none. Readiness-goal progress bar only.
-12. **Bulk invite:** 50/call cap, per-email transaction, idempotent on email+cohort.
-13. **Analytics:** Prisma `$queryRaw` for aggregations, inline (no materialized views until >2000 associates).
-14. **AI/Trainer variance:** denormalize to `Session.aiTrainerVariance Float?` at session save.
-15. **PIN removal timeline:** 4 commits — (a) Supabase alongside PIN, (b) data migration, (c) flip middleware, (d) delete PIN after 2-week grace + grep-gate.
-
----
-
-## Open Questions (MUST answer before planning)
-
-### Q1 — Associate email audit (BLOCKER for Phase 2)
-How many existing `Associate` rows have an obtainable email? Collisions? Any email in `session.candidateName` or adjacent fields for backfill? Forks Phase 2 strategy (hard vs soft cutover).
-**How:** `SELECT COUNT(*), COUNT(DISTINCT slug) FROM "Associate"` + candidateName pattern audit.
-
-### Q2 — Supabase project tier + current email rate limits
-Free vs Pro? April-2026 rate-limit buckets? Affects bulk-invite batch-size calibration + inter-call delay.
-**How:** Dashboard → Auth → Rate Limits.
-
-### Q3 — Latest `@supabase/ssr` version
-CLAUDE.md asserts `0.10.2`; STACK could not verify. **How:** `npm view @supabase/ssr version` at install time.
-
-### Q4 — Does `Session` capture question-bank provenance (`repo`/`branch`/`file`)?
-Needed for per-question-bank analytics differentiator. If absent: add schema field in v1.2 OR defer analytic to v1.3.
-**How:** Inspect `prisma/schema.prisma` + `sessionPersistence.ts`.
-
-### Q5 — Does `finalized.html` sidebar spec match 5-item flat nav?
-ARCH + FEATURES made recommendations without reading locked mockup (sandbox permission denied on `~/.gstack`). **How:** Read during Phase 6 design reconciliation.
-
-### Q6 — Cohort switcher visibility
-Resolved above (topbar). Confirm with user.
-
-### Q7 — PDF scope: per-associate on-demand + cohort, or cohort-only?
-Affects template count. Recommend both; cut per-associate if timeline slips.
-
-### Q8 — Cohort-mate privacy
-Can associates see cohort-mate names? Default: aggregate-only, no names. Affects associate-dashboard copy.
+1. **Shell refactor breaks trainer layout (HIGH)** — Default `role` prop to `'trainer'`; never restructure trainer config during refactor. Test trainer routes after each incremental change.
+2. **Auth callback race in password upgrade (MEDIUM)** — Wait for `supabase.auth.getSession()` before redirecting to password setup; add server-side session check on the setup page.
+3. **Gap score history perf (MEDIUM)** — Cap history at last 20 sessions; ensure `Session` is indexed on `(associateId, createdAt)`. Materialize snapshots in follow-up if needed.
+4. **Curriculum data exposure (MEDIUM)** — Never accept cohort ID from query params; always derive from authenticated associate. Return `[]` for unassigned associates, not 404.
+5. **Dark mode regression in new components (MEDIUM)** — Write DESIGN.md data-viz tokens first; all new components must use CSS vars from day one.
 
 ---
 
-## Recommended Phase Order for ROADMAP.md
+## Implications for Roadmap
 
-### Phase 1 — Cached Question-Bank Manifest
-Independent, quick win, validates <400ms wizard target. `src/lib/github-manifest-cache.ts`, `/api/github` wrap, `/api/github/cache/invalidate` (trainer-only), wizard "last synced" hint + refresh button. **No research needed.**
+### Phase 26: DESIGN.md Data-Viz Section
+**Rationale:** Unblocks all chart work. Chart tokens must exist before any chart component is built.
+**Delivers:** Chart color palette in `globals.css`, typography/axis conventions, tooltip patterns, trajectory language, dark mode chart behavior documented in `DESIGN.md`.
+**Avoids:** P5 (dark mode regression) — tokens established before any chart component is written.
 
-### Phase 2 — Associate Email Backfill + Schema Prep
-Unblocks downstream. Prisma migration adds `Associate.email String? @unique` + `authUserId String? @unique`. Trainer UI to enter emails. Audit script. **Research: YES — Q1 must answer first.**
+### Phase 27: Unified App Shell
+**Rationale:** Blocks associate layout adoption for data viz and curriculum. Must come before Phases 29/30.
+**Delivers:** `AppShell.tsx` with `role` prop; associate layout switched from `PublicShell`; `AssociateNav` deprecated.
+**Avoids:** P1 (shell regression) — role defaults to `'trainer'`, trainer config untouched, trainer routes verified.
+**Avoids:** P8 (layout shift) — associate components tested at 1280px with sidebar present.
 
-### Phase 3 — Supabase Auth Install (Alongside PIN)
-Install `@supabase/ssr` + `supabase-js`. Scaffold `src/lib/supabase/{server,middleware,admin}.ts`. Trainer email/password login + magic-link callback route. PIN still active. **Research: YES — Q2 + Q3 + PKCE config.**
+### Phase 28: Sign-in Redesign + Password Upgrade
+**Rationale:** Independent of shell; can run parallel to Phase 27.
+**Delivers:** `SignInPage.tsx` (no tabs), inline form expansion, first-login password upgrade prompt.
+**Avoids:** P2 (auth race) — session hydration check before redirect. P6 (state management) — single `activeMethod` state, shared email field.
 
-### Phase 4 — Bulk Invite + Data Migration
-`/api/trainer/invites/bulk` (per-email transaction, 50/call cap). Bulk UI (textarea → chips → preview → result table). Migration script for existing associates. `lastInvitedAt` throttle. **Research: light — Resend DMARC/SPF/DKIM verification.**
+### Phase 29: Associate Data Visualization
+**Rationale:** Requires shell (Phase 27) and chart tokens (Phase 26).
+**Delivers:** `StrengthWeaknessList`, `FocusAreaHero`, `SkillTrendChart`; gap API extended with session history.
+**Avoids:** P3 (history perf) — 20-session cap, query-time compute. P7 (tooltip dark mode) — `contentStyle` CSS vars from day one.
 
-### Phase 5 — Middleware Cutover + RLS Policies
-Flip `src/middleware.ts` + `getCallerIdentity` to Supabase-primary. Deploy RLS with `is_trainer()` SECURITY DEFINER helper. PIN legacy fallback in middleware during 2-week grace. **No research — ARCH §1.5 + §2 canonical.**
+### Phase 30: Associate Curriculum View
+**Rationale:** Requires shell (Phase 27). Can run parallel to Phase 29.
+**Delivers:** `CurriculumTimeline.tsx`, `/api/associate/curriculum` read-only route, empty state for unassigned associates.
+**Avoids:** P4 (data exposure) — cohort ID derived from auth session, never from request params.
 
-### Phase 6 — Dashboard Shell Redesign
-`src/app/trainer/layout.tsx` (topbar + sidebar), cohort switcher in topbar, localStorage collapse state, Radix sheet for mobile. URLs preserved. **Research: YES — Q5 reconcile with `finalized.html`.**
+### Phase 31: Dark Mode QA Sweep
+**Rationale:** Must be last — sweeps all surfaces built in Phases 26-30.
+**Delivers:** All routes verified in dark mode; hardcoded hex eliminated; recharts tooltips fixed.
 
-### Phase 7 — Trainer Analytics
-KPI strip, roster sparklines (single window-function query), cohort trend chart, skill-gap aggregation, `/trainer/gap-analysis`, `/trainer/calibration`. `src/lib/analyticsService.ts`. `Session.aiTrainerVariance` column + pipeline hook. **No research — ARCH §3 complete.**
+### Phase Ordering Rationale
 
-### Phase 8 — Associate Self-Dashboard
-New `/associate/[slug]/dashboard` + shared `AssociateNav`. Gap trend, single primary recommendation with "why" + dismiss, book-next-mock CTA, readiness-goal progress bar. **No research — FEATURES §C locked.**
+- Phase 26 before Phase 29 — chart tokens are a strict unblock for chart components
+- Phase 27 before Phases 29 and 30 — associate shell dependency
+- Phases 27 and 28 can run in parallel — sign-in is shell-independent
+- Phases 29 and 30 can run in parallel once Phase 27 is done
+- Phase 31 always last — sweep requires all surfaces to exist
 
-### Phase 9 — PDF Analytics Export
-Cohort + per-associate templates. SVG sparkline helper (no recharts in PDF). Memory-safe rendering. **Research: light — @react-pdf SVG primitive spike.**
+### Research Flags
 
-### Phase 10 — PIN Removal + Cleanup
-After 2-week grace. Delete PIN routes/services/tests/UI, `DROP COLUMN`, env cleanup, flag removal. CI grep-gate. **No research — PITFALLS §8 exhaustive file list.**
+No phases require `/gsd-research-phase` — all patterns are resolved by existing codebase knowledge and confirmed APIs.
 
----
-
-## Phase Research Flags
-
-| Phase | Needs `/gsd-research-phase`? | Reason |
-|-------|------------------------------|--------|
-| 1. Manifest cache | NO | Textbook pattern |
-| 2. Email backfill | **YES** | Q1 audit forks strategy |
-| 3. Supabase install | **YES** | Q2 + Q3 + PKCE details |
-| 4. Bulk invite + migration | YES (light) | Resend domain/DMARC |
-| 5. Middleware + RLS | NO | ARCH §1.5 + §2 locked |
-| 6. Dashboard shell | **YES** | Q5 finalized.html reconcile |
-| 7. Analytics | NO | ARCH §3 complete |
-| 8. Associate dashboard | NO | FEATURES §C locked |
-| 9. PDF export | YES (light) | @react-pdf SVG spike |
-| 10. Cleanup | NO | PITFALLS §8 complete |
-
----
-
-## Top Pitfalls Per Phase (surface in ROADMAP)
-
-**Critical:**
-1. **Middleware ordering + same-response-return** (Phase 5) — `getUser()` before route guard; return mutated response, not fresh `NextResponse.next()`.
-2. **Prisma bypasses RLS silently** (Phase 5) — document in PROJECT.md; every Prisma query filters explicitly.
-3. **Email collisions during migration** (Phase 2 + 4) — dry-run script emits conflict report; trainer approves CSV.
-4. **Magic-link rate limits** (Phase 4) — `generateLink` + Resend; 250ms inter-call jitter; structured result table.
-5. **PIN-removal grep-gate** (Phase 10) — CI check before `DROP COLUMN` deploy.
-
-**Moderate:**
-- **N+1 roster sparklines** (Phase 7) — `ROW_NUMBER() OVER (PARTITION BY associateId)`, single query.
-- **recharts-in-PDF OOM** (Phase 9) — pre-rendered SVG helper only.
-- **Mass-logout on cutover** (Phase 5) — weekend window; 2-week dual-auth grace; verify Zustand localStorage preserves mid-interview state.
-- **Redirect URL per env** (Phase 3) — `NEXT_PUBLIC_SITE_URL` + boot-time assert against `localhost` in prod.
-- **PKCE flow for magic links** (Phase 3) — prevent email-scanner auto-consume.
+Phases with standard patterns (skip research):
+- **All phases (26-31):** Verified implementations in existing codebase; no novel integrations
 
 ---
 
@@ -200,27 +121,31 @@ After 2-week grace. Delete PIN routes/services/tests/UI, `DROP COLUMN`, env clea
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Auth stack + SSR pattern | HIGH | Supabase docs + direct code |
-| RLS design (defense-only) | HIGH | Known Prisma + pgBouncer limitation |
-| Analytics architecture | HIGH | Raw-SQL at current scale |
-| Dashboard shell pattern | MEDIUM | Canonical App Router; finalized.html unverified |
-| Associate UX | MEDIUM-HIGH | Competitor patterns from training data |
-| Bulk invite orchestration | HIGH | ARCH §7 complete |
-| Manifest cache | HIGH | Textbook |
-| PDF chart rendering | MEDIUM | @react-pdf SVG finicky; spike advised |
-| Supabase rate-limit numbers | LOW-MEDIUM | Install-time verify (Q2) |
-| Package version pins | MEDIUM | Install-time verify (Q3) |
-| Existing email coverage | UNKNOWN | **Critical gap — Q1 before Phase 2** |
+| Stack | HIGH | All components verified in `node_modules`; APIs confirmed in existing codebase |
+| Features | HIGH | All features built on existing data models; no novel UX patterns |
+| Architecture | HIGH | Direct codebase knowledge from v1.2 execution; specific files identified |
+| Pitfalls | HIGH | Root causes verified by code inspection, not inference |
 
-**Overall: MEDIUM-HIGH.** Critical gaps: Q1 (email audit), Q5 (finalized.html). All other uncertainty is install-time resolvable.
+**Overall confidence:** HIGH
+
+### Gaps to Address
+
+- **Gap score history query perf:** Theoretical concern. Validate actual query time after Phase 29 implementation; materialize if >2s. Low risk given typical session counts.
+- **Password upgrade UX copy:** Exact banner copy and placement should be confirmed during Phase 28 planning against DESIGN.md hierarchy rules.
 
 ---
 
-## Gaps to Flag for Requirements Phase
+## Sources
 
-1. **Associate email coverage audit (Q1)** — highest priority; forks Phase 2.
-2. **`finalized.html` sidebar spec (Q5)** — reconcile before Phase 6.
-3. **PDF export scope (Q7)** — cohort-only vs both.
-4. **Cohort-mate privacy (Q8)** — default aggregate-only.
-5. **Supabase project tier (Q2)** — confirm before Phase 3.
-6. **Question-bank provenance in `Session` (Q4)** — schema check; v1.2 vs v1.3 decision for per-bank analytics.
+### Primary (HIGH confidence)
+- Direct `node_modules` inspection — recharts component availability at `node_modules/recharts/types/`
+- Existing codebase — `RosterSparkline.tsx` (CSS var in recharts), `auth/update-password/page.tsx` (updateUser pattern), `GapTrendChart.tsx` (hardcoded hex root cause identified)
+- Supabase JS `auth.updateUser` — confirmed in project codebase
+
+### Secondary (MEDIUM confidence)
+- UX patterns: Notion/Linear (sign-in stacked buttons), Duolingo/Khan Academy (learner viz framing), Canvas LMS (curriculum schedule)
+
+---
+
+*Research completed: 2026-04-16*
+*Ready for roadmap: yes*
