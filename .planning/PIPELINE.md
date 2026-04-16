@@ -2,17 +2,17 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 17 PLAN done (4 plans / 3 waves, checker PASS first iter, a40c2e9). Next: execute Phase 17.
+- Current stage: Phase 17 done + verified (5/6 SC auto PASS, 1 live smoke-test deferred, b446bd5). Phase 16 REVIEW artifacts committed (9560a4d). Next: plan Phase 18 (Supabase Auth Install).
 - Mode: interactive
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 17 PLAN committed (a40c2e9). 4 plans / 3 waves, checker PASS first iter, all 6 SC mapped to must_haves, [BLOCKING] `prisma migrate deploy` in 17-01, BACKFILL-01/02 covered, STRIDE threat models on each plan. Next:
-- `/gsd-execute-phase 17` to build
+Phase 16 complete (REVIEW + REVIEW-FIX committed 9560a4d). Phase 17 complete: 4 plans executed, VERIFICATION 2026-04-15T18:35Z — 5/6 SC automated PASS; 1 SC (live `prisma migrate deploy` on prod Supabase + `/trainer/settings/associates` smoke + cross-origin CSRF curl) flagged `human_needed`, deferred until auth cutover window. Next:
+- `/gsd-plan-phase 18` — Supabase Auth Install (depends on 17 `authUserId` col, which exists)
 - `/pipeline-coordinator --resume` to auto-route
 
-Phase 16 artifacts retained. Roadmap Phases 18-25 still pending plan.
+Roadmap Phases 18-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -37,10 +37,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phase 16, 17 PLAN done (17 = a40c2e9, 4 plans). Phases 18-25 pending. |
-| execute | in_progress | 2026-04-15 | | Phase 16 done (11 commits, 7447b87…51522dc, 254 tests, VERIFY 7/7). Phases 17-25 pending. |
-| review | per-phase | 2026-04-15 | | Phase 16: 0 BLK / 1 HI / 3 MED / 4 LO / 2 INFO → HI+MED fixed. |
-| test | per-phase | 2026-04-15 | | Phase 16: Nyquist filled 2 gaps (Truth 4/7), +7 tests → 254/254. |
+| plan | in_progress | 2026-04-15 | | Phases 16, 17 PLAN done. Phase 18 next. Phases 19-25 pending. |
+| execute | in_progress | 2026-04-15 | | Phase 16 done (11 commits, 7447b87…51522dc). Phase 17 done (4 plans, VERIFIED b446bd5). Phases 18-25 pending. |
+| review | per-phase | 2026-04-15 | | P16: 0 BLK / 1 HI / 3 MED / 4 LO / 2 INFO → HI+MED fixed (9560a4d). |
+| test | per-phase | 2026-04-15 | | P16: Nyquist filled 2 gaps (Truth 4/7), +7 tests → 254/254. P17: 5/6 SC auto PASS, 1 human_needed. |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
