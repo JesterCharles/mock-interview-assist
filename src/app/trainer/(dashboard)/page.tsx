@@ -1,94 +1,146 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { RosterAssociate, RosterResponse, CohortSummary } from '@/lib/trainer-types'
+import {
+  RosterAssociate,
+  RosterResponse,
+  KpiData,
+  RosterSparklineData,
+  CohortTrendPoint,
+} from '@/lib/trainer-types'
 import RosterTable from '@/components/trainer/RosterTable'
-import { CohortFilter } from '@/components/cohort/CohortFilter'
-import { ReadinessSummaryBar } from '@/components/cohort/ReadinessSummaryBar'
+import { KpiStrip } from '@/components/trainer/KpiStrip'
+import { CohortTrends } from '@/components/trainer/CohortTrends'
 import './trainer.css'
 
-export default function TrainerPage() {
+// Inner component that uses useSearchParams — must be wrapped in Suspense
+function TrainerDashboard() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const searchParams = useSearchParams()
+  const cohortParam = searchParams.get('cohort')
 
   const [associates, setAssociates] = useState<RosterAssociate[]>([])
-  const [cohorts, setCohorts] = useState<Array<{ id: string; name: string }>>([])
-  const [selectedCohortId, setSelectedCohortId] = useState<string>('all')
-  const [summary, setSummary] = useState<CohortSummary | null>(null)
-  const [dataLoading, setDataLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [kpiData, setKpiData] = useState<KpiData | null>(null)
+  const [sparklineData, setSparklineData] = useState<RosterSparklineData[]>([])
+  const [cohortTrends, setCohortTrends] = useState<CohortTrendPoint[]>([])
 
-  // One-time cohorts fetch (D-12). Silently degrades to empty list if endpoint missing.
-  useEffect(() => {
-    if (authLoading || !isAuthenticated) return
+  const [rosterLoading, setRosterLoading] = useState(true)
+  const [kpiLoading, setKpiLoading] = useState(true)
+  const [sparklineLoading, setSparklineLoading] = useState(true)
+  const [trendsLoading, setTrendsLoading] = useState(true)
 
-    async function fetchCohorts() {
-      try {
-        const res = await fetch('/api/cohorts')
-        if (!res.ok) {
-          // Silent degrade — dropdown still renders with just "All Associates"
-          return
-        }
-        const data: Array<{ id: number | string; name: string; startDate?: string }> =
-          await res.json()
-        // Sort by startDate desc per D-03
-        const sorted = [...data].sort((a, b) =>
-          (b.startDate ?? '').localeCompare(a.startDate ?? '')
-        )
-        setCohorts(sorted.map((c) => ({ id: String(c.id), name: c.name })))
-      } catch (err) {
-        console.error('[TrainerPage] cohorts fetch failed:', err)
-      }
-    }
+  const [rosterError, setRosterError] = useState<string | null>(null)
 
-    fetchCohorts()
-  }, [authLoading, isAuthenticated])
+  // Build scoped query param suffix
+  const cohortQuery = cohortParam ? `?cohort=${encodeURIComponent(cohortParam)}` : ''
+  const cohortIdQuery = cohortParam ? `?cohortId=${encodeURIComponent(cohortParam)}` : ''
 
-  // Fetch roster data after auth confirmed. Refetches when filter changes (D-11).
+  // Fetch roster data
   useEffect(() => {
     if (authLoading || !isAuthenticated) return
 
     async function fetchRoster() {
       try {
-        setDataLoading(true)
-        setError(null)
-        const url =
-          selectedCohortId === 'all'
-            ? '/api/trainer'
-            : `/api/trainer?cohortId=${encodeURIComponent(selectedCohortId)}&includeSummary=true`
+        setRosterLoading(true)
+        setRosterError(null)
+        // Use legacy cohortId param for the existing roster endpoint
+        const url = cohortParam
+          ? `/api/trainer${cohortIdQuery}&includeSummary=true`
+          : '/api/trainer'
         const res = await fetch(url)
-        if (!res.ok) {
-          throw new Error(`Failed to load roster (${res.status})`)
-        }
+        if (!res.ok) throw new Error(`Failed to load roster (${res.status})`)
         const raw: RosterAssociate[] | RosterResponse = await res.json()
         if (Array.isArray(raw)) {
-          // v1.0 shape — unfiltered "All Associates" path
           setAssociates(raw)
-          setSummary(null)
         } else {
           setAssociates(raw.associates)
-          setSummary(raw.summary)
         }
       } catch (err) {
-        console.error('[TrainerPage] fetch failed:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load roster')
+        console.error('[TrainerPage] roster fetch failed:', err)
+        setRosterError(err instanceof Error ? err.message : 'Failed to load roster')
       } finally {
-        setDataLoading(false)
+        setRosterLoading(false)
       }
     }
 
     fetchRoster()
-  }, [authLoading, isAuthenticated, selectedCohortId])
+  }, [authLoading, isAuthenticated, cohortParam, cohortIdQuery])
+
+  // Fetch KPI data
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return
+
+    async function fetchKpis() {
+      try {
+        setKpiLoading(true)
+        const res = await fetch(`/api/trainer/kpis${cohortQuery}`)
+        if (!res.ok) throw new Error(`KPI fetch failed (${res.status})`)
+        const data: KpiData = await res.json()
+        setKpiData(data)
+      } catch (err) {
+        console.error('[TrainerPage] KPI fetch failed:', err)
+        setKpiData(null)
+      } finally {
+        setKpiLoading(false)
+      }
+    }
+
+    fetchKpis()
+  }, [authLoading, isAuthenticated, cohortParam, cohortQuery])
+
+  // Fetch sparkline data
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return
+
+    async function fetchSparklines() {
+      try {
+        setSparklineLoading(true)
+        const res = await fetch(`/api/trainer/sparklines${cohortQuery}`)
+        if (!res.ok) throw new Error(`Sparkline fetch failed (${res.status})`)
+        const data: RosterSparklineData[] = await res.json()
+        setSparklineData(data)
+      } catch (err) {
+        console.error('[TrainerPage] sparkline fetch failed:', err)
+        setSparklineData([])
+      } finally {
+        setSparklineLoading(false)
+      }
+    }
+
+    fetchSparklines()
+  }, [authLoading, isAuthenticated, cohortParam, cohortQuery])
+
+  // Fetch cohort trends (only meaningful when cohort is selected)
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return
+
+    async function fetchTrends() {
+      try {
+        setTrendsLoading(true)
+        if (!cohortParam) {
+          setCohortTrends([])
+          return
+        }
+        const res = await fetch(`/api/trainer/cohort-trends${cohortQuery}`)
+        if (!res.ok) throw new Error(`Trends fetch failed (${res.status})`)
+        const data: CohortTrendPoint[] = await res.json()
+        setCohortTrends(data)
+      } catch (err) {
+        console.error('[TrainerPage] cohort trends fetch failed:', err)
+        setCohortTrends([])
+      } finally {
+        setTrendsLoading(false)
+      }
+    }
+
+    fetchTrends()
+  }, [authLoading, isAuthenticated, cohortParam, cohortQuery])
 
   // While auth is resolving, render nothing to avoid flash
-  if (authLoading) {
-    return null
-  }
-
-  // After auth resolves, if not authenticated middleware handles redirect
-  if (!isAuthenticated) {
-    return null
-  }
+  if (authLoading) return null
+  if (!isAuthenticated) return null
 
   return (
     <div className="trainer-shell">
@@ -99,7 +151,7 @@ export default function TrainerPage() {
           padding: '48px 24px',
         }}
       >
-        {/* Page title — 48px Clash Display 600 per DESIGN.md Typography */}
+        {/* Page title */}
         <h1
           style={{
             fontFamily: 'Clash Display, sans-serif',
@@ -114,28 +166,21 @@ export default function TrainerPage() {
           Trainer Dashboard
         </h1>
 
-        <div style={{ marginBottom: '24px' }}>
-          <CohortFilter
-            cohorts={cohorts}
-            selectedId={selectedCohortId === 'all' ? null : selectedCohortId}
-            onChange={(id) => setSelectedCohortId(id ?? 'all')}
-          />
-        </div>
-
-        {summary && selectedCohortId !== 'all' && (
-          <ReadinessSummaryBar
-            ready={summary.ready}
-            improving={summary.improving}
-            notReady={summary.notReady}
-            cohortName={
-              cohorts.find((c) => c.id === selectedCohortId)?.name ?? 'Cohort'
-            }
-          />
+        {/* Cohort Trends — full width, shown when cohort selected */}
+        {cohortParam && (
+          <div style={{ marginBottom: '32px' }}>
+            <CohortTrends data={cohortTrends} loading={trendsLoading} />
+          </div>
         )}
 
-        {dataLoading && (
+        {/* KPI Strip — 4-card grid */}
+        <div style={{ marginBottom: '32px' }}>
+          <KpiStrip data={kpiData} loading={kpiLoading} />
+        </div>
+
+        {/* Roster Table */}
+        {rosterLoading && (
           <div>
-            {/* Skeleton rows */}
             <p className="trainer-section-label" style={{ marginBottom: '12px' }}>
               roster
             </p>
@@ -145,7 +190,7 @@ export default function TrainerPage() {
                   key={i}
                   className="animate-pulse"
                   style={{
-                    height: '44px',
+                    height: '48px',
                     borderBottom: '1px solid #E8E2D9',
                     backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F0EBE2',
                   }}
@@ -155,7 +200,7 @@ export default function TrainerPage() {
           </div>
         )}
 
-        {error && !dataLoading && (
+        {rosterError && !rosterLoading && (
           <div
             style={{
               backgroundColor: '#FDECEB',
@@ -167,14 +212,25 @@ export default function TrainerPage() {
               fontFamily: 'DM Sans, sans-serif',
             }}
           >
-            <strong>Error:</strong> {error}
+            <strong>Error:</strong> {rosterError}
           </div>
         )}
 
-        {!dataLoading && !error && (
-          <RosterTable associates={associates} />
+        {!rosterLoading && !rosterError && (
+          <RosterTable
+            associates={associates}
+            sparklineData={sparklineLoading ? undefined : sparklineData}
+          />
         )}
       </div>
     </div>
+  )
+}
+
+export default function TrainerPage() {
+  return (
+    <Suspense fallback={null}>
+      <TrainerDashboard />
+    </Suspense>
   )
 }
