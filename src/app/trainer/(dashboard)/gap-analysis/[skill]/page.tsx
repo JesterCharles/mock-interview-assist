@@ -2,10 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import type { GapAnalysisRow } from '@/lib/trainer-types'
-
-type SortField = 'associatesAffected' | 'avgGapScore' | 'skill' | 'topic'
-type SortDir = 'asc' | 'desc'
+import Link from 'next/link'
+import type { GapDrillThroughRow } from '@/lib/trainer-types'
 
 function gapColor(score: number): string {
   if (score < 50) return 'var(--danger)'
@@ -18,7 +16,7 @@ function GapScoreCell({ score }: { score: number }) {
   const barWidth = Math.round((score / 100) * 60)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ color: 'var(--ink)', minWidth: '32px' }}>{Math.round(score)}</span>
+      <span style={{ color, minWidth: '32px', fontWeight: 500 }}>{Math.round(score)}</span>
       <div
         style={{
           width: `${barWidth}px`,
@@ -32,23 +30,23 @@ function GapScoreCell({ score }: { score: number }) {
   )
 }
 
-function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
-  if (!active) return <span style={{ opacity: 0.3, marginLeft: '4px' }}>↕</span>
-  return (
-    <span style={{ color: 'var(--accent)', marginLeft: '4px' }}>
-      {dir === 'desc' ? '↓' : '↑'}
-    </span>
-  )
+function relativeDate(iso: string | null): string {
+  if (!iso) return '—'
+  const diff = Date.now() - new Date(iso).getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  if (days === 0) return 'today'
+  if (days === 1) return '1d ago'
+  return `${days}d ago`
 }
 
 function SkeletonRow() {
   return (
     <tr>
-      {[20, 40, 20, 20].map((w, i) => (
+      {[40, 20, 20].map((w, i) => (
         <td key={i} style={{ padding: '12px 8px', borderBottom: '1px solid var(--border-subtle)' }}>
           <div
             style={{
-              width: `${w * 0.6}%`,
+              width: `${w * 0.8}%`,
               height: '14px',
               borderRadius: '3px',
               background: 'var(--surface-muted)',
@@ -60,73 +58,71 @@ function SkeletonRow() {
   )
 }
 
-export default function GapAnalysisPage() {
+interface PageProps {
+  params: Promise<{ skill: string }>
+}
+
+export default function GapDrillThroughPage({ params }: PageProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const topic = searchParams.get('topic') ?? ''
   const cohortId = searchParams.get('cohort')
 
-  const [rows, setRows] = useState<GapAnalysisRow[]>([])
+  const [skillDecoded, setSkillDecoded] = useState('')
+  const [rows, setRows] = useState<GapDrillThroughRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [sortField, setSortField] = useState<SortField>('associatesAffected')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  // Resolve async params
+  useEffect(() => {
+    params.then((p) => setSkillDecoded(decodeURIComponent(p.skill)))
+  }, [params])
 
   const fetchData = useCallback(async () => {
+    if (!skillDecoded || !topic) return
     setLoading(true)
     setError(false)
     try {
-      const params = new URLSearchParams()
-      if (cohortId) params.set('cohort', cohortId)
-      const res = await fetch(`/api/trainer/gap-analysis?${params.toString()}`)
+      const qs = new URLSearchParams({ skill: skillDecoded, topic })
+      if (cohortId) qs.set('cohort', cohortId)
+      const res = await fetch(`/api/trainer/gap-analysis?${qs.toString()}`)
       if (!res.ok) throw new Error('Failed to fetch')
-      const data: GapAnalysisRow[] = await res.json()
+      const data: GapDrillThroughRow[] = await res.json()
       setRows(data)
     } catch {
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [cohortId])
+  }, [skillDecoded, topic, cohortId])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  function handleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))
-    } else {
-      setSortField(field)
-      setSortDir(field === 'associatesAffected' ? 'desc' : 'asc')
-    }
-  }
+  const backHref =
+    '/trainer/gap-analysis' + (cohortId ? `?cohort=${cohortId}` : '')
 
-  const sortedRows = [...rows].sort((a, b) => {
-    let cmp = 0
-    if (sortField === 'associatesAffected') cmp = a.associatesAffected - b.associatesAffected
-    else if (sortField === 'avgGapScore') cmp = a.avgGapScore - b.avgGapScore
-    else if (sortField === 'skill') cmp = a.skill.localeCompare(b.skill)
-    else if (sortField === 'topic') cmp = a.topic.localeCompare(b.topic)
-    return sortDir === 'desc' ? -cmp : cmp
-  })
-
-  function handleRowClick(row: GapAnalysisRow) {
-    const skillEnc = encodeURIComponent(row.skill)
-    const topicEnc = encodeURIComponent(row.topic)
-    const cohortSuffix = cohortId ? `&cohort=${cohortId}` : ''
-    router.push(`/trainer/gap-analysis/${skillEnc}?topic=${topicEnc}${cohortSuffix}`)
-  }
-
-  const colWidths = ['20%', '40%', '20%', '20%']
-  const colLabels: [string, SortField][] = [
-    ['Skill', 'skill'],
-    ['Topic', 'topic'],
-    ['Associates Affected', 'associatesAffected'],
-    ['Avg Gap Score', 'avgGapScore'],
-  ]
+  const topicDecoded = decodeURIComponent(topic)
 
   return (
     <div style={{ padding: '32px 24px' }}>
+      {/* Back link */}
+      <Link
+        href={backHref}
+        style={{
+          fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
+          fontSize: '13px',
+          fontWeight: 500,
+          color: 'var(--accent)',
+          textDecoration: 'none',
+          display: 'inline-block',
+          marginBottom: '20px',
+        }}
+      >
+        ← Back to Gap Analysis
+      </Link>
+
       {/* Heading */}
       <h1
         style={{
@@ -138,7 +134,7 @@ export default function GapAnalysisPage() {
           letterSpacing: '-0.01em',
         }}
       >
-        Gap Analysis
+        {skillDecoded} — {topicDecoded}
       </h1>
       <p
         style={{
@@ -149,7 +145,7 @@ export default function GapAnalysisPage() {
           margin: '0 0 24px',
         }}
       >
-        Skill gaps across your cohort · sorted by associates affected
+        Associates with this gap · sorted by score ascending
       </p>
 
       {/* Error state */}
@@ -169,58 +165,38 @@ export default function GapAnalysisPage() {
       {!error && (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <colgroup>
-            {colWidths.map((w, i) => (
-              <col key={i} style={{ width: w }} />
-            ))}
+            <col style={{ width: '50%' }} />
+            <col style={{ width: '25%' }} />
+            <col style={{ width: '25%' }} />
           </colgroup>
           <thead>
-            <tr
-              style={{
-                borderBottom: '1px solid var(--border)',
-              }}
-            >
-              {colLabels.map(([label, field]) => (
+            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+              {['Associate Name', 'Gap Score', 'Last Session'].map((label) => (
                 <th
-                  key={field}
-                  onClick={() => handleSort(field)}
+                  key={label}
                   style={{
                     fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
                     fontSize: '12px',
                     fontWeight: 500,
-                    color: sortField === field ? 'var(--ink)' : 'var(--muted)',
+                    color: 'var(--muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.04em',
                     padding: '8px 8px 10px',
                     textAlign: 'left',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    whiteSpace: 'nowrap',
                   }}
                 >
                   {label}
-                  <SortArrow active={sortField === field} dir={sortDir} />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading
-              ? Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)
-              : sortedRows.length === 0
+              ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+              : rows.length === 0
               ? (
                 <tr>
-                  <td colSpan={4} style={{ padding: '48px 8px', textAlign: 'center' }}>
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-display), "Clash Display", sans-serif',
-                        fontSize: '18px',
-                        fontWeight: 500,
-                        color: 'var(--ink)',
-                        margin: '0 0 8px',
-                      }}
-                    >
-                      No gaps recorded yet
-                    </p>
+                  <td colSpan={3} style={{ padding: '48px 8px', textAlign: 'center' }}>
                     <p
                       style={{
                         fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
@@ -229,18 +205,16 @@ export default function GapAnalysisPage() {
                         margin: 0,
                       }}
                     >
-                      Run mocks with your cohort to start seeing skill gap data here.
+                      No associates with this gap in the selected cohort.
                     </p>
                   </td>
                 </tr>
               )
-              : sortedRows.map((row, idx) => (
+              : rows.map((row) => (
                 <tr
-                  key={`${row.skill}-${row.topic}-${idx}`}
-                  onClick={() => handleRowClick(row)}
+                  key={row.slug}
                   style={{
                     borderBottom: '1px solid var(--border-subtle)',
-                    cursor: 'pointer',
                     transition: 'background 150ms ease-out',
                   }}
                   onMouseEnter={(e) => {
@@ -253,42 +227,35 @@ export default function GapAnalysisPage() {
                 >
                   <td
                     style={{
-                      fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
-                      fontSize: '13px',
-                      fontWeight: 400,
-                      color: 'var(--ink)',
                       padding: '0 8px',
                       height: '48px',
                       verticalAlign: 'middle',
                     }}
                   >
-                    {row.skill}
-                  </td>
-                  <td
-                    style={{
-                      fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
-                      fontSize: '13px',
-                      fontWeight: 400,
-                      color: 'var(--ink)',
-                      padding: '0 8px',
-                      height: '48px',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    {row.topic}
-                  </td>
-                  <td
-                    style={{
-                      fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
-                      fontSize: '13px',
-                      fontWeight: 400,
-                      color: 'var(--ink)',
-                      padding: '0 8px',
-                      height: '48px',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    {row.associatesAffected}
+                    <button
+                      onClick={() => router.push(`/trainer/${row.slug}`)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
+                        fontSize: '13px',
+                        fontWeight: 400,
+                        color: 'var(--ink)',
+                        textAlign: 'left',
+                      }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)'
+                        ;(e.currentTarget as HTMLButtonElement).style.textDecoration = 'underline'
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)'
+                        ;(e.currentTarget as HTMLButtonElement).style.textDecoration = 'none'
+                      }}
+                    >
+                      {row.displayName}
+                    </button>
                   </td>
                   <td
                     style={{
@@ -297,7 +264,20 @@ export default function GapAnalysisPage() {
                       verticalAlign: 'middle',
                     }}
                   >
-                    <GapScoreCell score={row.avgGapScore} />
+                    <GapScoreCell score={row.gapScore} />
+                  </td>
+                  <td
+                    style={{
+                      fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',
+                      fontSize: '13px',
+                      fontWeight: 400,
+                      color: 'var(--muted)',
+                      padding: '0 8px',
+                      height: '48px',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    {relativeDate(row.lastSessionDate)}
                   </td>
                 </tr>
               ))}
