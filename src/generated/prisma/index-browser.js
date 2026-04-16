@@ -134,6 +134,9 @@ exports.Prisma.AssociateScalarFieldEnum = {
   readinessStatus: 'readinessStatus',
   recommendedArea: 'recommendedArea',
   lastComputedAt: 'lastComputedAt',
+  email: 'email',
+  authUserId: 'authUserId',
+  lastInvitedAt: 'lastInvitedAt',
   pinHash: 'pinHash',
   pinGeneratedAt: 'pinGeneratedAt',
   cohortId: 'cohortId'
@@ -157,6 +160,7 @@ exports.Prisma.SessionScalarFieldEnum = {
   techMap: 'techMap',
   associateId: 'associateId',
   cohortId: 'cohortId',
+  aiTrainerVariance: 'aiTrainerVariance',
   mode: 'mode',
   readinessRecomputeStatus: 'readinessRecomputeStatus',
   createdAt: 'createdAt',

@@ -2617,6 +2617,9 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    email: string | null
+    authUserId: string | null
+    lastInvitedAt: Date | null
     pinHash: string | null
     pinGeneratedAt: Date | null
     cohortId: number | null
@@ -2631,6 +2634,9 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    email: string | null
+    authUserId: string | null
+    lastInvitedAt: Date | null
     pinHash: string | null
     pinGeneratedAt: Date | null
     cohortId: number | null
@@ -2645,6 +2651,9 @@ export namespace Prisma {
     readinessStatus: number
     recommendedArea: number
     lastComputedAt: number
+    email: number
+    authUserId: number
+    lastInvitedAt: number
     pinHash: number
     pinGeneratedAt: number
     cohortId: number
@@ -2671,6 +2680,9 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    email?: true
+    authUserId?: true
+    lastInvitedAt?: true
     pinHash?: true
     pinGeneratedAt?: true
     cohortId?: true
@@ -2685,6 +2697,9 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    email?: true
+    authUserId?: true
+    lastInvitedAt?: true
     pinHash?: true
     pinGeneratedAt?: true
     cohortId?: true
@@ -2699,6 +2714,9 @@ export namespace Prisma {
     readinessStatus?: true
     recommendedArea?: true
     lastComputedAt?: true
+    email?: true
+    authUserId?: true
+    lastInvitedAt?: true
     pinHash?: true
     pinGeneratedAt?: true
     cohortId?: true
@@ -2800,6 +2818,9 @@ export namespace Prisma {
     readinessStatus: string | null
     recommendedArea: string | null
     lastComputedAt: Date | null
+    email: string | null
+    authUserId: string | null
+    lastInvitedAt: Date | null
     pinHash: string | null
     pinGeneratedAt: Date | null
     cohortId: number | null
@@ -2833,6 +2854,9 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    email?: boolean
+    authUserId?: boolean
+    lastInvitedAt?: boolean
     pinHash?: boolean
     pinGeneratedAt?: boolean
     cohortId?: boolean
@@ -2851,6 +2875,9 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    email?: boolean
+    authUserId?: boolean
+    lastInvitedAt?: boolean
     pinHash?: boolean
     pinGeneratedAt?: boolean
     cohortId?: boolean
@@ -2866,6 +2893,9 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    email?: boolean
+    authUserId?: boolean
+    lastInvitedAt?: boolean
     pinHash?: boolean
     pinGeneratedAt?: boolean
     cohortId?: boolean
@@ -2881,12 +2911,15 @@ export namespace Prisma {
     readinessStatus?: boolean
     recommendedArea?: boolean
     lastComputedAt?: boolean
+    email?: boolean
+    authUserId?: boolean
+    lastInvitedAt?: boolean
     pinHash?: boolean
     pinGeneratedAt?: boolean
     cohortId?: boolean
   }
 
-  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt" | "readinessStatus" | "recommendedArea" | "lastComputedAt" | "pinHash" | "pinGeneratedAt" | "cohortId", ExtArgs["result"]["associate"]>
+  export type AssociateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "displayName" | "createdAt" | "updatedAt" | "readinessStatus" | "recommendedArea" | "lastComputedAt" | "email" | "authUserId" | "lastInvitedAt" | "pinHash" | "pinGeneratedAt" | "cohortId", ExtArgs["result"]["associate"]>
   export type AssociateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cohort?: boolean | Associate$cohortArgs<ExtArgs>
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
@@ -2916,6 +2949,9 @@ export namespace Prisma {
       readinessStatus: string | null
       recommendedArea: string | null
       lastComputedAt: Date | null
+      email: string | null
+      authUserId: string | null
+      lastInvitedAt: Date | null
       pinHash: string | null
       pinGeneratedAt: Date | null
       cohortId: number | null
@@ -3353,6 +3389,9 @@ export namespace Prisma {
     readonly readinessStatus: FieldRef<"Associate", 'String'>
     readonly recommendedArea: FieldRef<"Associate", 'String'>
     readonly lastComputedAt: FieldRef<"Associate", 'DateTime'>
+    readonly email: FieldRef<"Associate", 'String'>
+    readonly authUserId: FieldRef<"Associate", 'String'>
+    readonly lastInvitedAt: FieldRef<"Associate", 'DateTime'>
     readonly pinHash: FieldRef<"Associate", 'String'>
     readonly pinGeneratedAt: FieldRef<"Associate", 'DateTime'>
     readonly cohortId: FieldRef<"Associate", 'Int'>
@@ -3860,6 +3899,7 @@ export namespace Prisma {
     overallSoftSkillScore: number | null
     associateId: number | null
     cohortId: number | null
+    aiTrainerVariance: number | null
   }
 
   export type SessionSumAggregateOutputType = {
@@ -3868,6 +3908,7 @@ export namespace Prisma {
     overallSoftSkillScore: number | null
     associateId: number | null
     cohortId: number | null
+    aiTrainerVariance: number | null
   }
 
   export type SessionMinAggregateOutputType = {
@@ -3883,6 +3924,7 @@ export namespace Prisma {
     softSkillFeedback: string | null
     associateId: number | null
     cohortId: number | null
+    aiTrainerVariance: number | null
     mode: string | null
     readinessRecomputeStatus: string | null
     createdAt: Date | null
@@ -3902,6 +3944,7 @@ export namespace Prisma {
     softSkillFeedback: string | null
     associateId: number | null
     cohortId: number | null
+    aiTrainerVariance: number | null
     mode: string | null
     readinessRecomputeStatus: string | null
     createdAt: Date | null
@@ -3926,6 +3969,7 @@ export namespace Prisma {
     techMap: number
     associateId: number
     cohortId: number
+    aiTrainerVariance: number
     mode: number
     readinessRecomputeStatus: number
     createdAt: number
@@ -3940,6 +3984,7 @@ export namespace Prisma {
     overallSoftSkillScore?: true
     associateId?: true
     cohortId?: true
+    aiTrainerVariance?: true
   }
 
   export type SessionSumAggregateInputType = {
@@ -3948,6 +3993,7 @@ export namespace Prisma {
     overallSoftSkillScore?: true
     associateId?: true
     cohortId?: true
+    aiTrainerVariance?: true
   }
 
   export type SessionMinAggregateInputType = {
@@ -3963,6 +4009,7 @@ export namespace Prisma {
     softSkillFeedback?: true
     associateId?: true
     cohortId?: true
+    aiTrainerVariance?: true
     mode?: true
     readinessRecomputeStatus?: true
     createdAt?: true
@@ -3982,6 +4029,7 @@ export namespace Prisma {
     softSkillFeedback?: true
     associateId?: true
     cohortId?: true
+    aiTrainerVariance?: true
     mode?: true
     readinessRecomputeStatus?: true
     createdAt?: true
@@ -4006,6 +4054,7 @@ export namespace Prisma {
     techMap?: true
     associateId?: true
     cohortId?: true
+    aiTrainerVariance?: true
     mode?: true
     readinessRecomputeStatus?: true
     createdAt?: true
@@ -4117,6 +4166,7 @@ export namespace Prisma {
     techMap: JsonValue | null
     associateId: number | null
     cohortId: number | null
+    aiTrainerVariance: number | null
     mode: string
     readinessRecomputeStatus: string
     createdAt: Date
@@ -4160,6 +4210,7 @@ export namespace Prisma {
     techMap?: boolean
     associateId?: boolean
     cohortId?: boolean
+    aiTrainerVariance?: boolean
     mode?: boolean
     readinessRecomputeStatus?: boolean
     createdAt?: boolean
@@ -4186,6 +4237,7 @@ export namespace Prisma {
     techMap?: boolean
     associateId?: boolean
     cohortId?: boolean
+    aiTrainerVariance?: boolean
     mode?: boolean
     readinessRecomputeStatus?: boolean
     createdAt?: boolean
@@ -4212,6 +4264,7 @@ export namespace Prisma {
     techMap?: boolean
     associateId?: boolean
     cohortId?: boolean
+    aiTrainerVariance?: boolean
     mode?: boolean
     readinessRecomputeStatus?: boolean
     createdAt?: boolean
@@ -4238,13 +4291,14 @@ export namespace Prisma {
     techMap?: boolean
     associateId?: boolean
     cohortId?: boolean
+    aiTrainerVariance?: boolean
     mode?: boolean
     readinessRecomputeStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "techMap" | "associateId" | "cohortId" | "mode" | "readinessRecomputeStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "candidateName" | "interviewerName" | "date" | "status" | "questionCount" | "selectedWeeks" | "overallTechnicalScore" | "overallSoftSkillScore" | "technicalFeedback" | "softSkillFeedback" | "questions" | "starterQuestions" | "assessments" | "techMap" | "associateId" | "cohortId" | "aiTrainerVariance" | "mode" | "readinessRecomputeStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associate?: boolean | Session$associateArgs<ExtArgs>
     cohort?: boolean | Session$cohortArgs<ExtArgs>
@@ -4282,6 +4336,7 @@ export namespace Prisma {
       techMap: Prisma.JsonValue | null
       associateId: number | null
       cohortId: number | null
+      aiTrainerVariance: number | null
       mode: string
       readinessRecomputeStatus: string
       createdAt: Date
@@ -4728,6 +4783,7 @@ export namespace Prisma {
     readonly techMap: FieldRef<"Session", 'Json'>
     readonly associateId: FieldRef<"Session", 'Int'>
     readonly cohortId: FieldRef<"Session", 'Int'>
+    readonly aiTrainerVariance: FieldRef<"Session", 'Float'>
     readonly mode: FieldRef<"Session", 'String'>
     readonly readinessRecomputeStatus: FieldRef<"Session", 'String'>
     readonly createdAt: FieldRef<"Session", 'DateTime'>
@@ -10690,6 +10746,9 @@ export namespace Prisma {
     readinessStatus: 'readinessStatus',
     recommendedArea: 'recommendedArea',
     lastComputedAt: 'lastComputedAt',
+    email: 'email',
+    authUserId: 'authUserId',
+    lastInvitedAt: 'lastInvitedAt',
     pinHash: 'pinHash',
     pinGeneratedAt: 'pinGeneratedAt',
     cohortId: 'cohortId'
@@ -10716,6 +10775,7 @@ export namespace Prisma {
     techMap: 'techMap',
     associateId: 'associateId',
     cohortId: 'cohortId',
+    aiTrainerVariance: 'aiTrainerVariance',
     mode: 'mode',
     readinessRecomputeStatus: 'readinessRecomputeStatus',
     createdAt: 'createdAt',
@@ -10962,6 +11022,9 @@ export namespace Prisma {
     readinessStatus?: StringNullableFilter<"Associate"> | string | null
     recommendedArea?: StringNullableFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    email?: StringNullableFilter<"Associate"> | string | null
+    authUserId?: StringNullableFilter<"Associate"> | string | null
+    lastInvitedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     pinHash?: StringNullableFilter<"Associate"> | string | null
     pinGeneratedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     cohortId?: IntNullableFilter<"Associate"> | number | null
@@ -10979,6 +11042,9 @@ export namespace Prisma {
     readinessStatus?: SortOrderInput | SortOrder
     recommendedArea?: SortOrderInput | SortOrder
     lastComputedAt?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    authUserId?: SortOrderInput | SortOrder
+    lastInvitedAt?: SortOrderInput | SortOrder
     pinHash?: SortOrderInput | SortOrder
     pinGeneratedAt?: SortOrderInput | SortOrder
     cohortId?: SortOrderInput | SortOrder
@@ -10990,6 +11056,8 @@ export namespace Prisma {
   export type AssociateWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     slug?: string
+    email?: string
+    authUserId?: string
     AND?: AssociateWhereInput | AssociateWhereInput[]
     OR?: AssociateWhereInput[]
     NOT?: AssociateWhereInput | AssociateWhereInput[]
@@ -10999,13 +11067,14 @@ export namespace Prisma {
     readinessStatus?: StringNullableFilter<"Associate"> | string | null
     recommendedArea?: StringNullableFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    lastInvitedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     pinHash?: StringNullableFilter<"Associate"> | string | null
     pinGeneratedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     cohortId?: IntNullableFilter<"Associate"> | number | null
     cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
-  }, "id" | "slug">
+  }, "id" | "slug" | "email" | "authUserId">
 
   export type AssociateOrderByWithAggregationInput = {
     id?: SortOrder
@@ -11016,6 +11085,9 @@ export namespace Prisma {
     readinessStatus?: SortOrderInput | SortOrder
     recommendedArea?: SortOrderInput | SortOrder
     lastComputedAt?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    authUserId?: SortOrderInput | SortOrder
+    lastInvitedAt?: SortOrderInput | SortOrder
     pinHash?: SortOrderInput | SortOrder
     pinGeneratedAt?: SortOrderInput | SortOrder
     cohortId?: SortOrderInput | SortOrder
@@ -11038,6 +11110,9 @@ export namespace Prisma {
     readinessStatus?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     recommendedArea?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableWithAggregatesFilter<"Associate"> | Date | string | null
+    email?: StringNullableWithAggregatesFilter<"Associate"> | string | null
+    authUserId?: StringNullableWithAggregatesFilter<"Associate"> | string | null
+    lastInvitedAt?: DateTimeNullableWithAggregatesFilter<"Associate"> | Date | string | null
     pinHash?: StringNullableWithAggregatesFilter<"Associate"> | string | null
     pinGeneratedAt?: DateTimeNullableWithAggregatesFilter<"Associate"> | Date | string | null
     cohortId?: IntNullableWithAggregatesFilter<"Associate"> | number | null
@@ -11064,6 +11139,7 @@ export namespace Prisma {
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     cohortId?: IntNullableFilter<"Session"> | number | null
+    aiTrainerVariance?: FloatNullableFilter<"Session"> | number | null
     mode?: StringFilter<"Session"> | string
     readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
@@ -11090,6 +11166,7 @@ export namespace Prisma {
     techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
     cohortId?: SortOrderInput | SortOrder
+    aiTrainerVariance?: SortOrderInput | SortOrder
     mode?: SortOrder
     readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
@@ -11119,6 +11196,7 @@ export namespace Prisma {
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     cohortId?: IntNullableFilter<"Session"> | number | null
+    aiTrainerVariance?: FloatNullableFilter<"Session"> | number | null
     mode?: StringFilter<"Session"> | string
     readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
@@ -11145,6 +11223,7 @@ export namespace Prisma {
     techMap?: SortOrderInput | SortOrder
     associateId?: SortOrderInput | SortOrder
     cohortId?: SortOrderInput | SortOrder
+    aiTrainerVariance?: SortOrderInput | SortOrder
     mode?: SortOrder
     readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
@@ -11177,6 +11256,7 @@ export namespace Prisma {
     techMap?: JsonNullableWithAggregatesFilter<"Session">
     associateId?: IntNullableWithAggregatesFilter<"Session"> | number | null
     cohortId?: IntNullableWithAggregatesFilter<"Session"> | number | null
+    aiTrainerVariance?: FloatNullableWithAggregatesFilter<"Session"> | number | null
     mode?: StringWithAggregatesFilter<"Session"> | string
     readinessRecomputeStatus?: StringWithAggregatesFilter<"Session"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
@@ -11533,6 +11613,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
@@ -11549,6 +11632,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohortId?: number | null
@@ -11564,6 +11650,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
@@ -11580,6 +11669,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -11596,6 +11688,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohortId?: number | null
@@ -11609,6 +11704,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -11622,6 +11720,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -11643,6 +11744,7 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -11669,6 +11771,7 @@ export namespace Prisma {
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
     cohortId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -11691,6 +11794,7 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11717,6 +11821,7 @@ export namespace Prisma {
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11741,6 +11846,7 @@ export namespace Prisma {
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
     cohortId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -11763,6 +11869,7 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11787,6 +11894,7 @@ export namespace Prisma {
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12278,6 +12386,9 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    email?: SortOrder
+    authUserId?: SortOrder
+    lastInvitedAt?: SortOrder
     pinHash?: SortOrder
     pinGeneratedAt?: SortOrder
     cohortId?: SortOrder
@@ -12297,6 +12408,9 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    email?: SortOrder
+    authUserId?: SortOrder
+    lastInvitedAt?: SortOrder
     pinHash?: SortOrder
     pinGeneratedAt?: SortOrder
     cohortId?: SortOrder
@@ -12311,6 +12425,9 @@ export namespace Prisma {
     readinessStatus?: SortOrder
     recommendedArea?: SortOrder
     lastComputedAt?: SortOrder
+    email?: SortOrder
+    authUserId?: SortOrder
+    lastInvitedAt?: SortOrder
     pinHash?: SortOrder
     pinGeneratedAt?: SortOrder
     cohortId?: SortOrder
@@ -12467,6 +12584,7 @@ export namespace Prisma {
     techMap?: SortOrder
     associateId?: SortOrder
     cohortId?: SortOrder
+    aiTrainerVariance?: SortOrder
     mode?: SortOrder
     readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
@@ -12479,6 +12597,7 @@ export namespace Prisma {
     overallSoftSkillScore?: SortOrder
     associateId?: SortOrder
     cohortId?: SortOrder
+    aiTrainerVariance?: SortOrder
   }
 
   export type SessionMaxOrderByAggregateInput = {
@@ -12494,6 +12613,7 @@ export namespace Prisma {
     softSkillFeedback?: SortOrder
     associateId?: SortOrder
     cohortId?: SortOrder
+    aiTrainerVariance?: SortOrder
     mode?: SortOrder
     readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
@@ -12513,6 +12633,7 @@ export namespace Prisma {
     softSkillFeedback?: SortOrder
     associateId?: SortOrder
     cohortId?: SortOrder
+    aiTrainerVariance?: SortOrder
     mode?: SortOrder
     readinessRecomputeStatus?: SortOrder
     createdAt?: SortOrder
@@ -12525,6 +12646,7 @@ export namespace Prisma {
     overallSoftSkillScore?: SortOrder
     associateId?: SortOrder
     cohortId?: SortOrder
+    aiTrainerVariance?: SortOrder
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -13497,6 +13619,7 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -13521,6 +13644,7 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     cohortId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -13636,6 +13760,7 @@ export namespace Prisma {
     techMap?: JsonNullableFilter<"Session">
     associateId?: IntNullableFilter<"Session"> | number | null
     cohortId?: IntNullableFilter<"Session"> | number | null
+    aiTrainerVariance?: FloatNullableFilter<"Session"> | number | null
     mode?: StringFilter<"Session"> | string
     readinessRecomputeStatus?: StringFilter<"Session"> | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
@@ -13679,6 +13804,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
@@ -13694,6 +13822,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohortId?: number | null
@@ -13752,6 +13883,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
@@ -13767,6 +13901,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -13815,6 +13952,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
@@ -13830,6 +13970,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     cohortId?: number | null
@@ -13860,6 +14003,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
@@ -13875,6 +14021,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -13889,6 +14038,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     sessions?: SessionCreateNestedManyWithoutAssociateInput
@@ -13904,6 +14056,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
@@ -13936,6 +14091,7 @@ export namespace Prisma {
     starterQuestions: JsonNullValueInput | InputJsonValue
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -13960,6 +14116,7 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -14031,6 +14188,9 @@ export namespace Prisma {
     readinessStatus?: StringNullableFilter<"Associate"> | string | null
     recommendedArea?: StringNullableFilter<"Associate"> | string | null
     lastComputedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
+    email?: StringNullableFilter<"Associate"> | string | null
+    authUserId?: StringNullableFilter<"Associate"> | string | null
+    lastInvitedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     pinHash?: StringNullableFilter<"Associate"> | string | null
     pinGeneratedAt?: DateTimeNullableFilter<"Associate"> | Date | string | null
     cohortId?: IntNullableFilter<"Associate"> | number | null
@@ -14160,6 +14320,7 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     cohortId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -14191,6 +14352,7 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14215,6 +14377,7 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14238,6 +14401,7 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14280,6 +14444,9 @@ export namespace Prisma {
     readinessStatus?: string | null
     recommendedArea?: string | null
     lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
     pinHash?: string | null
     pinGeneratedAt?: Date | string | null
   }
@@ -14301,6 +14468,7 @@ export namespace Prisma {
     assessments: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: number | null
+    aiTrainerVariance?: number | null
     mode?: string
     readinessRecomputeStatus?: string
     createdAt?: Date | string
@@ -14324,6 +14492,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
@@ -14339,6 +14510,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
@@ -14354,6 +14528,9 @@ export namespace Prisma {
     readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
     recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
     lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     pinGeneratedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -14374,6 +14551,7 @@ export namespace Prisma {
     starterQuestions?: JsonNullValueInput | InputJsonValue
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14398,6 +14576,7 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14421,6 +14600,7 @@ export namespace Prisma {
     assessments?: JsonNullValueInput | InputJsonValue
     techMap?: NullableJsonNullValueInput | InputJsonValue
     associateId?: NullableIntFieldUpdateOperationsInput | number | null
+    aiTrainerVariance?: NullableFloatFieldUpdateOperationsInput | number | null
     mode?: StringFieldUpdateOperationsInput | string
     readinessRecomputeStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

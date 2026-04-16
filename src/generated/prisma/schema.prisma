@@ -22,6 +22,9 @@ model Associate {
   readinessStatus String? // 'ready' | 'improving' | 'not_ready'
   recommendedArea String? // topic or skill name — lowest gap score
   lastComputedAt  DateTime? // when readiness was last computed
+  email           String?    @unique
+  authUserId      String?    @unique
+  lastInvitedAt   DateTime?
   pinHash         String? // bcrypt hash of 6-digit PIN; null until trainer generates
   pinGeneratedAt  DateTime? // when current PIN was issued; also the token-version for cookie revocation
   cohortId        Int?
@@ -52,6 +55,7 @@ model Session {
   associate                Associate? @relation(fields: [associateId], references: [id])
   cohortId                 Int?
   cohort                   Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  aiTrainerVariance        Float?
   mode                     String     @default("trainer-led")
   readinessRecomputeStatus String     @default("not_applicable") // not_applicable | pending | done | failed
   createdAt                DateTime   @default(now())
