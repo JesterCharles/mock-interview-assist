@@ -73,7 +73,10 @@
   1. DESIGN.md contains a Data Visualization section with chart palette, axis conventions, tooltip patterns, and trajectory language rules
   2. globals.css contains named CSS custom properties for chart colors with light and dark mode pairs
   3. A developer building a new recharts component can find the correct color token in globals.css without guessing
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 26-01-PLAN.md — Add chart tokens to globals.css and Data Visualization section to DESIGN.md
 
 ### Phase 27: Unified App Shell
 **Goal**: Associates access all pages through the same topbar+sidebar shell as trainers, with a role-restricted nav (Dashboard and Interviews only)
@@ -142,7 +145,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 26. Design Tokens (Data-Viz) | v1.3 | 0/? | Not started | - |
+| 26. Design Tokens (Data-Viz) | v1.3 | 0/1 | Not started | - |
 | 27. Unified App Shell | v1.3 | 0/? | Not started | - |
 | 28. Sign-in Redesign | v1.3 | 0/? | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
