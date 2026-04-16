@@ -248,7 +248,7 @@ tick={{ fill: 'var(--muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
 | A2 | `--chart-5: #5C4A3A` (deep umber) fits warm editorial palette | Code Examples | Low — hex is easily adjusted |
 | A3 | Adding `--radius-sm/md/lg` tokens is in scope given D-06 references `var(--radius-lg)` | Architecture Patterns | Low — worst case the spec uses literal `8px` instead |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`--chart-highlight` inclusion**
    - What we know: D-06/D-07 cover tooltip styling; `--chart-highlight` is discretionary
