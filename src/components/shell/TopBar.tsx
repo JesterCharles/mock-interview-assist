@@ -7,7 +7,14 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { AvatarMenu } from './AvatarMenu';
 import { CohortSwitcher } from './CohortSwitcher';
 import { MobileSidebar } from './MobileSidebar';
+import { dashboardSidebarGroups, settingsSidebarGroups } from './sidebar-configs';
 import type { SidebarGroup } from './types';
+
+function resolveGroups(pathname: string): SidebarGroup[] {
+  if (pathname.startsWith('/trainer/settings')) return settingsSidebarGroups;
+  if (pathname.startsWith('/trainer')) return dashboardSidebarGroups;
+  return [];
+}
 
 interface NavItem {
   label: string;
@@ -40,8 +47,9 @@ interface TopBarProps {
   sidebarGroups?: SidebarGroup[];
 }
 
-export function TopBar({ sidebarGroups }: TopBarProps) {
+export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
   const pathname = usePathname();
+  const sidebarGroups = propGroups ?? resolveGroups(pathname);
 
   return (
     <header
