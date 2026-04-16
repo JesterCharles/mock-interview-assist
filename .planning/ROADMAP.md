@@ -203,7 +203,7 @@ Plans:
   4. PDF generation completes without OOM on the constrained Docker host (verified on production-equivalent memory limits)
 **Plans**: 2 plans
 Plans:
-- [ ] 24-01-PLAN.md — SVG sparkline helper + shared PDF styles + CohortAnalyticsPdf + AssociateAnalyticsPdf templates
+- [x] 24-01-PLAN.md — SVG sparkline helper + shared PDF styles + CohortAnalyticsPdf + AssociateAnalyticsPdf templates
 - [ ] 24-02-PLAN.md — PDF API routes (cohort-pdf + associate-pdf) + Reports page + associate detail Export PDF button
 **UI hint**: yes
 
@@ -249,5 +249,5 @@ Plans:
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 24. PDF Analytics Export | v1.2 | 0/2 | Planning | - |
+| 24. PDF Analytics Export | v1.2 | 1/2 | In Progress|  |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |

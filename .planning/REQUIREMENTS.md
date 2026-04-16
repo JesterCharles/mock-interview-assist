@@ -59,8 +59,8 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## PDF Analytics Export (Phase 9)
 
-- [ ] **PDF-01**: Trainer can export cohort analytics report as PDF from Dashboard > Reports. Template includes KPI strip snapshot, gap-by-topic table, roster summary. Generated via `@react-pdf/renderer`.
-- [ ] **PDF-02**: Trainer can export per-associate report from associate detail page. Template includes gap trend, session list, recommended areas. Sparkline/chart rendering uses a pre-rendered hand-rolled SVG helper (no recharts inside `@react-pdf` — OOM risk on constrained hosts).
+- [x] **PDF-01**: Trainer can export cohort analytics report as PDF from Dashboard > Reports. Template includes KPI strip snapshot, gap-by-topic table, roster summary. Generated via `@react-pdf/renderer`.
+- [x] **PDF-02**: Trainer can export per-associate report from associate detail page. Template includes gap trend, session list, recommended areas. Sparkline/chart rendering uses a pre-rendered hand-rolled SVG helper (no recharts inside `@react-pdf` — OOM risk on constrained hosts).
 
 ## PIN Removal + Cleanup (Phase 10)
 
@@ -125,8 +125,8 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | ASELF-02 | Phase 23 | Complete |
 | ASELF-03 | Phase 23 | Complete |
 | ASELF-04 | Phase 23 | Complete |
-| PDF-01 | Phase 24 | Pending |
-| PDF-02 | Phase 24 | Pending |
+| PDF-01 | Phase 24 | Complete |
+| PDF-02 | Phase 24 | Complete |
 | CLEANUP-01 | Phase 25 | Pending |
 | CLEANUP-02 | Phase 25 | Pending |
 | CLEANUP-03 | Phase 25 | Pending |
