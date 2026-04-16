@@ -46,7 +46,7 @@
 - [x] **Phase 22: Trainer Analytics** -- KPI strip, sparklines, cohort trends, gap aggregation, calibration view (completed 2026-04-16)
 - [x] **Phase 23: Associate Self-Dashboard** -- new `/associate/[slug]/dashboard` with personal trends, recommended next area, readiness goal (completed 2026-04-16)
 - [x] **Phase 24: PDF Analytics Export** -- cohort + per-associate PDF reports with pre-rendered SVG sparklines (completed 2026-04-16)
-- [ ] **Phase 25: PIN Removal + Cleanup** -- delete PIN system, drop columns, remove env vars, CI grep-gate
+- [x] **Phase 25: PIN Removal + Cleanup** -- delete PIN system, drop columns, remove env vars, CI grep-gate (completed 2026-04-16)
 
 ## Phase Details
 
@@ -220,7 +220,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 25-01-PLAN.md — Delete PIN code + update dependents + grep-gate test
-- [ ] 25-02-PLAN.md — Schema migration + env/doc cleanup + build verification
+- [x] 25-02-PLAN.md — Schema migration + env/doc cleanup + build verification
 
 ## Progress
 
@@ -250,4 +250,4 @@ Plans:
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 24. PDF Analytics Export | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 25. PIN Removal + Cleanup | v1.2 | 1/2 | In Progress|  |
+| 25. PIN Removal + Cleanup | v1.2 | 2/2 | Complete   | 2026-04-16 |

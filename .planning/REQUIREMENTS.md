@@ -66,7 +66,7 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 - [x] **CLEANUP-01**: After 2-week grace period, CI grep-gate verifies zero matches for `ENABLE_ASSOCIATE_AUTH|pinHash|pinGeneratedAt|associate_session|verifyAssociateToken|isAssociateAuthEnabled` in `src/`. Gate is a pre-ship check (blocks merge to main).
 - [x] **CLEANUP-02**: Delete PIN routes (`/api/associate/pin/*`), services (`pinService`, `pinAttemptLimiter`, `associateSession`), legacy `/associate/login` redirect, `SignInTabs` feature flag logic, PIN-related tests, feature flag file `src/lib/featureFlags.ts`. Prisma migration drops `Associate.pinHash` + `Associate.pinGeneratedAt`.
-- [ ] **CLEANUP-03**: Remove env vars `APP_PASSWORD`, `ASSOCIATE_SESSION_SECRET`, `ENABLE_ASSOCIATE_AUTH` from all envs + docs. CLAUDE.md + PROJECT.md updated to reflect Supabase-only auth.
+- [x] **CLEANUP-03**: Remove env vars `APP_PASSWORD`, `ASSOCIATE_SESSION_SECRET`, `ENABLE_ASSOCIATE_AUTH` from all envs + docs. CLAUDE.md + PROJECT.md updated to reflect Supabase-only auth.
 
 ---
 
@@ -129,6 +129,6 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | PDF-02 | Phase 24 | Complete |
 | CLEANUP-01 | Phase 25 | Complete |
 | CLEANUP-02 | Phase 25 | Complete |
-| CLEANUP-03 | Phase 25 | Pending |
+| CLEANUP-03 | Phase 25 | Complete |
 
 **Coverage:** 30/30 v1.2 requirements mapped. No orphans.
