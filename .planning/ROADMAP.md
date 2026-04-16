@@ -44,7 +44,7 @@
 - [x] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth (completed 2026-04-16)
 - [x] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization (completed 2026-04-16)
 - [x] **Phase 22: Trainer Analytics** -- KPI strip, sparklines, cohort trends, gap aggregation, calibration view (completed 2026-04-16)
-- [ ] **Phase 23: Associate Self-Dashboard** -- new `/associate/[slug]/dashboard` with personal trends, recommended next area, readiness goal
+- [x] **Phase 23: Associate Self-Dashboard** -- new `/associate/[slug]/dashboard` with personal trends, recommended next area, readiness goal (completed 2026-04-16)
 - [ ] **Phase 24: PDF Analytics Export** -- cohort + per-associate PDF reports with pre-rendered SVG sparklines
 - [ ] **Phase 25: PIN Removal + Cleanup** -- delete PIN system, drop columns, remove env vars, CI grep-gate
 
@@ -189,7 +189,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
-- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
+- [x] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 **UI hint**: yes
 
 ### Phase 24: PDF Analytics Export
@@ -203,7 +203,7 @@ Plans:
   4. PDF generation completes without OOM on the constrained Docker host (verified on production-equivalent memory limits)
 **Plans**: 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
+- [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
 - [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 **UI hint**: yes
 
@@ -248,6 +248,6 @@ Plans:
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
-| 23. Associate Self-Dashboard | v1.2 | 1/2 | In Progress|  |
+| 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
