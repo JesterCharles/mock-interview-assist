@@ -83,14 +83,14 @@ export default async function CurriculumPage({ params }: Props) {
           </Link>
           <span aria-hidden>›</span>
           <Link
-            href="/trainer/cohorts"
+            href="/trainer/settings/cohorts"
             style={{ color: 'var(--muted)', textDecoration: 'none' }}
           >
             Cohorts
           </Link>
           <span aria-hidden>›</span>
           <Link
-            href={`/trainer/cohorts/${cohort.id}`}
+            href={`/trainer/settings/cohorts/${cohort.id}`}
             style={{ color: 'var(--muted)', textDecoration: 'none' }}
           >
             {cohort.name}

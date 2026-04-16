@@ -100,7 +100,7 @@ export default async function CohortDetailPage({ params }: Props) {
           </Link>
           <span aria-hidden>›</span>
           <Link
-            href="/trainer/cohorts"
+            href="/trainer/settings/cohorts"
             style={{ color: 'var(--muted)', textDecoration: 'none' }}
           >
             Cohorts
@@ -184,7 +184,7 @@ export default async function CohortDetailPage({ params }: Props) {
           }}
         >
           <Link
-            href={`/trainer/cohorts/${cohort.id}/curriculum`}
+            href={`/trainer/settings/cohorts/${cohort.id}/curriculum`}
             style={{
               color: 'var(--accent)',
               textDecoration: 'none',

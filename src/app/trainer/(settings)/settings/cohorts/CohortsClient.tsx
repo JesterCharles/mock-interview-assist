@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { CohortCard } from '@/components/cohort/CohortCard'
 import { CohortForm, type CohortInput } from '@/components/cohort/CohortForm'
-import '../trainer.css'
 
 export interface CohortWithCounts {
   id: number
@@ -172,42 +171,6 @@ export default function CohortsClient({ initialCohorts }: Props) {
           padding: '48px 24px',
         }}
       >
-        {/* Sub-nav */}
-        <nav
-          aria-label="Trainer sections"
-          style={{
-            display: 'flex',
-            gap: '16px',
-            marginBottom: '24px',
-            fontSize: '13px',
-            fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
-            fontWeight: 500,
-          }}
-        >
-          <Link
-            href="/trainer"
-            style={{
-              color: 'var(--muted)',
-              textDecoration: 'none',
-              padding: '6px 10px',
-              borderRadius: '6px',
-            }}
-          >
-            Dashboard
-          </Link>
-          <span
-            aria-current="page"
-            style={{
-              color: 'var(--ink)',
-              backgroundColor: 'var(--surface-muted)',
-              padding: '6px 10px',
-              borderRadius: '6px',
-            }}
-          >
-            Cohorts
-          </span>
-        </nav>
-
         <div
           style={{
             display: 'flex',
@@ -320,7 +283,7 @@ export default function CohortsClient({ initialCohorts }: Props) {
                   }}
                 >
                   <Link
-                    href={`/trainer/cohorts/${c.id}`}
+                    href={`/trainer/settings/cohorts/${c.id}`}
                     style={{
                       color: 'var(--accent)',
                       textDecoration: 'none',

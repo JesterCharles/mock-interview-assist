@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { RosterAssociate, RosterResponse, CohortSummary } from '@/lib/trainer-types'
 import RosterTable from '@/components/trainer/RosterTable'
@@ -11,7 +9,6 @@ import { ReadinessSummaryBar } from '@/components/cohort/ReadinessSummaryBar'
 import './trainer.css'
 
 export default function TrainerPage() {
-  const router = useRouter()
   const { isAuthenticated, isLoading: authLoading } = useAuth()
 
   const [associates, setAssociates] = useState<RosterAssociate[]>([])
@@ -20,13 +17,6 @@ export default function TrainerPage() {
   const [summary, setSummary] = useState<CohortSummary | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Auth guard — matching existing /dashboard pattern exactly (D-06, T-06-02)
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login')
-    }
-  }, [isAuthenticated, authLoading, router])
 
   // One-time cohorts fetch (D-12). Silently degrades to empty list if endpoint missing.
   useEffect(() => {
@@ -95,7 +85,7 @@ export default function TrainerPage() {
     return null
   }
 
-  // After auth resolves, if not authenticated let the redirect above take effect
+  // After auth resolves, if not authenticated middleware handles redirect
   if (!isAuthenticated) {
     return null
   }
@@ -109,42 +99,6 @@ export default function TrainerPage() {
           padding: '48px 24px',
         }}
       >
-        {/* Sub-nav — links to sibling trainer views (D-12) */}
-        <nav
-          aria-label="Trainer sections"
-          style={{
-            display: 'flex',
-            gap: '16px',
-            marginBottom: '24px',
-            fontSize: '13px',
-            fontFamily: 'DM Sans, sans-serif',
-            fontWeight: 500,
-          }}
-        >
-          <span
-            aria-current="page"
-            style={{
-              color: '#1A1A1A',
-              backgroundColor: '#F0EBE2',
-              padding: '6px 10px',
-              borderRadius: '6px',
-            }}
-          >
-            Dashboard
-          </span>
-          <Link
-            href="/trainer/cohorts"
-            style={{
-              color: '#7A7267',
-              textDecoration: 'none',
-              padding: '6px 10px',
-              borderRadius: '6px',
-            }}
-          >
-            Cohorts
-          </Link>
-        </nav>
-
         {/* Page title — 48px Clash Display 600 per DESIGN.md Typography */}
         <h1
           style={{

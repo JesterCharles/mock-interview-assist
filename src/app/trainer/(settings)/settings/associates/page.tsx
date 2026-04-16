@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import AssociatesBackfillTable from './AssociatesBackfillTable'
 import DryRunPreviewCard from './DryRunPreviewCard'
@@ -23,20 +22,6 @@ export default function AssociatesBackfillPage() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '48px 24px' }}>
-        <Link
-          href="/trainer"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13,
-            color: 'var(--muted)',
-            textDecoration: 'none',
-            marginBottom: 24,
-            display: 'inline-block',
-          }}
-        >
-          ← Back to dashboard
-        </Link>
-
         <h1
           style={{
             fontFamily: "'Clash Display', sans-serif",

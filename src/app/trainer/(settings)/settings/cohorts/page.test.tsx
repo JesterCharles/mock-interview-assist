@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 /**
- * Behavioral tests for the /trainer/cohorts server component shell.
+ * Behavioral tests for the /trainer/settings/cohorts server component shell.
  *
  * Covers the auth + server-seed truths from Plan 11-02 that currently
  * only have manual-checkpoint coverage:
@@ -49,7 +49,7 @@ vi.mock('./CohortsClient', () => {
 
 import CohortsPage from './page'
 
-describe('/trainer/cohorts server page', () => {
+describe('/trainer/settings/cohorts server page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

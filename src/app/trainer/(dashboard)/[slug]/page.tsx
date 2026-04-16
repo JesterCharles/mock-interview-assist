@@ -40,13 +40,6 @@ export default function AssociateDetailPage() {
     return () => { cancelled = true }
   }, [])
 
-  // Auth guard — matching existing /trainer and /dashboard pattern exactly (D-06, T-06-02)
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login')
-    }
-  }, [isAuthenticated, authLoading, router])
-
   // Fetch associate detail after auth confirmed
   useEffect(() => {
     if (authLoading || !isAuthenticated || !slug) return
@@ -82,7 +75,7 @@ export default function AssociateDetailPage() {
     return null
   }
 
-  // After auth resolves, if not authenticated let the redirect above take effect
+  // After auth resolves, if not authenticated middleware handles redirect
   if (!isAuthenticated) {
     return null
   }
