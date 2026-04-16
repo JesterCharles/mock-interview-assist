@@ -43,6 +43,10 @@ export function parseInterviewQuestions(
             ? keywordsMatch[1].split(',').map(k => k.trim())
             : [];
 
+        // Extract topic (optional frontmatter); fallback to keywords[0]
+        const topicMatch = block.match(/\*\*Topic:\*\*\s*(.+?)(?=\n|$)/);
+        const topic = topicMatch ? topicMatch[1].trim() : (keywords[0] ?? '');
+
         // Extract model answer from details block
         const detailsMatch = block.match(/<details>[\s\S]*?<summary>[\s\S]*?<\/summary>([\s\S]*?)<\/details>/);
         const modelAnswer = detailsMatch
@@ -57,6 +61,7 @@ export function parseInterviewQuestions(
             modelAnswer,
             difficulty: currentDifficulty,
             weekNumber,
+            topic,
         });
     }
 

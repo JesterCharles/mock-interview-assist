@@ -8,6 +8,7 @@ export interface ParsedQuestion {
     modelAnswer: string;
     difficulty: 'beginner' | 'intermediate' | 'advanced';
     weekNumber: number;
+    topic?: string;
 }
 
 export interface StarterQuestion {
