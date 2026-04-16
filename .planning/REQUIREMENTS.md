@@ -52,10 +52,10 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## Associate Self-Dashboard (Phase 8)
 
-- [ ] **ASELF-01**: New route `/associate/[slug]/dashboard`. Sibling `layout.tsx` renders `AssociateNav` with tabs: Dashboard / Profile / Book a Mock. Dashboard shows personal gap trend chart (own GapScore history).
+- [x] **ASELF-01**: New route `/associate/[slug]/dashboard`. Sibling `layout.tsx` renders `AssociateNav` with tabs: Dashboard / Profile / Book a Mock. Dashboard shows personal gap trend chart (own GapScore history).
 - [ ] **ASELF-02**: Single "Recommended Next Practice Area" card surfaces `Associate.recommendedArea` with a one-line "why" and a "Not now" dismiss. Dismiss persists for 7 days via localStorage.
 - [ ] **ASELF-03**: Readiness-goal progress bar shows current weighted readiness vs cohort threshold. Associates do NOT see cohort-mate names (aggregate-only privacy default).
-- [ ] **ASELF-04**: "Book a Mock" CTA navigates associate to a trainer-scheduling flow (minimum viable: mailto link or in-app message to trainer — full scheduling deferred).
+- [x] **ASELF-04**: "Book a Mock" CTA navigates associate to a trainer-scheduling flow (minimum viable: mailto link or in-app message to trainer — full scheduling deferred).
 
 ## PDF Analytics Export (Phase 9)
 
@@ -121,10 +121,10 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | ANALYTICS-04 | Phase 22 | Complete |
 | ANALYTICS-05 | Phase 22 | Complete |
 | ANALYTICS-06 | Phase 22 | Complete |
-| ASELF-01 | Phase 23 | Pending |
+| ASELF-01 | Phase 23 | Complete |
 | ASELF-02 | Phase 23 | Pending |
 | ASELF-03 | Phase 23 | Pending |
-| ASELF-04 | Phase 23 | Pending |
+| ASELF-04 | Phase 23 | Complete |
 | PDF-01 | Phase 24 | Pending |
 | PDF-02 | Phase 24 | Pending |
 | CLEANUP-01 | Phase 25 | Pending |
