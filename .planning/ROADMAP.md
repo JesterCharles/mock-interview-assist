@@ -140,8 +140,8 @@ Plans:
 - [x] 20-02-PLAN.md — Route handler audit annotations + PROJECT.md BYPASSRLS documentation
 
 ### Phase 21: App Shell Redesign
-**Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher, reorganized routes, Profile table migration (role in DB, admin-promote UI), and `/trainer/*` → `/app/*` route restructure.
-**Depends on**: Phase 18 (needs Supabase auth + 3-role model for admin-promote UI and route restructure)
+**Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher, reorganized routes under Next.js route groups, and new settings section absorbing existing cohort and associate management pages.
+**Depends on**: Phase 18 (needs Supabase auth for avatar menu user info)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04
 **Success Criteria** (what must be TRUE):
   1. Every authenticated trainer route renders a global topbar with logo + Dashboard / Interviews / Question Banks / Settings + avatar menu; active section is highlighted
@@ -150,7 +150,11 @@ Plans:
   4. New `/trainer/settings` section provides Threshold / Cohorts / Curriculum / Users / Associates pages (BACKFILL-02 page lives here)
   5. Topbar cohort switcher persists selection to `?cohort=<id>` URL param; all Dashboard child pages respect the filter
   6. Sidebar collapsed state persists to localStorage; mobile sidebar is a Radix off-canvas sheet
-**Plans**: [to be planned]
+**Plans**: 2 plans
+
+Plans:
+- [ ] 21-01-PLAN.md — Install Radix deps + shell components (TopBar, SectionSidebar, AvatarMenu, CohortSwitcher, MobileSidebar) + sidebar configs + ConditionalNavbar
+- [ ] 21-02-PLAN.md — Route reorganization (route groups, file moves, layouts, placeholder pages, settings routes, link updates, tests, visual verification)
 **UI hint**: yes
 
 ### Phase 22: Trainer Analytics
@@ -228,7 +232,7 @@ Plans:
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
+| 21. App Shell Redesign | v1.2 | 0/2 | In progress | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
