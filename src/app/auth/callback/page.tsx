@@ -19,6 +19,9 @@ export default function AuthCallbackPage() {
     async function handleCallback() {
       const supabase = createSupabaseBrowserClient();
 
+      // Sign out any existing session to prevent role conflicts
+      await supabase.auth.signOut();
+
       // Parse hash fragment: #access_token=...&refresh_token=...&type=magiclink
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
