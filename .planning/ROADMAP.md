@@ -42,7 +42,7 @@
 - [x] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery) (completed 2026-04-16)
 - [x] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap) (completed 2026-04-16)
 - [x] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth (completed 2026-04-16)
-- [ ] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization
+- [x] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization (completed 2026-04-16)
 - [ ] **Phase 22: Trainer Analytics** -- KPI strip, sparklines, cohort trends, gap aggregation, calibration view
 - [ ] **Phase 23: Associate Self-Dashboard** -- new `/associate/[slug]/dashboard` with personal trends, recommended next area, readiness goal
 - [ ] **Phase 24: PDF Analytics Export** -- cohort + per-associate PDF reports with pre-rendered SVG sparklines
@@ -154,7 +154,7 @@ Plans:
 
 Plans:
 - [x] 21-01-PLAN.md — Install Radix deps + shell components (TopBar, SectionSidebar, AvatarMenu, CohortSwitcher, MobileSidebar) + sidebar configs + ConditionalNavbar
-- [ ] 21-02-PLAN.md — Route reorganization (route groups, file moves, layouts, placeholder pages, settings routes, link updates, tests, visual verification)
+- [x] 21-02-PLAN.md — Route reorganization (route groups, file moves, layouts, placeholder pages, settings routes, link updates, tests, visual verification)
 **UI hint**: yes
 
 ### Phase 22: Trainer Analytics
@@ -232,7 +232,7 @@ Plans:
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 21. App Shell Redesign | v1.2 | 1/2 | In Progress|  |
+| 21. App Shell Redesign | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |

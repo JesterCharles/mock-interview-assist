@@ -38,7 +38,7 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 - [x] **SHELL-01**: Global topbar with logo + primary nav (Dashboard · Interviews · Question Banks · Settings) + avatar menu. Present on all authenticated trainer routes. Active section highlighted.
 - [x] **SHELL-02**: Section-scoped sidebar. Dashboard section shows Overview (Roster / Gap Analysis / Calibration) + Actions (New Mock / Reports). Interviews, Question Banks, and Settings define their own sidebars or render without sidebar where not applicable. Mobile sidebar = Radix sheet (off-canvas hamburger).
-- [ ] **SHELL-03**: Route reorganization preserves existing URLs where possible. `/trainer` → Dashboard > Roster (default landing). `/trainer/[slug]` stays as child route (not modal). `/interview/new` → Interviews section. `/question-banks` → Question Banks section. New `/trainer/settings` section with sidebar: Threshold / Cohorts / Curriculum / Users / Associates (BACKFILL-02 page lives here).
+- [x] **SHELL-03**: Route reorganization preserves existing URLs where possible. `/trainer` → Dashboard > Roster (default landing). `/trainer/[slug]` stays as child route (not modal). `/interview/new` → Interviews section. `/question-banks` → Question Banks section. New `/trainer/settings` section with sidebar: Threshold / Cohorts / Curriculum / Users / Associates (BACKFILL-02 page lives here).
 - [x] **SHELL-04**: Topbar cohort switcher is global and persists selection to URL query param (`?cohort=<id>`) — all Dashboard child pages respect the filter. Sidebar collapsed state persisted to localStorage.
 
 ## Trainer Analytics (Phase 7)
@@ -113,7 +113,7 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | AUTH-10 | Phase 20 | Complete |
 | SHELL-01 | Phase 21 | Complete |
 | SHELL-02 | Phase 21 | Complete |
-| SHELL-03 | Phase 21 | Pending |
+| SHELL-03 | Phase 21 | Complete |
 | SHELL-04 | Phase 21 | Complete |
 | ANALYTICS-01 | Phase 22 | Pending |
 | ANALYTICS-02 | Phase 22 | Pending |
