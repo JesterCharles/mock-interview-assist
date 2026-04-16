@@ -1,5 +1,37 @@
 # Milestones
 
+## v1.2 Analytics & Auth Overhaul (Shipped: 2026-04-16)
+
+**Phases completed:** 10 phases (16-25), 26 plans
+**Timeline:** 2026-04-15 → 2026-04-16 (~16 hours wall time)
+**Requirements:** 30/30 met (CACHE-01..02, BACKFILL-01..02, AUTH-05..10, INVITE-01..03, SHELL-01..04, ANALYTICS-01..06, ASELF-01..04, PDF-01..02, CLEANUP-01..03)
+**Commits:** 205 (range `443d804..fbbbfb5`)
+**Files changed:** 190 (+16,120 / -2,540)
+**Tests:** 470 passing
+**Codex review:** gpt-5.4, 2 P1 + 2 P2 findings, all fixed (`0fb1bde`)
+**Mode:** Autonomous (`--unattended --discuss`)
+
+**Key accomplishments:**
+
+- In-memory question-bank manifest cache with ETag short-circuit + stampede dedupe (<400ms warm)
+- Full Supabase auth: trainer email/password + associate magic link (PKCE, Resend delivery)
+- Bulk invite onboarding: paste 1-50 emails → cohort assign → transactional magic links
+- RLS defense-in-depth: 10 policies on 5 tables, `is_trainer()` SECURITY DEFINER (app_metadata)
+- Two-level app shell: topbar + section-scoped sidebar + cohort switcher + mobile drawer
+- Trainer analytics dashboard: KPI strip, sparklines, cohort trends, gap analysis, calibration
+- Associate self-dashboard: personal gap trends, recommended next area, readiness progress bar
+- PDF analytics export: cohort + per-associate reports with hand-rolled SVG sparklines
+- PIN auth fully removed: schema columns dropped, env vars cleaned, CI grep-gate added
+- Schema prep + email backfill UI enabling trainer-curated associate identity migration
+
+**Archives:**
+
+- [Roadmap](milestones/v1.2-ROADMAP.md)
+- [Requirements](milestones/v1.2-REQUIREMENTS.md)
+- [Autonomous Report](reports/AUTONOMOUS-REPORT-v1.2.md)
+
+---
+
 ## v1.0 Readiness Loop MVP (Shipped: 2026-04-14)
 
 **Phases completed:** 7 phases, 15 plans
@@ -18,6 +50,7 @@
 - Adaptive mock setup pre-populating technologies from associate gap history
 
 **Archives:**
+
 - [Roadmap](milestones/v1.0-ROADMAP.md)
 - [Requirements](milestones/v1.0-REQUIREMENTS.md)
 - [Audit](milestones/v1.0-MILESTONE-AUDIT.md)
@@ -49,6 +82,7 @@
 - Codex review cycle: 9 findings, all P1/P2 addressed pre-merge (`21187f9`)
 
 **Archives:**
+
 - [Roadmap](milestones/v1.1-ROADMAP.md)
 - [Requirements](milestones/v1.1-REQUIREMENTS.md)
 - [Audit](milestones/v1.1-MILESTONE-AUDIT.md)
