@@ -74,34 +74,32 @@ Deferred to subsequent milestones.
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SHELL-01 | — | Pending |
-| SHELL-02 | — | Pending |
-| SHELL-03 | — | Pending |
-| SHELL-04 | — | Pending |
-| SIGNIN-01 | — | Pending |
-| SIGNIN-02 | — | Pending |
-| VIZ-01 | — | Pending |
-| VIZ-02 | — | Pending |
-| VIZ-03 | — | Pending |
-| VIZ-04 | — | Pending |
-| VIZ-05 | — | Pending |
-| VIZ-06 | — | Pending |
-| CURRIC-01 | — | Pending |
-| CURRIC-02 | — | Pending |
-| DESIGN-01 | — | Pending |
-| DESIGN-02 | — | Pending |
-| DARK-01 | — | Pending |
-| DARK-02 | — | Pending |
+| DESIGN-01 | Phase 26 | Pending |
+| DESIGN-02 | Phase 26 | Pending |
+| SHELL-01 | Phase 27 | Pending |
+| SHELL-02 | Phase 27 | Pending |
+| SHELL-03 | Phase 27 | Pending |
+| SHELL-04 | Phase 27 | Pending |
+| SIGNIN-01 | Phase 28 | Pending |
+| SIGNIN-02 | Phase 28 | Pending |
+| VIZ-01 | Phase 29 | Pending |
+| VIZ-02 | Phase 29 | Pending |
+| VIZ-03 | Phase 29 | Pending |
+| VIZ-04 | Phase 29 | Pending |
+| VIZ-05 | Phase 29 | Pending |
+| VIZ-06 | Phase 29 | Pending |
+| CURRIC-01 | Phase 30 | Pending |
+| CURRIC-02 | Phase 30 | Pending |
+| DARK-01 | Phase 31 | Pending |
+| DARK-02 | Phase 31 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after initial definition*
+*Last updated: 2026-04-16 — traceability populated by roadmap*
