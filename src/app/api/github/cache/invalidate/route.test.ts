@@ -34,7 +34,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it('anonymous caller → 401 and does not invalidate', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' });
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' });
 
     const res = await POST(makeRequest({ scope: 'all' }));
     const body = await res.json();
@@ -45,7 +45,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it('associate caller → 401 and does not invalidate', async () => {
-    mockIdentity.mockResolvedValue({ type: 'associate', associateId: 5, ver: 'v1' });
+    mockIdentity.mockResolvedValue({ kind: 'associate', userId: 'u2', email: 'a@test.com', associateId: 5, associateSlug: 'alice' });
 
     const res = await POST(makeRequest({ scope: 'all' }));
 
@@ -54,7 +54,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it("trainer caller with {scope:'all'} → invalidates all and returns cleared count", async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' });
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockInvalidate.mockReturnValue(3);
 
     const res = await POST(makeRequest({ scope: 'all' }));
@@ -66,7 +66,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it('trainer caller with scoped object → invalidates that specific key', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' });
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockInvalidate.mockReturnValue(1);
 
     const scope = { owner: 'o', repo: 'r', branch: 'b' };
@@ -80,7 +80,7 @@ describe('POST /api/github/cache/invalidate', () => {
 
   it('cross-origin POST → 403 before identity check, does not invalidate', async () => {
     // Identity is never consulted for cross-origin requests.
-    mockIdentity.mockResolvedValue({ type: 'trainer' });
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
 
     const res = await POST(
       makeRequest({ scope: 'all' }, { Origin: 'https://evil.example.com', Host: 'localhost' }),
@@ -93,7 +93,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it('same-origin POST (Origin host matches Host header) → proceeds normally', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' });
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockInvalidate.mockReturnValue(2);
 
     const res = await POST(
@@ -105,7 +105,7 @@ describe('POST /api/github/cache/invalidate', () => {
   });
 
   it('trainer caller with empty body → invalidates default repo/branch key', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' });
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockInvalidate.mockReturnValue(1);
 
     const res = await POST(makeRequest());

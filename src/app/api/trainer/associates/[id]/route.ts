@@ -41,8 +41,8 @@ export async function PATCH(
   const originErr = checkOrigin(request)
   if (originErr) return originErr
 
-  const caller = await getCallerIdentity(request)
-  if (caller.type !== 'trainer') {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
@@ -95,8 +95,8 @@ export async function DELETE(
   const originErr = checkOrigin(request)
   if (originErr) return originErr
 
-  const caller = await getCallerIdentity(request)
-  if (caller.type !== 'trainer') {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 

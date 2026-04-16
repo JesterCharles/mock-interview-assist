@@ -40,13 +40,13 @@ describe('GET /api/trainer/associates/preview', () => {
   })
 
   it('returns 401 for anonymous', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' })
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' })
     const res = await GET(makeReq())
     expect(res.status).toBe(401)
   })
 
   it('returns correct counts for trainer', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindMany.mockResolvedValue([
       { email: 'a@b.com', _count: { sessions: 2 } }, // withEmail
       { email: 'c@d.com', _count: { sessions: 0 } }, // withEmail
@@ -74,7 +74,7 @@ describe('GET /api/trainer/associates/preview', () => {
   })
 
   it('returns zeros when no associates exist', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindMany.mockResolvedValue([])
     const res = await GET(makeReq())
     expect(res.status).toBe(200)
@@ -89,7 +89,7 @@ describe('GET /api/trainer/associates/preview', () => {
   })
 
   it('returns 500 when prisma throws', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindMany.mockRejectedValue(new Error('db down'))
     const res = await GET(makeReq())
     expect(res.status).toBe(500)

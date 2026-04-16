@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const caller = await getCallerIdentity(request);
-  if (caller.type !== 'trainer') {
+  const caller = await getCallerIdentity();
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 

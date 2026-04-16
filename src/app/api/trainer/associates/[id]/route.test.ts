@@ -72,7 +72,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 401 for anonymous', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' })
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' })
     const { req, params } = makePatch('1', { email: 'a@b.com' })
     const res = await PATCH(req, { params })
     expect(res.status).toBe(401)
@@ -80,7 +80,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 403 for cross-origin request', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makePatch(
       '1',
       { email: 'a@b.com' },
@@ -94,7 +94,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 200 and updated row for valid email', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockUpdate.mockResolvedValue({ id: 1, email: 'user@example.com' })
     const { req, params } = makePatch('1', { email: 'user@example.com' })
     const res = await PATCH(req, { params })
@@ -108,7 +108,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('treats empty string as clear (null)', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockUpdate.mockResolvedValue({ id: 1, email: null })
     const { req, params } = makePatch('1', { email: '' })
     const res = await PATCH(req, { params })
@@ -119,7 +119,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('treats explicit null as clear', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockUpdate.mockResolvedValue({ id: 1, email: null })
     const { req, params } = makePatch('1', { email: null })
     const res = await PATCH(req, { params })
@@ -130,7 +130,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 400 for malformed email', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makePatch('1', { email: 'not-an-email' })
     const res = await PATCH(req, { params })
     expect(res.status).toBe(400)
@@ -138,14 +138,14 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 400 for invalid id', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makePatch('abc', { email: 'a@b.com' })
     const res = await PATCH(req, { params })
     expect(res.status).toBe(400)
   })
 
   it('returns 409 { error:email_taken, field:email } on P2002 without echoing email', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const p2002 = Object.assign(new Error('Unique constraint failed'), {
       code: 'P2002',
     })
@@ -161,7 +161,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 404 on P2025 (row not found)', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const p2025 = Object.assign(new Error('Record not found'), { code: 'P2025' })
     mockUpdate.mockRejectedValue(p2025)
     const { req, params } = makePatch('999', { email: 'a@b.com' })
@@ -170,7 +170,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 500 on unknown prisma error', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockUpdate.mockRejectedValue(new Error('boom'))
     const { req, params } = makePatch('1', { email: 'a@b.com' })
     const res = await PATCH(req, { params })
@@ -178,7 +178,7 @@ describe('PATCH /api/trainer/associates/[id]', () => {
   })
 
   it('returns 400 on invalid JSON body', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const req = new NextRequest('http://localhost/api/trainer/associates/1', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
@@ -195,7 +195,7 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 401 for anonymous', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' })
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' })
     const { req, params } = makeDelete('1')
     const res = await DELETE(req, { params })
     expect(res.status).toBe(401)
@@ -203,7 +203,7 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 403 for cross-origin', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makeDelete('1', {
       origin: 'http://evil.com',
       host: 'localhost',
@@ -214,7 +214,7 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 200 and deletes when sessionCount === 0', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue({ id: 1, _count: { sessions: 0 } })
     mockDelete.mockResolvedValue({ id: 1 })
     const { req, params } = makeDelete('1')
@@ -225,7 +225,7 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 409 has_sessions when sessionCount > 0, row preserved', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue({ id: 1, _count: { sessions: 3 } })
     const { req, params } = makeDelete('1')
     const res = await DELETE(req, { params })
@@ -237,7 +237,7 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 404 when row does not exist', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue(null)
     const { req, params } = makeDelete('999')
     const res = await DELETE(req, { params })
@@ -246,14 +246,14 @@ describe('DELETE /api/trainer/associates/[id]', () => {
   })
 
   it('returns 400 for invalid id', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makeDelete('not-a-number')
     const res = await DELETE(req, { params })
     expect(res.status).toBe(400)
   })
 
   it('returns 500 when delete throws unexpectedly', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue({ id: 1, _count: { sessions: 0 } })
     mockDelete.mockRejectedValue(new Error('boom'))
     const { req, params } = makeDelete('1')

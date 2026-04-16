@@ -1,100 +1,139 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { NextRequest } from 'next/server';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
 
-process.env.ASSOCIATE_SESSION_SECRET = 'test-secret-for-middleware';
+vi.mock('@/lib/supabase/middleware', () => ({
+  createSupabaseMiddlewareClient: vi.fn(),
+}));
 
+import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 import { middleware } from '@/middleware';
-import { signAssociateToken } from '@/lib/associateSession';
 
-function makeReq(pathname: string, cookies: Record<string, string> = {}): NextRequest {
-  const cookieHeader = Object.entries(cookies)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join('; ');
-  const headers = new Headers();
-  if (cookieHeader) headers.set('cookie', cookieHeader);
-  return new NextRequest(new URL(`http://localhost${pathname}`), { headers });
+const mockCreateMiddlewareClient = createSupabaseMiddlewareClient as unknown as ReturnType<typeof vi.fn>;
+
+function makeReq(pathname: string): NextRequest {
+  return new NextRequest(new URL(`http://localhost${pathname}`));
 }
 
-describe('middleware — per-identity permission table', () => {
-  const pinGeneratedAt = new Date('2026-04-14T10:00:00.000Z');
-  let validAssociateToken: string;
+function makeMutatedResponse() {
+  return NextResponse.next();
+}
 
-  beforeAll(async () => {
-    validAssociateToken = await signAssociateToken(42, pinGeneratedAt);
+function makeMiddlewareMock(user: unknown) {
+  return {
+    user,
+    response: makeMutatedResponse(),
+  };
+}
+
+describe('middleware — Supabase session refresh + role guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // --- Public paths ---
+
+  it('passes through / with no user (public)', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
+    const res = await middleware(makeReq('/'));
+    expect(res.status).toBeLessThan(300);
+    expect(res.headers.get('location')).toBeNull();
+  });
+
+  it('passes through /signin with no user (public)', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
+    const res = await middleware(makeReq('/signin'));
+    expect(res.status).toBeLessThan(300);
+  });
+
+  it('passes through /auth/callback with no user (public)', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
+    const res = await middleware(makeReq('/auth/callback'));
+    expect(res.status).toBeLessThan(300);
+  });
+
+  it('passes through /associate/login with no user (public)', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
+    const res = await middleware(makeReq('/associate/login'));
+    expect(res.status).toBeLessThan(300);
   });
 
   // --- Trainer paths ---
 
-  it('allows /trainer with nlm_session=authenticated', async () => {
-    const res = await middleware(makeReq('/trainer', { nlm_session: 'authenticated' }));
-    // NextResponse.next() → no redirect status
+  it('allows /trainer with trainer role', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: { role: 'trainer' } }),
+    );
+    const res = await middleware(makeReq('/trainer'));
     expect(res.status).toBeLessThan(300);
     expect(res.headers.get('location')).toBeNull();
   });
 
-  it('redirects /trainer to /login when only associate_session is present', async () => {
-    const res = await middleware(makeReq('/trainer', { associate_session: validAssociateToken }));
-    expect(res.status).toBe(307);
-    const loc = res.headers.get('location');
-    expect(loc).toBeTruthy();
-    expect(new URL(loc!).pathname).toBe('/login');
+  it('allows /trainer with admin role', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: { role: 'admin' } }),
+    );
+    const res = await middleware(makeReq('/trainer'));
+    expect(res.status).toBeLessThan(300);
   });
 
-  it('redirects /trainer to /login when no cookies', async () => {
+  it('redirects /trainer to /signin?next=/trainer when no session', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
     const res = await middleware(makeReq('/trainer'));
     expect(res.status).toBe(307);
-    expect(new URL(res.headers.get('location')!).pathname).toBe('/login');
+    const loc = new URL(res.headers.get('location')!);
+    expect(loc.pathname).toBe('/signin');
+    expect(loc.searchParams.get('next')).toBe('/trainer');
   });
 
-  it('redirects /dashboard to /login when only associate_session is present', async () => {
-    const res = await middleware(makeReq('/dashboard', { associate_session: validAssociateToken }));
+  it('redirects /trainer to /signin when associate role (not trainer)', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: {} }),
+    );
+    const res = await middleware(makeReq('/trainer'));
     expect(res.status).toBe(307);
-    expect(new URL(res.headers.get('location')!).pathname).toBe('/login');
+    expect(new URL(res.headers.get('location')!).pathname).toBe('/signin');
   });
 
-  it('allows /dashboard with trainer cookie', async () => {
-    const res = await middleware(makeReq('/dashboard', { nlm_session: 'authenticated' }));
+  it('allows /dashboard with trainer role', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: { role: 'trainer' } }),
+    );
+    const res = await middleware(makeReq('/dashboard'));
     expect(res.status).toBeLessThan(300);
+  });
+
+  it('redirects /dashboard to /signin when no session', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
+    const res = await middleware(makeReq('/dashboard'));
+    expect(res.status).toBe(307);
+    expect(new URL(res.headers.get('location')!).pathname).toBe('/signin');
   });
 
   // --- Associate paths ---
 
-  it('allows /associate/abc with valid associate_session (ver enforced downstream)', async () => {
-    const res = await middleware(makeReq('/associate/abc', { associate_session: validAssociateToken }));
+  it('allows /associate/abc with any authenticated user', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: {} }),
+    );
+    const res = await middleware(makeReq('/associate/abc'));
     expect(res.status).toBeLessThan(300);
     expect(res.headers.get('location')).toBeNull();
   });
 
-  it('allows /associate/abc with trainer cookie (trainer can view any associate)', async () => {
-    const res = await middleware(makeReq('/associate/abc', { nlm_session: 'authenticated' }));
+  it('allows /associate/abc with trainer role', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(
+      makeMiddlewareMock({ user_metadata: { role: 'trainer' } }),
+    );
+    const res = await middleware(makeReq('/associate/abc'));
     expect(res.status).toBeLessThan(300);
   });
 
-  it('redirects /associate/abc to /associate/login?next=... when no cookies', async () => {
+  it('redirects /associate/abc to /signin?next=... when no session', async () => {
+    mockCreateMiddlewareClient.mockResolvedValue(makeMiddlewareMock(null));
     const res = await middleware(makeReq('/associate/abc'));
     expect(res.status).toBe(307);
     const loc = new URL(res.headers.get('location')!);
-    expect(loc.pathname).toBe('/associate/login');
+    expect(loc.pathname).toBe('/signin');
     expect(loc.searchParams.get('next')).toBe('/associate/abc');
-  });
-
-  it('redirects /associate/abc to /associate/login when associate_session is tampered', async () => {
-    const tampered = validAssociateToken.slice(0, -4) + 'AAAA';
-    const res = await middleware(makeReq('/associate/abc', { associate_session: tampered }));
-    expect(res.status).toBe(307);
-    expect(new URL(res.headers.get('location')!).pathname).toBe('/associate/login');
-  });
-
-  it('allows /associate/login with no cookies (public)', async () => {
-    const res = await middleware(makeReq('/associate/login'));
-    expect(res.status).toBeLessThan(300);
-    expect(res.headers.get('location')).toBeNull();
-  });
-
-  // --- Unprotected paths ---
-
-  it('allows unprotected paths with no cookies', async () => {
-    const res = await middleware(makeReq('/some-public-page'));
-    expect(res.status).toBeLessThan(300);
   });
 });

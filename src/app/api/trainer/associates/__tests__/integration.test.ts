@@ -90,7 +90,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 1.
   it('LIST: anonymous caller → 401, no DB query', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' })
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' })
     const res = await LIST(makeListReq())
     expect(res.status).toBe(401)
     expect(mockFindMany).not.toHaveBeenCalled()
@@ -98,7 +98,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 2.
   it('LIST: trainer caller → 200 with AssociateBackfillRow[] mapped from Prisma', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindMany.mockResolvedValue([
       {
         id: 1,
@@ -151,7 +151,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
   it('PATCH: cross-origin → 403 before auth check (DB never touched)', async () => {
     // Identity should NOT even be consulted, but mock it anyway so a stray
     // call wouldn't throw — the assertion that matters is no DB write.
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makePatchReq(
       '1',
       { email: 'a@b.com' },
@@ -165,7 +165,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 4.
   it('PATCH: anonymous caller → 401', async () => {
-    mockIdentity.mockResolvedValue({ type: 'anonymous' })
+    mockIdentity.mockResolvedValue({ kind: 'anonymous' })
     const { req, params } = makePatchReq('1', { email: 'a@b.com' })
     const res = await PATCH(req, { params })
     expect(res.status).toBe(401)
@@ -174,7 +174,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 5.
   it('PATCH: trainer with valid email → 200 with updated row', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockUpdate.mockResolvedValue({ id: 1, email: 'new@example.com' })
     const { req, params } = makePatchReq('1', { email: 'new@example.com' })
     const res = await PATCH(req, { params })
@@ -189,7 +189,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 6.
   it('PATCH: P2002 collision → 409 email_taken, response body does NOT contain submitted email', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const p2002 = Object.assign(new Error('Unique constraint failed on the fields: (`email`)'), {
       code: 'P2002',
     })
@@ -207,7 +207,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 7.
   it('PATCH: malformed email → 400 invalid_payload, no DB write', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makePatchReq('1', { email: 'not-an-email' })
     const res = await PATCH(req, { params })
     expect(res.status).toBe(400)
@@ -218,7 +218,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 8.
   it('DELETE: associate with sessions > 0 → 409 has_sessions, prisma.delete NEVER called', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue({ id: 1, _count: { sessions: 3 } })
     const { req, params } = makeDeleteReq('1')
     const res = await DELETE(req, { params })
@@ -232,7 +232,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 9.
   it('DELETE: orphan associate (sessions === 0) → 200 { ok: true, id }', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mockFindUnique.mockResolvedValue({ id: 1, _count: { sessions: 0 } })
     mockDelete.mockResolvedValue({ id: 1 })
     const { req, params } = makeDeleteReq('1')
@@ -244,7 +244,7 @@ describe('trainer backfill integration (list + PATCH + DELETE)', () => {
 
   // 10.
   it('DELETE: cross-origin → 403, no DB lookup or delete', async () => {
-    mockIdentity.mockResolvedValue({ type: 'trainer' })
+    mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const { req, params } = makeDeleteReq('1', {
       origin: 'http://evil.com',
       host: 'localhost',
