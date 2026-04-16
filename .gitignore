@@ -42,3 +42,4 @@ next-env.d.ts
 
 # interview history data
 /data
+.playwright-cli/
