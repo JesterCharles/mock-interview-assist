@@ -27,7 +27,14 @@ export default async function SignInPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    redirect(nextPath ?? '/trainer');
+    const role = user.user_metadata?.role as string | undefined;
+    if (nextPath) {
+      redirect(nextPath);
+    } else if (role === 'trainer' || role === 'admin') {
+      redirect('/trainer');
+    } else {
+      redirect('/');
+    }
   }
 
   return (
