@@ -8,8 +8,7 @@
  * - Stampede dedupe: concurrent cold callers share one in-flight promise.
  * - Trainer invalidate endpoint clears entries explicitly.
  *
- * Mirrors module-state pattern in `pinAttemptLimiter.ts`:
- * no class, top-level Map, `__resetAll` + `__setFetcher` test hooks.
+ * Mirrors module-state pattern: no class, top-level Map, `__resetAll` + `__setFetcher` test hooks.
  *
  * Single-node deployment only (GCE Docker). For horizontal scale, move to Redis.
  */

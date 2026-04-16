@@ -1,30 +1,26 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rateLimitService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
-import { getAssociateSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { runReadinessPipeline } from '@/lib/readinessPipeline';
 import { InterviewSession } from '@/lib/types';
-import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 
 const LOG_PREFIX = '[associate-interview-complete]';
 
 /**
  * Authenticated automated-interview completion endpoint.
  *
- * SECURITY (T-10-02):
- *   - Identity comes ONLY from the associate_session cookie (version-checked
- *     against Associate.pinGeneratedAt in Phase 9). No silent fallthrough to
- *     anonymous behavior — missing/stale cookie returns 401.
- *   - Any client-supplied associateSlug is OVERRIDDEN by the cookie-derived
+ * SECURITY (T-25-01):
+ *   - Identity comes ONLY from the Supabase session (server-validated via
+ *     getCallerIdentity → supabase.auth.getUser()). No silent fallthrough to
+ *     anonymous behavior — missing/invalid session returns 401.
+ *   - Any client-supplied associateSlug is OVERRIDDEN by the session-derived
  *     slug before persistence. Spoofing is impossible via this route.
  *   - On successful persist, fire-and-forget runReadinessPipeline fans out
  *     gap + readiness recompute with the Session.readinessRecomputeStatus
- *     marker so failures are repairable by the sweep (Plan 10-03).
+ *     marker so failures are repairable by the sweep.
  */
 export async function POST(request: Request) {
-  if (!isAssociateAuthEnabled()) {
-    return NextResponse.json({ error: 'not_found' }, { status: 404 });
-  }
   try {
     const body = await request.json();
     const { fingerprint, session } = body as {
@@ -61,15 +57,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const assocSession = await getAssociateSession();
-    if (!assocSession) {
+    const caller = await getCallerIdentity();
+    if (caller.kind !== 'associate') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // Identity injected from cookie — any client-supplied associateSlug is ignored.
+    // Identity injected from Supabase session — any client-supplied associateSlug is ignored.
     const identified: InterviewSession = {
       ...session,
-      associateSlug: assocSession.slug,
+      associateSlug: caller.associateSlug,
     };
 
     const success = await persistSessionToDb(identified, { mode: 'automated' });
@@ -79,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget: readiness fan-out owns its own error handling + DB marker.
-    void runReadinessPipeline(assocSession.associateId, session.id);
+    void runReadinessPipeline(caller.associateId, session.id);
 
     return NextResponse.json({ success: true, persisted: 'db' });
   } catch (error) {

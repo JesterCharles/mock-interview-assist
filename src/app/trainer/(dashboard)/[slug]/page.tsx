@@ -10,7 +10,6 @@ import SessionHistoryList from '@/components/trainer/SessionHistoryList'
 import EmptyGapState from '@/components/trainer/EmptyGapState'
 import GapTrendChart from '@/components/trainer/GapTrendChart'
 import CalibrationView from '@/components/trainer/CalibrationView'
-import { GeneratePinButton } from '@/app/trainer/components/GeneratePinButton'
 import AssociateCohortSelect from './AssociateCohortSelect'
 import '../trainer.css'
 
@@ -45,23 +44,6 @@ export default function AssociateDetailPage() {
       setExportingPdf(false)
     }
   }
-  // PIN auth is feature-gated until v1.2 — hide Generate PIN when disabled.
-  const [associateAuthEnabled, setAssociateAuthEnabled] = useState(false)
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const res = await fetch('/api/associate/status', { cache: 'no-store' })
-        if (!res.ok) return
-        const data = (await res.json()) as { enabled?: boolean }
-        if (!cancelled) setAssociateAuthEnabled(!!data.enabled)
-      } catch {
-        // ignore — stays hidden
-      }
-    })()
-    return () => { cancelled = true }
-  }, [])
-
   // Fetch associate detail after auth confirmed
   useEffect(() => {
     if (authLoading || !isAuthenticated || !slug) return
@@ -208,14 +190,6 @@ export default function AssociateDetailPage() {
                 score={detail.readinessScore}
                 status={detail.readinessStatus}
               />
-              {associateAuthEnabled && (
-                <div style={{ marginTop: '16px' }}>
-                  <GeneratePinButton
-                    associateId={detail.id}
-                    associateName={detail.displayName}
-                  />
-                </div>
-              )}
               <div style={{ marginTop: '20px' }}>
                 <AssociateCohortSelect
                   slug={detail.slug}

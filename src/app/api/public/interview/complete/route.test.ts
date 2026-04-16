@@ -69,7 +69,7 @@ describe('POST /api/public/interview/complete (hardened)', () => {
     const res = await POST(
       makeReq(
         { fingerprint: 'fp', session: baseSession({ associateSlug: 'victim' }) },
-        { cookie: 'associate_session=anything' },
+        { cookie: 'sb-session=anything' },
       ),
     );
     expect(res.status).toBe(200);
