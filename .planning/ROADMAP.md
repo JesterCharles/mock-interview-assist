@@ -204,7 +204,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
-- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
+- [x] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 **UI hint**: yes
 
 ### Phase 25: PIN Removal + Cleanup
@@ -219,7 +219,7 @@ Plans:
   5. App boots and all auth flows function with only Supabase env vars present
 **Plans**: 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
+- [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
 - [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 
 ## Progress
@@ -248,6 +248,6 @@ Plans:
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
-| 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete   | 2026-04-16 |
+| 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
