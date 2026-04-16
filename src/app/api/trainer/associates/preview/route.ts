@@ -6,8 +6,8 @@ import type { BackfillPreview } from '@/lib/trainer-types'
 // GET /api/trainer/associates/preview — dry-run counts for pre-cutover sanity
 // before Phase 18 email-auth enforcement. Pure math over Associate rows; no writes.
 export async function GET(request: NextRequest) {
-  const caller = await getCallerIdentity(request)
-  if (caller.type !== 'trainer') {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
