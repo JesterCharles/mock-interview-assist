@@ -18,6 +18,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  try {
   const caller = await getCallerIdentity();
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -94,4 +95,8 @@ export async function POST(
     slug: associate.slug,
     email: associate.email,
   });
+  } catch (err) {
+    console.error('[invite] Unhandled error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
