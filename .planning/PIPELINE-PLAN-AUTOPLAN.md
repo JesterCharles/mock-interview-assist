@@ -1,107 +1,134 @@
-# PIPELINE-PLAN-AUTOPLAN — v1.1 Cohort Readiness System
+# PIPELINE-PLAN-AUTOPLAN — Phase 18: Supabase Auth Install
 
-**Date:** 2026-04-14
-**Scope:** Phases 8-14 (17 plans across 7 phases)
+**Date:** 2026-04-15
+**Scope:** Phase 18 (4 plans across 3 waves)
 **Reviewer:** autoplan (4 lenses: CEO / eng / design / DX)
-**Overall confidence:** HIGH (8.5/10) — plans are unusually detailed and self-consistent. Ship as-is with the few flags below.
+**Overall confidence:** HIGH (8.8/10) — plans are thorough, research is verified, threat model is solid. Ship as-is with the flags below.
+
+---
+
+## Decision Principles
+
+1. **Is there only one reasonable approach?** Auto-decide.
+2. **Does context/research already lock this?** Auto-decide per locked decision.
+3. **Is the risk low and reversible?** Auto-decide.
+4. **Does it match an established project pattern?** Auto-decide.
+5. **Are the approaches close (80/20)?** Auto-decide with best option.
+6. **Is this a genuine taste/direction call?** Surface to human.
 
 ---
 
 ## Auto-decisions (resolved via 6 decision principles)
 
 ### CEO lens (scope, user value, 10-star ops)
-- **AD-01** Scope is locked; no feature expansion requested. Plans correctly defer clone-curriculum, notifications, magic-link auth, cohort snapshots to v1.2. ACCEPT.
-- **AD-02** PIN UI styling utilitarian in Phase 9, polish in Phase 14 — correct sequencing (ship function before finish). ACCEPT.
-- **AD-03** "Readiness Signal Pattern" (typography not badges) applied on `/associate/[slug]` in 14-01 is the highest-leverage 10-star touch in-scope. KEEP.
-- **AD-04** Phase 12 omitting per-cohort trend charts is correct for 3-4 week window (COHORT-FUTURE-02). ACCEPT.
+
+- **AD-01** Three-role model (`admin`/`trainer`/`associate`) installed now even though admin-promote UI deferred to Phase 21. Correct: avoids a second auth migration. One-time infrastructure cost, zero user-facing complexity until Phase 21 activates it. ACCEPT. (Principle 2: locked decision)
+- **AD-02** PIN removal from scope is the highest-leverage scoping call in the phase. PIN never shipped to production; eliminating the grace window removes ~2 weeks of coexistence code + testing surface. `getCallerIdentity()` becomes clean single-source. ACCEPT. (Principle 2: locked decision)
+- **AD-03** Password reset as a Phase 18 deliverable alongside sign-in. This is table-stakes UX for email/password auth — shipping sign-in without reset would be a production blocker. ACCEPT. (Principle 1: only one reasonable approach)
+- **AD-04** 7-day magic link expiry configured via Supabase dashboard (not per-call). Research confirms per-call override isn't reliably supported. Dashboard setting is the right control surface. Documented in `user_setup` section of 18-01-PLAN. ACCEPT. (Principle 2: research locks this)
+- **AD-05** Advisory-only abuse flag (log + admin email) rather than auto-lockout for password reset. Correct for a product where the trainer IS the primary user — auto-lockout risks locking out the only person who manages the system. ACCEPT. (Principle 1)
+- **AD-06** Both tabs always visible on `/signin` (remove `showAssociateTab` prop / `ENABLE_ASSOCIATE_AUTH` check). Correct: with Supabase magic links replacing PIN, the feature gate is no longer meaningful. ACCEPT. (Principle 2)
 
 ### Engineering lens (architecture, risk, testability)
-- **AD-05** Dual-write preserved; additive-only migrations (Phase 8). Low risk. ACCEPT.
-- **AD-06** `onDelete: SetNull` on Associate.cohortId + Session.cohortId, CASCADE on CurriculumWeek.cohortId — correct semantics. ACCEPT.
-- **AD-07** `runReadinessPipeline` helper extraction (10-01) DRYs `/api/history` + public complete. KEEP.
-- **AD-08** Server-side identity override (10-01 D-12) prevents slug-spoofing. Correct trust boundary. ACCEPT.
-- **AD-09** Middleware stays synchronous, DB lookups happen in route handlers — correct perf posture. ACCEPT.
-- **AD-10** Trainer cookie precedence when both present (09-02 D-10) — pragmatic; trainers can impersonate-view. ACCEPT.
-- **AD-11** `bcryptjs` over `bcrypt` for Alpine Docker compat. Correct. ACCEPT.
-- **AD-12** Reusing `APP_PASSWORD` as HMAC secret for associate token — acceptable for v1.1 per D-08 note; migration path to dedicated secret documented. ACCEPT with risk flag (see RF-02).
 
-### Design lens
-- **AD-13** Phase 14 scope correctly excludes `/interview` + `/review` (mid-session regression risk). ACCEPT.
-- **AD-14** Phase 11/13 ship with DESIGN.md tokens from initial build; Phase 14 consolidates — reduces retrofit debt. KEEP.
-- **AD-15** `PublicShell` extraction in 14-01 is the right DRY boundary. KEEP.
-- **AD-16** Native `<select>` + `window.confirm` for trainer-internal CRUD — matches "utilitarian" direction; correct for solo-dev velocity. ACCEPT.
+- **AD-07** Middleware pattern: session refresh BEFORE route guard, return same mutated `NextResponse`. Research Pattern 2 + Pitfall 1 confirm this is the canonical Supabase+Next.js pattern. Plan 02 Task 1 follows it exactly. ACCEPT. (Principle 2)
+- **AD-08** `getCallerIdentity()` signature change from `(request: NextRequest)` to `()`. Breaking change affecting 5 callsites. Plan 02 Task 2 lists all callers (grep-verified) and updates them atomically. Pitfall 8 in research explicitly warns about this. Handled correctly. ACCEPT. (Principle 1)
+- **AD-09** `kind` discriminant replacing `type` on `CallerIdentity`. Prevents collision with TypeScript `type` keyword in destructuring patterns. Slightly better DX. Low risk, all callers updated in same PR. ACCEPT. (Principle 3: low risk, reversible)
+- **AD-10** In-memory `Map` + Prisma `AuthEvent` hybrid for rate limiting. Matches existing `rateLimitService.ts` pattern. Hot path stays in-memory; DB provides persistence + admin visibility. ACCEPT. (Principle 4: matches project pattern)
+- **AD-11** `authUserId` linkage in `/auth/callback` (match by email, update FK on first sign-in). Pitfall 5 in research identifies this exact gap. Plan 04 Task 1 handles it with the correct guard (only link when `authUserId` is currently null — prevents hijack). ACCEPT. (Principle 2)
+- **AD-12** Browser client (`src/lib/supabase/browser.ts`) added as 4th client module beyond the 3 specified in CONTEXT.md. Necessary for `signInWithPassword` in the Trainer tab (client component). Research Pattern 9 confirms this need. ACCEPT. (Principle 1)
+- **AD-13** Plan 02 middleware redirect forwards cookies via `response.headers.getSetCookie().forEach(...)`. This preserves refreshed session cookies on redirect responses — critical for the "bounce to /signin" flow. ACCEPT. (Principle 2: Pitfall 1 mitigation)
+- **AD-14** Wave structure: W1 (foundation) -> W2 (middleware + identity) -> W3 (sign-in flows). Correct dependency chain. Plans 03 and 04 run in parallel (same wave 3) since they share Wave 1+2 outputs but don't depend on each other. ACCEPT. (Principle 1)
+- **AD-15** Both Plan 03 and Plan 04 are `autonomous: false` with human-verify checkpoints. Correct for auth flows — these need manual smoke tests with real Supabase credentials. ACCEPT. (Principle 1)
+- **AD-16** `import 'server-only'` on `admin.ts`. Research anti-pattern section explicitly warns about omitting this. Plan 01 Task 1 includes it. Threat T-18-01 covers it. ACCEPT. (Principle 2)
 
-### DX lens
-- **AD-17** TDD on pure-function + API layers, manual checkpoints for UI flows — appropriate test-cost mix. ACCEPT.
-- **AD-18** Wave-based parallelization labeled; plans have clear `depends_on`. Good for /gsd-execute-phase routing. ACCEPT.
-- **AD-19** All plans define artifacts + truths + verify commands — high machine-readability for wave dispatch. ACCEPT.
+### Design lens (UX, visual, consistency)
 
----
+- **AD-17** Trainer tab: single password field replaced with email + password. Standard email/password UX. Plan 03 Task 1 specifies `inputBase` pattern from existing design system. ACCEPT. (Principle 4)
+- **AD-18** "Forgot password?" link inline (not a new page). Plan 03 specifies `color: var(--accent)`, `fontSize: 13`, `cursor: pointer`. Matches the terse, in-context design approach established in DESIGN.md. ACCEPT. (Principle 4)
+- **AD-19** Associate tab: email field replacing 6-digit PIN input. Full-width input vs narrow PIN boxes. Plan 04 Task 2 specifies `inputBase` pattern, full width. "Check your email" confirmation state on success, rate-limit error state on 429. ACCEPT. (Principle 4)
+- **AD-20** "Send sign-in link" button text (idle) / "Sending..." (submitting). Clear, non-ambiguous loading state. ACCEPT. (Principle 5)
+- **AD-21** Error messages: "Invalid email or password." (trainer), "Too many requests. Please try again later." (429), "Something went wrong. Please try again." (generic). Consistent with existing error copy patterns. Never leaks user existence. ACCEPT. (Principle 4 + security requirement)
 
-## Risk flags per phase
+### DX lens (developer experience, maintainability, onboarding)
 
-### Phase 8 (Schema Migration)
-- **RF-01 (medium):** 08-02 Task 2 adds `prisma migrate deploy` to Docker CMD — this runs on every container boot. Concurrent boots (multi-instance scale-out) could race. Not a v1.1 issue (single GCE instance), flag for v1.2 scale-out. SURFACED, no block.
-
-### Phase 9 (Associate PIN Auth)
-- **RF-02 (medium):** Reusing `APP_PASSWORD` as HMAC secret couples trainer auth rotation to associate token invalidation. If you rotate `APP_PASSWORD`, all active associate sessions silently invalidate. Document in 09-01 SUMMARY. Flag as v1.2 hardening (dedicated `ASSOCIATE_SESSION_SECRET`).
-- **RF-03 (low):** 09-02 middleware tests use `new NextRequest` — verify this matches the Next 16 App Router middleware test pattern; earlier Next versions had quirks. Note in test task.
-- **RF-04 (low):** 09-03 Task 2 action text is uncertain about Next 16 403 pattern ("use whichever Next 16 API is idiomatic"). Planner should verify `unauthorized()` availability in Next 16 docs before implementation; fallback is explicit `Response` with 403 status.
-
-### Phase 10 (Automated Interview Pipeline)
-- **RF-05 (low):** 10-02 Task 1 integration tests require a separate `TEST_DATABASE_URL`. If not configured, tests skip silently — acceptable but surface in SUMMARY so CI gap is tracked.
-- **RF-06 (low):** CONTEXT D-07 says SameSite=Lax for associate_session; 09-01 D-07 specifies SameSite=Strict. Inconsistency is benign (Strict is safer and 10-02 reads cookie server-side only) but flag for cleanup.
-
-### Phase 11 (Cohort Management)
-- **RF-07 (low):** 11-01 DELETE uses `$transaction` to null associates + delete cohort — redundant with Phase 8's `onDelete: SetNull` but belt-and-suspenders is fine. No action.
-- **RF-08 (low):** 11-02 no E2E test; relies on human checkpoint. Acceptable for solo dev, flag for future Playwright coverage.
-
-### Phase 12 (Cohort Dashboard Views)
-- **RF-09 (low):** 12-01 treats `cohortId` query param as string, passes to Prisma `where: { cohortId: string }` — Prisma expects `Int`. Executor must coerce to `Number` before query. Small bug risk if not caught during implementation.
-
-### Phase 13 (Curriculum Schedule)
-- **RF-10 (medium):** 13-03 <400ms perf budget is tight. `Promise.all(GitHub fetch, curriculum fetch)` caps on GitHub latency, not curriculum. Budget is realistic only if GitHub responds <350ms. Flag: if budget fails, either loosen to 600ms or stub GitHub in Playwright perf test (plan says stub is acceptable).
-- **RF-11 (low):** 13-03 Task 2 action proposes extending `/api/associates/[slug]/gap-scores` to return `cohortId` — that route was scoped to gap scores only in v1.0. Extending is fine but update its contract docs.
-- **RF-12 (low):** CurriculumWeek.skillName matching to `GitHubFile.path.split('/')[0]` is a fragile contract (D-02 "documented not code-enforced"). One typo in trainer curriculum UI silently excludes a skill. Consider inline help text near skillName input in 13-02 pointing to correct convention.
-
-### Phase 14 (Design Cohesion)
-- **RF-13 (medium):** 14-01 Task 1 deletes many globals.css utilities (`.glass-card`, `.nlm-bg`, etc.). These may be referenced from non-restyled pages (`/interview`, `/review`, `/dashboard`). Deletion could cause visual regression on pages that weren't restyled. MITIGATION: Before deletion, grep the full codebase for each class — if referenced outside restyled scope, either restyle inline or retain the utility as a compatibility alias pointing to new tokens.
-- **RF-14 (low):** 14-01 Task 1 replaces `--nlm-*` tokens entirely — same risk as RF-13. Mid-session pages may have hardcoded indigo. Grep before deletion.
-- **RF-15 (low):** 14-01 `CurriculumFilterBadge` (13-03) vs `CurriculumWeekList` (14-02) may duplicate "today marker" logic. Minor DRY miss, not blocking.
+- **AD-22** `user_setup` section in Plan 01 frontmatter lists all Supabase dashboard configuration steps (OTP expiry, PKCE, redirect URLs) with exact navigation paths. Excellent onboarding DX for the solo dev returning to this after a break. ACCEPT. (Principle 5)
+- **AD-23** `.env.example` and `.env.docker` updated with all 5 new vars + comments. Standard practice. ACCEPT. (Principle 4)
+- **AD-24** Boot-time assert (`src/lib/env.ts`) called from `instrumentation.ts register()`. Fail-fast pattern prevents silent deployment failures. Test coverage in `env.test.ts`. ACCEPT. (Principle 2: SC-2 requirement)
+- **AD-25** Old `/api/auth` route and `nlm_session` cookie kept alive (not deleted). Research Pattern 9 explicitly notes Phase 20 handles deletion. Plan 18 correctly avoids touching them beyond stopping the new sign-in surface from calling into them. ACCEPT. (Principle 2)
+- **AD-26** Rate limiter key schema with namespaces (`auth:magic-link:email:{hash}`, `auth:reset:email:{hash}`) prevents collision. Pitfall 7 in research warns about this exact issue. Plan 01 Task 2 action step 6 implements it. ACCEPT. (Principle 2)
 
 ---
 
-## Taste decisions surfaced (DECISION_NEEDED)
+## Flags (potential issues)
 
-### DN-01 (DX / trainer operations) — PIN delivery mechanism is out-of-band
-Phase 9 stops at trainer copies PIN and manually communicates it (SMS/email/slack outside product). No in-product delivery (SMS, email-to-associate, print-friendly view). For a solo-trainer running a single cohort this is fine. For 20+ associate cohorts this is painful.
-**Recommendation (FF):** Ship as planned. Add print-friendly PIN receipt view to v1.2 backlog only if trainer reports friction during cohort onboarding. No change to v1.1 scope.
+### FLAG-01: Middleware redirect cookie forwarding (Plan 02, Task 1, step 7)
 
-### DN-02 (eng) — Dockerfile runtime migrate-deploy vs startup script
-08-02 adds `prisma migrate deploy && node server.js` to CMD. Alternative: separate migration job (one-shot container) that runs before server start. Runtime in CMD is simpler for solo-GCE-Docker; separate job is proper pattern for Cloud Run / k8s.
-**Recommendation (FF):** Ship CMD approach as planned (matches current GCE deployment). Migration to separate job is part of future Cloud Run zero-scale work (already in MEMORY.md roadmap).
+**Severity:** Medium
+**Issue:** The plan specifies `response.headers.getSetCookie().forEach(c => redirect.headers.append('set-cookie', c))` for cookie forwarding on redirect. This is correct, but `getSetCookie()` is a relatively new Web API (added in Node 19+). The project runs Node 24 locally and Node 22 in Docker, so it's available, but this should be noted as a compatibility consideration.
+**Decision:** AUTO-ACCEPT. Node 22 supports `getSetCookie()`. Docker base image is `node:22-alpine`. No action needed. (Principle 3: low risk)
 
-### DN-03 (design) — Phase 14 scope includes `/login` but plan 14-01 also scaffolds `/associate/login` if Phase 9 didn't create it
-Creates ambiguity about plan ownership. Phase 9 Plan 03 owns `/associate/login/page.tsx`.
-**Recommendation:** Auto-decide — 09-03 builds the page, 14-01 restyles. No scaffolding path needed in 14-01 if 09-03 is done first (depends_on: ["09","10"] is correct). Add explicit note in 14-01 that scaffolding branch is dead code once 09-03 ships. NO USER INPUT NEEDED.
+### FLAG-02: Magic link endpoint returns 500 on generateLink error (Research Pattern 7 vs Plan 04)
 
-### DN-04 (eng) — Skill-to-path matching fragility (RF-12)
-Current plan: substring match `curriculumWeek.skillName` ↔ `githubFile.path.split('/')[0]` case-insensitive. Alternative: add dropdown in curriculum UI populated from live GitHub tech list.
-**Recommendation (FF):** Ship substring match as planned. Dropdown-from-GitHub is v1.2 polish (would require GitHub fetch in trainer UI + caching). Add helper text in curriculum form: "skillName must match a question bank folder (e.g., 'react', 'typescript')".
+**Severity:** Medium
+**Issue:** Research Pattern 7 shows `return NextResponse.json({ error: 'Failed to generate link' }, { status: 500 })` when `generateLink` fails. But Plan 04 Task 1 behavior section says "Always returns 200 { ok: true } regardless of email existence (no user leak)". The plan behavior is correct (security-first, never leak user existence), but the research pattern contradicts it. Plan 04 Task 1 action step explicitly says "return 200 `{ ok: true }` anyway" which is the right call.
+**Decision:** AUTO-ACCEPT the plan's behavior over the research pattern. The plan is security-correct. Research Pattern 7 is a starting sketch, not a locked decision. (Principle 1: only one secure approach)
 
-No BLOCKED items. All gray areas auto-resolve with fast-intuitive defaults consistent with solo-dev 3-4 week velocity.
+### FLAG-03: `associate` role default when `user_metadata.role` is unset (Plan 02)
+
+**Severity:** Low
+**Issue:** Plan 02 and Research Pattern 5 default to `'associate'` when `user_metadata.role` is not set on an authenticated user. This means any Supabase user created without explicit role metadata will be treated as an associate. This is correct for the magic-link flow (associates won't have role set until the callback links them), but could be surprising if someone manually creates a user in the dashboard without setting role.
+**Decision:** AUTO-ACCEPT. The alternative (defaulting to `'anonymous'`) would break the magic-link flow for new associates. The current default is the safer choice. Admin/trainer must be explicitly promoted. (Principle 5: close approaches, this is better)
+
+### FLAG-04: No automated tests for SignInTabs UI (Plans 03 + 04)
+
+**Severity:** Low
+**Issue:** Plans 03 and 04 rely on human-verify checkpoints for SignInTabs UI validation. No Vitest component tests or Playwright E2E tests are specified for the sign-in form interactions. This is acceptable for auth flows (which inherently need real Supabase credentials for meaningful testing), but creates a regression risk.
+**Decision:** AUTO-ACCEPT for Phase 18. Auth UI testing with mocked Supabase clients would be low-signal. The human-verify gates are the right call for an auth install phase. Playwright E2E tests can be added in a future phase when the auth system stabilizes. (Principle 3: low risk, reversible)
+
+### FLAG-05: `AuthProvider.login()` signature breaking change (Plan 03)
+
+**Severity:** Medium
+**Issue:** Plan 03 Task 1 changes `login(password: string)` to `login(email: string, password: string)`. This is flagged as a "BREAKING CHANGE" in the plan text. All callers of `useAuth().login()` must be updated. The plan only mentions updating `SignInTabs.tsx` but any other caller of `useAuth().login()` would break.
+**Decision:** AUTO-ACCEPT. `login()` is only called from `SignInTabs.tsx` in the current codebase (it's a sign-in-specific function). The plan handles the only caller. (Principle 3: low risk, grep-verifiable)
 
 ---
 
-## Confidence summary
+## Taste Decisions (surfaced for human input)
 
-| Dimension | Rating | Notes |
-|-----------|--------|-------|
-| Plan coverage of requirements | 10/10 | All 14 reqs mapped to plans |
-| Architectural soundness | 9/10 | Dual-write preserved; identity trust boundaries correct |
-| Test posture | 8/10 | TDD on pure/API layers; manual checkpoints on UI (appropriate) |
-| Design consistency | 8/10 | Phase 14 consolidates; RF-13 watch on globals.css token swap |
-| Solo-dev velocity fit | 9/10 | Native selects, window.confirm, inline forms — no over-engineering |
-| Backward compat discipline | 10/10 | Every plan re-asserts v1.0 non-regression |
+### TASTE-01: Resend `from` address for auth emails
 
-**Ready to execute via `/gsd-execute-phase` starting with Phase 8.** Surface RF-13/RF-14 (globals.css grep) and RF-09 (Int coercion) to executor at wave-dispatch time.
+**Context:** Plan 03 uses `from: 'Next Level Mock <auth@nextlevelmock.com>'` for password reset emails. Plan 04 uses the same for magic links. The existing interview report email uses `from: 'Next Level Mock <reports@nextlevelmock.com>'`.
+
+**Options:**
+- A) `auth@nextlevelmock.com` — separate subdomain for auth emails (better email reputation isolation)
+- B) `reports@nextlevelmock.com` — reuse existing verified sender (simpler, one Resend domain)
+- C) `noreply@nextlevelmock.com` — standard noreply pattern for transactional auth emails
+
+**Why this needs human input:** This is a branding/deliverability decision. All three approaches work. The `from` address affects email filtering, user trust, and requires DNS/Resend configuration. Close approaches with no clear engineering winner.
+
+**Recommendation:** Option A (`auth@`) if the domain is already verified in Resend and wildcard sending is enabled. Otherwise Option B to avoid DNS changes blocking the phase.
+
+---
+
+## Summary by Plan
+
+| Plan | Wave | SC Coverage | Verdict | Notes |
+|------|------|-------------|---------|-------|
+| 18-01 | 1 | SC-1 (partial), SC-2 | SHIP | Foundation layer. Clean package install + 4 client files + boot assert + rate limiter + AuthEvent migration. |
+| 18-02 | 2 | SC-5, SC-6 | SHIP | Auth backbone. Middleware rewrite + identity rewrite + all caller updates. Breaking changes handled atomically. |
+| 18-03 | 3 | SC-3 | SHIP | Trainer sign-in + password reset. Human-verify gate appropriate. |
+| 18-04 | 3 | SC-4 | SHIP | Associate magic link + PKCE callback + authUserId linkage. Human-verify gate appropriate. |
+
+## Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| Supabase dashboard not configured (OTP expiry, PKCE, redirect URLs) | Medium | High (magic links fail) | Plan 01 `user_setup` section documents exact steps |
+| Middleware cookie loss on redirect | Low | High (intermittent auth loss) | Pitfall 1 mitigated by cookie forwarding pattern in Plan 02 |
+| `authUserId` not linked on first magic-link callback | Low | Medium (associate sees anonymous) | Pitfall 5 mitigated by email-match fallback in Plan 04 |
+| Rate limiter namespace collision | Low | Low (wrong limit applied) | Pitfall 7 mitigated by explicit key schema in Plan 01 |
+
+## Overall Verdict
+
+**SHIP ALL 4 PLANS AS-IS.** No blocking issues found. One taste decision (TASTE-01: Resend from address) surfaced for human input but does not block execution. The plans are well-researched, threat-modeled, and correctly sequenced. Wave structure respects dependencies. Human-verify gates are placed at the right points (post-sign-in-flow, not post-infrastructure).
