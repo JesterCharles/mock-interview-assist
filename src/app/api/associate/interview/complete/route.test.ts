@@ -8,8 +8,8 @@ vi.mock('@/lib/sessionPersistence', () => ({
   persistSessionToDb: vi.fn(),
 }));
 
-vi.mock('@/lib/auth-server', () => ({
-  getAssociateSession: vi.fn(),
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 vi.mock('@/lib/readinessPipeline', () => ({
@@ -19,12 +19,12 @@ vi.mock('@/lib/readinessPipeline', () => ({
 import { POST } from './route';
 import { checkRateLimit } from '@/lib/rateLimitService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
-import { getAssociateSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { runReadinessPipeline } from '@/lib/readinessPipeline';
 
 const mockCheckRateLimit = checkRateLimit as unknown as ReturnType<typeof vi.fn>;
 const mockPersist = persistSessionToDb as unknown as ReturnType<typeof vi.fn>;
-const mockGetAssocSession = getAssociateSession as unknown as ReturnType<typeof vi.fn>;
+const mockGetCallerIdentity = getCallerIdentity as unknown as ReturnType<typeof vi.fn>;
 const mockRunPipeline = runReadinessPipeline as unknown as ReturnType<typeof vi.fn>;
 
 function baseSession(overrides: Record<string, unknown> = {}) {
@@ -54,26 +54,32 @@ describe('POST /api/associate/interview/complete', () => {
   beforeEach(() => {
     mockCheckRateLimit.mockReset().mockReturnValue({ allowed: true, nextReset: new Date() });
     mockPersist.mockReset().mockResolvedValue(true);
-    mockGetAssocSession.mockReset();
+    mockGetCallerIdentity.mockReset();
     mockRunPipeline.mockReset().mockResolvedValue(undefined);
   });
 
-  it('Test 1: no cookie -> 401', async () => {
-    mockGetAssocSession.mockResolvedValueOnce(null);
+  it('Test 1: anonymous caller -> 401', async () => {
+    mockGetCallerIdentity.mockResolvedValueOnce({ kind: 'anonymous' });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(401);
     expect(mockPersist).not.toHaveBeenCalled();
     expect(mockRunPipeline).not.toHaveBeenCalled();
   });
 
-  it('Test 2: stale cookie (returns null) -> 401', async () => {
-    mockGetAssocSession.mockResolvedValueOnce(null);
+  it('Test 2: trainer caller -> 401 (associate-only endpoint)', async () => {
+    mockGetCallerIdentity.mockResolvedValueOnce({ kind: 'trainer', userId: 'u1', email: 't@t.com' });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(401);
   });
 
-  it('Test 3: valid cookie -> 200, persist with cookie slug, pipeline invoked', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+  it('Test 3: valid associate session -> 200, persist with session slug, pipeline invoked', async () => {
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(200);
     const persisted = mockPersist.mock.calls[0][0];
@@ -81,8 +87,14 @@ describe('POST /api/associate/interview/complete', () => {
     expect(mockRunPipeline).toHaveBeenCalledWith(77, 'sess-auth-1');
   });
 
-  it('Test 4: client-supplied attacker-slug is OVERRIDDEN by cookie slug', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+  it('Test 4: client-supplied attacker-slug is OVERRIDDEN by session slug', async () => {
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const res = await POST(
       makeReq({ fingerprint: 'fp', session: baseSession({ associateSlug: 'attacker' }) }),
     );
@@ -93,7 +105,13 @@ describe('POST /api/associate/interview/complete', () => {
   });
 
   it('Test 5: persistSessionToDb returns false -> 500; pipeline NOT called', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     mockPersist.mockResolvedValueOnce(false);
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(500);
@@ -101,13 +119,25 @@ describe('POST /api/associate/interview/complete', () => {
   });
 
   it('Test 6: invalid session shape -> 400', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const res = await POST(makeReq({ fingerprint: 'fp', session: { id: 'x' } }));
     expect(res.status).toBe(400);
   });
 
   it('Test 7: oversized payload -> 413', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const huge = 'x'.repeat(600_000);
     const res = await POST(
       makeReq({ fingerprint: 'fp', session: baseSession({ technicalFeedback: huge }) }),
@@ -117,8 +147,13 @@ describe('POST /api/associate/interview/complete', () => {
 
   it('Test 8: rate-limit rejection -> 429', async () => {
     mockCheckRateLimit.mockReturnValueOnce({ allowed: false, nextReset: new Date() });
-    // Even if auth valid, rate limit wins before persistence
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(429);
     expect(mockPersist).not.toHaveBeenCalled();
@@ -126,11 +161,15 @@ describe('POST /api/associate/interview/complete', () => {
   });
 
   it('enforces mode=automated on persisted session', async () => {
-    mockGetAssocSession.mockResolvedValueOnce({ associateId: 77, slug: 'alice' });
+    mockGetCallerIdentity.mockResolvedValueOnce({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
+      associateId: 77,
+      associateSlug: 'alice',
+    });
     const res = await POST(makeReq({ fingerprint: 'fp', session: baseSession() }));
     expect(res.status).toBe(200);
-    // mode is now passed via the options arg, not stamped onto the session
-    // payload — prevents it getting lost when persistSessionToDb writes columns.
     const options = mockPersist.mock.calls[0][1];
     expect(options).toEqual({ mode: 'automated' });
   });

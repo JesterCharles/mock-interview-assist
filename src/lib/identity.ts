@@ -12,7 +12,7 @@ import { prisma } from '@/lib/prisma';
  * Associate linkage uses Associate.authUserId FK (populated in Phase 17 schema).
  * If no matching Associate row is found, returns anonymous.
  *
- * No PIN cookie read. No ENABLE_ASSOCIATE_AUTH check.
+ * No PIN cookie read. No feature flag check.
  */
 export type CallerIdentity =
   | { kind: 'admin'; userId: string; email: string }

@@ -48,9 +48,9 @@ if (TEST_DB_URL) {
   process.env.DATABASE_URL = TEST_DB_URL;
 }
 
-// Mock ONLY the cookie-identity boundary — real Prisma, real pipeline.
-vi.mock('@/lib/auth-server', () => ({
-  getAssociateSession: vi.fn(),
+// Mock ONLY the identity boundary — real Prisma, real pipeline.
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 // Rate limit would block repeat calls in-process; stub to always allow.
@@ -71,13 +71,13 @@ describeIntegration('Phase 10 pipeline integration (requires TEST_DATABASE_URL)'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let assocPOST: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let getAssociateSession: any;
+  let getCallerIdentity: any;
 
   beforeAll(async () => {
     ({ prisma } = await import('@/lib/prisma'));
     ({ POST: publicPOST } = await import('@/app/api/public/interview/complete/route'));
     ({ POST: assocPOST } = await import('@/app/api/associate/interview/complete/route'));
-    ({ getAssociateSession } = await import('@/lib/auth-server'));
+    ({ getCallerIdentity } = await import('@/lib/identity'));
   });
 
   afterAll(async () => {
@@ -95,7 +95,7 @@ describeIntegration('Phase 10 pipeline integration (requires TEST_DATABASE_URL)'
       update: { readinessThreshold: 75 },
       create: { id: 1, readinessThreshold: 75 },
     });
-    (getAssociateSession as ReturnType<typeof vi.fn>).mockReset();
+    (getCallerIdentity as ReturnType<typeof vi.fn>).mockReset();
   });
 
   // --- helpers ---------------------------------------------------------------
@@ -205,9 +205,12 @@ describeIntegration('Phase 10 pipeline integration (requires TEST_DATABASE_URL)'
 
   it('A: authenticated session writes Session+GapScore+readiness end-to-end', async () => {
     const assoc = await seedAssociateWithPriorSessions('test-assoc', 2);
-    (getAssociateSession as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (getCallerIdentity as ReturnType<typeof vi.fn>).mockResolvedValue({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
       associateId: assoc.id,
-      slug: assoc.slug,
+      associateSlug: assoc.slug,
     });
 
     const sessionId = `sess-A-${Date.now()}`;
@@ -274,10 +277,13 @@ describeIntegration('Phase 10 pipeline integration (requires TEST_DATABASE_URL)'
       data: { slug: 'victim', displayName: 'victim' },
     });
 
-    // Cookie says "attacker"; client payload tries to spoof "victim".
-    (getAssociateSession as ReturnType<typeof vi.fn>).mockResolvedValue({
+    // Session says "attacker"; client payload tries to spoof "victim".
+    (getCallerIdentity as ReturnType<typeof vi.fn>).mockResolvedValue({
+      kind: 'associate',
+      userId: 'u1',
+      email: 'a@a.com',
       associateId: attacker.id,
-      slug: attacker.slug,
+      associateSlug: attacker.slug,
     });
 
     const sessionId = `sess-C-${Date.now()}`;
