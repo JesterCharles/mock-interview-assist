@@ -55,14 +55,17 @@ Source: DESIGN.md §Spacing, `src/app/globals.css` button min-height rule
 | Role | Size | Weight | Font | Line Height | Usage |
 |------|------|--------|------|-------------|-------|
 | Page title | 28px | 600 | Clash Display | 1.2 | "Bulk Invite" heading on `/trainer/onboarding` |
-| Section heading | 22px | 600 | Clash Display | 1.2 | "Email Addresses", "Target Cohort", "Preview" section labels |
-| Body | 16px | 400 | DM Sans | 1.5 | Form helper text, preview table content, toast body |
-| Label / UI | 13px | 500 | DM Sans | 1.4 | Input labels, chip text, count summary ("3 valid, 1 invalid") |
-| Metadata | 12px | 500–600 | DM Sans | 1.3 | Status badges, table notes column, throttle timestamp |
-| Mono label | 11px | 500 | JetBrains Mono | 1.2 | Section category labels (uppercase, 0.07em tracking) |
+| Body | 16px | 400 | DM Sans | 1.5 | Form helper text, preview table content, toast body, section headings (semibold 600 variant for "Email Addresses", "Target Cohort", "Preview") |
+| Label / UI | 13px | 400 | DM Sans | 1.4 | Input labels, chip text, count summary ("3 valid, 1 invalid"), cap error copy |
+| Metadata / Mono | 12px | 600 | DM Sans / JetBrains Mono | 1.3 | Status badges, table notes column, throttle timestamp, section category labels (uppercase, 0.07em tracking, JetBrains Mono) |
 
-Active sizes for this phase: 28, 22, 16, 13, 12, 11px.
-Active weights: 400 (regular) and 500–600 (medium/semibold).
+Active sizes for this phase: 28, 16, 13, 12px.
+Active weights: 400 (regular) and 600 (semibold).
+
+Notes:
+- Section headings ("Email Addresses", "Target Cohort", "Preview") use 16px weight 600 Clash Display.
+- Count summary uses 13px weight 400 DM Sans; the colored segments (valid/invalid/duplicate) are differentiated by color only, not weight.
+- Badge text and mono category labels both use 12px weight 600 for legibility at small size.
 
 Source: DESIGN.md §Typography scale
 
@@ -146,27 +149,27 @@ Source: 19-CONTEXT.md (D-02, D-03, D-08, D-09, D-13, D-16), user decisions
 - Variant: multi-line, `--surface` background, `--border` 1px solid border, 8px border-radius, 16px padding
 - Min height: 120px, max height: 240px (scrollable)
 - Resize: vertical only
-- Font: 14px DM Sans 400, `--ink` color
+- Font: 13px DM Sans 400, `--ink` color
 - Placeholder: `--muted` color
 - Focus: `--accent` 2px outline, offset 2px
 - Live parsing fires on `onChange` (debounced 150ms)
 
 **Chip list**
 - Renders below textarea as a wrapping flex row (gap: 8px, row-gap: 8px)
-- Each chip: border-radius 9999px (pill), 6px vertical + 12px horizontal padding, 13px DM Sans 500
+- Each chip: border-radius 9999px (pill), 6px vertical + 12px horizontal padding, 13px DM Sans 400
 - Chip colors: per semantic table above (valid/invalid/duplicate)
-- X button: 16px touch target minimum, `×` glyph, same text color as chip, positioned inline-end
+- X button: minimum 44×44px hit area, `×` glyph, `aria-label="Remove {email}"` (e.g. `aria-label="Remove user@example.com"`), same text color as chip, positioned inline-end
 - Chip list has max-height 160px with overflow-y: auto when count exceeds ~20 chips
 
 **Count summary**
 - Renders immediately below chip list
 - Format: "{N} valid · {N} invalid · {N} duplicate"
-- 12px DM Sans 500
+- 12px DM Sans 600
 - valid count: `--success` color, invalid: `--danger`, duplicate: `--warning`
 
 **Cap error**
 - Inline below count summary when valid count > 50
-- 13px DM Sans 500, `--danger` color
+- 13px DM Sans 400, `--danger` color
 - "Preview Invites" button disabled when cap exceeded
 
 **Cohort dropdown**
@@ -197,7 +200,7 @@ Source: 19-CONTEXT.md (D-02, D-03, D-08, D-09, D-13, D-16), user decisions
 - Row hover: `--highlight` background (150ms ease-out transition)
 - Columns: Checkbox | Email | Action | Notes
 - Checkbox column: 40px wide; only actionable rows (New, Reassign) are checkable; Skip rows: checkbox disabled + grayed
-- Email column: 14px DM Sans 400, `--ink`
+- Email column: 13px DM Sans 400, `--ink`
 - Action column: semantic badge (pill shape, 12px DM Sans 600, per badge table above)
 - Notes column: 12px DM Sans 400, `--muted` (e.g. "Currently in Cohort B", "Invited 2 min ago")
 - Default: all New + Reassign rows checked; Skip rows unchecked + disabled
@@ -232,7 +235,7 @@ Source: 19-CONTEXT.md (D-02, D-03, D-08, D-09, D-13, D-16), user decisions
 - Duration: 4000ms
 - All success: success toast (green bar, white surface) — "All invites sent."
 - Partial failure: warning toast (orange bar) — "{N} failed. Check the results table."
-- Style: DM Sans 14px 400, `--ink` text, `--surface` background, `--border` border
+- Style: DM Sans 13px 400, `--ink` text, `--surface` background, `--border` border
 
 **"Invite More" button**
 - `.btn-secondary-flat` from globals.css
