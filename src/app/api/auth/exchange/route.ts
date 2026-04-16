@@ -118,7 +118,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
       }
 
-      if (assoc) return redirectWith(`/associate/${assoc.slug}`);
+      if (assoc) return redirectWith(`/associate/${assoc.slug}/dashboard`);
       return redirectWith('/signin?error=not-onboarded');
     } catch (err) {
       console.error('[exchange] authUserId linkage error:', err);
