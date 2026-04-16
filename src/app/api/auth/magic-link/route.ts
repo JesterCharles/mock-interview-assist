@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { prisma } from '@/lib/prisma';
 import { checkAuthRateLimit, recordAuthEvent } from '@/lib/authRateLimit';
 import { getMagicLinkEmailHtml } from '@/lib/email/auth-templates';
 
@@ -42,6 +43,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const limit = checkAuthRateLimit({ email, ip, type: 'magic-link' });
   if (!limit.allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
+  // Only send magic links to emails with an existing Associate row.
+  // Prevents Supabase from auto-creating auth users for unregistered emails.
+  // Still return 200 to avoid leaking whether the email exists.
+  const associate = await prisma.associate.findFirst({
+    where: { email: { equals: email, mode: 'insensitive' } },
+    select: { id: true },
+  });
+  if (!associate) {
+    await recordAuthEvent({ type: 'magic-link-no-associate', email, ip });
+    return NextResponse.json({ ok: true });
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';

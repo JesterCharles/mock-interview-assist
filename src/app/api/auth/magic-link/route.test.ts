@@ -16,6 +16,14 @@ vi.mock('@/lib/supabase/admin', () => ({
   },
 }));
 
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    associate: {
+      findFirst: vi.fn(),
+    },
+  },
+}));
+
 vi.mock('@/lib/authRateLimit', () => ({
   checkAuthRateLimit: vi.fn(),
   recordAuthEvent: vi.fn().mockResolvedValue(undefined),
@@ -34,6 +42,7 @@ vi.mock('resend', () => ({
 
 import { POST } from './route';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { prisma } from '@/lib/prisma';
 import { checkAuthRateLimit, recordAuthEvent } from '@/lib/authRateLimit';
 import { getMagicLinkEmailHtml } from '@/lib/email/auth-templates';
 
@@ -41,6 +50,8 @@ const mockGenerateLink = supabaseAdmin.auth.admin.generateLink as ReturnType<typ
 const mockCheckRateLimit = checkAuthRateLimit as ReturnType<typeof vi.fn>;
 const mockRecordAuthEvent = recordAuthEvent as ReturnType<typeof vi.fn>;
 const mockGetMagicLinkEmailHtml = getMagicLinkEmailHtml as ReturnType<typeof vi.fn>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockFindFirst = (prisma.associate as any).findFirst as ReturnType<typeof vi.fn>;
 
 function makeRequest(body: unknown, headers: Record<string, string> = {}): NextRequest {
   return new NextRequest('http://localhost:3000/api/auth/magic-link', {
@@ -58,6 +69,7 @@ describe('POST /api/auth/magic-link', () => {
     vi.clearAllMocks();
     mockSend.mockResolvedValue({ data: { id: 'email-id' }, error: null });
     mockCheckRateLimit.mockReturnValue({ allowed: true, remaining: 2, retryAfterMs: 0 });
+    mockFindFirst.mockResolvedValue({ id: 1 });
     mockGenerateLink.mockResolvedValue({
       data: { properties: { action_link: 'https://supabase.io/magic?token=abc' } },
       error: null,
@@ -75,6 +87,20 @@ describe('POST /api/auth/magic-link', () => {
     const req = makeRequest({});
     const res = await POST(req);
     expect(res.status).toBe(400);
+  });
+
+  it('returns 200 without generating link for non-associate email', async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const req = makeRequest({ email: 'stranger@example.com' });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual({ ok: true });
+    expect(mockGenerateLink).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockRecordAuthEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'magic-link-no-associate' })
+    );
   });
 
   it('returns 429 when rate limited', async () => {
