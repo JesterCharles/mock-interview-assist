@@ -60,6 +60,57 @@ export interface RosterResponse {
   summary: CohortSummary
 }
 
+// Phase 22 — Analytics response types
+
+export interface KpiData {
+  avgReadiness: number | null       // % of associates classified as "ready"
+  mocksThisWeek: number             // count of sessions in last 7 days
+  atRiskCount: number               // count of not_ready associates
+  topGapSkill: string | null        // skill name with lowest avg gap score
+  avgVariance: number | null        // average aiTrainerVariance across sessions
+}
+
+export interface SparklinePoint {
+  score: number
+}
+
+export interface RosterSparklineData {
+  associateId: number
+  slug: string
+  sparkline: SparklinePoint[]       // last 6 sessions, oldest first
+  trendWord: 'improving' | 'declining' | 'steady' | 'new'
+  topGap: string | null             // lowest gap score skill name
+  lastMockDate: string | null       // ISO timestamp
+}
+
+export interface GapAnalysisRow {
+  skill: string
+  topic: string
+  associatesAffected: number
+  avgGapScore: number
+}
+
+export interface GapDrillThroughRow {
+  slug: string
+  displayName: string
+  gapScore: number
+  lastSessionDate: string | null
+}
+
+export interface CalibrationData {
+  overrideRate: number | null       // percentage 0-100
+  overrideCount: number
+  totalScoredQuestions: number
+  deltaBuckets: Record<string, number>  // keys: "-3","-2","-1","0","1","2","3"
+}
+
+export interface CohortTrendPoint {
+  weekLabel: string                 // "W1", "W2", etc.
+  weekStart: string                 // ISO date
+  avgScore: number
+  sessionCount: number
+}
+
 // Plan 17-02 — Trainer backfill surface.
 // Row shape for /api/trainer/associates list used by the BACKFILL-02 admin UI.
 // Includes id (numeric PK) for trainer-only PATCH/DELETE actions.
