@@ -2,17 +2,17 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 22 done + verified (6132195). Next: discuss Phase 23 (Associate Self-Dashboard).
+- Current stage: Phase 23 done (3c050d8). Next: discuss Phase 24 (PDF Analytics Export).
 - Mode: unattended (--discuss)
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 22 complete (Trainer Analytics). 4 plans executed, 460 tests (55 new), 6/6 SC automated PASS, 5 human-verify items (visual). Key deliverables: KPI strip (4 cards, single $queryRaw), roster sparklines (windowed query), Gap Analysis page + drill-through, Calibration page (override frequency + delta histogram), Cohort Trends 12-week line chart, topic frontmatter parser, aiTrainerVariance write. Next:
-- `/gsd-discuss-phase 23 --auto` — Associate Self-Dashboard
+Phase 23 complete (Associate Self-Dashboard). 2 plans executed, 481 tests (21 new), no warnings. Key deliverables: AssociateNav 3-tab layout, gap trend chart, RecommendedAreaCard with 7-day dismiss, ReadinessProgressBar with threshold marker, mailto Book a Mock CTA. Next:
+- `/gsd-discuss-phase 24 --auto` — PDF Analytics Export
 - `/pipeline-coordinator --resume --unattended --discuss` to auto-route
 
-Roadmap Phases 23-25 still pending plan.
+Roadmap Phases 24-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -37,10 +37,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phases 16-22 PLAN done. Phase 23 next. Phases 24-25 pending. |
-| execute | in_progress | 2026-04-15 | | P16-P22 done. P22: 4 plans, 55 new tests, 460 total, VERIFIED 6132195. Phases 23-25 pending. |
-| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: patches applied. P19-P22: pending. |
-| test | per-phase | 2026-04-15 | | P16-P20: 395. P21: 405. P22: 460 tests, 6/6 SC (5 human-verify). |
+| plan | in_progress | 2026-04-15 | | Phases 16-23 PLAN done. Phase 24 next. Phase 25 pending. |
+| execute | in_progress | 2026-04-15 | | P16-P23 done. P23: 2 plans, 481 tests, no warnings. Phases 24-25 pending. |
+| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: patches applied. P19-P23: pending. |
+| test | per-phase | 2026-04-15 | | P16-P21: 405. P22: 460. P23: 481 tests. |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
