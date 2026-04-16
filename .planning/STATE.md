@@ -6,7 +6,7 @@ status: executing
 last_updated: "2026-04-16T22:56:08.693Z"
 last_activity: 2026-04-16 -- Phase 26 planning complete
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 0
   total_plans: 1
   completed_plans: 0
@@ -38,7 +38,7 @@ See: .planning/PROJECT.md (updated 2026-04-16 — v1.3 started)
 - v1.0: 7 phases, 22 reqs, ~26h
 - v1.1: 8 phases, 14 reqs, ~24h, 131 commits
 - v1.2: 10 phases, 30 reqs, ~16h, 205 commits, 470 tests
-- v1.3: 6 phases, 18 reqs (in progress)
+- v1.3: 7 phases, 19 reqs (in progress)
 
 ## Accumulated Context
 
@@ -64,6 +64,10 @@ See: .planning/PROJECT.md (updated 2026-04-16 — v1.3 started)
 | Cohort ID derived from auth session (never query params) | Prevents unauthorized curriculum data exposure | Phase 30 |
 | Build chart components with CSS vars from day one | Avoids dark mode retrofit in Phase 31 | Phase 26+ |
 | Cap gap history at 20 sessions for trend charts | Perf guard; materialize if >2s after Phase 29 | Phase 29 |
+
+## Roadmap Evolution
+
+- Phase 28.1 inserted after Phase 28: User Profile — Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED)
 
 ## Session Continuity
 

@@ -59,6 +59,7 @@
 - [ ] **Phase 26: Design Tokens (Data-Viz)** - Add chart palette, typography, and trajectory-language conventions to DESIGN.md and globals.css
 - [ ] **Phase 27: Unified App Shell** - Extend AppShell to serve associate role; remove PublicShell + AssociateNav
 - [ ] **Phase 28: Sign-in Redesign** - Replace tabbed SignInTabs with stacked-button single page + first-login password upgrade
+- [ ] **Phase 28.1: User Profile** - Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED)
 - [ ] **Phase 29: Associate Data Visualization** - Skill bars with trend arrows, focus area hero, per-skill trend chart, radar plot, dashboard skill filter
 - [ ] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state
 - [ ] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface
@@ -102,6 +103,21 @@ Plans:
   4. A trainer completing password sign-in is also prompted to set a new password on first login if none is set
 **Plans**: TBD
 **UI hint**: yes
+
+### Phase 28.1: User Profile (INSERTED)
+**Goal**: Profile model in Prisma with passwordSetAt, a profile page accessible from avatar menu (update password, display email/github/basic info), and migration of first-login detection from user_metadata to Profile table
+**Depends on**: Phase 28
+**Requirements**: PROFILE-01
+**Success Criteria** (what must be TRUE):
+  1. Profile model exists in Prisma schema with passwordSetAt, github, and display fields
+  2. Avatar menu dropdown links to a profile/settings page
+  3. Profile page allows updating password, viewing email, and entering github username
+  4. First-login detection reads from Profile.passwordSetAt instead of Supabase user_metadata
+**Plans**: TBD
+**UI hint**: yes
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 28.1 to break down)
 
 ### Phase 29: Associate Data Visualization
 **Goal**: Associates view a rich picture of their skill performance — ranked bars with trend direction, a prominent focus recommendation, a filterable session-over-session trend chart, and a radar plot of all cohort skills

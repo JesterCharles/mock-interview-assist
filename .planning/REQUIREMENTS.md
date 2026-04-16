@@ -19,6 +19,10 @@ Requirements for UX Unification & Polish milestone.
 - [ ] **SIGNIN-01**: Sign-in page shows two stacked buttons ("Continue with email link" / "Sign in with password") with inline form expansion, no tabs
 - [ ] **SIGNIN-02**: All users redirected to set password on first login (trainers and associates alike)
 
+### User Profile
+
+- [ ] **PROFILE-01**: Profile model (Prisma) with profile page accessible from avatar menu — update password, display email/github, basic associate info; first-login detection migrated from user_metadata to Profile.passwordSetAt
+
 ### Data Visualization
 
 - [ ] **VIZ-01**: Ranked skill list with score bars and trend arrows (up/down/flat) on associate dashboard
@@ -84,6 +88,7 @@ Deferred to subsequent milestones.
 | SHELL-04 | Phase 27 | Pending |
 | SIGNIN-01 | Phase 28 | Pending |
 | SIGNIN-02 | Phase 28 | Pending |
+| PROFILE-01 | Phase 28.1 | Pending |
 | VIZ-01 | Phase 29 | Pending |
 | VIZ-02 | Phase 29 | Pending |
 | VIZ-03 | Phase 29 | Pending |
