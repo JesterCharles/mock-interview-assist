@@ -2,17 +2,17 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 19 done + verified (897b337). Next: discuss Phase 20 (Middleware Cutover + RLS).
+- Current stage: Phase 20 done + verified (bfdac08). Next: discuss Phase 21 (App Shell Redesign).
 - Mode: unattended (--discuss)
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 19 complete (Bulk Invite). 3 plans executed, 395 tests (60 new), 5/6 SC automated PASS, 1 SC human-verified (email delivery). Key deliverables: email parser + chip input, inviteAssociate helper, bulk API (20/day pre-flight, partial-failure isolation), preview classification, 3-screen onboarding page, dashboard stub. Next:
-- `/gsd-discuss-phase 20 --auto` — Middleware Cutover + RLS
+Phase 20 complete (Middleware Cutover + RLS). 2 plans executed, 395 tests, 4/5 SC automated PASS, 1 SC human-needed (RLS live enforcement). Key deliverables: is_trainer() SECURITY DEFINER + 10 RLS policies on 5 tables, 17 route handlers audit-verified, PROJECT.md BYPASSRLS architecture docs. Next:
+- `/gsd-discuss-phase 21 --auto` — App Shell Redesign
 - `/pipeline-coordinator --resume --unattended --discuss` to auto-route
 
-Roadmap Phases 20-25 still pending plan.
+Roadmap Phases 21-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -37,10 +37,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phases 16-19 PLAN done. Phase 20 next. Phases 21-25 pending. |
-| execute | in_progress | 2026-04-15 | | P16-P19 done. P19: 3 plans, 60 new tests, 395 total, VERIFIED 897b337. Phases 20-25 pending. |
-| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: autoplan SHIP + codex review, patches applied. P19: pending. |
-| test | per-phase | 2026-04-15 | | P16: 254 tests. P17: 5/6 SC PASS. P18: 335 tests. P19: 395 tests, 5/6 SC PASS (1 human-verified). |
+| plan | in_progress | 2026-04-15 | | Phases 16-20 PLAN done. Phase 21 next. Phases 22-25 pending. |
+| execute | in_progress | 2026-04-15 | | P16-P20 done. P20: 2 plans, 10 RLS policies, VERIFIED bfdac08. Phases 21-25 pending. |
+| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: patches applied. P19-P20: pending. |
+| test | per-phase | 2026-04-15 | | P16-P18: 335 tests. P19: 395 tests, 5/6 SC. P20: 395 tests, 4/5 SC (1 human-needed). |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
