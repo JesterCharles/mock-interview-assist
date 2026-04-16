@@ -102,6 +102,8 @@ Unified entry point: `/signin` (`SignInTabs.tsx`) with Trainer + Associate tabs.
 
 PIN verification endpoint is defense-in-depth: the limiter uses a composite (server-IP + client fingerprint) key with a separate IP-only bucket. `NLM_TRUSTED_PROXY=true` opts into parsing `x-forwarded-for` when deployed behind a trusted edge proxy.
 
+RLS deployed as defense-in-depth (Phase 20). See PROJECT.md > Database Access Architecture for details.
+
 ### Key API Routes
 
 | Route | Purpose |

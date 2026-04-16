@@ -16,6 +16,46 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest, 24/24 Playwright, Codex findings all P1/P2 resolved pre-merge.
 - Total codebase: 35 routes, standalone Docker output, idempotent migrations.
 
+## Database Access Architecture
+
+### Prisma + Service-Role (BYPASSRLS)
+
+Prisma connects via `DATABASE_URL` (Supabase Transaction Pooler, port 6543) using the service-role key. Service-role connections **bypass RLS** — Postgres Row Level Security policies have zero effect on Prisma queries. This is intentional: Prisma is the primary data access layer, and all access control is enforced at the application layer.
+
+### RLS as Defense-in-Depth
+
+RLS policies are deployed on `Associate`, `Session`, `GapScore`, `Cohort`, and `CurriculumWeek` as a **defense-in-depth** layer. They protect against unauthorized direct `supabase-js` reads (e.g., from client-side code or edge functions that use the anon key). RLS is NOT the primary access control mechanism.
+
+Policies:
+- **Associate**: Self (authUserId = auth.uid()) OR trainer/admin
+- **Session, GapScore**: Owner (via Associate FK) OR trainer/admin
+- **Cohort, CurriculumWeek**: Trainer/admin only
+
+A `public.is_trainer()` SECURITY DEFINER function checks `auth.jwt() -> user_metadata.role` for `'trainer'` or `'admin'`.
+
+### Explicit-Filter Requirement
+
+Every route handler MUST call `getCallerIdentity()` and filter database queries by the caller's identity. Do NOT rely on RLS to enforce access control for Prisma queries — service-role bypasses it.
+
+Pattern:
+```typescript
+const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
+if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
+```
+
+All existing route handlers were audited in Phase 20 and annotated with `// [AUDIT-VERIFIED: P20]`.
+
+### AUTH-09 Status
+
+Middleware (`src/middleware.ts`) was rewritten to Supabase-primary in Phase 18. It guards:
+- `/trainer/*` — trainer role only
+- `/associate/*` except `/signin` — trainer or matching associate
+- `/interview/*`, `/review/*` — trainer only
+
+The PIN-based associate auth was never shipped to production. No grace window code exists — `getCallerIdentity()` reads Supabase session only.
+
 ## Current Milestone: v1.2 Analytics & Auth Overhaul
 
 **Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
