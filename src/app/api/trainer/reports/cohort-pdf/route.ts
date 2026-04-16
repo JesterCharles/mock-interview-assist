@@ -154,7 +154,7 @@ export async function GET(request: Request) {
               a.slug,
               a."displayName" as display_name,
               a."readinessStatus" as readiness_status,
-              a."readinessScore" as readiness_score,
+              NULL::float as readiness_score,
               a."recommendedArea" as recommended_area,
               (SELECT COUNT(*) FROM "Session" sc WHERE sc."associateId" = a.id) as session_count,
               (SELECT MAX(sc2."createdAt") FROM "Session" sc2 WHERE sc2."associateId" = a.id) as last_session_date,
@@ -170,7 +170,7 @@ export async function GET(request: Request) {
               a.slug,
               a."displayName" as display_name,
               a."readinessStatus" as readiness_status,
-              a."readinessScore" as readiness_score,
+              NULL::float as readiness_score,
               a."recommendedArea" as recommended_area,
               (SELECT COUNT(*) FROM "Session" sc WHERE sc."associateId" = a.id) as session_count,
               (SELECT MAX(sc2."createdAt") FROM "Session" sc2 WHERE sc2."associateId" = a.id) as last_session_date,
@@ -283,20 +283,20 @@ export async function GET(request: Request) {
 
     // ── 6. Render PDF ───────────────────────────────────────────────────────
     const generatedDate = new Date().toISOString().split('T')[0]
-    const buffer = await renderToBuffer(
-      React.createElement(CohortAnalyticsPdf, {
-        cohortName,
-        generatedDate,
-        kpi,
-        gaps,
-        roster,
-      })
-    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const element = React.createElement(CohortAnalyticsPdf, {
+      cohortName,
+      generatedDate,
+      kpi,
+      gaps,
+      roster,
+    }) as unknown as Parameters<typeof renderToBuffer>[0]
+    const buffer = await renderToBuffer(element)
 
     const safeName = cohortName.replace(/[^a-z0-9-]/gi, '-').toLowerCase()
     const filename = `nlm-cohort-${safeName}-${generatedDate}.pdf`
 
-    return new NextResponse(buffer, {
+    return new Response(buffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,

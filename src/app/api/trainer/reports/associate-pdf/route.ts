@@ -57,7 +57,7 @@ export async function GET(request: Request) {
 
     const sessions: SessionSummary[] = rawSessions.map((s) => ({
       id: s.id,
-      date: s.date instanceof Date ? s.date.toISOString() : String(s.date),
+      date: String(s.date),
       overallTechnicalScore: s.overallTechnicalScore ?? null,
       overallSoftSkillScore: s.overallSoftSkillScore ?? null,
       status: s.status ?? 'completed',
@@ -105,26 +105,26 @@ export async function GET(request: Request) {
 
     // ── 5. Render PDF ───────────────────────────────────────────────────────
     const generatedDate = new Date().toISOString().split('T')[0]
-    const buffer = await renderToBuffer(
-      React.createElement(AssociateAnalyticsPdf, {
-        associate: {
-          displayName: associate.displayName ?? associate.slug,
-          slug: associate.slug,
-          readinessStatus: validatedReadinessStatus(associate.readinessStatus),
-          readinessScore: associate.readinessScore ?? null,
-          recommendedArea: associate.recommendedArea ?? null,
-          cohortName: associate.cohort?.name ?? null,
-        },
-        generatedDate,
-        gapScores,
-        sessions,
-        skillSparklines,
-      })
-    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const element = React.createElement(AssociateAnalyticsPdf, {
+      associate: {
+        displayName: associate.displayName ?? associate.slug,
+        slug: associate.slug,
+        readinessStatus: validatedReadinessStatus(associate.readinessStatus),
+        readinessScore: null,
+        recommendedArea: associate.recommendedArea ?? null,
+        cohortName: associate.cohort?.name ?? null,
+      },
+      generatedDate,
+      gapScores,
+      sessions,
+      skillSparklines,
+    }) as unknown as Parameters<typeof renderToBuffer>[0]
+    const buffer = await renderToBuffer(element)
 
     const filename = `nlm-${slug}-${generatedDate}.pdf`
 
-    return new NextResponse(buffer, {
+    return new Response(buffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,
