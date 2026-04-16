@@ -231,7 +231,7 @@ export default async function AssociateProfilePage({ params }: PageProps) {
   const readiness = deriveReadiness(associate.sessions);
 
   return (
-    <PublicShell title={displayName}>
+    <>
       {/* Back navigation */}
       <Link
         href={isTrainerOrAdmin ? '/trainer' : '/'}
@@ -402,6 +402,6 @@ export default async function AssociateProfilePage({ params }: PageProps) {
           ))}
         </div>
       )}
-    </PublicShell>
+    </>
   );
 }
