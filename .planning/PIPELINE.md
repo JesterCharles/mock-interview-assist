@@ -2,17 +2,15 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 23 done (3c050d8). Next: discuss Phase 24 (PDF Analytics Export).
+- Current stage: ALL PHASES COMPLETE (e24a51e). v1.2 milestone execution done. 10 phases, 30 reqs, 470 tests.
 - Mode: unattended (--discuss)
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 23 complete (Associate Self-Dashboard). 2 plans executed, 481 tests (21 new), no warnings. Key deliverables: AssociateNav 3-tab layout, gap trend chart, RecommendedAreaCard with 7-day dismiss, ReadinessProgressBar with threshold marker, mailto Book a Mock CTA. Next:
-- `/gsd-discuss-phase 24 --auto` — PDF Analytics Export
-- `/pipeline-coordinator --resume --unattended --discuss` to auto-route
+v1.2 MILESTONE COMPLETE. All 10 phases (16-25) executed. 30/30 requirements covered. 470 tests passing. PIN auth fully removed, Supabase-only auth, two-level nav shell, trainer analytics dashboard, associate self-dashboard, PDF export, bulk invite, RLS deployed.
 
-Roadmap Phases 24-25 still pending plan.
+Next: `/gsd-complete-milestone` to archive and tag, or `/pipeline-coordinator --from ship` to run shipping pipeline.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -37,10 +35,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phases 16-23 PLAN done. Phase 24 next. Phase 25 pending. |
-| execute | in_progress | 2026-04-15 | | P16-P23 done. P23: 2 plans, 481 tests, no warnings. Phases 24-25 pending. |
-| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: patches applied. P19-P23: pending. |
-| test | per-phase | 2026-04-15 | | P16-P21: 405. P22: 460. P23: 481 tests. |
+| plan | done | 2026-04-15 | 2026-04-16 | All 10 phases (16-25) planned. 30 reqs mapped. |
+| execute | done | 2026-04-15 | 2026-04-16 | All 10 phases executed. P25 final (e24a51e). 470 tests. |
+| review | per-phase | 2026-04-15 | | P16: fixed. P18: patched. P19-P25: pending full review. |
+| test | done | 2026-04-15 | 2026-04-16 | 470 tests passing. PIN tests removed (P25). All SC verified. |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
