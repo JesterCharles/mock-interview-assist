@@ -31,7 +31,7 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## Middleware Cutover + RLS (Phase 5)
 
-- [ ] **AUTH-09**: `src/middleware.ts` flipped to Supabase-primary. Guards `/trainer/*` (trainer role only), `/associate/*` except `/signin` (trainer or matching associate), `/interview/*` + `/review/*` (trainer only). PIN cookie path remains as fallback during 2-week grace.
+- [x] **AUTH-09**: `src/middleware.ts` flipped to Supabase-primary. Guards `/trainer/*` (trainer role only), `/associate/*` except `/signin` (trainer or matching associate), `/interview/*` + `/review/*` (trainer only). PIN cookie path remains as fallback during 2-week grace.
 - [x] **AUTH-10**: RLS policies deployed on `Session`, `GapScore`, `Associate`, `Cohort`, `CurriculumWeek` as defense-in-depth. Policies use `is_trainer()` SECURITY DEFINER helper for role check. Prisma stays on service-role (BYPASSRLS) + Transaction Pooler; every Prisma read in route handlers filters explicitly by identity from `getCallerIdentity()`. Documented in PROJECT.md.
 
 ## App Shell Redesign — Two-Level Nav (Phase 6)
@@ -109,7 +109,7 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | INVITE-01 | Phase 19 | Complete |
 | INVITE-02 | Phase 19 | Complete |
 | INVITE-03 | Phase 19 | Complete |
-| AUTH-09 | Phase 20 | Pending |
+| AUTH-09 | Phase 20 | Complete |
 | AUTH-10 | Phase 20 | Complete |
 | SHELL-01 | Phase 21 | Pending |
 | SHELL-02 | Phase 21 | Pending |

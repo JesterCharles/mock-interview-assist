@@ -41,7 +41,7 @@
 - [x] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI (completed 2026-04-15)
 - [x] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery) (completed 2026-04-16)
 - [x] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap) (completed 2026-04-16)
-- [ ] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth
+- [x] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth (completed 2026-04-16)
 - [ ] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization
 - [ ] **Phase 22: Trainer Analytics** -- KPI strip, sparklines, cohort trends, gap aggregation, calibration view
 - [ ] **Phase 23: Associate Self-Dashboard** -- new `/associate/[slug]/dashboard` with personal trends, recommended next area, readiness goal
@@ -137,7 +137,7 @@ Plans:
 
 Plans:
 - [x] 20-01-PLAN.md — RLS migration (is_trainer() function + policies on 5 tables)
-- [ ] 20-02-PLAN.md — Route handler audit annotations + PROJECT.md BYPASSRLS documentation
+- [x] 20-02-PLAN.md — Route handler audit annotations + PROJECT.md BYPASSRLS documentation
 
 ### Phase 21: App Shell Redesign
 **Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher, reorganized routes, Profile table migration (role in DB, admin-promote UI), and `/trainer/*` → `/app/*` route restructure.
@@ -227,7 +227,7 @@ Plans:
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 20. Middleware Cutover + RLS | v1.2 | 1/2 | In Progress|  |
+| 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
