@@ -2,17 +2,15 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: ALL PHASES COMPLETE (e24a51e). v1.2 milestone execution done. 10 phases, 30 reqs, 470 tests.
+- Current stage: COMPLETE. v1.2 milestone closed 2026-04-16.
 - Mode: unattended (--discuss)
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-v1.2 MILESTONE COMPLETE. All 10 phases (16-25) executed. 30/30 requirements covered. 470 tests passing. PIN auth fully removed, Supabase-only auth, two-level nav shell, trainer analytics dashboard, associate self-dashboard, PDF export, bulk invite, RLS deployed.
+v1.2 MILESTONE CLOSED. All 10 phases (16-25) executed. 30/30 requirements covered. 470 tests passing. Codex reviewed (P1+P2 fixed). Milestone archived. PIN auth removed, Supabase-only auth, two-level nav shell, trainer analytics, associate self-dashboard, PDF export, bulk invite, RLS deployed.
 
-Next: `/gsd-complete-milestone` to archive and tag, or `/pipeline-coordinator --from ship` to run shipping pipeline.
-
-Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
+Next: `/gsd-new-milestone` to start v1.3.
 
 ## v1.2 Milestone Scope (locked 2026-04-15)
 
@@ -37,13 +35,13 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
 | plan | done | 2026-04-15 | 2026-04-16 | All 10 phases (16-25) planned. 30 reqs mapped. |
 | execute | done | 2026-04-15 | 2026-04-16 | All 10 phases executed. P25 final (e24a51e). 470 tests. |
-| review | per-phase | 2026-04-15 | | P16: fixed. P18: patched. P19-P25: pending full review. |
+| review | done | 2026-04-15 | 2026-04-16 | Codex reviewed. P1+P2 findings fixed (0fb1bde). |
 | test | done | 2026-04-15 | 2026-04-16 | 470 tests passing. PIN tests removed (P25). All SC verified. |
-| debug | pending | | | |
-| optimize | pending | | | |
-| ship | pending | | | |
-| reflect | pending | | | |
-| maintain | pending | | | |
+| debug | skipped | | | No outstanding failures. |
+| optimize | skipped | | | Deferred to v1.3. |
+| ship | skipped | | | Milestone archived directly (642f065). |
+| reflect | skipped | | | User opted to close out. |
+| maintain | skipped | | | Deferred to v1.3. |
 
 ## HITL Gates (v1.2)
 | Gate | Stage | Type | Status | Decision |
@@ -56,9 +54,9 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | Roadmap approval | discover | sync | pending | |
 | Design selection | design | sync | pending | finalized.html already locked; expect light ui-phase pass |
 | Taste decisions | plan | async | pending | |
-| Review findings | review | async | pending | |
-| Merge approval | ship | sync | pending | |
-| Milestone closure | ship | async | pending | |
+| Review findings | review | async | done | Codex P1+P2 fixed (0fb1bde) |
+| Merge approval | ship | sync | skipped | Direct archive |
+| Milestone closure | ship | async | done | Archived 642f065 |
 
 ## Artifacts (v1.2)
 - PROJECT.md (updated 2026-04-15)
