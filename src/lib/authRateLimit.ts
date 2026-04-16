@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 
-export type AuthEventType = 'magic-link' | 'reset' | 'reset-abuse-flag' | 'login-failure';
+export type AuthEventType = 'magic-link' | 'magic-link-no-associate' | 'reset' | 'reset-abuse-flag' | 'login-failure' | 'trainer-invite';
 
 interface WindowEntry {
   timestamps: number[]; // epoch ms of each request in the sliding window
