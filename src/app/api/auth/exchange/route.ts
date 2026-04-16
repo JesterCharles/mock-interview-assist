@@ -73,6 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!role) {
       await supabaseAdmin.auth.admin.updateUserById(user.id, {
         user_metadata: { ...user.user_metadata, role: 'associate' },
+        app_metadata: { ...user.app_metadata, role: 'associate' },
       });
     }
 

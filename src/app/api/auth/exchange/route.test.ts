@@ -126,6 +126,7 @@ describe('GET /api/auth/exchange', () => {
     await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(mockUpdateUser).toHaveBeenCalledWith('u1', {
       user_metadata: { role: 'associate' },
+      app_metadata: { role: 'associate' },
     });
   });
 

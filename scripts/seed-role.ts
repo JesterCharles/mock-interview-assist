@@ -54,6 +54,7 @@ async function main() {
 
   const { error } = await admin.auth.admin.updateUserById(user.id, {
     user_metadata: { ...user.user_metadata, role },
+    app_metadata: { ...user.app_metadata, role },
   });
 
   if (error) {

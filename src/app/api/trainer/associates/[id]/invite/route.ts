@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
 import { checkAuthRateLimit } from '@/lib/authRateLimit';
-import { inviteAssociate } from '@/lib/inviteHelper';
 
 /**
  * POST /api/trainer/associates/[id]/invite
@@ -29,7 +28,7 @@ export async function POST(
     // Look up the associate
     const associate = await prisma.associate.findUnique({
       where: { id: associateId },
-      select: { id: true, slug: true, email: true, authUserId: true, cohortId: true },
+      select: { id: true, slug: true, email: true, authUserId: true, cohortId: true, lastInvitedAt: true },
     });
 
     if (!associate) {
@@ -51,25 +50,57 @@ export async function POST(
       return NextResponse.json({ error: 'Daily invite limit reached' }, { status: 429 });
     }
 
-    const result = await inviteAssociate(
-      associate.email,
-      associate.cohortId ?? 0,
-      caller.email ?? 'trainer'
-    );
+    // Single-invite bypasses the bulk helper's cohort reassignment semantics.
+    // We just want to send a magic link to an existing associate — no cohort logic.
+    const { supabaseAdmin } = await import('@/lib/supabase/admin');
+    const { Resend } = await import('resend');
+    const { getMagicLinkEmailHtml } = await import('@/lib/email/auth-templates');
 
-    if (result.status === 'failed') {
-      return NextResponse.json({ error: result.error ?? 'Failed to send invite' }, { status: 500 });
+    const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+    const resendClient = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
+
+    // Check throttle: 5-min cooldown per associate
+    if (
+      associate.lastInvitedAt &&
+      Date.now() - new Date(associate.lastInvitedAt).getTime() < 5 * 60 * 1000
+    ) {
+      return NextResponse.json({ error: 'Recently invited — wait 5 minutes' }, { status: 429 });
     }
 
-    if (result.status === 'skipped') {
-      return NextResponse.json({ error: result.error ?? 'Invite skipped' }, { status: 409 });
+    // Generate magic link
+    const { data: linkData, error: linkError } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: associate.email,
+        options: { redirectTo: `${SITE}/auth/callback` },
+      });
+
+    if (linkError || !linkData?.properties?.action_link) {
+      return NextResponse.json(
+        { error: linkError?.message ?? 'Failed to generate invite link' },
+        { status: 500 },
+      );
     }
+
+    // Send email
+    await resendClient.emails.send({
+      from: 'Next Level Mock <noreply@nextlevelmock.com>',
+      to: associate.email,
+      subject: "You're invited to Next Level Mock",
+      html: getMagicLinkEmailHtml(linkData.properties.action_link),
+    });
+
+    // Update lastInvitedAt
+    await prisma.associate.update({
+      where: { id: associate.id },
+      data: { lastInvitedAt: new Date() },
+    });
 
     return NextResponse.json({
       ok: true,
       slug: associate.slug,
       email: associate.email,
-      status: result.status,
+      status: 'invited',
     });
   } catch (err) {
     console.error('[invite] Unhandled error:', err);

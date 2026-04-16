@@ -39,10 +39,12 @@ export function generateSlug(email: string): string {
  * 9. Return { status: 'invited' | 'reassigned' }.
  */
 export async function inviteAssociate(
-  email: string,
+  rawEmail: string,
   cohortId: number,
   trainerIdentifier: string,
 ): Promise<InviteResult> {
+  const email = rawEmail.trim().toLowerCase();
+
   // Step 1: Find existing associate
   const existing = await prisma.associate.findUnique({
     where: { email },
