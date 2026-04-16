@@ -3,6 +3,24 @@ import { Prisma } from '@/generated/prisma';
 import { InterviewSession } from '@/lib/types';
 import { validateSlug } from '@/lib/slug-validation';
 
+/**
+ * Compute the average delta between AI (llmScore) and trainer (finalScore) scores.
+ * Returns null when no questions have both scores present.
+ * Exported for unit testing.
+ */
+export function computeAiTrainerVariance(
+  assessments: Record<string, { llmScore?: number; finalScore?: number }>
+): number | null {
+  const deltas: number[] = [];
+  for (const a of Object.values(assessments)) {
+    if (a.llmScore !== undefined && a.finalScore !== undefined) {
+      deltas.push(a.finalScore - a.llmScore);
+    }
+  }
+  if (deltas.length === 0) return null;
+  return deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+}
+
 type SessionMode = 'trainer-led' | 'automated';
 
 /**
@@ -49,6 +67,10 @@ export async function persistSessionToDb(
       }
     }
 
+    const aiTrainerVariance = computeAiTrainerVariance(
+      session.assessments as Record<string, { llmScore?: number; finalScore?: number }>
+    );
+
     await prisma.session.upsert({
       where: { id: session.id },
       create: {
@@ -69,6 +91,7 @@ export async function persistSessionToDb(
         techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         associateId,
         mode,
+        aiTrainerVariance,
       },
       update: {
         candidateName: session.candidateName ?? null,
@@ -87,6 +110,7 @@ export async function persistSessionToDb(
         techMap: session.techMap ? (session.techMap as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         ...(associateId !== null ? { associateId } : {}),
         mode,
+        aiTrainerVariance,
       },
     });
     return true;
