@@ -52,21 +52,18 @@ Source: DESIGN.md §Spacing, 21-UI-SPEC.md §Spacing Scale, CONTEXT.md D-04, D-0
 
 ## Typography
 
+4 sizes, 2 weights:
+
 | Role | Font | Size | Weight | Line Height | Usage |
 |------|------|------|--------|-------------|-------|
-| KPI value / readiness score | Clash Display | 28px | 600 | 1.2 | KPI card numbers (Avg Readiness %, Mocks count, At-Risk count, AI-Trainer Variance delta) |
-| Section heading | Clash Display | 28px | 500 | 1.2 | Page titles: "Gap Analysis", "Calibration", section heading above Cohort Trends chart |
-| Card title | Clash Display | 22px | 500 | 1.2 | KPI card label above the number (e.g. "Avg Readiness") — wait, see note |
-| KPI label | DM Sans | 12px | 500 | 1.4 | KPI card label below the number (e.g. "avg readiness"), trend word, top-gap tag, last-mock timestamp |
-| Table content | DM Sans | 14px | 400 | 1.4 | Roster table cells: associate name, skill/topic columns in Gap Analysis, override frequency |
-| Body / UI | DM Sans | 16px | 400 | 1.5 | Empty state body, error state body, chart axis labels |
-| Metadata | DM Sans | 12px | 500 | 1.4 | Gap Analysis column headers, Calibration section labels, table sort indicators |
+| Display / KPI value | Clash Display | 28px | 500 | 1.2 | KPI card numbers, page headings ("Gap Analysis", "Calibration"), section heading above Cohort Trends chart |
+| Body / UI | DM Sans | 16px | 400 | 1.5 | Empty state body, error state body, chart axis labels, card subtext |
+| Table content | DM Sans | 13px | 400 | 1.4 | Roster table cells: associate name, skill/topic columns in Gap Analysis, override frequency subtext, drill-through associate name, last session timestamps |
+| Labels / metadata | DM Sans | 12px | 500 | 1.4 | KPI card labels, trend words, top-gap tags, timestamps below trend word, Gap Analysis column headers, Calibration section labels, table sort indicators, chart axis tick labels, chart legend notes, tooltip text |
 
-Typography hierarchy correction per CONTEXT.md D-04:
-- KPI **numbers** (the metric): 28px Clash Display 600
-- KPI **labels** (descriptor text below number): 12px DM Sans (per D-04: "labels are 12px DM Sans")
+Weights in use: **400** (body, table content) and **500** (display values, headings, labels). No 600, no 700.
 
-Weights in use: **400** (table body, body text) and **500/600** (Clash Display headings at 500, KPI numbers at 600, DM Sans labels at 500). No weight 700.
+KPI differentiation: KPI **number** (metric) and page **heading** both use 28px Clash Display 500 — context separates them (number sits inside a card beneath a 12px label; heading appears at page level above content).
 
 Source: DESIGN.md §Typography, CONTEXT.md D-04, 21-UI-SPEC.md §Typography
 
@@ -112,7 +109,7 @@ Source: DESIGN.md §Color, CONTEXT.md D-04 "DESIGN.md surface tokens", RESEARCH.
 - Gap: 16px (md) between cards
 - Position: above the roster table, below the page heading on `/trainer`
 - Card surface: `background: var(--surface-muted)`, `border: 1px solid var(--border)`, `border-radius: 8px`, `padding: 16px`
-- KPI number: 28px Clash Display 600, `color: var(--ink)` (At-Risk count uses `--danger` when > 0)
+- KPI number: 28px Clash Display 500, `color: var(--ink)` (At-Risk count uses `--danger` when > 0)
 - KPI label: 12px DM Sans 500, `color: var(--muted)`, displayed below the number
 - At-Risk card extra: "Top Gap" label shown as a 12px DM Sans tag below the count in `--muted` text
 - AI-Trainer Variance: display as decimal delta (e.g. "+0.4" or "−0.3"), `--success` if positive, `--danger` if negative, `--muted` if zero/null
@@ -149,23 +146,23 @@ Source: CONTEXT.md D-07, D-08; RESEARCH.md Pattern 5, Open Questions #2
 - Heading: 16px DM Sans 500 `--ink` ("Cohort Readiness — Last 12 Weeks")
 - Position: above the KPI strip on `/trainer` (Cohort Trends → KPI Strip → Roster Table)
 - Chart: `<LineChart>` with `<ResponsiveContainer width="100%" height={120}>`
-- X-axis: week labels "W1"–"W12", 11px DM Sans 500, `--muted`, tick line hidden
-- Y-axis: 0–100 domain, hidden axis line, 4 tick values (0, 25, 50, 75, 100), 11px DM Sans 500, `--muted`
+- X-axis: week labels "W1"–"W12", 12px DM Sans 500, `--muted`, tick line hidden
+- Y-axis: 0–100 domain, hidden axis line, 4 tick values (0, 25, 50, 75, 100), 12px DM Sans 500, `--muted`
 - Grid: horizontal dotted lines at tick values, `stroke: var(--border)`, `strokeDasharray="2 4"`
 - Line: `stroke="var(--accent)"`, `strokeWidth={2}`, `dot={false}`, `isAnimationActive={false}`
 - Tooltip: single-value tooltip showing "W7 · 68% avg", `background: var(--surface)`, `border: 1px solid var(--border)`, `border-radius: 6px`, 12px DM Sans
-- Empty state (< 2 weeks of data): show "Not enough data yet — check back after more mocks." in 14px DM Sans `--muted`, centered within the chart area
+- Empty state (< 2 weeks of data): show "Not enough data yet — check back after more mocks." in 13px DM Sans `--muted`, centered within the chart area
 
 Source: CONTEXT.md D-20, D-21, D-22
 
 ### GapAnalysisTable (Gap Analysis page)
 - Page layout: full-width within dashboard content area, no max-width constraint (data-dense table)
 - Heading: 28px Clash Display 500 "Gap Analysis"
-- Subheading: 14px DM Sans 400 `--muted` "Skill gaps across your cohort · sorted by associates affected"
+- Subheading: 13px DM Sans 400 `--muted` "Skill gaps across your cohort · sorted by associates affected"
 - Table: 4 columns — Skill, Topic, Associates Affected, Avg Gap Score
 - Column widths: Skill (20%), Topic (40%), Associates Affected (20%), Avg Gap Score (20%)
 - Header row: 12px DM Sans 500 uppercase `--muted`, 0.04em tracking, `border-bottom: 1px solid var(--border)`
-- Body rows: 14px DM Sans 400 `--ink`, row height 48px, `border-bottom: 1px solid var(--border-subtle)`
+- Body rows: 13px DM Sans 400 `--ink`, row height 48px, `border-bottom: 1px solid var(--border-subtle)`
 - Row hover: `background: var(--highlight)` (150ms ease-out)
 - Sort: default "Associates Affected DESC" — active column header shows `--accent` sort arrow; clicking header toggles sort direction
 - Avg Gap Score: render as 0–100 value (not percentage) with a subtle inline bar — `--danger` fill for score < 50, `--warning` for 50-74, `--success` for 75+; bar max-width 60px at 100
@@ -178,11 +175,11 @@ Source: CONTEXT.md D-09, D-10, D-11, D-12
 ### GapDrillThrough (Gap Analysis drill-through page `/trainer/gap-analysis/[skill]`)
 - Back navigation: "← Back to Gap Analysis" link, 13px DM Sans 500 `--accent`
 - Heading: 28px Clash Display 500 "[Skill] — [Topic]" (e.g. "React — Hooks")
-- Subheading: "Associates with this gap · sorted by score ascending" — 14px DM Sans `--muted`
+- Subheading: "Associates with this gap · sorted by score ascending" — 13px DM Sans `--muted`
 - Table: 3 columns — Associate Name (linked to `/trainer/[slug]`), Gap Score, Last Session
-- Associate name: 14px DM Sans 400, `--accent` link color on hover with underline
+- Associate name: 13px DM Sans 400, `--accent` link color on hover with underline
 - Gap Score: inline colored indicator matching GapAnalysisTable color logic above
-- Last Session: relative timestamp, 14px DM Sans `--muted`
+- Last Session: relative timestamp, 13px DM Sans `--muted`
 
 Source: CONTEXT.md D-11
 
@@ -191,15 +188,15 @@ Source: CONTEXT.md D-11
 - Heading: 28px Clash Display 500 "Calibration"
 - Section 1 — Override Frequency:
   - Card surface: `var(--surface-muted)`, `border: 1px solid var(--border)`, `border-radius: 8px`, `padding: 16px`
-  - Large number: 28px Clash Display 600 showing percentage (e.g. "23%")
+  - Large number: 28px Clash Display 500 showing percentage (e.g. "23%")
   - Label: 12px DM Sans 500 `--muted` "of questions overridden by trainer"
-  - Subtext: 14px DM Sans 400 `--muted` "X overrides out of Y scored questions"
+  - Subtext: 13px DM Sans 400 `--muted` "X overrides out of Y scored questions"
 - Section 2 — Delta Distribution:
   - Section heading: 16px DM Sans 500 "Score Delta Distribution (AI → Trainer)"
   - Chart: `<BarChart>` with 7 bars (buckets: -3, -2, -1, 0, +1, +2, +3)
   - `<ResponsiveContainer width="100%" height={160}>`
   - X-axis: bucket labels (-3 through +3), 12px DM Sans 500 `--muted`
-  - Y-axis: count, hidden axis line, 4 ticks, 11px DM Sans `--muted`
+  - Y-axis: count, hidden axis line, 4 ticks, 12px DM Sans `--muted`
   - Grid: horizontal dotted lines, `stroke: var(--border)`, `strokeDasharray="2 4"`
   - Bar fill: `--danger` for negative buckets, `var(--surface-muted)` + `--border` outline for zero, `--success` for positive
   - Tooltip: "X overrides at delta [N]", `background: var(--surface)`, `border: 1px solid var(--border)`
