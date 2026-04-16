@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { InterviewSession } from '@/lib/types';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { readHistory, writeHistory } from '@/lib/historyService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { prisma } from '@/lib/prisma';
@@ -13,7 +13,8 @@ import { getSettings } from '@/lib/settingsService';
 // GET - Retrieve all interview history
 export async function GET() {
     try {
-        if (!(await isAuthenticatedSession())) {
+        const caller = await getCallerIdentity()
+        if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
         const history = readHistory();
@@ -27,7 +28,8 @@ export async function GET() {
 // POST - Save a completed interview to history
 export async function POST(request: NextRequest) {
     try {
-        if (!(await isAuthenticatedSession())) {
+        const caller = await getCallerIdentity()
+        if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
         const session: InterviewSession = await request.json();
@@ -81,7 +83,8 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove a session from history
 export async function DELETE(request: NextRequest) {
     try {
-        if (!(await isAuthenticatedSession())) {
+        const caller = await getCallerIdentity()
+        if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
         const { sessionId } = await request.json();

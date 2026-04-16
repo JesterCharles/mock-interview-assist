@@ -25,17 +25,17 @@ vi.mock('@/lib/prisma', () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { GET, POST } from '@/app/api/cohorts/route';
 
 const mockFindMany = prisma.cohort.findMany as ReturnType<typeof vi.fn>;
 const mockCreate = prisma.cohort.create as ReturnType<typeof vi.fn>;
-const mockAuth = isAuthenticatedSession as ReturnType<typeof vi.fn>;
+const mockAuth = getCallerIdentity as ReturnType<typeof vi.fn>;
 
 function makePost(body: unknown): Request {
   return new Request('http://localhost/api/cohorts', {
@@ -51,13 +51,13 @@ describe('GET /api/cohorts', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    mockAuth.mockResolvedValue(false);
+    mockAuth.mockResolvedValue({ kind: 'anonymous' });
     const res = await GET();
     expect(res.status).toBe(401);
   });
 
   it('returns CohortDTO[] with associateCount ordered by startDate desc', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const rows = [
       {
         id: 2,
@@ -116,13 +116,13 @@ describe('POST /api/cohorts', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    mockAuth.mockResolvedValue(false);
+    mockAuth.mockResolvedValue({ kind: 'anonymous' });
     const res = await POST(makePost({ name: 'X', startDate: '2026-01-01', endDate: '2026-02-01' }));
     expect(res.status).toBe(401);
   });
 
   it('returns 201 and CohortDTO on valid create', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockCreate.mockResolvedValue({
       id: 7,
       name: 'Fall 2026',
@@ -154,7 +154,7 @@ describe('POST /api/cohorts', () => {
   });
 
   it('returns 400 with zod issues when name is empty', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const res = await POST(
       makePost({ name: '', startDate: '2026-01-01', endDate: '2026-02-01' })
     );
@@ -166,7 +166,7 @@ describe('POST /api/cohorts', () => {
   });
 
   it('returns 400 when endDate < startDate', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const res = await POST(
       makePost({
         name: 'Invalid',
@@ -180,7 +180,7 @@ describe('POST /api/cohorts', () => {
   });
 
   it('returns 400 when description > 500 chars', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const res = await POST(
       makePost({
         name: 'Valid',
@@ -193,7 +193,7 @@ describe('POST /api/cohorts', () => {
   });
 
   it('returns 409 on Prisma P2002 unique constraint violation', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const p2002 = Object.assign(new Error('Unique constraint failed'), {
       code: 'P2002',
     });
@@ -210,7 +210,7 @@ describe('POST /api/cohorts', () => {
   });
 
   it('accepts null/omitted endDate', async () => {
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockCreate.mockResolvedValue({
       id: 8,
       name: 'Open',

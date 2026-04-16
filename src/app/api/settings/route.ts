@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { getSettings, updateThreshold } from '@/lib/settingsService';
 
 const updateSettingsSchema = z.object({
@@ -20,7 +20,8 @@ const updateSettingsSchema = z.object({
 });
 
 export async function GET() {
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -34,7 +35,8 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest | Request) {
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { isAuthenticatedSession } from '@/lib/auth-server'
+import { getCallerIdentity } from '@/lib/identity'
 import { prisma } from '@/lib/prisma'
 import { AssociateDetail, SessionSummary, GapScoreEntry } from '@/lib/trainer-types'
 
@@ -25,7 +25,8 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   // Auth check first — prevent slug probing by unauthenticated users (CR-04)
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -132,7 +133,8 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -10,7 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
 import { listWeeks, getTaughtWeeks, createWeek } from '@/lib/curriculumService';
 
@@ -57,7 +57,8 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -96,7 +97,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

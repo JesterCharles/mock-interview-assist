@@ -28,18 +28,18 @@ vi.mock('@/lib/prisma', () => {
   return { prisma: mockPrisma };
 });
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { GET, PATCH, DELETE } from '@/app/api/cohorts/[id]/route';
 
 const mockFindUnique = prisma.cohort.findUnique as ReturnType<typeof vi.fn>;
 const mockUpdate = prisma.cohort.update as ReturnType<typeof vi.fn>;
 const mockTransaction = prisma.$transaction as ReturnType<typeof vi.fn>;
-const mockAuth = isAuthenticatedSession as ReturnType<typeof vi.fn>;
+const mockAuth = getCallerIdentity as ReturnType<typeof vi.fn>;
 
 function makeCtx(id: string) {
   return { params: Promise.resolve({ id }) };
@@ -60,7 +60,7 @@ function makeRequest(method: string, body?: unknown) {
 describe('/api/cohorts/[id] auth guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue(false);
+    mockAuth.mockResolvedValue({ kind: 'anonymous' });
   });
 
   it('GET returns 401 when unauthenticated', async () => {
@@ -86,7 +86,7 @@ describe('/api/cohorts/[id] auth guard', () => {
 describe('GET /api/cohorts/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('returns CohortDTO with associateCount when found', async () => {
@@ -139,7 +139,7 @@ describe('GET /api/cohorts/[id]', () => {
 describe('PATCH /api/cohorts/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('partial update with name only returns 200 and updated CohortDTO', async () => {
@@ -248,7 +248,7 @@ describe('PATCH /api/cohorts/[id]', () => {
 describe('DELETE /api/cohorts/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue(true);
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('runs $transaction that updates associates then deletes cohort, returns 204', async () => {

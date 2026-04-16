@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isAuthenticatedSession } from '@/lib/auth-server'
+import { getCallerIdentity } from '@/lib/identity'
 import { prisma } from '@/lib/prisma'
 import { CohortSummary, RosterAssociate, RosterResponse } from '@/lib/trainer-types'
 
@@ -12,8 +12,8 @@ function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_re
 }
 
 export async function GET(request: Request) {
-  // Auth check — use shared helper for consistency (T-06-01, CR-02)
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

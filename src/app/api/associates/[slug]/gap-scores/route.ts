@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
 import type { GapScoreResponse } from '@/lib/adaptiveSetup';
 
@@ -22,7 +22,8 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   // Auth guard — trainer session required
-  if (!(await isAuthenticatedSession())) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

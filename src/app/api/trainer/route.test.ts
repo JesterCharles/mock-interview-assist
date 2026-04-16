@@ -21,18 +21,18 @@ vi.mock('@/lib/prisma', () => {
   return { prisma: mockPrisma };
 });
 
-// --- Mock @/lib/auth-server ---
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+// --- Mock @/lib/identity ---
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 // Imports AFTER vi.mock declarations
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { GET } from '@/app/api/trainer/route';
 
 const mockFindMany = prisma.associate.findMany as ReturnType<typeof vi.fn>;
-const mockIsAuthenticated = isAuthenticatedSession as ReturnType<typeof vi.fn>;
+const mockIsAuthenticated = getCallerIdentity as ReturnType<typeof vi.fn>;
 
 function makeRequest(url = 'http://localhost/api/trainer'): Request {
   return new Request(url);
@@ -70,7 +70,7 @@ describe('GET /api/trainer — auth', () => {
   });
 
   it('returns 401 when not authenticated', async () => {
-    mockIsAuthenticated.mockResolvedValue(false);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'anonymous' });
     const res = await GET(makeRequest());
     expect(res.status).toBe(401);
     expect(mockFindMany).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe('GET /api/trainer — auth', () => {
 describe('GET /api/trainer — default (backward compat)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('returns a raw JSON array (NOT wrapped) for v1.0 consumers', async () => {
@@ -128,7 +128,7 @@ describe('GET /api/trainer — default (backward compat)', () => {
 describe('GET /api/trainer — cohortId filter (raw array)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('passes where: { cohortId } to Prisma and returns raw array', async () => {
@@ -145,7 +145,7 @@ describe('GET /api/trainer — cohortId filter (raw array)', () => {
 describe('GET /api/trainer — cohortId + includeSummary (wrapped)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('returns { associates, summary } with correct counts', async () => {

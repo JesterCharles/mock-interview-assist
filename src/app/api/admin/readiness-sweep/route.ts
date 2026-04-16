@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { runReadinessSweep } from '@/lib/readinessSweep';
 
 /**
@@ -33,8 +33,8 @@ const querySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authed = await isAuthenticatedSession();
-  if (!authed) {
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

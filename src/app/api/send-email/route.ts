@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { getReportEmailHtml } from '@/lib/email-templates';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 
 // Initialize with dummy key to avoid crashes at build time, will fail gracefully at runtime if not set
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
@@ -18,7 +18,8 @@ const MAX_EMAILS_PER_WINDOW = 5;
 export async function POST(req: NextRequest) {
     try {
         // --- 1. Authentication Check ---
-        if (!(await isAuthenticatedSession())) {
+        const caller = await getCallerIdentity()
+        if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
              return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
 

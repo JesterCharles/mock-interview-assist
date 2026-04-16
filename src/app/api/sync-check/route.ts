@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { readHistory } from '@/lib/historyService';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    if (!(await isAuthenticatedSession())) {
+    const caller = await getCallerIdentity()
+    if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

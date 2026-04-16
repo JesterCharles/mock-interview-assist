@@ -4,16 +4,16 @@ vi.mock('@/lib/readinessSweep', () => ({
   runReadinessSweep: vi.fn(),
 }));
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 import { POST } from './route';
 import { runReadinessSweep } from '@/lib/readinessSweep';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 
 const mockSweep = runReadinessSweep as unknown as ReturnType<typeof vi.fn>;
-const mockAuth = isAuthenticatedSession as unknown as ReturnType<typeof vi.fn>;
+const mockAuth = getCallerIdentity as unknown as ReturnType<typeof vi.fn>;
 
 function makeRequest(url = 'http://localhost/api/admin/readiness-sweep'): Request {
   return new Request(url, { method: 'POST' });
@@ -27,11 +27,11 @@ describe('POST /api/admin/readiness-sweep', () => {
       successCount: 0,
       failureCount: 0,
     });
-    mockAuth.mockReset().mockResolvedValue(true);
+    mockAuth.mockReset().mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
   });
 
   it('Test 1: no trainer cookie → 401', async () => {
-    mockAuth.mockResolvedValueOnce(false);
+    mockAuth.mockResolvedValueOnce({ kind: 'anonymous' });
 
     const res = await POST(makeRequest());
 

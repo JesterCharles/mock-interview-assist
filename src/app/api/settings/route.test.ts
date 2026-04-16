@@ -25,9 +25,9 @@ vi.mock('@/lib/prisma', () => {
   return { prisma: mockPrisma };
 });
 
-// --- Mock @/lib/auth-server ---
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+// --- Mock @/lib/identity ---
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }));
 
 // --- Mock @/lib/readinessService ---
@@ -37,7 +37,7 @@ vi.mock('@/lib/readinessService', () => ({
 
 // Imports AFTER vi.mock declarations
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { recomputeAllReadiness } from '@/lib/readinessService';
 import { getSettings, updateThreshold } from '@/lib/settingsService';
 import { GET, PUT } from '@/app/api/settings/route';
@@ -45,7 +45,7 @@ import { GET, PUT } from '@/app/api/settings/route';
 // Typed mock references
 const mockSettingsFindFirst = prisma.settings.findFirst as ReturnType<typeof vi.fn>;
 const mockSettingsUpsert = prisma.settings.upsert as ReturnType<typeof vi.fn>;
-const mockIsAuthenticated = isAuthenticatedSession as ReturnType<typeof vi.fn>;
+const mockIsAuthenticated = getCallerIdentity as ReturnType<typeof vi.fn>;
 const mockRecomputeAll = recomputeAllReadiness as ReturnType<typeof vi.fn>;
 
 // Helper to create a minimal NextRequest-like object
@@ -114,13 +114,13 @@ describe('GET /api/settings', () => {
   });
 
   it('returns 401 when not authenticated', async () => {
-    mockIsAuthenticated.mockResolvedValue(false);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'anonymous' });
     const res = await GET();
     expect(res.status).toBe(401);
   });
 
   it('returns current threshold when authenticated (default 75 when no row)', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockSettingsFindFirst.mockResolvedValue(null);
     const res = await GET();
     expect(res.status).toBe(200);
@@ -129,7 +129,7 @@ describe('GET /api/settings', () => {
   });
 
   it('returns stored threshold when Settings row exists', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mockSettingsFindFirst.mockResolvedValue({ id: 1, readinessThreshold: 90, updatedAt: new Date() });
     const res = await GET();
     expect(res.status).toBe(200);
@@ -148,14 +148,14 @@ describe('PUT /api/settings', () => {
   });
 
   it('returns 401 when not authenticated', async () => {
-    mockIsAuthenticated.mockResolvedValue(false);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'anonymous' });
     const req = makeRequest({ readinessThreshold: 80 });
     const res = await PUT(req);
     expect(res.status).toBe(401);
   });
 
   it('returns 200 and success:true when valid threshold is provided', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 80 });
     const res = await PUT(req);
     expect(res.status).toBe(200);
@@ -164,35 +164,35 @@ describe('PUT /api/settings', () => {
   });
 
   it('returns 400 for negative threshold', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: -1 });
     const res = await PUT(req);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 for threshold > 100', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 101 });
     const res = await PUT(req);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 for string threshold', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 'invalid' });
     const res = await PUT(req);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when readinessThreshold field is missing', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({});
     const res = await PUT(req);
     expect(res.status).toBe(400);
   });
 
   it('triggers recomputeAllReadiness with the new threshold on valid PUT', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 85 });
     await PUT(req);
     expect(mockRecomputeAll).toHaveBeenCalledOnce();
@@ -200,14 +200,14 @@ describe('PUT /api/settings', () => {
   });
 
   it('accepts boundary value 0', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 0 });
     const res = await PUT(req);
     expect(res.status).toBe(200);
   });
 
   it('accepts boundary value 100', async () => {
-    mockIsAuthenticated.mockResolvedValue(true);
+    mockIsAuthenticated.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     const req = makeRequest({ readinessThreshold: 100 });
     const res = await PUT(req);
     expect(res.status).toBe(200);

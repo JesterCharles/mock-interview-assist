@@ -100,7 +100,7 @@ Plans:
 Plans:
 - [x] 18-01-PLAN.md — Install packages + scaffold Supabase clients + boot assert + AuthEvent migration + rate limiter
 - [x] 18-02-PLAN.md — Middleware rewrite (Supabase session refresh) + getCallerIdentity rewrite + caller updates
-- [ ] 18-03-PLAN.md — Trainer email/password sign-in + password reset (Resend + abuse flagging)
+- [x] 18-03-PLAN.md — Trainer email/password sign-in + password reset (Resend + abuse flagging)
 - [ ] 18-04-PLAN.md — Associate magic link (PKCE + Resend + /auth/callback + authUserId linkage)
 **UI hint**: yes
 
@@ -215,7 +215,7 @@ Plans:
 | 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete | 2026-04-14 |
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
-| 18. Supabase Auth Install | v1.2 | 2/4 | In Progress|  |
+| 18. Supabase Auth Install | v1.2 | 3/4 | In Progress|  |
 | 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |

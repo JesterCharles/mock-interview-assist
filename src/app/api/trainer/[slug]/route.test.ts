@@ -21,17 +21,17 @@ vi.mock('@/lib/prisma', () => {
   return { prisma: mockPrisma }
 })
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: vi.fn(),
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: vi.fn(),
 }))
 
 import { prisma } from '@/lib/prisma'
-import { isAuthenticatedSession } from '@/lib/auth-server'
+import { getCallerIdentity } from '@/lib/identity'
 import { GET, PATCH } from '@/app/api/trainer/[slug]/route'
 
 const mockFindUnique = prisma.associate.findUnique as ReturnType<typeof vi.fn>
 const mockUpdate = prisma.associate.update as ReturnType<typeof vi.fn>
-const mockAuth = isAuthenticatedSession as ReturnType<typeof vi.fn>
+const mockAuth = getCallerIdentity as ReturnType<typeof vi.fn>
 
 function makeCtx(slug: string) {
   return { params: Promise.resolve({ slug }) }
@@ -52,7 +52,7 @@ function makeRequest(method: string, body?: unknown) {
 describe('GET /api/trainer/[slug] cohort fields', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockAuth.mockResolvedValue(true)
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
   })
 
   it('returns cohortId + cohortName when associate is assigned to a cohort', async () => {
@@ -105,11 +105,11 @@ describe('GET /api/trainer/[slug] cohort fields', () => {
 describe('PATCH /api/trainer/[slug]', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockAuth.mockResolvedValue(true)
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
   })
 
   it('returns 401 when unauthenticated', async () => {
-    mockAuth.mockResolvedValue(false)
+    mockAuth.mockResolvedValue({ kind: 'anonymous' })
     const res = await PATCH(makeRequest('PATCH', { cohortId: 1 }), makeCtx('jane'))
     expect(res.status).toBe(401)
   })

@@ -45,11 +45,12 @@ Ensure the output is valid JSON.`],
 `]
 ]);
 
-import { isAuthenticatedSession } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 
 export async function POST(request: NextRequest) {
     try {
-        if (!(await isAuthenticatedSession())) {
+        const caller = await getCallerIdentity()
+        if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
         const apiKey = process.env.OPENAI_API_KEY;
