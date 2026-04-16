@@ -45,7 +45,7 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 - [x] **ANALYTICS-01**: Dashboard > Roster renders KPI strip with 4 fixed cards: Avg Readiness, Mocks This Week, At-Risk Count (Top Gap label + count), AI-Trainer Variance. Values scoped by topbar cohort switcher. Single Prisma `$queryRaw` for all 4 KPIs.
 - [x] **ANALYTICS-02**: Roster table rows render per-associate sparkline (last 6 sessions overall score) + trend word + top-gap tag + last-mock timestamp. All sparkline data sourced from a single windowed query (`ROW_NUMBER() OVER (PARTITION BY associateId)`) — no N+1.
-- [ ] **ANALYTICS-03**: Dashboard > Gap Analysis page aggregates by **skill** AND **topic** across selected cohort. Topic pulled from per-question `topic` field (fallback: first keyword when absent). Sort by count-associates-affected desc. Drill-through to list of associates with that gap.
+- [x] **ANALYTICS-03**: Dashboard > Gap Analysis page aggregates by **skill** AND **topic** across selected cohort. Topic pulled from per-question `topic` field (fallback: first keyword when absent). Sort by count-associates-affected desc. Drill-through to list of associates with that gap.
 - [x] **ANALYTICS-04**: Question-bank markdown parser reads optional `topic:` frontmatter field per question. `Session.questions` JSON stores `topic` per question object (set at interview start). Fallback to `keywords[0]` when bank hasn't been updated.
 - [x] **ANALYTICS-05**: Dashboard > Calibration page shows trainer-override frequency + delta distribution (AI score vs trainer final). `Session.aiTrainerVariance` denormalized at session save (not computed per page view).
 - [x] **ANALYTICS-06**: Cohort Trends card on Dashboard > Roster renders cohort-wide average readiness over time (line chart, weekly buckets, last 12 weeks).
@@ -117,7 +117,7 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | SHELL-04 | Phase 21 | Complete |
 | ANALYTICS-01 | Phase 22 | Complete |
 | ANALYTICS-02 | Phase 22 | Complete |
-| ANALYTICS-03 | Phase 22 | Pending |
+| ANALYTICS-03 | Phase 22 | Complete |
 | ANALYTICS-04 | Phase 22 | Complete |
 | ANALYTICS-05 | Phase 22 | Complete |
 | ANALYTICS-06 | Phase 22 | Complete |
