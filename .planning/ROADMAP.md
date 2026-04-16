@@ -203,8 +203,8 @@ Plans:
   4. PDF generation completes without OOM on the constrained Docker host (verified on production-equivalent memory limits)
 **Plans**: 2 plans
 Plans:
-- [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
-- [x] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
+- [ ] 24-01-PLAN.md — SVG sparkline helper + shared PDF styles + CohortAnalyticsPdf + AssociateAnalyticsPdf templates
+- [ ] 24-02-PLAN.md — PDF API routes (cohort-pdf + associate-pdf) + Reports page + associate detail Export PDF button
 **UI hint**: yes
 
 ### Phase 25: PIN Removal + Cleanup
@@ -219,8 +219,8 @@ Plans:
   5. App boots and all auth flows function with only Supabase env vars present
 **Plans**: 2 plans
 Plans:
-- [x] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
-- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
+- [ ] 25-01-PLAN.md — [To be planned]
+- [ ] 25-02-PLAN.md — [To be planned]
 
 ## Progress
 
@@ -249,5 +249,5 @@ Plans:
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
+| 24. PDF Analytics Export | v1.2 | 0/2 | Planning | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
