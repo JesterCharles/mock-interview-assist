@@ -153,7 +153,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Install Radix deps + shell components (TopBar, SectionSidebar, AvatarMenu, CohortSwitcher, MobileSidebar) + sidebar configs + ConditionalNavbar
+- [x] 21-01-PLAN.md — Install Radix deps + shell components (TopBar, SectionSidebar, AvatarMenu, CohortSwitcher, MobileSidebar) + sidebar configs + ConditionalNavbar
 - [ ] 21-02-PLAN.md — Route reorganization (route groups, file moves, layouts, placeholder pages, settings routes, link updates, tests, visual verification)
 **UI hint**: yes
 
@@ -232,7 +232,7 @@ Plans:
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 21. App Shell Redesign | v1.2 | 0/2 | In progress | - |
+| 21. App Shell Redesign | v1.2 | 1/2 | In Progress|  |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
