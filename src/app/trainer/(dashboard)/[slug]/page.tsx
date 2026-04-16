@@ -23,6 +23,28 @@ export default function AssociateDetailPage() {
   const [detail, setDetail] = useState<AssociateDetail | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exportingPdf, setExportingPdf] = useState(false)
+
+  async function handleExportPdf() {
+    if (!slug) return
+    setExportingPdf(true)
+    try {
+      const res = await fetch(`/api/trainer/reports/associate-pdf?slug=${encodeURIComponent(slug)}`)
+      if (!res.ok) {
+        console.error('[AssociateDetailPage] Export PDF failed:', res.status)
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `nlm-${slug}-${new Date().toISOString().split('T')[0]}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExportingPdf(false)
+    }
+  }
   // PIN auth is feature-gated until v1.2 — hide Generate PIN when disabled.
   const [associateAuthEnabled, setAssociateAuthEnabled] = useState(false)
   useEffect(() => {
@@ -211,6 +233,32 @@ export default function AssociateDetailPage() {
                 >
                   Current: {detail.cohortName ?? 'Unassigned'}
                 </p>
+              </div>
+
+              {/* Export PDF button */}
+              <div style={{ marginTop: '20px' }}>
+                <button
+                  onClick={handleExportPdf}
+                  disabled={exportingPdf}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 16px',
+                    background: 'transparent',
+                    color: exportingPdf ? '#7A7267' : '#1A1A1A',
+                    border: '1px solid #C9C2B8',
+                    borderRadius: '6px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '13px',
+                    cursor: exportingPdf ? 'not-allowed' : 'pointer',
+                    opacity: exportingPdf ? 0.6 : 1,
+                    transition: 'opacity 150ms ease',
+                  }}
+                >
+                  {exportingPdf ? 'Exporting…' : 'Export PDF'}
+                </button>
               </div>
             </div>
 
