@@ -55,14 +55,16 @@ Source: DESIGN.md §Spacing, globals.css button system, CONTEXT.md D-13
 
 | Role | Font | Size | Weight | Line Height | Usage |
 |------|------|------|--------|-------------|-------|
+| Labels / metadata | DM Sans | 12px | 500 | 1.4 | Group labels in sidebar (uppercase, 0.06em tracking), role badge in avatar menu, metadata text |
 | Nav item / sidebar label | DM Sans | 13px | 500 | 1.4 | Topbar section links, sidebar item labels |
 | Body | DM Sans | 16px | 400 | 1.5 | Dropdown item text, avatar email display |
-| Secondary / metadata | DM Sans | 12px | 500 | 1.4 | Role badge in avatar menu, group labels in sidebar (uppercase, 0.06em tracking) |
-| Section heading | Clash Display | 28px | 600 | 1.2 | Page title for placeholder pages (Gap Analysis, Calibration, Reports) |
+| Display heading | Clash Display | 28px | 500 | 1.2 | Page title for placeholder pages (Gap Analysis, Calibration, Reports), topbar wordmark |
+
+Weights in use: **400** (body, dropdown text) and **500** (nav items, labels, headings, wordmark). No weight 600.
 
 Notes:
-- Group labels in sidebar (e.g. "OVERVIEW", "ACTIONS", "SETTINGS") use 11px JetBrains Mono 500, uppercase, 0.07em tracking — per DESIGN.md §Typography
-- Topbar logo/wordmark uses Clash Display 600, sized to fit within 56px topbar
+- Group labels in sidebar (e.g. "OVERVIEW", "ACTIONS", "SETTINGS") use 12px DM Sans 500, uppercase, 0.06em tracking
+- Clash Display reads visually bold at weight 500 for 28px display usage — weight 600 is not needed
 
 Source: DESIGN.md §Typography
 
@@ -105,7 +107,7 @@ Source: DESIGN.md §Color, globals.css tokens, CONTEXT.md decisions
 ### TopBar.tsx
 - Height: 56px, `position: sticky; top: 0; z-index: 30`
 - Background: `var(--surface-muted)`, border-bottom: `1px solid var(--border)`
-- Left zone: NLM wordmark (Clash Display 600, links to `/trainer`) + hamburger button (mobile only, `md:hidden`)
+- Left zone: NLM wordmark (Clash Display 500, links to `/trainer`) + hamburger button (mobile only, `md:hidden`)
 - Center zone: Section nav links — Dashboard, Interviews, Question Banks, Settings (hidden on mobile — only hamburger shows)
 - Right zone: CohortSwitcher (wrapped in `<Suspense fallback={null}>`) + ThemeToggle + AvatarMenu
 - Active detection: `usePathname().startsWith(prefix)` — accent left underline or bottom border on active item
@@ -117,7 +119,7 @@ Source: DESIGN.md §Color, globals.css tokens, CONTEXT.md decisions
 - Collapse transition: `width` CSS transition, 200ms ease-in-out (DESIGN.md §Motion "short" duration)
 - Collapsed state: icons only, no labels, tooltip on hover showing label
 - Toggle button: bottom of sidebar, `ChevronLeft` / `ChevronRight` from lucide-react
-- Group labels: 11px JetBrains Mono 500, uppercase, hidden when collapsed
+- Group labels: 12px DM Sans 500, uppercase, 0.06em tracking, hidden when collapsed
 - Item active state: 2px `--accent` left border + `--accent` text color
 - Item hover: `--highlight` background, 150ms ease-out, border-radius 6px
 - localStorage key: `nlm_sidebar_collapsed` (read in `useEffect` only — no SSR flash)
@@ -125,7 +127,7 @@ Source: DESIGN.md §Color, globals.css tokens, CONTEXT.md decisions
 ### AvatarMenu (Radix DropdownMenu)
 - Trigger: avatar circle (initials from email) + chevron
 - Avatar size: 32px circle, `background: var(--surface-muted)`, `border: 1px solid var(--border)`, 13px DM Sans 500 initial
-- Items: user email (non-interactive, 14px DM Sans 400 muted), role badge (admin/trainer — 12px, DM Sans 600, `--success` for trainer, `--warning` for admin), separator, Sign Out (16px DM Sans 400, `--danger` text)
+- Items: user email (non-interactive, 16px DM Sans 400 muted), role badge (admin/trainer — 12px, DM Sans 500, `--success` for trainer, `--warning` for admin), separator, Sign Out (16px DM Sans 400, `--danger` text)
 - Dropdown position: `side="bottom" align="end"`, `sideOffset: 8`
 - Click-away: Radix handles natively
 
@@ -147,7 +149,7 @@ Source: DESIGN.md §Color, globals.css tokens, CONTEXT.md decisions
 
 ### Placeholder pages (Gap Analysis, Calibration, Reports)
 - Layout: centered column, max-width 480px
-- Heading: 28px Clash Display 600, `--ink`
+- Heading: 28px Clash Display 500, `--ink`
 - Subtext: 16px DM Sans 400, `--muted`
 - Copy: see Copywriting Contract below
 
