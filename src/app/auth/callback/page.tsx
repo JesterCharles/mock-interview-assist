@@ -19,9 +19,6 @@ export default function AuthCallbackPage() {
     async function handleCallback() {
       const supabase = createSupabaseBrowserClient();
 
-      // Sign out any existing session to prevent role conflicts
-      await supabase.auth.signOut();
-
       // Parse hash fragment: #access_token=...&refresh_token=...&type=magiclink
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
@@ -63,15 +60,23 @@ export default function AuthCallbackPage() {
         return;
       }
 
+      // Verify session is set before calling server
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace('/signin?error=invalid-link');
+        return;
+      }
+
       // Session established — call server for authUserId linkage + redirect
       setStatus('Linking account...');
 
       try {
         const res = await fetch('/api/auth/callback-link', { method: 'POST' });
         const data = await res.json();
-        router.replace(data.redirect ?? '/');
+        // Full page navigation to ensure middleware gets fresh cookies
+        window.location.href = data.redirect ?? '/';
       } catch {
-        router.replace('/signin?error=invalid-link');
+        window.location.href = '/signin?error=invalid-link';
       }
     }
 
