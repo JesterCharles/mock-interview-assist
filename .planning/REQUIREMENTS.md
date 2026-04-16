@@ -25,7 +25,7 @@ REQ-IDs continue from v1.1. Locked decisions from `.planning/research/SUMMARY.md
 
 ## Bulk Invite (Phase 4)
 
-- [ ] **INVITE-01**: Trainer posts comma-separated (or newline-separated) email list to `/trainer/onboarding`. Live validation chips flag malformed/duplicate emails before submit. Per-batch cap 50; UI blocks larger submissions with clear error.
+- [x] **INVITE-01**: Trainer posts comma-separated (or newline-separated) email list to `/trainer/onboarding`. Live validation chips flag malformed/duplicate emails before submit. Per-batch cap 50; UI blocks larger submissions with clear error.
 - [ ] **INVITE-02**: Submit picks target cohort + auto-assigns curriculum from cohort. Preview screen shows per-email action (new / reassign cohort / skip — same cohort / skip — invalid). Trainer confirms to execute.
 - [ ] **INVITE-03**: `/api/trainer/invites/bulk` runs per-email transaction: upsert Associate by email → set cohortId → `admin.generateLink` → Resend send → write result. Partial failures don't roll back siblings. Response body is a result table (email, status, error if any). `lastInvitedAt` throttle = 5 min.
 
@@ -106,7 +106,7 @@ Roadmap phase numbers are continuous across milestones. v1.2 phases are numbered
 | AUTH-06 | Phase 18 | Pending |
 | AUTH-07 | Phase 18 | Pending |
 | AUTH-08 | Phase 18 | Pending |
-| INVITE-01 | Phase 19 | Pending |
+| INVITE-01 | Phase 19 | Complete |
 | INVITE-02 | Phase 19 | Pending |
 | INVITE-03 | Phase 19 | Pending |
 | AUTH-09 | Phase 20 | Pending |
