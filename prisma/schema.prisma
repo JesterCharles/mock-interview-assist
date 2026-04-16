@@ -25,8 +25,6 @@ model Associate {
   email           String?   @unique
   authUserId      String?   @unique
   lastInvitedAt   DateTime?
-  pinHash         String? // bcrypt hash of 6-digit PIN; null until trainer generates
-  pinGeneratedAt  DateTime? // when current PIN was issued; also the token-version for cookie revocation
   cohortId        Int?
   cohort          Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   sessions        Session[]

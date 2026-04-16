@@ -137,8 +137,6 @@ exports.Prisma.AssociateScalarFieldEnum = {
   email: 'email',
   authUserId: 'authUserId',
   lastInvitedAt: 'lastInvitedAt',
-  pinHash: 'pinHash',
-  pinGeneratedAt: 'pinGeneratedAt',
   cohortId: 'cohortId'
 };
 
