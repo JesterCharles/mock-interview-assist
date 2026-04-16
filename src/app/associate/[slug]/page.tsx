@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma';
-import { isAuthenticatedSession, getAssociateIdentity } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
-import { isAssociateAuthEnabled } from '@/lib/featureFlags';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PublicShell } from '@/components/layout/PublicShell';
@@ -185,12 +184,11 @@ export default async function AssociateProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  const trainer = await isAuthenticatedSession();
-  const associateIdentity = trainer ? null : await getAssociateIdentity();
+  const caller = await getCallerIdentity();
 
-  if (!trainer && !associateIdentity) {
+  if (caller.kind === 'anonymous') {
     redirect(
-      '/associate/login?next=' +
+      '/signin?as=associate&next=' +
         encodeURIComponent('/associate/' + slugValidation.slug),
     );
   }
@@ -200,7 +198,9 @@ export default async function AssociateProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  if (!trainer && associateIdentity && associateIdentity.associateId !== targetId) {
+  // Associates can only view their own profile; trainers/admins can view any
+  const isTrainerOrAdmin = caller.kind === 'trainer' || caller.kind === 'admin';
+  if (!isTrainerOrAdmin && caller.kind === 'associate' && caller.associateId !== targetId) {
     return renderForbidden();
   }
 
@@ -234,7 +234,7 @@ export default async function AssociateProfilePage({ params }: PageProps) {
     <PublicShell title={displayName}>
       {/* Back navigation */}
       <Link
-        href={trainer ? '/trainer' : '/'}
+        href={isTrainerOrAdmin ? '/trainer' : '/'}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -247,7 +247,7 @@ export default async function AssociateProfilePage({ params }: PageProps) {
         }}
       >
         <span aria-hidden="true">&larr;</span>{' '}
-        {trainer ? 'Back to roster' : 'Back to home'}
+        {isTrainerOrAdmin ? 'Back to roster' : 'Back to home'}
       </Link>
 
       {/* Profile header */}
@@ -305,18 +305,16 @@ export default async function AssociateProfilePage({ params }: PageProps) {
         {/* Primary action — start an automated interview.
             Gated: when associate auth is disabled, the underlying interview
             entry returns 401, so hide the CTA entirely. */}
-        {isAssociateAuthEnabled() && (
-          <div style={{ marginTop: '24px' }}>
-            <Link
-              href={`/associate/${associate.slug}/interview`}
-              className="btn-accent-flat"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-            >
-              Start mock interview
-              <span aria-hidden="true">&rarr;</span>
-            </Link>
-          </div>
-        )}
+        <div style={{ marginTop: '24px' }}>
+          <Link
+            href={`/associate/${associate.slug}/interview`}
+            className="btn-accent-flat"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            Start mock interview
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
       </header>
 
       {/* Session list */}

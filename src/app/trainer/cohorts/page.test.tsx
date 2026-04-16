@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => ({
   redirectMock: vi.fn((_url: string) => {
     throw new Error('NEXT_REDIRECT')
   }),
-  isAuthenticatedSessionMock: vi.fn(),
+  getCallerIdentityMock: vi.fn(),
   findManyMock: vi.fn(),
   cohortsClientMock: vi.fn((_props: unknown) => null),
 }))
@@ -27,8 +27,8 @@ vi.mock('next/navigation', () => ({
   redirect: mocks.redirectMock,
 }))
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: mocks.isAuthenticatedSessionMock,
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: mocks.getCallerIdentityMock,
 }))
 
 vi.mock('@/lib/prisma', () => ({
@@ -54,16 +54,16 @@ describe('/trainer/cohorts server page', () => {
     vi.clearAllMocks()
   })
 
-  it('redirects unauthenticated requests to /login', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(false)
+  it('redirects unauthenticated requests to /signin', async () => {
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'anonymous' })
 
     await expect(CohortsPage()).rejects.toThrow('NEXT_REDIRECT')
-    expect(mocks.redirectMock).toHaveBeenCalledWith('/login')
+    expect(mocks.redirectMock).toHaveBeenCalledWith('/signin')
     expect(mocks.findManyMock).not.toHaveBeenCalled()
   })
 
   it('fetches cohorts ordered by startDate desc with associate count for authenticated trainer', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(true)
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mocks.findManyMock.mockResolvedValue([])
 
     await CohortsPage()
@@ -79,7 +79,7 @@ describe('/trainer/cohorts server page', () => {
   })
 
   it('serializes Cohort rows with readiness counts (ISO strings, nullable endDate) for client', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(true)
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     mocks.findManyMock.mockResolvedValue([
       {
         id: 2,

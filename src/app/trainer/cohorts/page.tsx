@@ -1,14 +1,14 @@
 import { redirect } from 'next/navigation'
-import { isAuthenticatedSession } from '@/lib/auth-server'
+import { getCallerIdentity } from '@/lib/identity'
 import { prisma } from '@/lib/prisma'
 import CohortsClient, { type CohortWithCounts } from './CohortsClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CohortsPage() {
-  const authed = await isAuthenticatedSession()
-  if (!authed) {
-    redirect('/login')
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
+    redirect('/signin')
   }
 
   // Fetch cohorts + readiness counts per cohort. Readiness counts are computed

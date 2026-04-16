@@ -18,8 +18,7 @@ const mocks = vi.hoisted(() => ({
   redirectMock: vi.fn((_url: string) => {
     throw new Error('NEXT_REDIRECT');
   }),
-  isAuthenticatedSessionMock: vi.fn(),
-  getAssociateIdentityMock: vi.fn(),
+  getCallerIdentityMock: vi.fn(),
   getAssociateIdBySlugMock: vi.fn(),
 }));
 
@@ -28,9 +27,8 @@ vi.mock('next/navigation', () => ({
   notFound: mocks.notFoundMock,
 }));
 
-vi.mock('@/lib/auth-server', () => ({
-  isAuthenticatedSession: mocks.isAuthenticatedSessionMock,
-  getAssociateIdentity: mocks.getAssociateIdentityMock,
+vi.mock('@/lib/identity', () => ({
+  getCallerIdentity: mocks.getCallerIdentityMock,
 }));
 
 vi.mock('@/lib/associateService', () => ({
@@ -72,27 +70,24 @@ describe('/associate/[slug] guard matrix', () => {
   beforeEach(() => {
     mocks.redirectMock.mockClear();
     mocks.notFoundMock.mockClear();
-    mocks.isAuthenticatedSessionMock.mockReset();
-    mocks.getAssociateIdentityMock.mockReset();
+    mocks.getCallerIdentityMock.mockReset();
     mocks.getAssociateIdBySlugMock.mockReset();
   });
 
-  it('anonymous → redirects to /associate/login?next=/associate/alice', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(false);
-    mocks.getAssociateIdentityMock.mockResolvedValue(null);
+  it('anonymous → redirects to /signin?as=associate&next=/associate/alice', async () => {
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'anonymous' });
 
     await expect(AssociateProfilePage(makeParams('alice'))).rejects.toThrow(
       'NEXT_REDIRECT'
     );
 
     expect(mocks.redirectMock).toHaveBeenCalledWith(
-      '/associate/login?next=' + encodeURIComponent('/associate/alice')
+      '/signin?as=associate&next=' + encodeURIComponent('/associate/alice')
     );
   });
 
   it('associate with matching id + fresh ver → renders (no redirect, no 403)', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(false);
-    mocks.getAssociateIdentityMock.mockResolvedValue({ associateId: 42 });
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'associate', userId: 'u2', email: 'assoc@test.com', associateId: 42, associateSlug: 'alice' });
     mocks.getAssociateIdBySlugMock.mockResolvedValue(42);
 
     const result = await AssociateProfilePage(makeParams('alice'));
@@ -101,8 +96,7 @@ describe('/associate/[slug] guard matrix', () => {
   });
 
   it('associate with mismatched slug → 403 element (data-http-status="403")', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(false);
-    mocks.getAssociateIdentityMock.mockResolvedValue({ associateId: 99 });
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'associate', userId: 'u2', email: 'assoc@test.com', associateId: 99, associateSlug: 'bob' });
     mocks.getAssociateIdBySlugMock.mockResolvedValue(42);
 
     const result = (await AssociateProfilePage(makeParams('alice'))) as {
@@ -112,22 +106,20 @@ describe('/associate/[slug] guard matrix', () => {
     expect(mocks.redirectMock).not.toHaveBeenCalled();
   });
 
-  it('associate with stale ver (getAssociateIdentity → null) → redirect to login', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(false);
-    mocks.getAssociateIdentityMock.mockResolvedValue(null);
+  it('associate with stale ver (getCallerIdentity → anonymous) → redirect to login', async () => {
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'anonymous' });
 
     await expect(AssociateProfilePage(makeParams('alice'))).rejects.toThrow(
       'NEXT_REDIRECT'
     );
 
     expect(mocks.redirectMock).toHaveBeenCalledWith(
-      '/associate/login?next=' + encodeURIComponent('/associate/alice')
+      '/signin?as=associate&next=' + encodeURIComponent('/associate/alice')
     );
   });
 
   it('trainer → renders (regardless of slug)', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(true);
-    mocks.getAssociateIdentityMock.mockResolvedValue(null);
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mocks.getAssociateIdBySlugMock.mockResolvedValue(42);
 
     const result = await AssociateProfilePage(makeParams('any-slug'));
@@ -136,7 +128,7 @@ describe('/associate/[slug] guard matrix', () => {
   });
 
   it('slug not found → notFound()', async () => {
-    mocks.isAuthenticatedSessionMock.mockResolvedValue(true);
+    mocks.getCallerIdentityMock.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' });
     mocks.getAssociateIdBySlugMock.mockResolvedValue(null);
 
     await expect(AssociateProfilePage(makeParams('ghost'))).rejects.toThrow(

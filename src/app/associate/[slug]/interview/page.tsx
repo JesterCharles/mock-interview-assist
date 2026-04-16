@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation';
-import { isAuthenticatedSession, getAssociateIdentity } from '@/lib/auth-server';
+import { getCallerIdentity } from '@/lib/identity';
 import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
 import { AuthenticatedInterviewClient } from '@/components/interview/AuthenticatedInterviewClient';
@@ -63,12 +63,11 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
     notFound();
   }
 
-  const trainer = await isAuthenticatedSession();
-  const associateIdentity = trainer ? null : await getAssociateIdentity();
+  const caller = await getCallerIdentity();
 
-  if (!trainer && !associateIdentity) {
+  if (caller.kind === 'anonymous') {
     redirect(
-      '/associate/login?next=' +
+      '/signin?as=associate&next=' +
         encodeURIComponent('/associate/' + slugValidation.slug + '/interview'),
     );
   }
@@ -78,7 +77,7 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
     notFound();
   }
 
-  if (!trainer && associateIdentity && associateIdentity.associateId !== targetId) {
+  if (caller.kind === 'associate' && caller.associateId !== targetId) {
     return renderForbidden();
   }
 

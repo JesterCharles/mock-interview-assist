@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { isAuthenticatedSession } from '@/lib/auth-server'
+import { getCallerIdentity } from '@/lib/identity'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -24,9 +24,9 @@ function formatDate(d: Date | null): string {
 }
 
 export default async function CohortDetailPage({ params }: Props) {
-  const authed = await isAuthenticatedSession()
-  if (!authed) {
-    redirect('/login')
+  const caller = await getCallerIdentity()
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
+    redirect('/signin')
   }
 
   const { id } = await params
