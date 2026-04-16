@@ -80,7 +80,7 @@ describe('GET /api/auth/exchange', () => {
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(mockSetSession).toHaveBeenCalledWith({ access_token: 'at', refresh_token: 'rt' });
     expect(res.status).toBe(307);
-    expect(getRedirectPath(res)).toBe('/associate/alice');
+    expect(getRedirectPath(res)).toBe('/associate/alice/dashboard');
   });
 
   it('exchanges PKCE code', async () => {
@@ -88,7 +88,7 @@ describe('GET /api/auth/exchange', () => {
     const res = await GET(makeRequest({ code: 'pkce-code' }));
     expect(mockExchangeCode).toHaveBeenCalledWith('pkce-code');
     expect(res.status).toBe(307);
-    expect(getRedirectPath(res)).toBe('/associate/bob');
+    expect(getRedirectPath(res)).toBe('/associate/bob/dashboard');
   });
 
   it('redirects to /signin on setSession error', async () => {
@@ -146,7 +146,7 @@ describe('GET /api/auth/exchange', () => {
       data: { authUserId: 'u2' },
       select: { slug: true },
     });
-    expect(getRedirectPath(res)).toBe('/associate/carol');
+    expect(getRedirectPath(res)).toBe('/associate/carol/dashboard');
   });
 
   it('handles P2002 race on authUserId linkage', async () => {
@@ -160,7 +160,7 @@ describe('GET /api/auth/exchange', () => {
     mockUpdate.mockRejectedValue({ code: 'P2002' });
 
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
-    expect(getRedirectPath(res)).toBe('/associate/dave');
+    expect(getRedirectPath(res)).toBe('/associate/dave/dashboard');
   });
 
   it('redirects to not-onboarded when no associate matches', async () => {
