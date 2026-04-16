@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       cohortId: a.cohortId,
       cohortName: a.cohort?.name ?? null,
       createdAt: a.createdAt.toISOString(),
+      lastInvitedAt: a.lastInvitedAt?.toISOString() ?? null,
     }))
     return NextResponse.json(payload)
   } catch (error) {

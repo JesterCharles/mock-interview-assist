@@ -57,6 +57,7 @@ describe('GET /api/trainer/associates', () => {
     mockIdentity.mockResolvedValue({ kind: 'trainer', userId: 'u1', email: 'trainer@test.com' })
     const createdA = new Date('2026-03-01T00:00:00.000Z')
     const createdB = new Date('2026-04-01T00:00:00.000Z')
+    const invitedAt = new Date('2026-04-10T12:00:00.000Z')
     mockFindMany.mockResolvedValue([
       {
         id: 1,
@@ -64,6 +65,7 @@ describe('GET /api/trainer/associates', () => {
         displayName: 'Alice',
         email: 'alice@example.com',
         createdAt: createdA,
+        lastInvitedAt: invitedAt,
         cohortId: 9,
         cohort: { id: 9, name: 'Spring 2026' },
         _count: { sessions: 3 },
@@ -74,6 +76,7 @@ describe('GET /api/trainer/associates', () => {
         displayName: null,
         email: null,
         createdAt: createdB,
+        lastInvitedAt: null,
         cohortId: null,
         cohort: null,
         _count: { sessions: 0 },
@@ -93,6 +96,7 @@ describe('GET /api/trainer/associates', () => {
         cohortId: 9,
         cohortName: 'Spring 2026',
         createdAt: '2026-03-01T00:00:00.000Z',
+        lastInvitedAt: '2026-04-10T12:00:00.000Z',
       },
       {
         id: 2,
@@ -103,6 +107,7 @@ describe('GET /api/trainer/associates', () => {
         cohortId: null,
         cohortName: null,
         createdAt: '2026-04-01T00:00:00.000Z',
+        lastInvitedAt: null,
       },
     ])
     expect(mockFindMany).toHaveBeenCalledWith(

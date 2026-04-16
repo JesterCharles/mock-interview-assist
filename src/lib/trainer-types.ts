@@ -72,6 +72,7 @@ export interface AssociateBackfillRow {
   cohortId: number | null
   cohortName: string | null
   createdAt: string // ISO
+  lastInvitedAt: string | null // ISO — for bulk invite preview throttle check
 }
 
 // Dry-run preview counts returned by /api/trainer/associates/preview.
