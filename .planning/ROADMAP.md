@@ -115,7 +115,13 @@ Plans:
   4. `/api/trainer/invites/bulk` runs per-email transactions; partial failures do not roll back siblings; response is a result table with per-email status
   5. Re-invite throttle (`lastInvitedAt` < 5 min) blocks repeat sends with a clear message
   6. New invitee receives a Resend-delivered magic link that lands them on `/associate/[slug]/dashboard` after click-through
-**Plans**: [to be planned]
+**Plans**: 3 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — Email parser pure function + EmailChipInput component
+- [ ] 19-02-PLAN.md — Preview classification + onboarding page wiring + human verify
+- [ ] 19-03-PLAN.md — inviteAssociate helper extraction + bulk API route + integration tests
+**UI hint**: yes
 
 ### Phase 20: Middleware Cutover + RLS
 **Goal**: Supabase identity is the primary auth source for all guarded routes; RLS policies are deployed as defense-in-depth without breaking Prisma access.
@@ -216,7 +222,7 @@ Plans:
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
-| 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
+| 19. Bulk Invite | v1.2 | 0/3 | Planned | - |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
