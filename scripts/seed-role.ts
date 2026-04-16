@@ -39,25 +39,29 @@ const admin = createClient(url, key, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const { data: users, error: listErr } = await admin.auth.admin.listUsers();
-if (listErr) {
-  console.error('Failed to list users:', listErr.message);
-  process.exit(1);
+async function main() {
+  const { data: users, error: listErr } = await admin.auth.admin.listUsers();
+  if (listErr) {
+    console.error('Failed to list users:', listErr.message);
+    process.exit(1);
+  }
+
+  const user = users.users.find((u) => u.email === email);
+  if (!user) {
+    console.error(`No user found with email: ${email}`);
+    process.exit(1);
+  }
+
+  const { error } = await admin.auth.admin.updateUserById(user.id, {
+    user_metadata: { ...user.user_metadata, role },
+  });
+
+  if (error) {
+    console.error('Failed to update:', error.message);
+    process.exit(1);
+  }
+
+  console.log(`Set ${email} → role: ${role} (user_id: ${user.id})`);
 }
 
-const user = users.users.find((u) => u.email === email);
-if (!user) {
-  console.error(`No user found with email: ${email}`);
-  process.exit(1);
-}
-
-const { error } = await admin.auth.admin.updateUserById(user.id, {
-  user_metadata: { ...user.user_metadata, role },
-});
-
-if (error) {
-  console.error('Failed to update:', error.message);
-  process.exit(1);
-}
-
-console.log(`Set ${email} → role: ${role} (user_id: ${user.id})`);
+main();
