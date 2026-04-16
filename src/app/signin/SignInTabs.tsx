@@ -98,14 +98,13 @@ export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
     }
   }
 
-  // TODO (Plan 04): wire magic link POST handler
   async function handleAssocSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (assocStatus === 'submitting') return;
     setAssocStatus('submitting');
     setAssocError(null);
     try {
-      const res = await fetch('/api/auth/magic-link/request', {
+      const res = await fetch('/api/auth/magic-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: assocEmail }),
@@ -113,6 +112,11 @@ export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
       if (res.status === 429) {
         setAssocStatus('error');
         setAssocError('Too many requests. Please try again later.');
+        return;
+      }
+      if (!res.ok) {
+        setAssocStatus('error');
+        setAssocError('Something went wrong. Please try again.');
         return;
       }
       setAssocStatus('sent');
@@ -258,10 +262,23 @@ export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
             </div>
           )}
         </div>
+      ) : assocStatus === 'sent' ? (
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.5, marginBottom: 16 }}>
+            Check your email — we sent a sign-in link to <strong>{assocEmail}</strong>.
+          </p>
+          <button
+            type="button"
+            onClick={() => { setAssocStatus('idle'); setAssocError(null); }}
+            style={{ color: 'var(--accent)', fontSize: 13, cursor: 'pointer', background: 'none', border: 'none', padding: 0, display: 'block' }}
+          >
+            Didn&apos;t get it? Try again
+          </button>
+        </div>
       ) : (
         <form onSubmit={handleAssocSubmit} noValidate>
           <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
-            Enter your email and we&apos;ll send you a sign-in link.
+            Enter your email to receive a sign-in link.
           </p>
           <label htmlFor="assoc-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
             Email
@@ -277,22 +294,14 @@ export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
             disabled={assocStatus === 'submitting'}
             style={{ ...inputBase, marginBottom: 16 }}
           />
-          {assocStatus === 'sent' ? (
-            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.5 }}>
-              Check your email for a sign-in link.
-            </p>
-          ) : (
-            <>
-              {assocError && (
-                <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
-                  {assocError}
-                </div>
-              )}
-              <button type="submit" disabled={assocStatus === 'submitting' || !assocEmail} className="btn-accent-flat" style={{ width: '100%' }}>
-                {assocStatus === 'submitting' ? 'Sending…' : 'Send magic link'}
-              </button>
-            </>
+          {assocError && (
+            <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+              {assocError}
+            </div>
           )}
+          <button type="submit" disabled={assocStatus === 'submitting' || !assocEmail} className="btn-accent-flat" style={{ width: '100%' }}>
+            {assocStatus === 'submitting' ? 'Sending…' : 'Send sign-in link'}
+          </button>
         </form>
       )}
     </div>
