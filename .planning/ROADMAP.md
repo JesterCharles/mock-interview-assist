@@ -249,5 +249,5 @@ Plans:
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 24. PDF Analytics Export | v1.2 | 2/2 | Complete   | 2026-04-16 |
+| 24. PDF Analytics Export | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
