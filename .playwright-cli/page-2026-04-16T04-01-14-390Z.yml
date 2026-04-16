@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - link "Next Level Mock" [ref=e5] [cursor=pointer]:
+        - /url: /trainer
+        - img [ref=e7]
+        - generic [ref=e9]: Next Level Mock
+      - generic [ref=e10]: Loading...
+  - main [ref=e11]
+  - button "Open Next.js Dev Tools" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
+  - alert [ref=e21]

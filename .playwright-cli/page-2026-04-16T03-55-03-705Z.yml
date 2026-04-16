@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - link "Next Level Mock" [ref=e5] [cursor=pointer]:
+        - /url: /trainer
+        - img [ref=e7]
+        - generic [ref=e9]: Next Level Mock
+      - generic [ref=e46]:
+        - link "Dashboard" [ref=e47] [cursor=pointer]:
+          - /url: /trainer
+          - img [ref=e48]
+          - text: Dashboard
+        - link "New Interview" [ref=e53] [cursor=pointer]:
+          - /url: /interview/new
+          - img [ref=e54]
+          - text: New Interview
+        - link "Question Banks" [ref=e57] [cursor=pointer]:
+          - /url: /question-banks
+          - img [ref=e58]
+          - text: Question Banks
+        - link "History" [ref=e61] [cursor=pointer]:
+          - /url: /history
+          - img [ref=e62]
+          - text: History
+        - generic "Signed in as trainer" [ref=e66]: trainer
+        - button "Sign out" [ref=e67]:
+          - img [ref=e68]
+          - text: Sign out
+        - button "Switch to dark theme" [ref=e72]:
+          - img [ref=e73]
+  - main [ref=e11]:
+    - generic [ref=e76]:
+      - navigation "Trainer sections" [ref=e77]:
+        - generic [ref=e78]: Dashboard
+        - link "Cohorts" [ref=e79] [cursor=pointer]:
+          - /url: /trainer/cohorts
+      - heading "Trainer Dashboard" [level=1] [ref=e80]
+      - generic [ref=e82]:
+        - generic [ref=e83]: Cohort
+        - combobox "Cohort" [ref=e84] [cursor=pointer]:
+          - option "All Associates" [selected]
+      - generic [ref=e85]:
+        - paragraph [ref=e86]: roster
+        - table [ref=e88]:
+          - rowgroup [ref=e89]:
+            - row "Name Slug Readiness ↑ Sessions Last Session Recommended Area" [ref=e90] [cursor=pointer]:
+              - columnheader "Name" [ref=e91]:
+                - button "Name" [ref=e92]
+              - columnheader "Slug" [ref=e93]
+              - columnheader "Readiness ↑" [ref=e94]:
+                - button "Readiness ↑" [ref=e95]
+              - columnheader "Sessions" [ref=e96]:
+                - button "Sessions" [ref=e97]
+              - columnheader "Last Session" [ref=e98]:
+                - button "Last Session" [ref=e99]
+              - columnheader "Recommended Area" [ref=e100]
+          - rowgroup [ref=e101]:
+            - link "View Carol Chen detail" [ref=e102] [cursor=pointer]:
+              - cell "Carol Chen" [ref=e103]
+              - cell "carol-chen" [ref=e104]
+              - cell "-- pending" [ref=e105]
+              - cell "1" [ref=e106]
+              - cell "Apr 10, 2026" [ref=e107]
+              - cell "TypeScript Generics" [ref=e108]
+            - link "View Bob Martinez detail" [ref=e109] [cursor=pointer]:
+              - cell "Bob Martinez" [ref=e110]
+              - cell "bob-martinez" [ref=e111]
+              - cell "-- pending" [ref=e112]
+              - cell "3" [ref=e113]
+              - cell "Apr 12, 2026" [ref=e114]
+              - cell "React Hooks" [ref=e115]
+            - link "View Alice Johnson detail" [ref=e116] [cursor=pointer]:
+              - cell "Alice Johnson" [ref=e117]
+              - cell "alice-johnson" [ref=e118]
+              - cell "-- pending" [ref=e119]
+              - cell "4" [ref=e120]
+              - cell "Apr 11, 2026" [ref=e121]
+              - cell "—" [ref=e122]
+  - button "Open Next.js Dev Tools" [ref=e34] [cursor=pointer]:
+    - img [ref=e35]
+  - alert [ref=e45]
