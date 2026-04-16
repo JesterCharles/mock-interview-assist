@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation';
-import { isAuthenticatedSession, getAssociateIdentity } from '@/lib/auth-server';
-import { prisma } from '@/lib/prisma';
-import { isAssociateAuthEnabled } from '@/lib/featureFlags';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { SignInTabs } from './SignInTabs';
 import { PublicShell } from '@/components/layout/PublicShell';
 
 /**
- * Unified sign-in. Two tabs — Trainer (password) and Associate (PIN-only).
- * Already-authenticated callers are forwarded to their natural landing.
+ * Unified sign-in. Two tabs — Trainer (email/password) and Associate (magic link).
+ * Both tabs always visible. Already-authenticated callers are forwarded to their landing.
  */
 
 interface PageProps {
@@ -23,27 +21,13 @@ function safeNext(raw: string | undefined): string | null {
 export default async function SignInPage({ searchParams }: PageProps) {
   const { as, next } = await searchParams;
   const nextPath = safeNext(next);
-  const associateEnabled = isAssociateAuthEnabled();
-  // Initial tab: respect ?as= only when associate auth is enabled; otherwise
-  // always land on Trainer (the only available path).
-  const initialTab: 'trainer' | 'associate' =
-    associateEnabled && as === 'associate' ? 'associate' : 'trainer';
+  const initialTab: 'trainer' | 'associate' = as === 'associate' ? 'associate' : 'trainer';
 
-  // Bounce if already signed in.
-  const trainer = await isAuthenticatedSession();
-  if (trainer) {
+  // Bounce if already signed in via Supabase session
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
     redirect(nextPath ?? '/trainer');
-  }
-  if (associateEnabled) {
-    const identity = await getAssociateIdentity();
-    if (identity) {
-      if (nextPath) redirect(nextPath);
-      const me = await prisma.associate.findUnique({
-        where: { id: identity.associateId },
-        select: { slug: true },
-      });
-      redirect(me ? `/associate/${me.slug}/interview` : '/');
-    }
   }
 
   return (
@@ -72,7 +56,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
         >
           Sign in
         </h1>
-        <SignInTabs initialTab={initialTab} nextPath={nextPath} showAssociateTab={associateEnabled} />
+        <SignInTabs initialTab={initialTab} nextPath={nextPath} showAssociateTab={true} />
       </div>
     </PublicShell>
   );

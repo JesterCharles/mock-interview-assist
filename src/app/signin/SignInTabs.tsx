@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import fpPromise from '@fingerprintjs/fingerprintjs';
 import { useAuth } from '@/lib/auth-context';
 
 interface SignInTabsProps {
   initialTab: 'trainer' | 'associate';
   nextPath: string | null;
-  /** When false (default for v1.1 release), hides the Associate tab entirely. */
+  /** Both tabs are always visible in v1.2+. This prop is kept for API compat. */
   showAssociateTab?: boolean;
 }
 
@@ -37,95 +36,93 @@ const inputBase: React.CSSProperties = {
   fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
 };
 
-export function SignInTabs({ initialTab, nextPath, showAssociateTab = false }: SignInTabsProps) {
+export function SignInTabs({ initialTab, nextPath }: SignInTabsProps) {
   const router = useRouter();
   const { login } = useAuth();
-  // If associate tab is hidden, force trainer regardless of initialTab.
-  const [tab, setTab] = useState<'trainer' | 'associate'>(
-    showAssociateTab ? initialTab : 'trainer',
-  );
+  const [tab, setTab] = useState<'trainer' | 'associate'>(initialTab);
 
-  // Trainer state
+  // Trainer sign-in state
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [trainerError, setTrainerError] = useState<string | null>(null);
   const [trainerSubmitting, setTrainerSubmitting] = useState(false);
 
-  // Associate state
-  const [pin, setPin] = useState('');
-  const [fingerprint, setFingerprint] = useState('');
-  const [associateError, setAssociateError] = useState<string | null>(null);
-  const [associateSubmitting, setAssociateSubmitting] = useState(false);
+  // Forgot-password inline form state
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetStatus, setResetStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [resetError, setResetError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const fp = await fpPromise.load();
-        const r = await fp.get();
-        if (!cancelled) setFingerprint(r.visitorId);
-      } catch {
-        // ignore
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Associate magic link state (wired in Plan 04)
+  const [assocEmail, setAssocEmail] = useState('');
+  const [assocStatus, setAssocStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [assocError, setAssocError] = useState<string | null>(null);
 
   async function handleTrainerSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (trainerSubmitting) return;
     setTrainerError(null);
     setTrainerSubmitting(true);
-    const ok = await login(password);
+    const ok = await login(email, password);
     if (ok) {
       router.replace(nextPath ?? '/trainer');
       router.refresh();
       return;
     }
-    setTrainerError('Invalid password.');
+    setTrainerError('Invalid email or password.');
     setPassword('');
     setTrainerSubmitting(false);
   }
 
-  async function handleAssociateSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleResetSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (associateSubmitting) return;
-    setAssociateError(null);
-    if (!/^\d{6}$/.test(pin)) {
-      setAssociateError('PIN must be 6 digits.');
-      return;
-    }
-    if (!fingerprint) {
-      setAssociateError('Still loading. Please try again in a moment.');
-      return;
-    }
-    setAssociateSubmitting(true);
+    if (resetStatus === 'submitting') return;
+    setResetStatus('submitting');
+    setResetError(null);
     try {
-      const res = await fetch('/api/associate/pin/verify', {
+      const res = await fetch('/api/auth/reset/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin, fingerprint }),
+        body: JSON.stringify({ email: resetEmail }),
       });
-      if (res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { slug?: string };
-        const slug = data.slug ?? '';
-        const dest = nextPath ?? (slug ? `/associate/${slug}/interview` : '/');
-        router.replace(dest);
-        router.refresh();
+      if (res.status === 429) {
+        setResetStatus('error');
+        setResetError('Too many requests. Please try again later.');
         return;
       }
-      if (res.status === 429) setAssociateError('Too many attempts. Please wait 15 minutes.');
-      else if (res.status === 401) setAssociateError('Invalid PIN.');
-      else setAssociateError('Sign-in failed. Please try again.');
+      // Always show success regardless of whether email exists (security)
+      setResetStatus('sent');
     } catch {
-      setAssociateError('Network error. Please try again.');
-    } finally {
-      setAssociateSubmitting(false);
+      setResetStatus('error');
+      setResetError('Network error. Please try again.');
     }
   }
 
-  const activeStyle = (active: boolean): React.CSSProperties => ({
+  // TODO (Plan 04): wire magic link POST handler
+  async function handleAssocSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (assocStatus === 'submitting') return;
+    setAssocStatus('submitting');
+    setAssocError(null);
+    try {
+      const res = await fetch('/api/auth/magic-link/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: assocEmail }),
+      });
+      if (res.status === 429) {
+        setAssocStatus('error');
+        setAssocError('Too many requests. Please try again later.');
+        return;
+      }
+      setAssocStatus('sent');
+    } catch {
+      setAssocStatus('error');
+      setAssocError('Network error. Please try again.');
+    }
+  }
+
+  const activeTabStyle = (active: boolean): React.CSSProperties => ({
     ...tabBtnBase,
     background: active ? 'var(--surface)' : 'var(--surface-muted)',
     color: active ? 'var(--ink)' : 'var(--muted)',
@@ -134,96 +131,168 @@ export function SignInTabs({ initialTab, nextPath, showAssociateTab = false }: S
 
   return (
     <div>
-      {showAssociateTab && (
-        <div role="tablist" aria-label="Sign-in role" style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'trainer'}
-            onClick={() => setTab('trainer')}
-            style={{ ...activeStyle(tab === 'trainer'), borderRadius: '8px 0 0 8px' }}
-          >
-            Trainer
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'associate'}
-            onClick={() => setTab('associate')}
-            style={{ ...activeStyle(tab === 'associate'), borderRadius: '0 8px 8px 0' }}
-          >
-            Associate
-          </button>
-        </div>
-      )}
+      {/* Tab switcher — both tabs always visible */}
+      <div role="tablist" aria-label="Sign-in role" style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'trainer'}
+          onClick={() => setTab('trainer')}
+          style={{ ...activeTabStyle(tab === 'trainer'), borderRadius: '8px 0 0 8px' }}
+        >
+          Trainer
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'associate'}
+          onClick={() => setTab('associate')}
+          style={{ ...activeTabStyle(tab === 'associate'), borderRadius: '0 8px 8px 0' }}
+        >
+          Associate
+        </button>
+      </div>
 
       {tab === 'trainer' ? (
-        <form onSubmit={handleTrainerSubmit} noValidate>
+        <div>
+          {!showReset ? (
+            <form onSubmit={handleTrainerSubmit} noValidate>
+              <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                Trainer access. Sign in with your email and password.
+              </p>
+
+              <label htmlFor="trainer-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
+                Email
+              </label>
+              <input
+                id="trainer-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus
+                autoComplete="email"
+                required
+                disabled={trainerSubmitting}
+                style={{ ...inputBase, marginBottom: 16 }}
+              />
+
+              <label htmlFor="trainer-password" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
+                Password
+              </label>
+              <input
+                id="trainer-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                disabled={trainerSubmitting}
+                style={{ ...inputBase, marginBottom: 8 }}
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setResetEmail(email);
+                  setShowReset(true);
+                  setResetStatus('idle');
+                  setResetError(null);
+                }}
+                style={{ color: 'var(--accent)', fontSize: 13, cursor: 'pointer', background: 'none', border: 'none', padding: 0, marginBottom: 16, display: 'block' }}
+              >
+                Forgot password?
+              </button>
+
+              {trainerError && (
+                <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                  {trainerError}
+                </div>
+              )}
+
+              <button type="submit" disabled={trainerSubmitting || !email || !password} className="btn-accent-flat" style={{ width: '100%' }}>
+                {trainerSubmitting ? 'Signing in…' : 'Sign in'}
+              </button>
+            </form>
+          ) : (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowReset(false)}
+                style={{ color: 'var(--accent)', fontSize: 13, cursor: 'pointer', background: 'none', border: 'none', padding: 0, marginBottom: 16, display: 'block' }}
+              >
+                ← Back to sign in
+              </button>
+
+              {resetStatus === 'sent' ? (
+                <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.5 }}>
+                  Check your email for a reset link.
+                </p>
+              ) : (
+                <form onSubmit={handleResetSubmit} noValidate>
+                  <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                    Enter your email and we&apos;ll send a reset link.
+                  </p>
+                  <label htmlFor="reset-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
+                    Email
+                  </label>
+                  <input
+                    id="reset-email"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    autoFocus
+                    required
+                    disabled={resetStatus === 'submitting'}
+                    style={{ ...inputBase, marginBottom: 16 }}
+                  />
+                  {resetError && (
+                    <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                      {resetError}
+                    </div>
+                  )}
+                  <button type="submit" disabled={resetStatus === 'submitting' || !resetEmail} className="btn-accent-flat" style={{ width: '100%' }}>
+                    {resetStatus === 'submitting' ? 'Sending…' : 'Send reset link'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <form onSubmit={handleAssocSubmit} noValidate>
           <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
-            Trainer access. Enter the team password.
+            Enter your email and we&apos;ll send you a sign-in link.
           </p>
-          <label htmlFor="trainer-password" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
-            Team password
+          <label htmlFor="assoc-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 6 }}>
+            Email
           </label>
           <input
-            id="trainer-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            id="assoc-email"
+            type="email"
+            value={assocEmail}
+            onChange={(e) => setAssocEmail(e.target.value)}
             autoFocus
+            autoComplete="email"
             required
-            disabled={trainerSubmitting}
+            disabled={assocStatus === 'submitting'}
             style={{ ...inputBase, marginBottom: 16 }}
           />
-          {trainerError && (
-            <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
-              {trainerError}
-            </div>
+          {assocStatus === 'sent' ? (
+            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.5 }}>
+              Check your email for a sign-in link.
+            </p>
+          ) : (
+            <>
+              {assocError && (
+                <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                  {assocError}
+                </div>
+              )}
+              <button type="submit" disabled={assocStatus === 'submitting' || !assocEmail} className="btn-accent-flat" style={{ width: '100%' }}>
+                {assocStatus === 'submitting' ? 'Sending…' : 'Send magic link'}
+              </button>
+            </>
           )}
-          <button type="submit" disabled={trainerSubmitting || !password} className="btn-accent-flat" style={{ width: '100%' }}>
-            {trainerSubmitting ? 'Verifying…' : 'Sign in as trainer'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleAssociateSubmit} noValidate>
-          <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
-            Enter the 6-digit PIN your trainer gave you.
-          </p>
-          <label htmlFor="associate-pin" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 8 }}>
-            PIN
-          </label>
-          <input
-            id="associate-pin"
-            type="text"
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            autoComplete="one-time-code"
-            disabled={associateSubmitting}
-            required
-            autoFocus
-            style={{
-              ...inputBase,
-              width: '12rem',
-              padding: '12px 14px',
-              fontSize: 32,
-              letterSpacing: '0.4em',
-              fontVariantNumeric: 'tabular-nums',
-              textAlign: 'center',
-              fontFamily: "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
-              marginBottom: 24,
-            }}
-          />
-          {associateError && (
-            <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
-              {associateError}
-            </div>
-          )}
-          <button type="submit" disabled={associateSubmitting} className="btn-accent-flat" style={{ width: '100%' }}>
-            {associateSubmitting ? 'Verifying…' : 'Sign in as associate'}
-          </button>
         </form>
       )}
     </div>
