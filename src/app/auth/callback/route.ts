@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -40,6 +41,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const role = user.user_metadata?.role as string | undefined;
+
+  // Auto-assign 'associate' role if no role set (first-time magic link users)
+  if (!role) {
+    await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, role: 'associate' },
+    });
+  }
 
   // Trainer / admin — redirect to trainer dashboard
   if (role === 'trainer' || role === 'admin') {

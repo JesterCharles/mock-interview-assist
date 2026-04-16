@@ -39,7 +39,7 @@
 
 - [x] **Phase 16: Cached Question-Bank Manifest** -- in-memory cache + ETag short-circuit + manual refresh, hits <400ms wizard target (completed 2026-04-15)
 - [x] **Phase 17: Schema Prep + Email Backfill** -- additive schema (`Associate.email`, `authUserId`, `lastInvitedAt`, `Session.aiTrainerVariance`) + trainer email-backfill UI (completed 2026-04-15)
-- [ ] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery)
+- [x] **Phase 18: Supabase Auth Install** -- `@supabase/ssr` scaffold + trainer email/password + associate magic-link (PKCE + Resend delivery) (completed 2026-04-16)
 - [ ] **Phase 19: Bulk Invite** -- trainer onboarding flow: paste emails → cohort + curriculum → per-email transactional invite (50/call cap)
 - [ ] **Phase 20: Middleware Cutover + RLS** -- Supabase-primary middleware, PIN fallback during 2-week grace, RLS as defense-in-depth
 - [ ] **Phase 21: App Shell Redesign** -- two-level nav (topbar + section-scoped sidebar), cohort switcher, route reorganization
@@ -101,7 +101,7 @@ Plans:
 - [x] 18-01-PLAN.md — Install packages + scaffold Supabase clients + boot assert + AuthEvent migration + rate limiter
 - [x] 18-02-PLAN.md — Middleware rewrite (Supabase session refresh) + getCallerIdentity rewrite + caller updates
 - [x] 18-03-PLAN.md — Trainer email/password sign-in + password reset (Resend + abuse flagging)
-- [ ] 18-04-PLAN.md — Associate magic link (PKCE + Resend + /auth/callback + authUserId linkage)
+- [x] 18-04-PLAN.md — Associate magic link (PKCE + Resend + /auth/callback + authUserId linkage)
 **UI hint**: yes
 
 ### Phase 19: Bulk Invite
@@ -130,8 +130,8 @@ Plans:
 **Plans**: [to be planned]
 
 ### Phase 21: App Shell Redesign
-**Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher and reorganized routes.
-**Depends on**: Nothing (parallelizable with 17-20)
+**Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher, reorganized routes, Profile table migration (role in DB, admin-promote UI), and `/trainer/*` → `/app/*` route restructure.
+**Depends on**: Phase 18 (needs Supabase auth + 3-role model for admin-promote UI and route restructure)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04
 **Success Criteria** (what must be TRUE):
   1. Every authenticated trainer route renders a global topbar with logo + Dashboard / Interviews / Question Banks / Settings + avatar menu; active section is highlighted
@@ -215,7 +215,7 @@ Plans:
 | 15. Design Cohesion Sweep | v1.1 | 4/4 | Complete | 2026-04-14 |
 | 16. Cached Question-Bank Manifest | v1.2 | 1/1 | Complete   | 2026-04-15 |
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
-| 18. Supabase Auth Install | v1.2 | 3/4 | In Progress|  |
+| 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 0/0 | Not started | - |
 | 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |

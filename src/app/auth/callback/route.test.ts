@@ -1,8 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+vi.mock('server-only', () => ({}));
+
 vi.mock('@/lib/supabase/server', () => ({
   createSupabaseServerClient: vi.fn(),
+}));
+
+vi.mock('@/lib/supabase/admin', () => ({
+  supabaseAdmin: {
+    auth: { admin: { updateUserById: vi.fn().mockResolvedValue({ data: {}, error: null }) } },
+  },
 }));
 
 vi.mock('@/lib/prisma', () => ({
