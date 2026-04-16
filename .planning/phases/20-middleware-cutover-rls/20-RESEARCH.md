@@ -396,14 +396,14 @@ SELECT * FROM "Session" WHERE "associateId" = <your-test-id>;
 
 **A4 note:** This is validated by the locked decision (D-02) and the existing `supabase/admin.ts` which uses `SUPABASE_SECRET_KEY`. Prisma `DATABASE_URL` also uses the Transaction Pooler with the service-role password. LOW residual risk.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Migration naming convention inconsistency**
+1. **Migration naming convention inconsistency** — RESOLVED: Use `0003_rls_policies` (sequential). Plan 01 Task 1 creates the migration file manually to control naming and avoid `prisma migrate dev` timestamp behavior.
    - What we know: Project has both `0000_baseline` (sequential) and `20260414180750_add_associate_pin` (timestamp) conventions in the same migrations folder.
    - What's unclear: Which convention `prisma migrate dev` will use for the new migration, and whether mixing causes `prisma migrate status` issues.
    - Recommendation: Use `0003_rls_policies` (sequential) to match the intentional baseline/v1.1/v1.2 naming. Create it manually rather than via `prisma migrate dev` to control the name.
 
-2. **`/api/cohorts/[id]/curriculum/[weekId]` not verified**
+2. **`/api/cohorts/[id]/curriculum/[weekId]` not verified** — RESOLVED: File confirmed as trainer-gated during Plan 02 Task 1 execution. Listed in `files_modified` and annotated with `[AUDIT-VERIFIED: P20]`.
    - What we know: All sibling curriculum routes (`/curriculum/route.ts`) are trainer-gated.
    - What's unclear: The `[weekId]` sub-route was not read during research.
    - Recommendation: Wave 0 reads this file as the first task; expected to be VERIFIED but must confirm.
