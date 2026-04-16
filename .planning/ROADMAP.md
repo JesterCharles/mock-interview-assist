@@ -186,7 +186,10 @@ Plans:
   3. A readiness-goal progress bar shows the associate's current weighted readiness vs the cohort threshold; no cohort-mate names are visible (aggregate-only)
   4. "Book a Mock" CTA opens a working trainer-contact path (mailto or in-app message) — no full scheduler required
   5. Associates from other slugs cannot access this dashboard (middleware enforces matching identity)
-**Plans**: [to be planned]
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
+- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 **UI hint**: yes
 
 ### Phase 24: PDF Analytics Export
@@ -198,7 +201,10 @@ Plans:
   2. Trainer can export a per-associate PDF from the associate detail page containing gap trend, session list, and recommended areas
   3. PDFs render using a hand-rolled SVG sparkline helper (no recharts inside `@react-pdf/renderer`)
   4. PDF generation completes without OOM on the constrained Docker host (verified on production-equivalent memory limits)
-**Plans**: [to be planned]
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
+- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 **UI hint**: yes
 
 ### Phase 25: PIN Removal + Cleanup
@@ -211,7 +217,10 @@ Plans:
   3. Prisma migration drops `Associate.pinHash` and `Associate.pinGeneratedAt`; `prisma migrate deploy` succeeds
   4. Env vars `APP_PASSWORD`, `ASSOCIATE_SESSION_SECRET`, `ENABLE_ASSOCIATE_AUTH` are removed from `.env.example`, `.env.docker`, deploy docs, and CLAUDE.md / PROJECT.md
   5. App boots and all auth flows function with only Supabase env vars present
-**Plans**: [to be planned]
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — AssociateNav layout + tabs (Dashboard / Profile / Book a Mock mailto)
+- [ ] 23-02-PLAN.md — Dashboard page (gap trend chart + recommended area card + readiness progress bar + identity guard)
 
 ## Progress
 
@@ -239,6 +248,6 @@ Plans:
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
-| 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
+| 23. Associate Self-Dashboard | v1.2 | 0/2 | Planning    | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
