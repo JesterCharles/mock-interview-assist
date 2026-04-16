@@ -24,7 +24,7 @@ const BulkInviteSchema = z.object({
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Auth gate
-  const caller = await getCallerIdentity();
+  const caller = await getCallerIdentity(); // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

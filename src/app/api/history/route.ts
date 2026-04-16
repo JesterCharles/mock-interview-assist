@@ -13,7 +13,7 @@ import { getSettings } from '@/lib/settingsService';
 // GET - Retrieve all interview history
 export async function GET() {
     try {
-        const caller = await getCallerIdentity()
+        const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
         if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
@@ -28,7 +28,7 @@ export async function GET() {
 // POST - Save a completed interview to history
 export async function POST(request: NextRequest) {
     try {
-        const caller = await getCallerIdentity()
+        const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
         if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove a session from history
 export async function DELETE(request: NextRequest) {
     try {
-        const caller = await getCallerIdentity()
+        const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
         if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
         }

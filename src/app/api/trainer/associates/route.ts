@@ -8,7 +8,7 @@ import type { AssociateBackfillRow } from '@/lib/trainer-types'
 // walk oldest-first when filling in emails. sessionCount drives the
 // delete-safety UI on Plan 17-03.
 export async function GET(request: NextRequest) {
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }

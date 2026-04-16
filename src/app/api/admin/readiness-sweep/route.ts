@@ -33,7 +33,7 @@ const querySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

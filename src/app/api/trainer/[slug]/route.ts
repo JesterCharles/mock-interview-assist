@@ -25,7 +25,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   // Auth check first — prevent slug probing by unauthenticated users (CR-04)
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -133,7 +133,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

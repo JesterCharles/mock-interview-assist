@@ -12,7 +12,7 @@ function validatedReadinessStatus(raw: unknown): 'ready' | 'improving' | 'not_re
 }
 
 export async function GET(request: Request) {
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

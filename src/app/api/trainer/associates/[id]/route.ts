@@ -41,7 +41,7 @@ export async function PATCH(
   const originErr = checkOrigin(request)
   if (originErr) return originErr
 
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
@@ -95,7 +95,7 @@ export async function DELETE(
   const originErr = checkOrigin(request)
   if (originErr) return originErr
 
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }

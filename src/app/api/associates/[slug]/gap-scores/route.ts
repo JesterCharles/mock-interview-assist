@@ -22,7 +22,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   // Auth guard — trainer session required
-  const caller = await getCallerIdentity()
+  const caller = await getCallerIdentity() // [AUDIT-VERIFIED: P20]
   if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
