@@ -25,9 +25,6 @@ model Associate {
   pinHash         String? // bcrypt hash of 6-digit PIN; null until trainer generates
   pinGeneratedAt  DateTime? // when current PIN was issued; also the token-version for cookie revocation
   cohortId        Int?
-  email           String?    @unique
-  authUserId      String?    @unique
-  lastInvitedAt   DateTime?
   cohort          Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   sessions        Session[]
   gapScores       GapScore[]
@@ -57,7 +54,6 @@ model Session {
   cohort                   Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   mode                     String     @default("trainer-led")
   readinessRecomputeStatus String     @default("not_applicable") // not_applicable | pending | done | failed
-  aiTrainerVariance        Float?
   createdAt                DateTime   @default(now())
   updatedAt                DateTime   @updatedAt
 
@@ -114,4 +110,17 @@ model CurriculumWeek {
 
   @@unique([cohortId, weekNumber])
   @@index([cohortId])
+}
+
+// Auth event log for rate-limit abuse tracking and admin visibility
+model AuthEvent {
+  id        String   @id @default(cuid())
+  type      String // 'magic-link' | 'reset' | 'reset-abuse-flag' | 'login-failure'
+  email     String
+  ip        String
+  metadata  Json? // e.g. { flagCount: N, deduplicatedUntil: ISO }
+  createdAt DateTime @default(now())
+
+  @@index([email, type])
+  @@index([createdAt])
 }

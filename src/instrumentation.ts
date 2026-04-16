@@ -1,6 +1,9 @@
 export async function register() {
     // Only run the setup logic on the Node.js server, not in Edge functions
     if (process.env.NEXT_RUNTIME === 'nodejs') {
+        const { assertProductionEnv } = await import('./lib/env');
+        assertProductionEnv();
+
         const { runCleanupJob } = await import('./lib/cleanupService');
         
         // Execute a garbage collection / cleanup immediately on boot
