@@ -171,7 +171,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 22-01-PLAN.md — Data foundation: topic parser + aiTrainerVariance write + analytics types
-- [ ] 22-02-PLAN.md — Roster page: KPI strip + sparklines + cohort trends + page rewrite
+- [x] 22-02-PLAN.md — Roster page: KPI strip + sparklines + cohort trends + page rewrite
 - [ ] 22-03-PLAN.md — Gap Analysis page + drill-through
 - [ ] 22-04-PLAN.md — Calibration page (override frequency + delta histogram)
 **UI hint**: yes
@@ -238,7 +238,7 @@ Plans:
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 22. Trainer Analytics | v1.2 | 1/4 | In Progress|  |
+| 22. Trainer Analytics | v1.2 | 2/4 | In Progress|  |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |

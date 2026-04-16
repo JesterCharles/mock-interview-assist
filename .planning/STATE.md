@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Analytics & Auth Overhaul
 status: executing
-last_updated: "2026-04-16T08:05:38.430Z"
+last_updated: "2026-04-16T08:11:58.780Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 20
-  completed_plans: 17
-  percent: 85
+  completed_plans: 18
+  percent: 90
 ---
 
 # v1.2 — Analytics & Auth Overhaul (started 2026-04-15)
@@ -46,7 +46,7 @@ See: .planning/PROJECT.md (updated 2026-04-15 — v1.2 milestone active)
 ## Current Position
 
 Phase: 22 (Trainer Analytics) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -73,6 +73,14 @@ Last activity: 2026-04-16
 - No streaks / no leaderboards / no push notifications; readiness-goal progress bar only
 - Cohort-mate names hidden on associate dashboard (aggregate-only privacy default)
 
+### Phase 22 decisions (plan 02)
+
+- `useSearchParams()` for cohort URL param — P21 CohortSwitcher owns selection, local state removed from roster page
+- `CohortFilter` + `ReadinessSummaryBar` removed — KpiStrip supersedes both with richer data
+- Cohort Trends only rendered when cohort param present (no global trend is meaningful)
+- Sparkline topGap queried with DISTINCT ON in separate query from windowed session query
+- `<Suspense>` wrapper required around `useSearchParams()` component in Next.js App Router
+
 ### v1.1 decisions (retained)
 
 - Postgres canonical for all new features; file history legacy export only
@@ -95,5 +103,5 @@ Last activity: 2026-04-16
 
 ## Session Continuity
 
-Last session: 2026-04-16T08:05:38.427Z
+Last session: 2026-04-16T08:11:58.777Z
 Resume with: `/gsd-plan-phase 16`
