@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Next Level Mock — an adaptive technical skills development platform built with Next.js 16 (App Router). Features trainer-led and AI-automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email. The Readiness Loop MVP added persistent gap tracking per associate, readiness classification (ready/improving/not_ready), a trainer dashboard with roster and trend charts, and adaptive interview setup that pre-populates tech weights based on past performance. v1.1 (Cohort Readiness System) added cohort management + per-week curriculum, a curriculum-aware setup filter, a unified role-aware Navbar + `/signin`, a feature-gated PIN-based associate flow, a unified design system (see `DESIGN.md`), and a background readiness sweep.
+Next Level Mock — an adaptive technical skills development platform built with Next.js 16 (App Router). Features trainer-led and AI-automated mock interviews scored via LLM (GPT-4o-mini through LangChain/LangGraph), with candidates receiving PDF reports via email. The Readiness Loop MVP added persistent gap tracking per associate, readiness classification (ready/improving/not_ready), a trainer dashboard with roster and trend charts, and adaptive interview setup that pre-populates tech weights based on past performance. v1.1 (Cohort Readiness System) added cohort management + per-week curriculum, a curriculum-aware setup filter, a unified role-aware Navbar + `/signin`, Supabase-based associate auth, a unified design system (see `DESIGN.md`), and a background readiness sweep.
 
 ## Commands
 
@@ -29,7 +29,7 @@ Docker: `docker compose up` (uses `.env.docker`, maps port 80 → 3000).
 4. **Completion** — Generate PDF report (`@react-pdf/renderer`), send via Resend email. Session is dual-written to file storage and Supabase with `Session.mode` set (`trainer-led` or `automated`), gap scores are computed, and readiness status is recomputed for the associate.
 5. **Trainer dashboard** (`/trainer`) — Roster view of all associates with readiness badges, sortable table, search. Drill into `/trainer/[slug]` for session history, gap trend charts (recharts), skill filtering, cohort assignment, and calibration view. Cohort + curriculum management lives under `/trainer/cohorts` and `/trainer/cohorts/[id]/curriculum`.
 6. **Associate profile** (`/associate/[slug]`) — Server-rendered profile showing session history and readiness status. Associate-authenticated interview entry at `/associate/[slug]/interview` (feature-gated).
-7. **Sign in** (`/signin`) — Unified entry point with Trainer and Associate tabs. Legacy `/login` and `/associate/login` redirect here. The Associate tab is hidden when `ENABLE_ASSOCIATE_AUTH` is `false` (default in v1.1).
+7. **Sign in** (`/signin`) — Unified entry point with Trainer and Associate tabs. Legacy `/login` redirects here.
 
 There is also a public automated interview mode (`/api/public/interview/*`) that uses an AI agent to conduct interviews without a trainer.
 
@@ -69,7 +69,7 @@ Questions are parsed from Markdown files fetched from a configurable GitHub repo
 
 **Supabase (Postgres via Prisma)**:
 - `Session` — Full interview session data, linked to Associate via `associateId`. Carries `mode` (`trainer-led` | `automated`) and optional `cohortId`.
-- `Associate` — Identity (slug, displayName), readiness fields (status, recommendedArea, lastComputedAt), optional `cohortId`, PIN fields (hash + generatedAt) for the feature-gated associate flow
+- `Associate` — Identity (slug, displayName), readiness fields (status, recommendedArea, lastComputedAt), optional `cohortId`, Supabase auth fields (email, authUserId, lastInvitedAt)
 - `GapScore` — Per-skill recency-weighted scores, unique per (associateId, skill, topic)
 - `Settings` — Singleton trainer config (readiness threshold, default 75%)
 - `Cohort` — Name, startDate, optional endDate/description; has many associates, sessions, and curriculum weeks
@@ -85,9 +85,7 @@ Questions are parsed from Markdown files fetched from a configurable GitHub repo
 - `src/lib/settingsService.ts` — Read/write trainer settings, triggers bulk readiness recompute on threshold change
 - `src/lib/adaptiveSetup.ts` — Maps gap scores to tech weights (1-5) for setup wizard pre-population
 - `src/lib/curriculumService.ts` / `src/lib/curriculumFilter.ts` — Cohort curriculum CRUD + setup-wizard tech filter (exact `skillSlug` match)
-- `src/lib/featureFlags.ts` — `isAssociateAuthEnabled()` reads `ENABLE_ASSOCIATE_AUTH`
-- `src/lib/pinService.ts` / `src/lib/pinAttemptLimiter.ts` — PIN generation/verification + composite (server-IP + fingerprint) limiter
-- `src/lib/associateSession.ts` / `src/lib/identity.ts` — HMAC-signed associate session cookie + trainer/associate/anonymous caller identity resolution
+- `src/lib/identity.ts` — Supabase-based caller identity resolution (trainer/associate/anonymous)
 - `src/lib/prisma.ts` — Prisma singleton client
 - `src/lib/historyService.ts` — File-based history read/write (extracted from route handler)
 
@@ -95,12 +93,10 @@ Questions are parsed from Markdown files fetched from a configurable GitHub repo
 
 Two identity types resolve through `src/lib/identity.ts` (`getCallerIdentity`):
 
-- **Trainer** — Single-password auth with HttpOnly cookie (`nlm_session`, 24hr expiry). Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`.
-- **Associate** (feature-gated behind `ENABLE_ASSOCIATE_AUTH`) — Trainer generates a PIN (`/trainer/[slug]` → `GeneratePinButton`), associate enters it at `/associate/login`, server issues an HMAC-signed `associate_session` cookie (`src/lib/associateSession.ts`, keyed on `ASSOCIATE_SESSION_SECRET`). Cookie version bumps invalidate on PIN regeneration; version check happens at guarded surfaces, not in middleware.
+- **Trainer** — Supabase email/password auth. Role marker: `auth.users.user_metadata.role = 'trainer'`. Auth context in `src/lib/auth-context.tsx`, server helpers in `src/lib/auth-server.ts`.
+- **Associate** — Supabase magic-link auth. Trainer bulk-invites associates via `/trainer` → `admin.generateLink` + Resend delivery.
 
-Unified entry point: `/signin` (`SignInTabs.tsx`) with Trainer + Associate tabs. `/login` and `/associate/login` redirect there. The Associate tab is hidden when the flag is off. Middleware (`src/middleware.ts`) guards `/dashboard`, `/interview`, `/review`, `/trainer` (trainer only) and `/associate/*` except `/associate/login` (trainer OR associate). Middleware is cookie-only — no DB work.
-
-PIN verification endpoint is defense-in-depth: the limiter uses a composite (server-IP + client fingerprint) key with a separate IP-only bucket. `NLM_TRUSTED_PROXY=true` opts into parsing `x-forwarded-for` when deployed behind a trusted edge proxy.
+Unified entry point: `/signin` (`SignInTabs.tsx`) with Trainer + Associate tabs. Legacy `/login` redirects there. Middleware (`src/middleware.ts`) guards `/dashboard`, `/interview`, `/review`, `/trainer` (trainer only) and `/associate/*` (trainer OR matching associate).
 
 RLS deployed as defense-in-depth (Phase 20). See PROJECT.md > Database Access Architecture for details.
 
@@ -123,12 +119,10 @@ RLS deployed as defense-in-depth (Phase 20). See PROJECT.md > Database Access Ar
 | `/api/cohorts/[id]` | Cohort detail / update / delete |
 | `/api/cohorts/[id]/curriculum` | List/create curriculum weeks for a cohort |
 | `/api/cohorts/[id]/curriculum/[weekId]` | Update/delete a curriculum week |
-| `/api/associate/pin/generate` | Trainer: generate PIN for an associate (flag-gated, 404 when off) |
-| `/api/associate/pin/verify` | Public: verify PIN, issue associate_session cookie (flag-gated) |
-| `/api/associate/me` | Current associate identity (flag-gated) |
-| `/api/associate/logout` | Clear associate_session cookie (flag-gated) |
-| `/api/associate/status` | Public: reports whether `ENABLE_ASSOCIATE_AUTH` is on |
-| `/api/associate/interview/complete` | Authenticated associate session completion (flag-gated, tagged `mode: automated`) |
+| `/api/associate/me` | Current associate identity |
+| `/api/associate/logout` | Sign out associate (Supabase signOut) |
+| `/api/associate/status` | Public: returns static `{ enabled: true }` |
+| `/api/associate/interview/complete` | Authenticated associate session completion (tagged `mode: automated`) |
 | `/api/admin/readiness-sweep` | Trigger background readiness recompute sweep |
 | `/api/public/interview/start` | Start public automated interview |
 | `/api/public/interview/agent` | Process public interview responses |
@@ -139,12 +133,13 @@ RLS deployed as defense-in-depth (Phase 20). See PROJECT.md > Database Access Ar
 - `OPENAI_API_KEY` — Required for LLM scoring
 - `GITHUB_TOKEN` — GitHub API access for question banks
 - `RESEND_API_KEY` — Email delivery
-- `APP_PASSWORD` — Trainer authentication password
-- `ASSOCIATE_SESSION_SECRET` — HMAC secret for associate_session cookies. Required in production. Generate with `openssl rand -hex 32`. Intentionally decoupled from `APP_PASSWORD` so trainer-password rotation does not invalidate associate sessions.
-- `ENABLE_ASSOCIATE_AUTH` — Feature flag for the PIN-based associate flow. Default `false` in v1.1 (flag flips to `true` for v1.2). When off: all PIN endpoints return 404, `/signin` hides the Associate tab, associate-auth CTAs on `/`, `/associate/[slug]`, and `/trainer/[slug]` are hidden. Vitest sets it to `true` to exercise the gated code paths.
-- `NLM_TRUSTED_PROXY` — Set `true` when deployed behind a trusted edge proxy (GCE LB, Cloudflare, etc.). Opts the PIN verify limiter into parsing `x-forwarded-for` for IP-keyed brute-force protection. Leave unset locally.
 - `DATABASE_URL` — Supabase Transaction Pooler connection string (port 6543, `?connection_limit=5&pool_timeout=10`)
 - `DIRECT_URL` — Direct Supabase connection for Prisma migrations (port 5432)
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — Supabase publishable (anon) key
+- `SUPABASE_SECRET_KEY` — Supabase secret key (server-only)
+- `NEXT_PUBLIC_SITE_URL` — Production site URL for OAuth redirects
+- `ADMIN_EMAILS` — Comma-separated admin emails for abuse-flag notifications
 
 ## Tech Stack
 
@@ -377,7 +372,7 @@ Conventions not yet established. Will populate as patterns emerge during develop
 
 ### Prisma Schema (`prisma/schema.prisma`)
 
-Models: `Associate` (identity + readiness + optional PIN + optional cohort), `Session` (full interview data linked to Associate, carries `mode` and optional `cohortId`), `GapScore` (per-skill recency-weighted scores, unique per associate+skill+topic), `Settings` (singleton trainer config), `Cohort` (group of associates with curriculum), `CurriculumWeek` (per-cohort weekly plan, keyed on `skillSlug`), `HealthCheck`. Generated client output: `src/generated/prisma/`. Migrations live in `prisma/migrations/` — `0000_baseline` is idempotent (`IF NOT EXISTS` + DO-block FK guards) so `prisma migrate deploy` is safe over pre-migration production databases.
+Models: `Associate` (identity + readiness + Supabase auth fields + optional cohort), `Session` (full interview data linked to Associate, carries `mode` and optional `cohortId`), `GapScore` (per-skill recency-weighted scores, unique per associate+skill+topic), `Settings` (singleton trainer config), `Cohort` (group of associates with curriculum), `CurriculumWeek` (per-cohort weekly plan, keyed on `skillSlug`), `HealthCheck`, `AuthEvent` (auth rate-limit abuse log). Generated client output: `src/generated/prisma/`. Migrations live in `prisma/migrations/` — `0000_baseline` is idempotent (`IF NOT EXISTS` + DO-block FK guards) so `prisma migrate deploy` is safe over pre-migration production databases.
 
 ### Session Save Pipeline
 

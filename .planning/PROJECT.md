@@ -65,7 +65,7 @@ The PIN-based associate auth was never shipped to production. No grace window co
 - **Trainer Analytics + Reporting** — KPI strip (Avg Readiness, Mocks This Week, Top Gap, AI/Trainer Variance), cohort-wide readiness trends, individual sparklines in roster, skill + **topic**-level gap aggregation across cohort (topic sourced from question-bank markdown `topic:` frontmatter, fallback to first keyword), PDF export of analytics (cohort + per-associate)
 - **App Shell Redesign (per `finalized.html`) — two-level nav** — Topbar (primary sections): Dashboard · Interviews · Question Banks · Settings. Sidebar is section-scoped (changes per topbar choice). Dashboard section sidebar: Overview (Roster / Gap Analysis / Calibration), Actions (New Mock / Reports). Existing routes reorganize: `/trainer` → Dashboard, `/interview/new` → Interviews, `/question-banks` → Question Banks, new `/trainer/settings` (threshold, cohorts, curriculum, users). KPI strip on Roster with 4 fixed cards: Avg Readiness / Mocks This Week / Top Gap / AI-Trainer Variance.
 - **Associate Dashboard Upgrade** — self-view gap scores + trend charts, recommended next practice area CTA, goals/progress streaks, book-next-mock action
-- **Full Supabase Auth + Bulk Onboarding (invite-only platform)** — trainer login via Supabase email/password (or OAuth), associate login via Supabase magic link; **platform becomes invite-only** (public automated interview still open, but associate accounts require trainer invite). Bulk invite flow (trainer pastes emails → picks cohort + curriculum → per-email transaction creates Associate, assigns cohort, `admin.generateLink` + Resend delivery, 50/call cap). Existing Associate rows have no emails — trainer email-backfill UI before cutover (slug-only rows with no sessions wiped, rows with sessions get trainer-typed emails). Add `Associate.authUserId` nullable FK to `auth.users` + `Associate.email` + `Associate.lastInvitedAt`. RLS policies on Session/GapScore/Cohort/CurriculumWeek as defense-in-depth (Prisma remains app-layer primary). Full cutover after 2-week grace: remove PIN system + `ENABLE_ASSOCIATE_AUTH` flag + `APP_PASSWORD` + `ASSOCIATE_SESSION_SECRET` env vars.
+- **Full Supabase Auth + Bulk Onboarding (invite-only platform)** — trainer login via Supabase email/password (or OAuth), associate login via Supabase magic link; **platform becomes invite-only** (public automated interview still open, but associate accounts require trainer invite). Bulk invite flow (trainer pastes emails → picks cohort + curriculum → per-email transaction creates Associate, assigns cohort, `admin.generateLink` + Resend delivery, 50/call cap). Existing Associate rows have no emails — trainer email-backfill UI before cutover (slug-only rows with no sessions wiped, rows with sessions get trainer-typed emails). Add `Associate.authUserId` nullable FK to `auth.users` + `Associate.email` + `Associate.lastInvitedAt`. RLS policies on Session/GapScore/Cohort/CurriculumWeek as defense-in-depth (Prisma remains app-layer primary). PIN system removed in Phase 25 — Supabase auth is now the sole identity mechanism.
 - **Cached Question-Bank Manifest** — cache GitHub manifest to hit wizard `<400ms` target; TTL or hash-based invalidation
 
 **Deferred to v1.3 (CI/CD pipeline milestone):** production deploy automation, scheduled readiness sweep cron, dark-mode visual QA, Nyquist validation hygiene backfill.
@@ -104,7 +104,7 @@ The PIN-based associate auth was never shipped to production. No grace window co
 - ✓ READY-03: Configurable readiness threshold — v1.0
 - ✓ DASH-01 through DASH-07: Trainer dashboard — v1.0
 
-- ✓ AUTH-01..04: Associate PIN auth (6-digit, dedicated secret, cookie versioning) — v1.1 (flag-gated off in prod)
+- ✓ AUTH-01..04: Associate Supabase auth (magic-link, bulk invite, Supabase cutover) — v1.2
 - ✓ PIPE-01..02: Authenticated automated-interview pipeline + readiness recompute marker + sweep — v1.1
 - ✓ COHORT-01..04: Cohort CRUD, nullable FK, roster filter, opt-in summary (backward-compatible shape) — v1.1
 - ✓ CURRIC-01..02: Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
@@ -140,7 +140,7 @@ The PIN-based associate auth was never shipped to production. No grace window co
 - **Supabase (Postgres)**: Hosted database — free tier, scales to multi-user later
 - **Postgres canonical (v1.1)**: Per Codex review finding #6, v1.1 treats Postgres as the single source of truth for all new features (cohorts, PINs, authenticated automated sessions, curriculum, cohort dashboards). File history is transitional export/backup for trainer-led sessions only — no new code path in v1.1 writes to file storage. `/api/sync-check` is an advisory export-parity check, no longer a safety-critical gate. Deleting the file-history write path entirely is deferred to a later milestone.
 - **Docker deployment**: GCE via Docker Compose, port 80
-- **ASSOCIATE_SESSION_SECRET**: Dedicated env var for HMAC-signing associate PIN session cookies. Separate from `APP_PASSWORD`. Added per Codex review finding #4 — rotating the trainer password no longer invalidates associate sessions, and the cryptographic secret is not a human-entered string.
+- **Supabase Auth**: Trainer and associate identity resolved exclusively via Supabase (`getCallerIdentity()`). PIN system removed in Phase 25.
 
 ## Key Decisions
 
@@ -154,7 +154,7 @@ The PIN-based associate auth was never shipped to production. No grace window co
 | recharts 3.8.1 (not Tremor) | React 19 compatible. Tremor requires React 18. | ✓ Validated P6 |
 | Dual-write migration (file + DB) | v1.0: preserve existing flows. | ✓ Validated P2 |
 | Postgres canonical for v1.1 | Cohorts/PINs/automated pipeline are DB-only by design; file layer is legacy backup. | Codex review 2026-04-14 |
-| Dedicated ASSOCIATE_SESSION_SECRET | Decouple associate auth from trainer password; enable token versioning. | Codex review 2026-04-14 |
+| Supabase-only auth (Phase 25) | PIN system removed after Supabase cutover; getCallerIdentity() is sole identity resolver. | Phase 25 cleanup |
 | Interview format only for MVP | Validate core loop before expanding | ✓ Good |
 
 ## Evolution
