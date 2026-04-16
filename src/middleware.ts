@@ -1,60 +1,72 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getCallerIdentity } from '@/lib/identity';
+import { type NextRequest, NextResponse } from 'next/server';
+import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 
 /**
- * Per-identity permission table (D-11, D-12).
+ * Middleware: refresh Supabase session BEFORE route guard on every matched request.
  *
- * | Path prefix                                 | Required identity         | On violation              |
- * |---------------------------------------------|---------------------------|---------------------------|
- * | /dashboard, /interview, /review, /trainer   | trainer                   | redirect /login           |
- * | /associate/* (except /associate/login)      | trainer OR associate      | redirect /associate/login |
- * | /associate/login                            | public                    | —                         |
+ * | Path prefix                                 | Required role            | On violation              |
+ * |---------------------------------------------|--------------------------|---------------------------|
+ * | /dashboard, /interview, /review, /trainer   | admin OR trainer         | redirect /signin?next=    |
+ * | /associate/* (except /associate/login)      | any authenticated user   | redirect /signin?next=    |
+ * | public paths (/, /signin, /auth/callback)   | none                     | pass through              |
  *
- * Middleware is cookie-only — NO DB work. Version-check (cookie ver vs
- * Associate.pinGeneratedAt) is enforced at the guarded surface (server
- * components / route handlers) via auth-server helpers (D-09a).
+ * CRITICAL: Always returns the `response` object from createSupabaseMiddlewareClient
+ * (never creates a fresh NextResponse.next()) so refreshed session cookies are preserved.
  */
 
-// /interview covers /interview AND /interview/new (the renamed setup wizard).
-// /dashboard kept as a guarded path so the legacy redirect page itself stays
-// trainer-only — anonymous hits still redirect to /login first.
+const PUBLIC_PATHS = ['/', '/signin', '/auth/callback', '/associate/login'];
 const TRAINER_PATHS = ['/dashboard', '/interview', '/review', '/trainer'];
 const ASSOCIATE_PATH = '/associate';
-const PUBLIC_ASSOCIATE_PATHS = ['/associate/login'];
 
 function matchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Public associate paths — allow unconditionally.
-  if (PUBLIC_ASSOCIATE_PATHS.some((p) => matchesPrefix(pathname, p))) {
-    return NextResponse.next();
+  // STEP 1: Always refresh Supabase session first — never skip this call.
+  const { user, response } = await createSupabaseMiddlewareClient(request);
+
+  // Public paths — return mutated response (session cookies forwarded).
+  if (isPublic(pathname)) {
+    return response;
   }
 
-  const identity = await getCallerIdentity(request);
+  // Extract role from Supabase user_metadata; unauthenticated users have no role.
+  const role: string | null = user?.user_metadata?.role ?? (user ? 'associate' : null);
 
-  // 2. Trainer-only paths.
+  // STEP 2: Trainer-only paths — require admin or trainer role.
   if (TRAINER_PATHS.some((p) => matchesPrefix(pathname, p))) {
-    if (identity.type === 'trainer') return NextResponse.next();
-    // Associate cookies do NOT pass trainer gates (D-12 — prevent Pitfall 1).
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // 3. Associate-gated paths (anything under /associate/* not in public list).
-  if (matchesPrefix(pathname, ASSOCIATE_PATH)) {
-    if (identity.type === 'trainer' || identity.type === 'associate') {
-      return NextResponse.next();
+    if (role === 'trainer' || role === 'admin') {
+      return response;
     }
-    const loginUrl = new URL('/associate/login', request.url);
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirectUrl = new URL('/signin', request.url);
+    redirectUrl.searchParams.set('next', pathname);
+    const redirect = NextResponse.redirect(redirectUrl);
+    // Forward refreshed session cookies even on redirect.
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
   }
 
-  // 4. Everything else is public.
-  return NextResponse.next();
+  // STEP 3: Associate paths — any authenticated user passes.
+  if (matchesPrefix(pathname, ASSOCIATE_PATH)) {
+    if (user) {
+      return response;
+    }
+    const redirectUrl = new URL('/signin', request.url);
+    redirectUrl.searchParams.set('next', pathname);
+    const redirect = NextResponse.redirect(redirectUrl);
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
+  }
+
+  // Everything else is public.
+  return response;
 }
 
 export const config = {
