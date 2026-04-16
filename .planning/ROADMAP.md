@@ -133,7 +133,11 @@ Plans:
   3. RLS policies on `Session`, `GapScore`, `Associate`, `Cohort`, `CurriculumWeek` block direct `supabase-js` reads from non-owners (verified by manual test query)
   4. All Prisma reads in route handlers filter explicitly by identity from `getCallerIdentity()`; no implicit RLS reliance
   5. PROJECT.md documents the BYPASSRLS + Transaction Pooler architecture and the explicit-filter requirement
-**Plans**: [to be planned]
+**Plans**: 2 plans
+
+Plans:
+- [ ] 20-01-PLAN.md — RLS migration (is_trainer() function + policies on 5 tables)
+- [ ] 20-02-PLAN.md — Route handler audit annotations + PROJECT.md BYPASSRLS documentation
 
 ### Phase 21: App Shell Redesign
 **Goal**: Trainer routes render a two-level navigation shell (global topbar + section-scoped sidebar) with persistent cohort switcher, reorganized routes, Profile table migration (role in DB, admin-promote UI), and `/trainer/*` → `/app/*` route restructure.
@@ -223,7 +227,7 @@ Plans:
 | 17. Schema Prep + Email Backfill | v1.2 | 4/4 | Complete   | 2026-04-15 |
 | 18. Supabase Auth Install | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 20. Middleware Cutover + RLS | v1.2 | 0/0 | Not started | - |
+| 20. Middleware Cutover + RLS | v1.2 | 0/2 | Not started | - |
 | 21. App Shell Redesign | v1.2 | 0/0 | Not started | - |
 | 22. Trainer Analytics | v1.2 | 0/0 | Not started | - |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
