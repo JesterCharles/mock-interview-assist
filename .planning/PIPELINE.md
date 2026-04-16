@@ -2,17 +2,17 @@
 
 ## Current Run — v1.2
 - Started: 2026-04-15
-- Current stage: Phase 18 done + verified (548a131). Next: plan Phase 19 (Bulk Invite).
-- Mode: interactive
+- Current stage: Phase 19 done + verified (897b337). Next: discuss Phase 20 (Middleware Cutover + RLS).
+- Mode: unattended (--discuss)
 - Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
 
 ## Resume Point
 
-Phase 18 complete (Supabase Auth Install). 4 plans executed, 335 tests, 6/6 SC PASS (2 human-verified). Key deliverables: Supabase email/pw + magic-link auth, 3-role model, getCallerIdentity rewrite, all routes migrated, password reset, trainer invite endpoint, auto-assign on callback. Next:
-- `/gsd-plan-phase 19` — Bulk Invite (depends on 18 admin client + Resend primitives)
-- `/pipeline-coordinator --resume` to auto-route
+Phase 19 complete (Bulk Invite). 3 plans executed, 395 tests (60 new), 5/6 SC automated PASS, 1 SC human-verified (email delivery). Key deliverables: email parser + chip input, inviteAssociate helper, bulk API (20/day pre-flight, partial-failure isolation), preview classification, 3-screen onboarding page, dashboard stub. Next:
+- `/gsd-discuss-phase 20 --auto` — Middleware Cutover + RLS
+- `/pipeline-coordinator --resume --unattended --discuss` to auto-route
 
-Roadmap Phases 19-25 still pending plan.
+Roadmap Phases 20-25 still pending plan.
 
 Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will detect in-progress state).
 
@@ -37,10 +37,10 @@ Re-enter via `/pipeline-coordinator --resume` or `/gsd-new-milestone` (will dete
 | discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
 | init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
 | design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | in_progress | 2026-04-15 | | Phases 16-18 PLAN done. Phase 19 next. Phases 20-25 pending. |
-| execute | in_progress | 2026-04-15 | | P16 done. P17 done. P18 done (4 plans, 335 tests, VERIFIED 548a131). Phases 19-25 pending. |
-| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: autoplan SHIP + codex review, patches applied. |
-| test | per-phase | 2026-04-15 | | P16: 254 tests. P17: 5/6 SC PASS. P18: 335 tests, 6/6 SC PASS (2 human-verified). |
+| plan | in_progress | 2026-04-15 | | Phases 16-19 PLAN done. Phase 20 next. Phases 21-25 pending. |
+| execute | in_progress | 2026-04-15 | | P16-P19 done. P19: 3 plans, 60 new tests, 395 total, VERIFIED 897b337. Phases 20-25 pending. |
+| review | per-phase | 2026-04-15 | | P16: HI+MED fixed. P18: autoplan SHIP + codex review, patches applied. P19: pending. |
+| test | per-phase | 2026-04-15 | | P16: 254 tests. P17: 5/6 SC PASS. P18: 335 tests. P19: 395 tests, 5/6 SC PASS (1 human-verified). |
 | debug | pending | | | |
 | optimize | pending | | | |
 | ship | pending | | | |
