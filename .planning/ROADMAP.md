@@ -238,7 +238,7 @@ Plans:
 | 19. Bulk Invite | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 20. Middleware Cutover + RLS | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 21. App Shell Redesign | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 22. Trainer Analytics | v1.2 | 4/4 | Complete   | 2026-04-16 |
+| 22. Trainer Analytics | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. Associate Self-Dashboard | v1.2 | 0/0 | Not started | - |
 | 24. PDF Analytics Export | v1.2 | 0/0 | Not started | - |
 | 25. PIN Removal + Cleanup | v1.2 | 0/0 | Not started | - |
