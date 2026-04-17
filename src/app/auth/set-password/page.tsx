@@ -64,6 +64,18 @@ export default function SetPasswordPage() {
       return;
     }
 
+    // Write passwordSetAt to Profile table (per D-14)
+    try {
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passwordSetAt: new Date().toISOString() }),
+      });
+    } catch {
+      // Non-blocking — metadata is already set as fallback
+      console.warn('[set-password] Failed to update Profile.passwordSetAt');
+    }
+
     setStatus('success');
 
     // Determine role-appropriate dashboard and redirect after brief delay
