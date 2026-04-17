@@ -63,7 +63,7 @@
 - [x] **Phase 29: Associate Data Visualization** - Skill bars with trend arrows, focus area hero, per-skill trend chart, radar plot, dashboard skill filter (completed 2026-04-17)
 - [x] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state (completed 2026-04-17)
 - [x] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface (completed 2026-04-17)
-- [ ] **Phase 32: Shell Architecture Overhaul** - Sidebar-primary nav, TopBar utility-only, profile modal, landing header, roster cleanup, password security
+- [x] **Phase 32: Shell Architecture Overhaul** - Sidebar-primary nav, TopBar utility-only, profile modal, landing header, roster cleanup, password security (completed 2026-04-17)
 
 ## Phase Details
 
@@ -177,13 +177,13 @@ Plans:
 **Goal:** Restructure AppShell with sidebar-primary navigation for all roles, strip TopBar to utility items only, add profile modal, landing page header, roster cleanup, and password security.
 **Requirements**: SHELL-32-01, SHELL-32-02, SHELL-32-03, SHELL-32-04, SHELL-32-05, SHELL-32-06, SHELL-32-07, SHELL-32-08, SHELL-32-09
 **Depends on:** Phase 31
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 32-01-PLAN.md — Sidebar Settings accordion + TopBar center nav removal + Batch Upload in sidebar
-- [ ] 32-02-PLAN.md — Profile modal from avatar menu + landing page minimal header + /profile redirect
-- [ ] 32-03-PLAN.md — Roster slug column removal + trainer detail reuses AssociateDashboardClient
-- [ ] 32-04-PLAN.md — Password change requires old password or email OTP verification
+- [x] 32-01-PLAN.md — Sidebar Settings accordion + TopBar center nav removal + Batch Upload in sidebar
+- [x] 32-02-PLAN.md — Profile modal from avatar menu + landing page minimal header + /profile redirect
+- [x] 32-03-PLAN.md — Roster slug column removal + trainer detail reuses AssociateDashboardClient
+- [x] 32-04-PLAN.md — Password change requires old password or email OTP verification
 
 ## Progress
 
@@ -198,4 +198,9 @@ Plans:
 | 29. Associate Data Visualization | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 30. Associate Curriculum View | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 31. Dark Mode QA Sweep | v1.3 | 1/1 | Complete    | 2026-04-17 |
-| 32. Shell Architecture Overhaul | v1.3 | 0/4 | Not started | - |
+| 32. Shell Architecture Overhaul | v1.3 | 4/4 | Complete    | 2026-04-17 |
+
+## Backlog
+
+- **999.1 Staging / Prod Split** — Provision second Supabase project for staging, split `.env.local` (staging) from `.env` (prod), route Docker deploy to prod only, add staging deploy target. Drivers: avoid seeding demo data into prod DB; enable safe schema/migration previews; unblock pre-merge CI smoke tests. Estimate: 1 phase, ~4-6h.
+- **999.2 Trainer Default Cohort** — Persist each trainer's assigned/default cohort so roster boots scoped to their cohort instead of "All Cohorts". Options: add `Profile.defaultCohortId` (reuse existing Profile model) or a new `TrainerCohortAssignment` join. UX: dropdown still lets user view others; default sticks. Drivers: trainers typically own one cohort; "All Cohorts" noise hides the roster that matters. Estimate: 1 small phase, ~3h.
