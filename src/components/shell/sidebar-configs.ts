@@ -9,6 +9,7 @@ import {
   BookOpen,
   UserCog,
   User,
+  LayoutDashboard,
 } from 'lucide-react';
 import type { SidebarGroup } from './types';
 
@@ -29,6 +30,19 @@ export const dashboardSidebarGroups: SidebarGroup[] = [
     ],
   },
 ];
+
+export function associateSidebarGroups(slug: string): SidebarGroup[] {
+  return [
+    {
+      label: '',
+      items: [
+        { href: `/associate/${slug}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/', label: 'Interviews', icon: PlayCircle },
+        { href: `/associate/${slug}/curriculum`, label: 'Curriculum', icon: BookOpen },
+      ],
+    },
+  ];
+}
 
 export const settingsSidebarGroups: SidebarGroup[] = [
   {

@@ -11,6 +11,7 @@ import { dashboardSidebarGroups, settingsSidebarGroups } from './sidebar-configs
 import type { SidebarGroup } from './types';
 
 function resolveGroups(pathname: string): SidebarGroup[] {
+  if (pathname.startsWith('/associate/')) return [];
   if (pathname.startsWith('/trainer/settings')) return settingsSidebarGroups;
   if (pathname.startsWith('/trainer')) return dashboardSidebarGroups;
   return [];
@@ -45,11 +46,18 @@ function isNavItemActive(item: NavItem, pathname: string): boolean {
 
 interface TopBarProps {
   sidebarGroups?: SidebarGroup[];
+  role?: 'trainer' | 'associate';
+  associateSlug?: string;
 }
 
-export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
+export function TopBar({ sidebarGroups: propGroups, role = 'trainer', associateSlug }: TopBarProps) {
   const pathname = usePathname();
   const sidebarGroups = propGroups ?? resolveGroups(pathname);
+
+  const wordmarkHref =
+    role === 'associate' && associateSlug
+      ? `/associate/${associateSlug}/dashboard`
+      : '/trainer';
 
   return (
     <header
@@ -73,7 +81,7 @@ export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
           <MobileSidebar groups={sidebarGroups} />
         )}
         <Link
-          href="/trainer"
+          href={wordmarkHref}
           style={{
             fontFamily: 'var(--font-display), "Clash Display", sans-serif',
             fontWeight: 500,
@@ -87,42 +95,49 @@ export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
         </Link>
       </div>
 
-      {/* Center zone: section nav links (desktop only) */}
-      <nav
-        className="hidden md:flex"
-        style={{ flex: 1, alignItems: 'center', gap: 4 }}
-        aria-label="Main navigation"
-      >
-        {NAV_ITEMS.map((item) => {
-          const active = isNavItemActive(item, pathname);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                padding: '4px 10px',
-                borderRadius: 6,
-                fontSize: 13,
-                fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
-                fontWeight: 500,
-                color: active ? 'var(--accent)' : 'var(--ink)',
-                textDecoration: 'none',
-                borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                transition: 'background 120ms ease-out, color 120ms ease-out',
-              }}
-              className="hover:bg-[var(--highlight)]"
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Center zone: section nav links — trainer only */}
+      {role === 'trainer' && (
+        <nav
+          className="hidden md:flex"
+          style={{ flex: 1, alignItems: 'center', gap: 4 }}
+          aria-label="Main navigation"
+        >
+          {NAV_ITEMS.map((item) => {
+            const active = isNavItemActive(item, pathname);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+                  fontWeight: 500,
+                  color: active ? 'var(--accent)' : 'var(--ink)',
+                  textDecoration: 'none',
+                  borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
+                  transition: 'background 120ms ease-out, color 120ms ease-out',
+                }}
+                className="hover:bg-[var(--highlight)]"
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
 
-      {/* Right zone: CohortSwitcher + ThemeToggle + AvatarMenu */}
+      {/* Spacer for associate role (no center nav) */}
+      {role === 'associate' && <div style={{ flex: 1 }} />}
+
+      {/* Right zone: CohortSwitcher (trainer only) + ThemeToggle + AvatarMenu */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 'auto' }}>
-        <Suspense fallback={null}>
-          <CohortSwitcher />
-        </Suspense>
+        {role === 'trainer' && (
+          <Suspense fallback={null}>
+            <CohortSwitcher />
+          </Suspense>
+        )}
         <ThemeToggle />
         <AvatarMenu />
       </div>
