@@ -21,6 +21,22 @@
   font-family: 'DM Sans', sans-serif;
 }
 
+[data-theme="dark"] .trainer-shell {
+  --bg: #1C1917;
+  --surface: #262220;
+  --surface-muted: #2E2A26;
+  --ink: #E8E2D9;
+  --muted: #A89F94;
+  --accent: #E07A4F;
+  --accent-hover: #C85A2E;
+  --success: #4ADE80;
+  --warning: #FACC15;
+  --danger: #F87171;
+  --border: #3D3630;
+  --border-subtle: #332E29;
+  --highlight: #2E2518;
+}
+
 /* Card surface */
 .trainer-card {
   background-color: var(--surface);

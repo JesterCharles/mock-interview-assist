@@ -61,7 +61,7 @@ type Tab = 'profile' | 'security' | 'learning';
 function readinessBadgeStyle(status: string): React.CSSProperties {
   if (status === 'ready') {
     return {
-      background: '#E8F5EE',
+      background: 'var(--success-bg)',
       color: 'var(--success)',
       padding: '2px 10px',
       borderRadius: 9999,
@@ -72,7 +72,7 @@ function readinessBadgeStyle(status: string): React.CSSProperties {
   }
   if (status === 'improving') {
     return {
-      background: '#FEF3E0',
+      background: 'var(--warning-bg)',
       color: 'var(--warning)',
       padding: '2px 10px',
       borderRadius: 9999,
@@ -82,7 +82,7 @@ function readinessBadgeStyle(status: string): React.CSSProperties {
     };
   }
   return {
-    background: '#FDECEB',
+    background: 'var(--danger-bg)',
     color: 'var(--danger)',
     padding: '2px 10px',
     borderRadius: 9999,
