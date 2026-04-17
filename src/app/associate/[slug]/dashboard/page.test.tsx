@@ -61,12 +61,6 @@ vi.mock('@/components/associate/ReadinessProgressBar', () => ({
 vi.mock('@/components/trainer/GapTrendChart', () => ({
   default: () => null,
 }));
-vi.mock('@/components/layout/PublicShell', () => ({
-  PublicShell: ({ children, ...props }: { children?: unknown; [key: string]: unknown }) => ({
-    type: 'div',
-    props: { ...props, children },
-  }),
-}));
 
 import AssociateDashboardPage from './page';
 
