@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import fpPromise from '@fingerprintjs/fingerprintjs';
 import { Loader2, ArrowRight, Play, BookOpen, Clock, Download, AlertTriangle, ChevronLeft, ChevronRight, Search, CheckCircle2 } from 'lucide-react';
+import { LandingHeader } from '@/components/shell/LandingHeader';
 import SpeechToText from '@/components/SpeechToText';
 import { PDFReport } from '@/components/PDFReport';
 import ProgressBar from '@/components/ProgressBar';
@@ -699,7 +700,7 @@ export default function PublicInterviewPage() {
 
     if (step === 'loading') {
         return (
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><LandingHeader /><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
                 <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
                     <Loader2 className="w-7 h-7 animate-spin mb-4" style={{ color: 'var(--accent)' }} />
                     <h2 style={{ ...headingDisplay, fontSize: 22, marginBottom: 6 }}>Next Level Mock</h2>
@@ -712,7 +713,7 @@ export default function PublicInterviewPage() {
     if (step === 'limit-reached') {
         const nextTime = rateInfo?.nextReset ? new Date(rateInfo.nextReset).toLocaleString() : 'tomorrow';
         return (
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><LandingHeader /><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
                 <div className="flex items-center justify-center py-12">
                     <div className="max-w-md w-full p-8 text-center animate-slide-up" style={surfaceCard}>
                         <div
@@ -738,7 +739,7 @@ export default function PublicInterviewPage() {
 
     if (step === 'topics') {
         return (
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><LandingHeader /><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
                 <div className="space-y-8">
                     {/* Header */}
                     <div className="text-center mb-4 animate-slide-up">
@@ -987,7 +988,7 @@ export default function PublicInterviewPage() {
         const questionIds = questions.map(q => q.id);
 
         return (
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><LandingHeader /><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
                 <div className="flex flex-col">
                     {/* Header */}
                     <header
@@ -1193,7 +1194,7 @@ export default function PublicInterviewPage() {
         const answeredQs = questions.filter(q => validAssessments[q.id]);
 
         return (
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif" }}><LandingHeader /><main className="mx-auto w-full px-6 py-12" style={{ maxWidth: '1120px' }}>
                 <div className="space-y-8 animate-fade-in pb-12">
                     <div className="p-6" style={surfaceCard}>
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
