@@ -40,13 +40,12 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed
   return (
     <aside
       suppressHydrationWarning
-      className="hidden md:flex flex-col shrink-0 overflow-hidden"
+      className="hidden md:flex flex-col shrink-0 overflow-hidden self-stretch"
       style={{
         width: collapsed ? 48 : 200,
         transition: mounted ? 'width 200ms ease-in-out' : 'none',
         background: 'var(--surface-muted)',
         borderRight: '1px solid var(--border)',
-        height: '100%',
         minHeight: 0,
       }}
     >
@@ -60,7 +59,6 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed
           justifyContent: collapsed ? 'center' : 'flex-start',
           paddingLeft: collapsed ? 0 : 16,
           paddingRight: collapsed ? 0 : 16,
-          borderBottom: '1px solid var(--border)',
           fontFamily: 'var(--font-display), "Clash Display", sans-serif',
           fontWeight: 500,
           fontSize: 16,

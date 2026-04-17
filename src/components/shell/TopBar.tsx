@@ -47,7 +47,7 @@ export function TopBar({
         gap: 16,
       }}
     >
-      {/* Desktop: sidebar collapse toggle lives here */}
+      {/* Desktop: sidebar collapse toggle */}
       {onToggleSidebar && (
         <button
           type="button"
@@ -57,13 +57,13 @@ export function TopBar({
           style={{
             alignItems: 'center',
             justifyContent: 'center',
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             borderRadius: 6,
-            background: 'transparent',
-            border: 'none',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
             cursor: 'pointer',
-            color: 'var(--muted)',
+            color: 'var(--ink)',
             flexShrink: 0,
           }}
         >
