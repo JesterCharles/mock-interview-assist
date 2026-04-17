@@ -12,10 +12,10 @@ describe('dashboardSidebarGroups', () => {
     expect(overview.items).toHaveLength(3);
   });
 
-  it('second group is Actions with 2 items', () => {
+  it('second group is Actions with 3 items', () => {
     const actions = dashboardSidebarGroups[1];
     expect(actions.label).toBe('Actions');
-    expect(actions.items).toHaveLength(2);
+    expect(actions.items).toHaveLength(3);
   });
 
   it('has correct hrefs for Overview items', () => {
@@ -29,6 +29,7 @@ describe('dashboardSidebarGroups', () => {
     const items = dashboardSidebarGroups[1].items;
     expect(items[0].href).toBe('/interview/new');
     expect(items[1].href).toBe('/trainer/reports');
+    expect(items[2].href).toBe('/trainer/onboarding');
   });
 
   it('all items have icon property that is a React component', () => {
