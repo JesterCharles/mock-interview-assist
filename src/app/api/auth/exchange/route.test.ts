@@ -64,7 +64,7 @@ describe('GET /api/auth/exchange', () => {
     mockSetSession.mockResolvedValue({ error: null });
     mockExchangeCode.mockResolvedValue({ error: null });
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'assoc@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u1', email: 'assoc@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     mockFindUnique.mockResolvedValue(null);
   });
@@ -104,7 +104,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('redirects trainer to /trainer', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer' } } },
+      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer', password_set: true } } },
     });
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(getRedirectPath(res)).toBe('/trainer');
@@ -112,7 +112,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('redirects admin to /trainer', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'a@test.com', user_metadata: { role: 'admin' } } },
+      data: { user: { id: 'u1', email: 'a@test.com', user_metadata: { role: 'admin', password_set: true } } },
     });
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(getRedirectPath(res)).toBe('/trainer');
@@ -120,19 +120,19 @@ describe('GET /api/auth/exchange', () => {
 
   it('auto-assigns associate role when no role set', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'new@test.com', user_metadata: {} } },
+      data: { user: { id: 'u1', email: 'new@test.com', user_metadata: { password_set: true } } },
     });
     mockFindUnique.mockResolvedValue({ slug: 'new-user' });
     await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(mockUpdateUser).toHaveBeenCalledWith('u1', {
-      user_metadata: { role: 'associate' },
+      user_metadata: { password_set: true, role: 'associate' },
       app_metadata: { role: 'associate' },
     });
   });
 
   it('links authUserId on first sign-in by email match', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u2', email: 'assoc@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u2', email: 'assoc@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     // First findUnique (by authUserId) returns null
     // Second findUnique (by email) returns match with null authUserId
@@ -152,7 +152,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('handles P2002 race on authUserId linkage', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u3', email: 'race@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u3', email: 'race@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     mockFindUnique
       .mockResolvedValueOnce(null)
