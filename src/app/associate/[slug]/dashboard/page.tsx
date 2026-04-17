@@ -121,8 +121,9 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
   const readinessPercent =
     skillLevelScores.length > 0
       ? Math.round(
-          skillLevelScores.reduce((sum, g) => sum + g.weightedScore, 0) /
-            skillLevelScores.length,
+          (skillLevelScores.reduce((sum, g) => sum + g.weightedScore, 0) /
+            skillLevelScores.length) *
+            100,
         )
       : 0;
 
