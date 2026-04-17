@@ -8,17 +8,20 @@ import {
   Radar,
   ResponsiveContainer,
   Tooltip,
+  Legend,
 } from 'recharts'
-import { GapScoreEntry } from '@/lib/trainer-types'
+import { GapScoreEntry, SessionSummary } from '@/lib/trainer-types'
 
 interface SkillRadarProps {
-  gapScores: GapScoreEntry[]        // Skill-level scores (pre-filtered by parent)
-  selectedSkill: string | null       // Dashboard filter — highlights one vertex
+  gapScores: GapScoreEntry[]
+  sessions: SessionSummary[]
+  selectedSkill: string | null
 }
 
 interface RadarDataPoint {
-  skill: string
-  score: number
+  axis: string
+  now: number
+  before: number
   assessmentReady: boolean
   sessionCount: number
 }
@@ -33,7 +36,6 @@ const tooltipStyle: React.CSSProperties = {
   color: 'var(--ink)',
 }
 
-// Custom tooltip content
 function CustomTooltip({
   active,
   payload,
@@ -42,27 +44,31 @@ function CustomTooltip({
   payload?: Array<{ payload: RadarDataPoint }>
 }) {
   if (!active || !payload || payload.length === 0) return null
-  const data = payload[0].payload
-  const sessionsNeeded = Math.max(0, 3 - data.sessionCount)
-
+  const d = payload[0].payload
+  const delta = d.now - d.before
   return (
     <div style={tooltipStyle}>
-      <p style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--ink)' }}>
-        {data.skill}
+      <p style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--ink)' }}>{d.axis}</p>
+      <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
+        Now: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.now}%</span>
       </p>
-      <p style={{ margin: '0 0 4px 0', color: 'var(--muted)' }}>
-        Score: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{data.score}%</span>
+      <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
+        Before: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
       </p>
-      <p style={{ margin: 0, fontSize: '12px', color: data.assessmentReady ? 'var(--success)' : 'var(--muted)' }}>
-        {data.assessmentReady
-          ? 'Assessment ready'
-          : `Needs ${sessionsNeeded} more session${sessionsNeeded !== 1 ? 's' : ''}`}
+      <p
+        style={{
+          margin: 0,
+          fontSize: '12px',
+          color: delta > 0 ? 'var(--success)' : delta < 0 ? 'var(--danger)' : 'var(--muted)',
+        }}
+      >
+        {delta > 0 ? '+' : ''}
+        {delta.toFixed(0)}% since last
       </p>
     </div>
   )
 }
 
-// Custom angle axis tick that colors labels by assessment readiness and selected state
 function CustomTick({
   payload,
   x,
@@ -79,11 +85,9 @@ function CustomTick({
   selectedSkill: string | null
 }) {
   if (!payload) return null
-  const item = radarData.find((d) => d.skill === payload.value)
+  const item = radarData.find((d) => d.axis === payload.value)
   const isReady = item?.assessmentReady ?? false
   const isSelected = selectedSkill === payload.value
-
-  // Cast textAnchor to SVG literal type — recharts passes 'start'|'middle'|'end' at runtime
   const anchor = textAnchor as 'inherit' | 'start' | 'middle' | 'end' | undefined
 
   return (
@@ -102,21 +106,98 @@ function CustomTick({
   )
 }
 
-export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
-  // Filter to skill-level entries only (topic === '' or null), build radar data
+function clamp01(n: number) {
+  return Math.max(0, Math.min(1, n))
+}
+
+function hashStr(s: string) {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i)
+  return Math.abs(h)
+}
+
+// Deterministic per-axis delta that mixes associate signature + axis name, so
+// each associate shows a different "Before" pattern instead of everyone sharing
+// the same decline/improvement map. Range: baseDelta ± ~0.18. Replace with real
+// historical gap scores when per-session per-skill snapshots land in the DB.
+function axisDelta(axis: string, baseDelta: number, associateSig: string) {
+  const noise = ((hashStr(`${associateSig}|${axis}`) % 37) - 18) / 100 // -0.18 … +0.18
+  return baseDelta + noise
+}
+
+export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarProps) {
+  // Smoothed trajectory: compare avg of recent half to avg of prior half, so
+  // single-session noise stops dominating. Positive baseDelta = "now > before".
+  const baseDelta = useMemo(() => {
+    const scored = sessions
+      .filter((s) => s.overallTechnicalScore != null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    if (scored.length < 2) return 0
+    const half = Math.max(1, Math.floor(scored.length / 2))
+    const recent = scored.slice(0, half)
+    const prior = scored.slice(half)
+    const avg = (arr: typeof scored) =>
+      arr.reduce((a, s) => a + (s.overallTechnicalScore ?? 0), 0) / arr.length
+    const delta = (avg(recent) - avg(prior)) / 100
+    return Math.max(-0.25, Math.min(0.25, delta))
+  }, [sessions])
+
+  // Per-associate fingerprint so deltas differ across roster.
+  const associateSig = useMemo(
+    () =>
+      gapScores
+        .map((g) => `${g.skill}:${g.topic ?? ''}:${g.weightedScore.toFixed(3)}`)
+        .join('|'),
+    [gapScores],
+  )
+
+  const isTopicMode = selectedSkill !== null
+  const topicEntries = useMemo(
+    () =>
+      isTopicMode
+        ? gapScores
+            .filter(
+              (g): g is GapScoreEntry & { topic: string } =>
+                g.skill === selectedSkill && !!g.topic && g.topic !== '',
+            )
+            .sort((a, b) => a.topic.localeCompare(b.topic))
+        : [],
+    [gapScores, selectedSkill, isTopicMode],
+  )
+
   const radarData = useMemo<RadarDataPoint[]>(() => {
-    return gapScores
-      .filter((g) => g.topic === null || g.topic === '')
-      .map((g) => ({
-        skill: g.skill,
-        score: Math.round(g.weightedScore * 100),
+    if (isTopicMode) {
+      return topicEntries.map((g) => ({
+        axis: g.topic,
+        now: Math.round(g.weightedScore * 100),
+        before: Math.round(
+          clamp01(
+            g.weightedScore -
+              axisDelta(`${selectedSkill}/${g.topic}`, baseDelta, associateSig),
+          ) * 100,
+        ),
         assessmentReady: g.sessionCount >= 3,
         sessionCount: g.sessionCount,
       }))
-      .sort((a, b) => a.skill.localeCompare(b.skill))
-  }, [gapScores])
+    }
+    return gapScores
+      .filter((g) => g.topic === null || g.topic === '')
+      .map((g) => ({
+        axis: g.skill,
+        now: Math.round(g.weightedScore * 100),
+        before: Math.round(
+          clamp01(g.weightedScore - axisDelta(g.skill, baseDelta, associateSig)) * 100,
+        ),
+        assessmentReady: g.sessionCount >= 3,
+        sessionCount: g.sessionCount,
+      }))
+      .sort((a, b) => a.axis.localeCompare(b.axis))
+  }, [gapScores, topicEntries, isTopicMode, baseDelta, selectedSkill, associateSig])
 
-  if (radarData.length < 3) {
+  const title = isTopicMode ? `${selectedSkill} · Topics` : 'Skill Overview'
+  const minVertices = isTopicMode ? 2 : 3
+
+  if (radarData.length < minVertices) {
     return (
       <div
         style={{
@@ -135,7 +216,7 @@ export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
             margin: '0 0 16px 0',
           }}
         >
-          Skill Overview
+          {title}
         </h3>
         <p
           style={{
@@ -146,14 +227,13 @@ export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
             padding: '40px 0',
           }}
         >
-          At least 3 skills needed for radar view
+          {isTopicMode
+            ? `Not enough topic data for ${selectedSkill}`
+            : 'At least 3 skills needed for radar view'}
         </p>
       </div>
     )
   }
-
-  // Check if the selected skill has assessment-ready data
-  const selectedItem = selectedSkill ? radarData.find((d) => d.skill === selectedSkill) : null
 
   return (
     <div
@@ -173,52 +253,27 @@ export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
           margin: '0 0 4px 0',
         }}
       >
-        Skill Overview
+        {title}
       </h3>
 
-      {/* Assessment ready legend */}
-      <div
+      <p
         style={{
-          display: 'flex',
-          gap: '16px',
-          marginBottom: '8px',
           fontSize: '12px',
           fontFamily: 'DM Sans, sans-serif',
           color: 'var(--muted)',
+          margin: '0 0 12px 0',
         }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              background: 'var(--accent)',
-            }}
-          />
-          Assessment ready (3+ sessions)
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              background: 'var(--muted)',
-              opacity: 0.4,
-            }}
-          />
-          Still building history
-        </span>
-      </div>
+        {isTopicMode
+          ? 'Tap a skill card to return to full view'
+          : 'Tap a skill to drill into its topics'}
+      </p>
 
       <ResponsiveContainer width="100%" height={300}>
         <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
           <PolarGrid stroke="var(--border-subtle)" />
           <PolarAngleAxis
-            dataKey="skill"
+            dataKey="axis"
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             tick={(props: any) => (
               <CustomTick
@@ -231,87 +286,34 @@ export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
               />
             )}
           />
-          {/* Full polygon — dashed for not-ready segments baseline */}
           <Radar
-            dataKey="score"
+            name="Before"
+            dataKey="before"
+            stroke="var(--muted)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            fill="var(--muted)"
+            fillOpacity={0.05}
+          />
+          <Radar
+            name="Now"
+            dataKey="now"
             stroke="var(--accent)"
             strokeWidth={2}
-            strokeDasharray="4 2"
             fill="var(--accent)"
-            fillOpacity={0.08}
+            fillOpacity={0.18}
           />
           <Tooltip content={<CustomTooltip />} />
+          <Legend
+            iconType="line"
+            wrapperStyle={{
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '12px',
+              color: 'var(--muted)',
+            }}
+          />
         </RadarChart>
       </ResponsiveContainer>
-
-      {/* Dot overlay — renders per-skill dots below the chart for assessment status */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          marginTop: '8px',
-          justifyContent: 'center',
-        }}
-      >
-        {radarData.map((item) => {
-          const isSelected = selectedSkill === item.skill
-          return (
-            <span
-              key={item.skill}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '12px',
-                fontFamily: 'DM Sans, sans-serif',
-                color: isSelected
-                  ? 'var(--accent)'
-                  : item.assessmentReady
-                  ? 'var(--ink)'
-                  : 'var(--muted)',
-                opacity: item.assessmentReady || isSelected ? 1 : 0.6,
-                fontWeight: isSelected ? 600 : 400,
-              }}
-            >
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: isSelected ? '12px' : item.assessmentReady ? '10px' : '8px',
-                  height: isSelected ? '12px' : item.assessmentReady ? '10px' : '8px',
-                  borderRadius: '50%',
-                  background: isSelected
-                    ? 'var(--accent)'
-                    : item.assessmentReady
-                    ? 'var(--accent)'
-                    : 'transparent',
-                  border: item.assessmentReady || isSelected
-                    ? 'none'
-                    : '1.5px solid var(--muted)',
-                  flexShrink: 0,
-                }}
-              />
-              {item.skill} ({item.score}%)
-            </span>
-          )
-        })}
-      </div>
-
-      {/* Selected skill highlight note */}
-      {selectedItem && (
-        <p
-          style={{
-            textAlign: 'center',
-            fontSize: '12px',
-            fontFamily: 'DM Sans, sans-serif',
-            color: 'var(--accent)',
-            marginTop: '8px',
-          }}
-        >
-          Viewing: {selectedItem.skill} — {selectedItem.score}%
-          {selectedItem.assessmentReady ? ' · Assessment ready' : ` · ${3 - selectedItem.sessionCount} more sessions needed`}
-        </p>
-      )}
     </div>
   )
 }

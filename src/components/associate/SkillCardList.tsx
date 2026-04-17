@@ -57,19 +57,22 @@ export function SkillCardList({
     }
   }
 
-  // Build skill data array, sorted strongest first (D-02)
+  // Build skill data array, sorted strongest first (D-02).
+  // Skill-level bar renders as mean(topic scores) when topics exist, so the
+  // hierarchy stays coherent (skill bar never disagrees with its topics).
+  // Falls back to stored skill-level score when no topics are present.
   const skills: SkillData[] = [];
   for (const [skill, { skillEntry, topics }] of skillMap) {
-    if (!skillEntry) continue;
-    const percent = Math.round(skillEntry.weightedScore * 100);
-    const color = getScoreColor(percent);
-    const { slope } = computeSkillTrend(sessions, skill, gapScores);
-
+    if (!skillEntry && topics.length === 0) continue;
     const topicData = topics.map((t) => {
       const tPercent = Math.round(t.weightedScore * 100);
       return { topic: t.topic ?? '', percent: tPercent, color: getScoreColor(tPercent) };
     });
-
+    const percent = topicData.length > 0
+      ? Math.round(topicData.reduce((a, t) => a + t.percent, 0) / topicData.length)
+      : Math.round((skillEntry?.weightedScore ?? 0) * 100);
+    const color = getScoreColor(percent);
+    const { slope } = computeSkillTrend(sessions, skill, gapScores);
     skills.push({ skill, percent, color, slope, topics: topicData });
   }
 

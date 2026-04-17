@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { FocusHero } from '@/components/associate/FocusHero';
 import { SkillCardList } from '@/components/associate/SkillCardList';
-import { SkillTrendChart } from '@/components/associate/SkillTrendChart';
 import { SkillRadar } from '@/components/associate/SkillRadar';
 import { ReadinessProgressBar } from '@/components/associate/ReadinessProgressBar';
 import { computeSkillTrend } from '@/lib/vizUtils';
@@ -37,10 +36,6 @@ export function AssociateDashboardClient({
   const lowestSkillScore = gapScores
     .filter((g) => g.topic === null || g.topic === '')
     .sort((a, b) => a.weightedScore - b.weightedScore)[0]?.weightedScore ?? null;
-
-  const handleSelectSkill = (skill: string | null) => {
-    setSelectedSkill(skill);
-  };
 
   const handleCardSelect = (skill: string | null) => {
     // Re-clicking the selected card deselects it (D-11)
@@ -116,18 +111,13 @@ export function AssociateDashboardClient({
             selectedSkill={selectedSkill}
             onSelectSkill={handleCardSelect}
           />
-          <SkillTrendChart
-            gapScores={gapScores}
-            sessions={sessions}
-            selectedSkill={selectedSkill}
-            onSelectSkill={(skill: string | null) => handleSelectSkill(skill)}
-          />
         </div>
 
         {/* Right column: SkillRadar → ReadinessProgressBar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <SkillRadar
             gapScores={gapScores}
+            sessions={sessions}
             selectedSkill={selectedSkill}
           />
           <ReadinessProgressBar
