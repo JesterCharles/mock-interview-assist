@@ -89,7 +89,28 @@ export function AvatarMenu() {
           </div>
 
           <DropdownMenu.Separator
-            style={{ height: 1, background: 'var(--border)', margin: '0 0 4px' }}
+            style={{ height: 1, background: 'var(--border)', margin: '4px 0' }}
+          />
+
+          {/* Profile link */}
+          <DropdownMenu.Item
+            asChild
+            style={{
+              padding: '8px 12px',
+              fontSize: 16,
+              fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+              fontWeight: 400,
+              color: 'var(--ink)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+            className="hover:bg-[var(--highlight)] focus-visible:bg-[var(--highlight)]"
+          >
+            <a href="/profile">Profile</a>
+          </DropdownMenu.Item>
+
+          <DropdownMenu.Separator
+            style={{ height: 1, background: 'var(--border)', margin: '4px 0' }}
           />
 
           {/* Sign Out */}
