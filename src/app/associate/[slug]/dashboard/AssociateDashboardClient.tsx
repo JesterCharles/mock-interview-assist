@@ -120,7 +120,7 @@ export function AssociateDashboardClient({
             gapScores={gapScores}
             sessions={sessions}
             selectedSkill={selectedSkill}
-            onSelectSkill={(skill) => handleSelectSkill(skill)}
+            onSelectSkill={(skill: string | null) => handleSelectSkill(skill)}
           />
         </div>
 

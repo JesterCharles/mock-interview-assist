@@ -44,7 +44,7 @@ const tooltipStyle: React.CSSProperties = {
   color: 'var(--ink)',
 }
 
-export default function SkillTrendChart({
+export function SkillTrendChart({
   gapScores,
   sessions,
   selectedSkill,

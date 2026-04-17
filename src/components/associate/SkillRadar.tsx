@@ -102,7 +102,7 @@ function CustomTick({
   )
 }
 
-export default function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
+export function SkillRadar({ gapScores, selectedSkill }: SkillRadarProps) {
   // Filter to skill-level entries only (topic === '' or null), build radar data
   const radarData = useMemo<RadarDataPoint[]>(() => {
     return gapScores
