@@ -19,6 +19,7 @@
   --success: #2D6A4F;
   --warning: #B7791F;
   --danger: #B83B2E;
+  --mastery: #2B6CB0;  /* Blue — 90-100% score band */
   --border: #DDD5C8;
   --border-subtle: #E8E2D9;
   --highlight: #FFF8F0;
@@ -51,6 +52,7 @@
   --success: #3D8B6A;
   --warning: #D4952A;
   --danger: #D45040;
+  --mastery: #4A90C4;  /* Blue desaturated 10-15% for dark mode */
   --border: #3D3733;
   --border-subtle: #332F2B;
   --highlight: #2E2520;
@@ -81,6 +83,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-mastery: var(--mastery);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
   --color-highlight: var(--highlight);
