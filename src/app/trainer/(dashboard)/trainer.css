@@ -17,7 +17,7 @@
 
   background-color: var(--bg);
   color: var(--ink);
-  min-height: 100vh;
+  min-height: 100%;
   font-family: 'DM Sans', sans-serif;
 }
 

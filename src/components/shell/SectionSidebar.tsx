@@ -11,22 +11,26 @@ interface SectionSidebarProps {
   groups: SidebarGroup[];
   sidebarHeader?: string | null;
   settingsGroup?: SettingsAccordionGroup;
+  startCollapsed?: boolean;
 }
 
-export function SectionSidebar({ groups, sidebarHeader, settingsGroup }: SectionSidebarProps) {
+export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startCollapsed = false }: SectionSidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return startCollapsed;
+    const stored = window.localStorage.getItem('nlm_sidebar_collapsed');
+    if (stored === 'true') return true;
+    if (stored === 'false') return false;
+    return startCollapsed;
+  });
+  const [settingsOpen, setSettingsOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('nlm_settings_open') === 'true';
+  });
+  const [mounted, setMounted] = useState(false);
 
-  // Hydrate from localStorage — no SSR flash
   useEffect(() => {
-    const stored = localStorage.getItem('nlm_sidebar_collapsed');
-    if (stored === 'true') setCollapsed(true);
-  }, []);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('nlm_settings_open');
-    if (stored === 'true') setSettingsOpen(true);
+    setMounted(true);
   }, []);
 
   const toggle = () => {
@@ -52,16 +56,17 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup }: Section
 
   return (
     <aside
+      suppressHydrationWarning
       className="hidden md:flex flex-col shrink-0 overflow-hidden"
       style={{
         width: collapsed ? 48 : 200,
-        transition: 'width 200ms ease-in-out',
+        transition: mounted ? 'width 200ms ease-in-out' : 'none',
         background: 'var(--surface-muted)',
         borderRight: '1px solid var(--border)',
-        minHeight: 0,
         position: 'sticky',
         top: 56,
         height: 'calc(100vh - 56px)',
+        alignSelf: 'flex-start',
       }}
     >
       <nav
@@ -147,10 +152,16 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup }: Section
         {settingsGroup && (
           <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
             {collapsed ? (
-              /* Collapsed: show only the icon with tooltip */
+              /* Collapsed: icon expands sidebar + opens accordion */
               <button
                 title="Settings"
                 aria-label="Settings"
+                onClick={() => {
+                  setCollapsed(false);
+                  localStorage.setItem('nlm_sidebar_collapsed', 'false');
+                  setSettingsOpen(true);
+                  localStorage.setItem('nlm_settings_open', 'true');
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

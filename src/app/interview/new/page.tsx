@@ -997,7 +997,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-full flex flex-col" style={{ background: 'var(--bg)' }}>
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col max-w-4xl">
 
         {/* Header */}
@@ -1099,6 +1099,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
