@@ -103,6 +103,101 @@ Display readiness as bold typography, not traffic-light badges:
 - Score in Clash Display 700, trend word in 11px DM Sans 600 lowercase
 - Treats associates like athletes with stat lines, not students with grades
 
+## Data Visualization
+
+### Chart Palette
+
+Six-color series system. Primary series uses `--accent`; secondary series use `--chart-1` through `--chart-5`. Dark mode variants desaturate 10-15% per the existing color pattern. Neon/electric chart colors are forbidden (see Anti-Patterns).
+
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `--accent` | `#C85A2E` | `#D4743F` | Primary data line in single-series charts |
+| `--chart-1` | `#2D6A4F` | `#3D8B6A` | Warm sage — maps from `--success` |
+| `--chart-2` | `#B7791F` | `#D4952A` | Amber — maps from `--warning` |
+| `--chart-3` | `#B83B2E` | `#D45040` | Clay — maps from `--danger` |
+| `--chart-4` | `#8C7B6E` | `#A89080` | Warm taupe (earth tone) |
+| `--chart-5` | `#5C4A3A` | `#7A6555` | Deep umber (earth tone) |
+| `--chart-highlight` | `rgba(200,90,46,0.15)` | `rgba(212,116,63,0.2)` | Hover/active dot fill, bar hover background |
+
+### Recharts Usage Pattern
+
+Canonical code for consuming tokens in recharts:
+
+```tsx
+// Primary series
+<Line stroke="var(--accent)" strokeWidth={2} />
+
+// Secondary series
+<Line stroke="var(--chart-1)" strokeWidth={1.5} />
+<Line stroke="var(--chart-2)" strokeWidth={1.5} />
+
+// Area fill
+<Area fill="var(--chart-highlight)" stroke="var(--accent)" />
+```
+
+Recharts resolves CSS custom properties in SVG `stroke` and `fill` attributes on modern browsers. No JS color resolution needed.
+
+Tailwind utilities (`bg-chart-1`, `text-chart-1`, etc.) are available via `@theme inline` mappings in `globals.css` — use for non-SVG chart elements (legends, skill bars, badges).
+
+### Axis & Grid Conventions
+
+Axis tick labels use `--muted` color, 12px DM Sans:
+```tsx
+tick={{ fill: 'var(--muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
+```
+
+Cartesian grid lines use `--border-subtle` with dashed pattern:
+```tsx
+<CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+```
+
+Clean charts (bar, radar) omit axis lines entirely. Grid lines only where they aid reading (line charts, area charts).
+
+### Tooltip Styling
+
+All chart tooltips use this `contentStyle`:
+```tsx
+contentStyle={{
+  backgroundColor: 'var(--surface)',
+  border: '1px solid var(--border-subtle)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+  fontFamily: 'DM Sans, sans-serif',
+  fontSize: '13px',
+  color: 'var(--ink)',
+}}
+```
+
+Dark mode shadow: `0 2px 8px rgba(0,0,0,0.3)`. CSS custom properties handle the color switch automatically; the shadow is the only value that does not auto-switch (acceptable — the difference is subtle).
+
+### Trajectory Language
+
+Extends the athletic stat-line pattern from Readiness Signal Pattern.
+
+**Vocabulary** (strongest to weakest):
+
+| Word | Meaning | When to Use |
+|------|---------|-------------|
+| ascending | Strong upward trend | slope > +3pts/session over 3+ sessions |
+| climbing | Moderate improvement | slope +1 to +3pts/session |
+| holding | Flat / stable | slope -1 to +1pts/session |
+| dipping | Moderate decline | slope -1 to -3pts/session |
+| stalling | Sustained weakness or decline | slope < -3pts/session or avg below threshold with no improvement |
+
+**Display formats:**
+
+- **Compact:** "[score] [trajectory word]" — e.g., "82 ascending" (roster badges, sparkline labels)
+- **Narrative:** "Improving +Npts over M sessions" — e.g., "Improving +8pts over 3 sessions" (focus area hero, trend chart captions)
+
+**Narrative mapping:**
+
+| Trajectory | Narrative Prefix |
+|-----------|-----------------|
+| ascending / climbing | "Improving" |
+| holding | "Holding steady" |
+| dipping | "Slipping" |
+| stalling | "Needs focus" |
+
 ## Anti-Patterns (never use)
 - Purple/violet gradients
 - Glass morphism / backdrop-filter blur
@@ -125,3 +220,4 @@ Display readiness as bold typography, not traffic-light badges:
 | 2026-04-13 | Readiness as typography not badges | From Claude subagent: "82 ascending" > green dot. More information density, more emotional impact. Treats associates like athletes. |
 | 2026-04-15 | Legacy `--nlm-*` tokens + decorative utilities deleted | v1.1 Phase 15 unified every route on the DESIGN tokens. All `--nlm-*` custom properties, decorative utility classes, and kill-list keyframes removed from `globals.css`. Playwright regression + legacy-deletion specs guard against re-introduction. |
 | 2026-04-15 | Dark mode wired app-wide | v1.1 Phase 15-02 added a boot-time theme script on `<html>` with `suppressHydrationWarning`. All tokens have dark-mode equivalents. Toggle is available in the unified Navbar. |
+| 2026-04-16 | Data visualization tokens + conventions added | Phase 26: chart palette (6 series colors), axis/grid/tooltip conventions, trajectory language vocabulary. Tokens in globals.css, documentation in this section. |
