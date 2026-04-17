@@ -175,8 +175,17 @@ export default function AssociateDetailPage() {
 
         {!dataLoading && !error && detail && (
           <>
-            {/* Header */}
-            <div style={{ marginBottom: '32px' }}>
+            {/* Header — name left, actions top-right */}
+            <div
+              style={{
+                marginBottom: '32px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: '24px',
+                flexWrap: 'wrap',
+              }}
+            >
               <h1
                 style={{
                   fontFamily: 'Clash Display, sans-serif',
@@ -184,38 +193,31 @@ export default function AssociateDetailPage() {
                   fontSize: '48px',
                   color: 'var(--ink)',
                   lineHeight: 1.1,
-                  marginBottom: '8px',
+                  margin: 0,
                   letterSpacing: '-0.02em',
                 }}
               >
                 {detail.displayName}
               </h1>
-              <ReadinessDisplay
-                score={detail.readinessScore}
-                status={detail.readinessStatus}
-              />
 
-              {/* Trainer-only action strip */}
-              <div style={{ marginTop: '20px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: '12px',
+                  minWidth: '240px',
+                }}
+              >
                 <AssociateCohortSelect
                   slug={detail.slug}
                   initialCohortId={detail.cohortId}
                   initialCohortName={detail.cohortName}
                 />
-                <p
-                  style={{
-                    fontSize: '13px',
-                    fontFamily: 'DM Sans, sans-serif',
-                    color: 'var(--muted)',
-                    marginTop: '6px',
-                    marginBottom: 0,
-                  }}
-                >
-                  Current: {detail.cohortName ?? 'Unassigned'}
-                </p>
-              </div>
-
-              <div style={{ marginTop: '20px' }}>
+                <ReadinessDisplay
+                  score={detail.readinessScore}
+                  status={detail.readinessStatus}
+                />
                 <button
                   onClick={handleExportPdf}
                   disabled={exportingPdf}
