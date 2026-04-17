@@ -108,7 +108,6 @@ export default function RosterTable({ associates, sparklineData }: RosterTablePr
                   Name{sortIndicator('displayName')}
                 </button>
               </th>
-              <th>Slug</th>
               <th>
                 <button onClick={() => handleSort('readinessStatus')}>
                   Readiness{sortIndicator('readinessStatus')}
@@ -138,7 +137,7 @@ export default function RosterTable({ associates, sparklineData }: RosterTablePr
             {sorted.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={8}
                   style={{
                     textAlign: 'center',
                     padding: '48px 16px',
@@ -164,11 +163,6 @@ export default function RosterTable({ associates, sparklineData }: RosterTablePr
                 aria-label={`View ${associate.displayName} detail`}
               >
                 <td style={{ fontWeight: 500 }}>{associate.displayName}</td>
-                <td>
-                  <span className="trainer-meta" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px' }}>
-                    {associate.slug}
-                  </span>
-                </td>
                 <td>
                   <ReadinessDisplay
                     score={associate.readinessScore}
