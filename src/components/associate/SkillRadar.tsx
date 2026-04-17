@@ -57,7 +57,7 @@ function CustomTooltip({
       {hasHistory && (
         <>
           <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
-            Before: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
+            Est. prior: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
           </p>
           <p
             style={{
@@ -313,7 +313,7 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
           />
           {hasHistory && (
             <Radar
-              name="Before"
+              name="Est. prior"
               dataKey="before"
               stroke="var(--muted)"
               strokeWidth={1.5}
@@ -343,6 +343,20 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
           )}
         </RadarChart>
       </ResponsiveContainer>
+      {hasHistory && (
+        <p
+          style={{
+            fontSize: '11px',
+            fontFamily: 'DM Sans, sans-serif',
+            color: 'var(--muted)',
+            margin: '8px 0 0 0',
+            fontStyle: 'italic',
+          }}
+        >
+          Est. prior is approximated from overall session trend — real per-skill
+          history lands once snapshots are stored.
+        </p>
+      )}
     </div>
   )
 }
