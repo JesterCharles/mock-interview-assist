@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function LandingHeader() {
   return (
@@ -16,7 +17,7 @@ export function LandingHeader() {
         padding: '0 16px',
       }}
     >
-      {/* Wordmark */}
+      {/* Wordmark — matches TopBar */}
       <Link
         href="/"
         style={{
@@ -28,17 +29,20 @@ export function LandingHeader() {
           letterSpacing: '-0.01em',
         }}
       >
-        Next Level Mock
+        NLM
       </Link>
 
-      {/* Sign In */}
-      <Link
-        href="/signin"
-        className="btn-accent-flat"
-        style={{ fontSize: 13, padding: '6px 16px' }}
-      >
-        Sign In
-      </Link>
+      {/* Right zone */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <ThemeToggle />
+        <Link
+          href="/signin"
+          className="btn-accent-flat"
+          style={{ fontSize: 13, textDecoration: 'none' }}
+        >
+          Sign In
+        </Link>
+      </div>
     </header>
   );
 }
