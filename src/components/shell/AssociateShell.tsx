@@ -33,6 +33,13 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
     });
   };
 
+  const expandSidebar = () => {
+    setCollapsed(false);
+    window.localStorage.setItem('nlm_sidebar_collapsed', 'false');
+  };
+
+  const homeHref = `/associate/${slug}/dashboard`;
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
       <SectionSidebar
@@ -40,6 +47,8 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
         sidebarHeader={cohortName}
         collapsed={collapsed}
         mounted={mounted}
+        homeHref={homeHref}
+        onExpandSidebar={expandSidebar}
       />
       <div className="flex flex-col flex-1 min-w-0 min-h-0">
         <TopBar

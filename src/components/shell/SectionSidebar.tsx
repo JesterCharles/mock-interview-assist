@@ -13,9 +13,11 @@ interface SectionSidebarProps {
   settingsGroup?: SettingsAccordionGroup;
   collapsed: boolean;
   mounted: boolean;
+  homeHref?: string;
+  onExpandSidebar?: () => void;
 }
 
-export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed, mounted }: SectionSidebarProps) {
+export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed, mounted, homeHref = '/trainer', onExpandSidebar }: SectionSidebarProps) {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -51,7 +53,7 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed
     >
       {/* NLM wordmark — top corner of sidebar, aligns with TopBar baseline */}
       <Link
-        href="/trainer"
+        href={homeHref}
         style={{
           height: 56,
           display: 'flex',
@@ -159,6 +161,8 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed
                 title="Settings"
                 aria-label="Settings"
                 onClick={() => {
+                  // Expand the sidebar first so the accordion is visible.
+                  onExpandSidebar?.();
                   setSettingsOpen(true);
                   localStorage.setItem('nlm_settings_open', 'true');
                 }}

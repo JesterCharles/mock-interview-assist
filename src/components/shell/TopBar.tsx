@@ -75,25 +75,31 @@ export function TopBar({
         </button>
       )}
 
-      {/* Mobile hamburger + wordmark — narrow viewports where sidebar is hidden */}
-      <div style={{ alignItems: 'center', gap: 8, flexShrink: 0 }} className="md:hidden flex">
-        {sidebarGroups.length > 0 && (
+      {/* Mobile hamburger — narrow viewports only */}
+      {sidebarGroups.length > 0 && (
+        <div style={{ alignItems: 'center', flexShrink: 0 }} className="md:hidden flex">
           <MobileSidebar groups={sidebarGroups} settingsGroup={settingsGroup} />
-        )}
-        <Link
-          href={wordmarkHref}
-          style={{
-            fontFamily: 'var(--font-display), "Clash Display", sans-serif',
-            fontWeight: 500,
-            fontSize: 16,
-            color: 'var(--ink)',
-            textDecoration: 'none',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          NLM
-        </Link>
-      </div>
+        </div>
+      )}
+
+      {/* Wordmark — hidden on desktop only when a sidebar owns it (onToggleSidebar
+          indicates AppShell/AssociateShell provides the sidebar wordmark).
+          Bare-TopBar layouts (/history, /question-banks) keep the wordmark visible. */}
+      <Link
+        href={wordmarkHref}
+        className={onToggleSidebar ? 'md:hidden' : ''}
+        style={{
+          fontFamily: 'var(--font-display), "Clash Display", sans-serif',
+          fontWeight: 500,
+          fontSize: 16,
+          color: 'var(--ink)',
+          textDecoration: 'none',
+          letterSpacing: '-0.01em',
+          flexShrink: 0,
+        }}
+      >
+        NLM
+      </Link>
 
       {/* Spacer — pushes right zone to the edge */}
       <div style={{ flex: 1 }} />

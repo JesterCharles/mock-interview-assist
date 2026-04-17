@@ -37,6 +37,11 @@ export function AppShell({ children, variant = 'trainer' }: AppShellProps) {
     });
   };
 
+  const expandSidebar = () => {
+    setCollapsed(false);
+    window.localStorage.setItem('nlm_sidebar_collapsed', 'false');
+  };
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
       <SectionSidebar
@@ -44,6 +49,7 @@ export function AppShell({ children, variant = 'trainer' }: AppShellProps) {
         settingsGroup={trainerSettingsAccordion}
         collapsed={collapsed}
         mounted={mounted}
+        onExpandSidebar={expandSidebar}
       />
       <div className="flex flex-col flex-1 min-w-0 min-h-0">
         <TopBar
