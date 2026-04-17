@@ -30,7 +30,14 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    profile: {
+      findUnique: vi.fn(),
+    },
   },
+}));
+
+vi.mock('@/lib/profileService', () => ({
+  lazyBackfillProfile: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { GET } from './route';
@@ -40,6 +47,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 const mockFindUnique = prisma.associate.findUnique as ReturnType<typeof vi.fn>;
 const mockUpdate = prisma.associate.update as ReturnType<typeof vi.fn>;
 const mockUpdateUser = supabaseAdmin.auth.admin.updateUserById as ReturnType<typeof vi.fn>;
+const mockProfileFindUnique = prisma.profile.findUnique as ReturnType<typeof vi.fn>;
 
 function makeRequest(params: Record<string, string>): NextRequest {
   const url = new URL('http://localhost:3000/api/auth/exchange');
@@ -67,6 +75,7 @@ describe('GET /api/auth/exchange', () => {
       data: { user: { id: 'u1', email: 'assoc@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     mockFindUnique.mockResolvedValue(null);
+    mockProfileFindUnique.mockResolvedValue({ passwordSetAt: new Date() });
   });
 
   it('redirects to /signin?error=missing-code with no tokens or code', async () => {
