@@ -105,11 +105,10 @@ Plans:
   2. Clicking either button expands an inline form without navigating away
   3. An associate who signs in via magic link for the first time sees a prompt to set a password before reaching their dashboard
   4. A trainer completing password sign-in is also prompted to set a new password on first login if none is set
-**Plans**: 2 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] 27-01-PLAN.md — Extend shell components for associate role + wire associate layout
-- [ ] 27-02-PLAN.md — Curriculum placeholder + delete legacy nav components
+- [ ] 28-01-PLAN.md — Accordion sign-in buttons + first-login password setup
 **UI hint**: yes
 
 ### Phase 28.1: User Profile (INSERTED)
@@ -121,15 +120,11 @@ Plans:
   2. Avatar menu dropdown links to a profile/settings page
   3. Profile page allows updating password, viewing email, and entering github username
   4. First-login detection reads from Profile.passwordSetAt instead of Supabase user_metadata
-**Plans**: 2 plans
-
-Plans:
-- [ ] 27-01-PLAN.md — Extend shell components for associate role + wire associate layout
-- [ ] 27-02-PLAN.md — Curriculum placeholder + delete legacy nav components
-**UI hint**: yes
+**Plans**: TBD
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 28.1 to break down)
+**UI hint**: yes
 
 ### Phase 29: Associate Data Visualization
 **Goal**: Associates view a rich picture of their skill performance — ranked bars with trend direction, a prominent focus recommendation, a filterable session-over-session trend chart, and a radar plot of all cohort skills
@@ -142,11 +137,7 @@ Plans:
   4. A per-skill trend chart renders with a skill filter dropdown; selecting a skill updates the chart to show that skill's history
   5. A radar/spider plot shows all cohort skills; labels are visually distinct only for skills with enough sessions to be assessment-ready
   6. Selecting a skill anywhere on the dashboard transitions all dashboard elements to focus on that skill
-**Plans**: 2 plans
-
-Plans:
-- [ ] 27-01-PLAN.md — Extend shell components for associate role + wire associate layout
-- [ ] 27-02-PLAN.md — Curriculum placeholder + delete legacy nav components
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 30: Associate Curriculum View
@@ -157,11 +148,7 @@ Plans:
   1. An associate assigned to a cohort can navigate to a curriculum view and see the full weekly schedule
   2. The current week is visually highlighted; past weeks appear greyed; future weeks appear muted
   3. An associate with no cohort assignment sees a clear empty state message ("You haven't been assigned to a cohort yet") with no errors
-**Plans**: 2 plans
-
-Plans:
-- [ ] 27-01-PLAN.md — Extend shell components for associate role + wire associate layout
-- [ ] 27-02-PLAN.md — Curriculum placeholder + delete legacy nav components
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 31: Dark Mode QA Sweep
@@ -184,8 +171,8 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 26. Design Tokens (Data-Viz) | v1.3 | 1/1 | Complete    | 2026-04-17 |
-| 27. Unified App Shell | v1.3 | 0/? | Not started | - |
-| 28. Sign-in Redesign | v1.3 | 0/? | Not started | - |
+| 27. Unified App Shell | v1.3 | 0/2 | Not started | - |
+| 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
 | 30. Associate Curriculum View | v1.3 | 0/? | Not started | - |
 | 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
