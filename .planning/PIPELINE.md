@@ -30,11 +30,11 @@ PR #5 opened on branch `v1.3-ux-polish`. Merge deferred pending CI/CD (999.3 bac
 | design | pending | | | UI-phase specs needed for P27-30 |
 | plan | done | 2026-04-16 | 2026-04-16 | 7/7 phases discussed, 7/7 planned (9 plans total) |
 | execute | done | 2026-04-17 | 2026-04-17 | 7/7 phases, 10/10 plans, 479 tests passing |
-| review | done | 2026-04-17 | 2026-04-17 | Codex review + security audit, 1 critical fixed |
+| review | done | 2026-04-17 | 2026-04-17 | 4 codex passes on PR #5; 1 P1 (demo cohort prefix) + 6 P2 (shell/radar/e2e) + 1 P3 all addressed. Final gate clean on approved scope. |
 | test | done | 2026-04-17 | 2026-04-17 | 479 unit, 7 e2e passing, build clean |
 | debug | skipped | | | No blocking failures |
 | optimize | skipped | | | No numeric metric target this run |
-| ship | partial | 2026-04-17 | 2026-04-17 | PR #5 opened on branch v1.3-ux-polish; merge deferred until CI/CD |
+| ship | partial | 2026-04-17 | 2026-04-17 | PR #5 open w/ 17 commits on v1.3-ux-polish; user-approved locally; merge deferred until CI/CD |
 | reflect | pending | | | Blocked on merge |
 | maintain | pending | | | Blocked on merge |
 
