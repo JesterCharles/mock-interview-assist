@@ -62,10 +62,8 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startColl
         transition: mounted ? 'width 200ms ease-in-out' : 'none',
         background: 'var(--surface-muted)',
         borderRight: '1px solid var(--border)',
-        position: 'sticky',
-        top: 56,
-        height: 'calc(100vh - 56px)',
-        alignSelf: 'flex-start',
+        height: '100%',
+        minHeight: 0,
       }}
     >
       <nav
