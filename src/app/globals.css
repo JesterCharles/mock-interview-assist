@@ -23,6 +23,9 @@
   --border: #DDD5C8;
   --border-subtle: #E8E2D9;
   --highlight: #FFF8F0;
+  --success-bg: #E8F5EE;
+  --warning-bg: #FEF3E0;
+  --danger-bg: #FDECEB;
 
   /* Chart palette — DESIGN.md §Data Visualization */
   --chart-1: #2D6A4F;
@@ -56,6 +59,9 @@
   --border: #3D3733;
   --border-subtle: #332F2B;
   --highlight: #2E2520;
+  --success-bg: #1A2E24;
+  --warning-bg: #2E2518;
+  --danger-bg: #2E1C1A;
 
   /* Chart palette — dark (desaturated 10-15%) */
   --chart-1: #3D8B6A;
@@ -93,6 +99,9 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-chart-highlight: var(--chart-highlight);
+  --color-success-bg: var(--success-bg);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger-bg: var(--danger-bg);
   --font-display: var(--font-clash-display);
   --font-sans-new: var(--font-dm-sans);
   --font-jetbrains-mono: var(--font-jetbrains-mono);
