@@ -152,8 +152,10 @@ Plans:
   1. Switching to dark mode on any page produces no parchment-white backgrounds, no dark-on-dark text, and no invisible borders
   2. All recharts components (line charts, area charts, radar plots, sparklines) use CSS variable tokens for fills, strokes, and tooltip backgrounds in both themes
   3. No component file contains a hardcoded hex color or light-only Tailwind utility that bypasses the design token system
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 1 plan
+
+Plans:
+- [ ] 31-01-PLAN.md — Replace all hardcoded hex colors with CSS variable tokens and add badge-background tokens
 
 ## Progress
 
@@ -166,4 +168,4 @@ Plans:
 | 28. Sign-in Redesign | v1.3 | 0/? | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
 | 30. Associate Curriculum View | v1.3 | 0/? | Not started | - |
-| 31. Dark Mode QA Sweep | v1.3 | 0/? | Not started | - |
+| 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
