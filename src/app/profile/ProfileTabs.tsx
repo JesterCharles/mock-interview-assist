@@ -22,6 +22,7 @@ interface ProfileTabsProps {
   email: string;
   role: string;
   readiness: ReadinessData | null;
+  initialTab?: Tab;
 }
 
 const inputBase: React.CSSProperties = {
@@ -92,8 +93,8 @@ function readinessBadgeStyle(status: string): React.CSSProperties {
   };
 }
 
-export function ProfileTabs({ profile, email, role, readiness }: ProfileTabsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
+export function ProfileTabs({ profile, email, role, readiness, initialTab }: ProfileTabsProps) {
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab ?? 'profile');
 
   // Profile tab state
   const [displayName, setDisplayName] = useState(profile.displayName ?? '');
@@ -203,24 +204,13 @@ export function ProfileTabs({ profile, email, role, readiness }: ProfileTabsProp
   return (
     <div
       style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        backgroundColor: 'var(--bg)',
-        padding: '48px 16px',
+        width: '100%',
+        maxWidth: 600,
+        backgroundColor: 'var(--surface)',
+        borderRadius: 12,
+        padding: 40,
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 600,
-          backgroundColor: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 12,
-          padding: 40,
-        }}
-      >
         <h1
           style={{
             fontFamily: "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
@@ -535,6 +525,5 @@ export function ProfileTabs({ profile, email, role, readiness }: ProfileTabsProp
           </div>
         )}
       </div>
-    </div>
   );
 }
