@@ -82,7 +82,7 @@
 - **Approach:** Grid-disciplined
 - **Grid:** 12-column on desktop (1120px max), stack on mobile
 - **Max content width:** 1120px
-- **Sidebar:** 200px for trainer dashboard navigation
+- **Sidebar:** 200px expanded / 48px collapsed (persisted in `localStorage: nlm_sidebar_collapsed`)
 - **KPI strip:** 4-column grid at top of dashboard
 - **Border radius:** sm:4px (tags), md:6px (nav items), lg:8px (inputs, buttons, cards-inner), xl:12px (cards, modals), full:9999px (badges, pills)
 - **Composition:** Asymmetric. Let one chart or roster table own the viewport. Don't stack equal-weight cards.
@@ -94,6 +94,32 @@
 - **Easing:** enter(ease-out) exit(ease-in) move(ease-in-out)
 - **Duration:** micro(50-100ms) for hover states, short(150-200ms) for transitions, medium(250-350ms) for layout shifts
 - **Rule:** No decorative motion. Every animation must aid comprehension or provide feedback.
+
+## App Shell
+
+Two-rectangle layout, same on every authenticated surface.
+
+```
+┌──────┬────────────────────────────────────────────┐
+│ NLM  │  [◧]       [ spacer ]   cohorts · ☀ · 👤   │  ← TopBar (56px)
+│ ──── ├────────────────────────────────────────────┤
+│ nav  │                                            │
+│ nav  │  main (scroll container)                   │
+│ nav  │                                            │
+│ ...  │                                            │
+└──────┴────────────────────────────────────────────┘
+```
+
+- **Structure:** outer `flex h-screen overflow-hidden`. Left child is the sidebar (full viewport height). Right child is a `flex-col` containing TopBar (sticky 56px) over the scroll-owning main.
+- **Sidebar header:** NLM wordmark sits in the top-left corner, same baseline as TopBar content. No divider line below it — sidebar reads as one continuous surface.
+- **Sidebar groups:** `OVERVIEW` (Roster, Gap Analysis, Calibration), `ACTIONS` (New Mock, Reports, Batch Upload), then a bottom Settings accordion. Group labels are 12px DM Sans 500 uppercase, muted color.
+- **TopBar left:** the desktop collapse toggle (PanelLeftClose / PanelLeftOpen icon in a 34px chip with border + surface bg). No center nav. No wordmark duplication.
+- **TopBar right:** CohortSwitcher (trainer only) → ThemeToggle → AvatarMenu. Stays sticky while main scrolls.
+- **Scroll ownership:** only `<main>` scrolls. The outer `h-screen overflow-hidden` prevents the document from ever exceeding the viewport, so the sidebar and TopBar never disconnect.
+- **Collapse state:** lifted to AppShell. `localStorage.nlm_sidebar_collapsed` persists across sessions. Transitions stay disabled until the shell has mounted, so the localStorage hydration never flashes a collapse/expand animation.
+- **Mock variant:** interview flows (`/interview`, `/interview/new`, `/review`) boot with sidebar collapsed by default to maximize canvas. Still honors user preference once set.
+- **Mobile (<md):** sidebar hides. TopBar left shows the MobileSidebar hamburger + a duplicated NLM wordmark. Collapse toggle is hidden.
+- **Page roots inside AppShell:** use `min-h-full`, never `min-h-screen`. Main is already bounded; `min-h-screen` inside it creates a 56px phantom scroll region.
 
 ## Readiness Signal Pattern
 Display readiness as bold typography, not traffic-light badges:
@@ -221,3 +247,4 @@ Extends the athletic stat-line pattern from Readiness Signal Pattern.
 | 2026-04-15 | Legacy `--nlm-*` tokens + decorative utilities deleted | v1.1 Phase 15 unified every route on the DESIGN tokens. All `--nlm-*` custom properties, decorative utility classes, and kill-list keyframes removed from `globals.css`. Playwright regression + legacy-deletion specs guard against re-introduction. |
 | 2026-04-15 | Dark mode wired app-wide | v1.1 Phase 15-02 added a boot-time theme script on `<html>` with `suppressHydrationWarning`. All tokens have dark-mode equivalents. Toggle is available in the unified Navbar. |
 | 2026-04-16 | Data visualization tokens + conventions added | Phase 26: chart palette (6 series colors), axis/grid/tooltip conventions, trajectory language vocabulary. Tokens in globals.css, documentation in this section. |
+| 2026-04-17 | Two-rectangle App Shell with full-height sidebar | v1.3 UX pass: sidebar spans the full left edge of the viewport with the NLM wordmark in its top corner and no divider; TopBar starts to the right and owns the collapse toggle (top-left chip). Main is the sole scroll container — prevents the sidebar-bleeds-into-TopBar bug. Collapse state lifted to AppShell so TopBar + sidebar stay in sync, persisted via `localStorage.nlm_sidebar_collapsed`. |
