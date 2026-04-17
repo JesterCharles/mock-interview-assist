@@ -2,13 +2,13 @@
 
 ## Current Run — v1.3
 - Started: 2026-04-16
-- Current stage: SHIP
-- Mode: unattended (autonomous)
+- Current stage: SHIP (PR-open, merge deferred)
+- Mode: interactive
 - Previous: v1.2 completed 2026-04-16
 
 ## Resume Point
 
-All 7 phases planned. Phase 26 executed. Ready to execute Phases 27-31.
+PR #5 opened on branch `v1.3-ux-polish`. Merge deferred pending CI/CD (999.3 backlog candidate). Reflect + maintain blocked on merge.
 
 ## v1.3 Milestone Scope
 
@@ -33,10 +33,10 @@ All 7 phases planned. Phase 26 executed. Ready to execute Phases 27-31.
 | review | done | 2026-04-17 | 2026-04-17 | Codex review + security audit, 1 critical fixed |
 | test | done | 2026-04-17 | 2026-04-17 | 479 unit, 7 e2e passing, build clean |
 | debug | skipped | | | No blocking failures |
-| optimize | pending | | | |
-| ship | pending | | | |
-| reflect | pending | | | |
-| maintain | pending | | | |
+| optimize | skipped | | | No numeric metric target this run |
+| ship | partial | 2026-04-17 | 2026-04-17 | PR #5 opened on branch v1.3-ux-polish; merge deferred until CI/CD |
+| reflect | pending | | | Blocked on merge |
+| maintain | pending | | | Blocked on merge |
 
 ## HITL Gates (v1.3)
 | Gate | Stage | Type | Status | Decision |
