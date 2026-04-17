@@ -120,10 +120,10 @@ Plans:
   2. Avatar menu dropdown links to a profile/settings page
   3. Profile page allows updating password, viewing email, and entering github username
   4. First-login detection reads from Profile.passwordSetAt instead of Supabase user_metadata
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 28.1 to break down)
+- [ ] 28.1-01-PLAN.md — Profile model + tabbed profile page + password detection migration
 **UI hint**: yes
 
 ### Phase 29: Associate Data Visualization
@@ -166,13 +166,14 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 26 → 27 → 28 → 29 → 30 → 31
+**Execution Order:** 26 → 27 → 28 → 28.1 → 29 → 30 → 31
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 26. Design Tokens (Data-Viz) | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 27. Unified App Shell | v1.3 | 0/2 | Not started | - |
 | 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
+| 28.1. User Profile | v1.3 | 0/1 | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
 | 30. Associate Curriculum View | v1.3 | 0/? | Not started | - |
 | 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
