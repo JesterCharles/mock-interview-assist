@@ -30,7 +30,7 @@ test.describe('Sign-in page (Phase 28 accordion UI)', () => {
     await page.locator('#trainer-email').fill('bad@example.com');
     await page.locator('#trainer-password').fill('wrongpassword');
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-    await expect(page.getByRole('alert')).toContainText('Invalid email or password', { timeout: 15000 });
+    await expect(page.locator('[role="alert"]').filter({ hasText: /invalid email or password/i })).toBeVisible({ timeout: 15000 });
   });
 
   test('Forgot password toggles inline reset form', async ({ page }) => {
