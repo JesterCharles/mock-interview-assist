@@ -1,84 +1,61 @@
 # Pipeline Status
 
-## Current Run — v1.2
-- Started: 2026-04-15
-- Current stage: COMPLETE. v1.2 milestone closed 2026-04-16.
-- Mode: unattended (--discuss)
-- Previous: v1.1 pipeline completed 2026-04-14, archived 2026-04-15
+## Current Run — v1.3
+- Started: 2026-04-16
+- Current stage: EXECUTE
+- Mode: interactive (resumed)
+- Previous: v1.2 completed 2026-04-16
 
 ## Resume Point
 
-v1.2 MILESTONE CLOSED. All 10 phases (16-25) executed. 30/30 requirements covered. 470 tests passing. Codex reviewed (P1+P2 fixed). Milestone archived. PIN auth removed, Supabase-only auth, two-level nav shell, trainer analytics, associate self-dashboard, PDF export, bulk invite, RLS deployed.
+All 7 phases planned. Phase 26 executed. Ready to execute Phases 27-31.
 
-Next: `/gsd-new-milestone` to start v1.3.
+## v1.3 Milestone Scope
 
-## v1.2 Milestone Scope (locked 2026-04-15)
+**Goal:** Unify all surfaces to the two-level shell, enrich associate experience with curriculum visibility and richer data visualization, polish dark mode.
 
-**Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
+**Phases:**
+- Phase 26: Design Tokens (Data-Viz) — chart palette, typography, trajectory language in DESIGN.md + globals.css
+- Phase 27: Unified App Shell — extend AppShell for associate role, remove PublicShell + AssociateNav
+- Phase 28: Sign-in Redesign — stacked buttons, inline forms, first-login password upgrade
+- Phase 29: Associate Data Visualization — skill bars, trend arrows, focus hero, radar plot, skill filter
+- Phase 30: Associate Curriculum View — read-only schedule, current-week highlight, empty state
+- Phase 31: Dark Mode QA Sweep — fix hardcoded hex/light-only classes across all surfaces
 
-**Features:**
-- **A. Trainer Analytics + Reporting** — KPI strip, cohort trends, sparklines in roster, skill gap aggregation, PDF export
-- **B. Dashboard Redesign** — topbar + sidebar layout per `finalized.html` (Overview: Roster/Gap Analysis/Calibration; Actions: New Mock/Reports), KPI cards, enhanced roster, sidebar routes
-- **C. Associate Dashboard Upgrade** — self-view gap trends, recommended next practice area, goals/streaks, book-next-mock action
-- **D. Full Supabase Auth + Bulk Onboarding** — trainer email/password (or OAuth), associate magic link, bulk invite flow (comma-sep emails → cohort + curriculum assignment → magic-link send), migrate Associate → `auth.users` FK, RLS on Session/GapScore/Cohort/CurriculumWeek, full cutover (remove PIN system + `ENABLE_ASSOCIATE_AUTH` flag)
-- **E. Cached Question-Bank Manifest** — TTL or hash invalidation
-
-**Deferred to v1.3 (CI/CD milestone):** prod deploy automation, readiness sweep cron, dark-mode visual QA, Nyquist validation backfill.
-
-**Design reference:** `~/.gstack/projects/JesterCharles-mock-interview-assist/designs/design-system-20260413/finalized.html`
-
-## Stages (v1.2)
+## Stages (v1.3)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
-| discover | done | 2026-04-15 | 2026-04-15 | Research (58fc27f) + requirements (440a1df) + roadmap (218d32f). 10 phases, 30 reqs. |
-| init | skipped | | | Codebase + intel from v1.1 still current; no remap needed. |
-| design | pending | | | `finalized.html` mockup locked; /gsd-ui-phase per frontend phase (21, 22, 23). |
-| plan | done | 2026-04-15 | 2026-04-16 | All 10 phases (16-25) planned. 30 reqs mapped. |
-| execute | done | 2026-04-15 | 2026-04-16 | All 10 phases executed. P25 final (e24a51e). 470 tests. |
-| review | done | 2026-04-15 | 2026-04-16 | Codex reviewed. P1+P2 findings fixed (0fb1bde). |
-| test | done | 2026-04-15 | 2026-04-16 | 470 tests passing. PIN tests removed (P25). All SC verified. |
-| debug | skipped | | | No outstanding failures. |
-| optimize | skipped | | | Deferred to v1.3. |
-| ship | skipped | | | Milestone archived directly (642f065). |
-| reflect | skipped | | | User opted to close out. |
-| maintain | skipped | | | Deferred to v1.3. |
+| discover | done | 2026-04-16 | 2026-04-16 | Research + requirements + roadmap committed (ec44ea2) |
+| init | skipped | | | Codebase intel from v1.2 still current |
+| design | pending | | | UI-phase specs needed for P27-30 |
+| plan | done | 2026-04-16 | 2026-04-16 | 7/7 phases discussed, 7/7 planned (9 plans total) |
+| execute | pending | | | |
+| review | pending | | | |
+| test | pending | | | |
+| debug | pending | | | |
+| optimize | pending | | | |
+| ship | pending | | | |
+| reflect | pending | | | |
+| maintain | pending | | | |
 
-## HITL Gates (v1.2)
+## HITL Gates (v1.3)
 | Gate | Stage | Type | Status | Decision |
 |------|-------|------|--------|----------|
-| Research yes/no | discover | sync | done | Run — 4 researchers + synthesizer, commit 58fc27f |
-| Open questions | discover | sync | done | Locked: bank `topic:` frontmatter, two-level nav, invite-only, trainer email-backfill UI (5f27441) |
-| Requirements approval | discover | sync | done | 30 reqs / 10 categories approved (440a1df) |
-| Roadmap approval | discover | sync | done | 10 phases 16-25 approved (218d32f) |
-| Requirements approval | discover | sync | pending | |
-| Roadmap approval | discover | sync | pending | |
-| Design selection | design | sync | pending | finalized.html already locked; expect light ui-phase pass |
+| Design selection | design | sync | pending | |
 | Taste decisions | plan | async | pending | |
-| Review findings | review | async | done | Codex P1+P2 fixed (0fb1bde) |
-| Merge approval | ship | sync | skipped | Direct archive |
-| Milestone closure | ship | async | done | Archived 642f065 |
+| Review findings | review | async | pending | |
+| Merge approval | ship | sync | pending | |
+| Milestone closure | ship | async | pending | |
 
-## Artifacts (v1.2)
-- PROJECT.md (updated 2026-04-15)
-- STATE.md (updated 2026-04-15)
-- .planning/research/STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md, SUMMARY.md (58fc27f)
-- `finalized.html` (design ref, external)
-- Previous milestone archives: `.planning/milestones/v1.1-*`
+## Artifacts (v1.3)
+- ROADMAP.md (ec44ea2)
+- STATE.md (2026-04-16)
+- .planning/research/ (eaa30ac)
 
 ---
 
-## v1.1 Archive (completed)
+## Previous Milestones
 
-Shipped 2026-04-14 (PR #3 / `4238e36`), tag `v1.1`. Reflect + maintain skipped by user choice. Full history in `.planning/milestones/v1.1-*` + `.planning/reports/MILESTONE_SUMMARY-v1.1.md`.
-
-| Stage | Status | Notes |
-|-------|--------|-------|
-| discover | done | Cohort Readiness System approved. Office hours + codex cold read + 3 rounds adversarial. |
-| init | done | Codebase map (7 docs), intel (5 files), health 8.4/10, dev profile. |
-| plan | done | 7 phases, 18 PLAN.md + 7 CONTEXT.md. Autoplan HIGH 8.5/10. Codex MEDIUM 9 findings, all patched. |
-| execute | done | 7 phases (8-14), 18/18 plans. Phase 14 4/4 SC. |
-| review | per-phase | Phase 11: 0 BLK/0 HI/4 MED/8 LO/4 INFO. 7 fixed. |
-| test | per-phase | Phase 11: 40/40 green. Full suite 199/199 + 4 skipped. |
-| ship | done | PR #3 merged 4238e36. Codex initial FAIL (2xP1 + 3xP2) → fixed 21187f9 → re-merged. |
-| reflect | skipped | Deferred — user routed to v1.2. |
-| maintain | skipped | Deferred to v1.2 cycle. |
+- **v1.2** — Shipped 2026-04-16. 10 phases (16-25), 30 reqs, 470 tests. Archive: `.planning/milestones/v1.2-*`
+- **v1.1** — Shipped 2026-04-14 (PR #3). 8 phases (8-15), 22 reqs. Archive: `.planning/milestones/v1.1-*`
+- **v1.0** — Shipped 2026-04-14. 7 phases (1-7). Archive: `.planning/milestones/v1.0-*`
