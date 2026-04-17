@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { PublicShell } from '@/components/layout/PublicShell';
-import { AssociateNav } from '@/components/associate/AssociateNav';
+import { AssociateShell } from '@/components/shell/AssociateShell';
 
 /**
  * Associate scoped layout — wraps all /associate/[slug]/* child pages
- * with AssociateNav tabs (Dashboard / Profile / Book a Mock).
+ * with the unified TopBar + SectionSidebar shell (matching trainer layout).
  *
- * No identity guard here — each child page handles its own auth logic.
- * Layout is purely chrome: resolve display name for the nav, render shell.
+ * Server component: fetches associate + cohort name, passes to AssociateShell client component.
  *
  * Next.js 16: params is a Promise — must await before use.
  */
@@ -24,24 +22,25 @@ export default async function AssociateLayout({ children, params }: AssociateLay
 
   const associate = await prisma.associate.findUnique({
     where: { slug },
-    select: { displayName: true, slug: true },
+    select: { displayName: true, slug: true, cohortId: true },
   });
 
   if (!associate) {
     notFound();
   }
 
-  const displayName = associate.displayName ?? associate.slug;
-  const trainerEmail = process.env.TRAINER_EMAIL ?? '';
+  let cohortName: string | null = null;
+  if (associate.cohortId) {
+    const cohort = await prisma.cohort.findUnique({
+      where: { id: associate.cohortId },
+      select: { name: true },
+    });
+    cohortName = cohort?.name ?? null;
+  }
 
   return (
-    <PublicShell>
-      <AssociateNav
-        slug={slug}
-        associateName={displayName}
-        trainerEmail={trainerEmail}
-      />
+    <AssociateShell slug={slug} cohortName={cohortName}>
       {children}
-    </PublicShell>
+    </AssociateShell>
   );
 }

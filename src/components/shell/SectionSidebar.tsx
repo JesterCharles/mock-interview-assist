@@ -8,9 +8,10 @@ import type { SidebarGroup } from './types';
 
 interface SectionSidebarProps {
   groups: SidebarGroup[];
+  sidebarHeader?: string | null;
 }
 
-export function SectionSidebar({ groups }: SectionSidebarProps) {
+export function SectionSidebar({ groups, sidebarHeader }: SectionSidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -48,6 +49,22 @@ export function SectionSidebar({ groups }: SectionSidebarProps) {
       }}
     >
       <nav className="flex-1 overflow-y-auto py-4">
+        {/* Cohort header — shown when sidebarHeader is set and sidebar is expanded */}
+        {!collapsed && sidebarHeader && (
+          <div
+            style={{
+              padding: '0 12px 8px',
+              fontSize: 12,
+              fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+              fontWeight: 500,
+              color: 'var(--muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+            }}
+          >
+            {`Cohort: ${sidebarHeader}`}
+          </div>
+        )}
         {groups.map((group) => (
           <div key={group.label} style={{ marginBottom: 16 }}>
             {/* Group label — hidden when collapsed */}
