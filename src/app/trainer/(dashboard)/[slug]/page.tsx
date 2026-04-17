@@ -6,11 +6,8 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { AssociateDetail } from '@/lib/trainer-types'
 import ReadinessDisplay from '@/components/trainer/ReadinessDisplay'
-import SessionHistoryList from '@/components/trainer/SessionHistoryList'
-import EmptyGapState from '@/components/trainer/EmptyGapState'
-import GapTrendChart from '@/components/trainer/GapTrendChart'
-import CalibrationView from '@/components/trainer/CalibrationView'
 import AssociateCohortSelect from './AssociateCohortSelect'
+import { AssociateDashboardClient } from '@/app/associate/[slug]/dashboard/AssociateDashboardClient'
 import '../trainer.css'
 
 export default function AssociateDetailPage() {
@@ -20,6 +17,7 @@ export default function AssociateDetailPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
 
   const [detail, setDetail] = useState<AssociateDetail | null>(null)
+  const [threshold, setThreshold] = useState<number>(75)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [exportingPdf, setExportingPdf] = useState(false)
@@ -44,25 +42,38 @@ export default function AssociateDetailPage() {
       setExportingPdf(false)
     }
   }
-  // Fetch associate detail after auth confirmed
+
+  // Fetch associate detail and settings in parallel after auth confirmed
   useEffect(() => {
     if (authLoading || !isAuthenticated || !slug) return
 
-    async function fetchDetail() {
+    async function fetchData() {
       try {
         setDataLoading(true)
         setError(null)
-        const res = await fetch(`/api/trainer/${slug}`)
-        if (res.status === 404) {
-          // Associate not found — redirect back to roster
+
+        const [detailRes, settingsRes] = await Promise.all([
+          fetch(`/api/trainer/${slug}`),
+          fetch('/api/settings'),
+        ])
+
+        if (detailRes.status === 404) {
           router.push('/trainer')
           return
         }
-        if (!res.ok) {
-          throw new Error(`Failed to load associate (${res.status})`)
+        if (!detailRes.ok) {
+          throw new Error(`Failed to load associate (${detailRes.status})`)
         }
-        const data: AssociateDetail = await res.json()
+
+        const data: AssociateDetail = await detailRes.json()
         setDetail(data)
+
+        if (settingsRes.ok) {
+          const settings = await settingsRes.json()
+          if (typeof settings?.readinessThreshold === 'number') {
+            setThreshold(settings.readinessThreshold)
+          }
+        }
       } catch (err) {
         console.error('[AssociateDetailPage] fetch failed:', err)
         setError(err instanceof Error ? err.message : 'Failed to load associate')
@@ -71,7 +82,7 @@ export default function AssociateDetailPage() {
       }
     }
 
-    fetchDetail()
+    fetchData()
   }, [authLoading, isAuthenticated, slug, router])
 
   // While auth is resolving, render nothing to avoid flash
@@ -84,13 +95,16 @@ export default function AssociateDetailPage() {
     return null
   }
 
-  const hasGapData = detail
-    ? detail.gapScores.length > 0 && detail.sessionCount >= 3
-    : false
-
-  const hasCalibrationData = detail
-    ? detail.sessions.some((s) => Object.keys(s.assessments).length > 0)
-    : false
+  // Derive recommendedArea and lowestScore from gap scores
+  const skillLevelGaps = detail
+    ? detail.gapScores
+        .filter((g) => !g.topic || g.topic === '')
+        .sort((a, b) => a.weightedScore - b.weightedScore)
+    : []
+  const lowestGap = skillLevelGaps[0] ?? null
+  const recommendedArea = lowestGap?.skill ?? null
+  const lowestScore = lowestGap?.weightedScore ?? null
+  const lowestSkillSessionCount = lowestGap?.sessionCount ?? 0
 
   return (
     <div className="trainer-shell">
@@ -176,20 +190,12 @@ export default function AssociateDetailPage() {
               >
                 {detail.displayName}
               </h1>
-              <p
-                style={{
-                  fontSize: '14px',
-                  fontFamily: 'DM Sans, sans-serif',
-                  color: 'var(--muted)',
-                  marginBottom: '12px',
-                }}
-              >
-                {detail.slug}
-              </p>
               <ReadinessDisplay
                 score={detail.readinessScore}
                 status={detail.readinessStatus}
               />
+
+              {/* Trainer-only action strip */}
               <div style={{ marginTop: '20px' }}>
                 <AssociateCohortSelect
                   slug={detail.slug}
@@ -209,7 +215,6 @@ export default function AssociateDetailPage() {
                 </p>
               </div>
 
-              {/* Export PDF button */}
               <div style={{ marginTop: '20px' }}>
                 <button
                   onClick={handleExportPdf}
@@ -236,62 +241,17 @@ export default function AssociateDetailPage() {
               </div>
             </div>
 
-            {/* Asymmetric layout: 60% session history / 40% chart + calibration */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '3fr 2fr',
-                gap: '24px',
-                alignItems: 'start',
-              }}
-              className="detail-grid"
-            >
-              {/* Left column — session history (60%) */}
-              <div>
-                <SessionHistoryList sessions={detail.sessions} />
-              </div>
-
-              {/* Right column — gap chart + calibration (40%) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Gap trend chart section */}
-                <div className="trainer-card">
-                  <p className="trainer-section-label" style={{ marginBottom: '12px' }}>
-                    gap trends
-                  </p>
-                  {hasGapData ? (
-                    <GapTrendChart
-                      gapScores={detail.gapScores}
-                      sessions={detail.sessions}
-                    />
-                  ) : (
-                    <EmptyGapState sessionCount={detail.sessionCount} />
-                  )}
-                </div>
-
-                {/* Score calibration section */}
-                <div className="trainer-card">
-                  <p className="trainer-section-label" style={{ marginBottom: '12px' }}>
-                    score calibration
-                  </p>
-                  {hasCalibrationData ? (
-                    <CalibrationView sessions={detail.sessions} />
-                  ) : (
-                    <p
-                      style={{
-                        fontSize: '14px',
-                        fontFamily: 'DM Sans, sans-serif',
-                        color: 'var(--muted)',
-                        margin: 0,
-                        paddingTop: '8px',
-                        paddingBottom: '8px',
-                      }}
-                    >
-                      Select a session to view score calibration
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Associate dashboard view — same component associates see */}
+            <AssociateDashboardClient
+              displayName={detail.displayName}
+              gapScores={detail.gapScores}
+              sessions={detail.sessions}
+              readinessPercent={detail.readinessScore ?? 0}
+              threshold={threshold}
+              recommendedArea={recommendedArea}
+              lowestScore={lowestScore}
+              lowestSkillSessionCount={lowestSkillSessionCount}
+            />
           </>
         )}
       </div>
