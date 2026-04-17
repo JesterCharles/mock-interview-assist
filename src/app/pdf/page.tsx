@@ -306,8 +306,8 @@ ${session.softSkillFeedback || "No soft skills provided."}
         : statusMessage?.type === 'error' ? 'var(--danger)'
         : 'var(--accent)';
     const statusBg =
-        statusMessage?.type === 'success' ? '#E8F5EE'
-        : statusMessage?.type === 'error' ? '#FDECEB'
+        statusMessage?.type === 'success' ? 'var(--success-bg)'
+        : statusMessage?.type === 'error' ? 'var(--danger-bg)'
         : 'var(--highlight)';
 
     return (
@@ -336,7 +336,7 @@ ${session.softSkillFeedback || "No soft skills provided."}
                     className="px-4 h-full text-sm font-medium rounded-md flex items-center justify-center gap-2 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                         background: candidateEmail ? 'var(--accent)' : 'var(--surface-muted)',
-                        color: candidateEmail ? '#FFFFFF' : 'var(--muted)',
+                        color: candidateEmail ? 'white' : 'var(--muted)',
                     }}
                 >
                     <Send className="w-4 h-4" />

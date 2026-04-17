@@ -17,7 +17,7 @@ export default function AssociateDetailLoading() {
               height: '52px',
               width: '320px',
               borderRadius: '6px',
-              backgroundColor: '#E8E2D9',
+              backgroundColor: 'var(--border-subtle)',
               marginBottom: '12px',
             }}
           />
@@ -26,7 +26,7 @@ export default function AssociateDetailLoading() {
               height: '16px',
               width: '180px',
               borderRadius: '4px',
-              backgroundColor: '#F0EBE2',
+              backgroundColor: 'var(--surface-muted)',
             }}
           />
         </div>
@@ -47,7 +47,7 @@ export default function AssociateDetailLoading() {
                 height: '11px',
                 width: '100px',
                 borderRadius: '3px',
-                backgroundColor: '#E8E2D9',
+                backgroundColor: 'var(--border-subtle)',
                 marginBottom: '12px',
               }}
             />
@@ -58,8 +58,8 @@ export default function AssociateDetailLoading() {
                   className="animate-pulse"
                   style={{
                     height: '44px',
-                    borderBottom: '1px solid #E8E2D9',
-                    backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F0EBE2',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    backgroundColor: i % 2 === 0 ? 'var(--surface)' : 'var(--surface-muted)',
                   }}
                 />
               ))}
@@ -75,7 +75,7 @@ export default function AssociateDetailLoading() {
                   height: '11px',
                   width: '80px',
                   borderRadius: '3px',
-                  backgroundColor: '#E8E2D9',
+                  backgroundColor: 'var(--border-subtle)',
                   marginBottom: '16px',
                 }}
               />
@@ -84,7 +84,7 @@ export default function AssociateDetailLoading() {
                 style={{
                   height: '200px',
                   borderRadius: '6px',
-                  backgroundColor: '#F0EBE2',
+                  backgroundColor: 'var(--surface-muted)',
                 }}
               />
             </div>
@@ -96,7 +96,7 @@ export default function AssociateDetailLoading() {
                   height: '11px',
                   width: '120px',
                   borderRadius: '3px',
-                  backgroundColor: '#E8E2D9',
+                  backgroundColor: 'var(--border-subtle)',
                   marginBottom: '16px',
                 }}
               />
@@ -107,7 +107,7 @@ export default function AssociateDetailLoading() {
                   style={{
                     height: '32px',
                     borderRadius: '4px',
-                    backgroundColor: '#F0EBE2',
+                    backgroundColor: 'var(--surface-muted)',
                     marginBottom: '8px',
                   }}
                 />

@@ -46,7 +46,7 @@ export default function CohortFilterBar({
           fontWeight: 500,
           textTransform: 'uppercase',
           letterSpacing: '0.07em',
-          color: '#7A7267',
+          color: 'var(--muted)',
         }}
       >
         Cohort
@@ -58,9 +58,9 @@ export default function CohortFilterBar({
         style={{
           fontFamily: 'DM Sans, sans-serif',
           fontSize: '14px',
-          color: '#1A1A1A',
-          backgroundColor: '#FFFFFF',
-          border: '1px solid #DDD5C8',
+          color: 'var(--ink)',
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '8px',
           padding: '8px 12px',
           minWidth: '240px',
@@ -68,11 +68,11 @@ export default function CohortFilterBar({
           outline: 'none',
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = '#C85A2E'
-          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(200, 90, 46, 0.15)'
+          e.currentTarget.style.borderColor = 'var(--accent)'
+          e.currentTarget.style.boxShadow = '0 0 0 3px var(--chart-highlight)'
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = '#DDD5C8'
+          e.currentTarget.style.borderColor = 'var(--border)'
           e.currentTarget.style.boxShadow = 'none'
         }}
       >

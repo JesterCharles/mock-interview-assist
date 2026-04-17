@@ -50,7 +50,7 @@ export default function CurriculumTable({ cohortId, refreshSignal }: CurriculumT
         style={{
           padding: '32px 0',
           textAlign: 'center',
-          color: '#7A7267',
+          color: 'var(--muted)',
           fontFamily: "'DM Sans', sans-serif",
           fontSize: '14px',
         }}
@@ -64,11 +64,11 @@ export default function CurriculumTable({ cohortId, refreshSignal }: CurriculumT
     return (
       <div
         style={{
-          background: '#FDECEB',
-          border: '1px solid #B83B2E',
+          background: 'var(--danger-bg)',
+          border: '1px solid var(--danger)',
           borderRadius: '8px',
           padding: '12px 16px',
-          color: '#B83B2E',
+          color: 'var(--danger)',
           fontFamily: "'DM Sans', sans-serif",
           fontSize: '13px',
         }}
@@ -99,7 +99,7 @@ export default function CurriculumTable({ cohortId, refreshSignal }: CurriculumT
                 style={{
                   textAlign: 'center',
                   padding: '48px 16px',
-                  color: '#7A7267',
+                  color: 'var(--muted)',
                   fontStyle: 'italic',
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: '14px',

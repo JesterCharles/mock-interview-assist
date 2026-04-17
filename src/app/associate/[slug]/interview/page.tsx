@@ -3,7 +3,6 @@ import { getCallerIdentity } from '@/lib/identity';
 import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
 import { AuthenticatedInterviewClient } from '@/components/interview/AuthenticatedInterviewClient';
-import { PublicShell } from '@/components/layout/PublicShell';
 
 /**
  * Authenticated automated-interview entry (Plan 09-03, D-26).
@@ -22,37 +21,33 @@ interface PageProps {
 
 function renderForbidden() {
   return (
-    <PublicShell
-      title="Access denied"
+    <div
       data-testid="associate-interview-forbidden"
       data-http-status="403"
+      style={{
+        maxWidth: '480px',
+        margin: '0 auto',
+        textAlign: 'center',
+        padding: '48px 0',
+      }}
     >
-      <div
+      <h1
         style={{
-          maxWidth: '480px',
-          margin: '0 auto',
-          textAlign: 'center',
-          padding: '48px 0',
+          fontFamily:
+            "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+          fontSize: '28px',
+          fontWeight: 600,
+          margin: '0 0 8px 0',
+          color: 'var(--ink)',
         }}
       >
-        <h1
-          style={{
-            fontFamily:
-              "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
-            fontSize: '28px',
-            fontWeight: 600,
-            margin: '0 0 8px 0',
-            color: 'var(--ink)',
-          }}
-        >
-          Access denied
-        </h1>
-        <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
-          You are signed in as a different associate. You cannot start an
-          interview on someone else&apos;s profile.
-        </p>
-      </div>
-    </PublicShell>
+        Access denied
+      </h1>
+      <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
+        You are signed in as a different associate. You cannot start an
+        interview on someone else&apos;s profile.
+      </p>
+    </div>
   );
 }
 
@@ -86,7 +81,7 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
   const associateName = slugValidation.slug;
 
   return (
-    <PublicShell title="Automated Interview">
+    <div>
       <div
         style={{
           fontSize: '11px',
@@ -103,11 +98,11 @@ export default async function AssociateInterviewPage({ params }: PageProps) {
       </div>
 
       {/* The inner client component still uses legacy classes internally —
-          PublicShell only owns the chrome (Phase 14 D-06a). */}
+          shell chrome comes from the associate layout. */}
       <AuthenticatedInterviewClient
         associateSlug={slugValidation.slug}
         associateId={targetId}
       />
-    </PublicShell>
+    </div>
   );
 }

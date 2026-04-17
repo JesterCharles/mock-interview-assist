@@ -162,7 +162,7 @@ export default function ReviewPage() {
     if (!session) {
         return (
             <div
-                className="min-h-screen flex items-center justify-center"
+                className="min-h-full flex items-center justify-center"
                 style={{ background: 'var(--bg)' }}
             >
                 <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
@@ -285,7 +285,7 @@ export default function ReviewPage() {
             case 'validated':
                 return {
                     icon: CheckCircle2,
-                    bg: '#E8F5EE',
+                    bg: 'var(--success-bg)',
                     border: 'var(--success)',
                     text: 'var(--success)',
                     label: 'Validated',
@@ -293,7 +293,7 @@ export default function ReviewPage() {
             case 'ready':
                 return {
                     icon: AlertCircle,
-                    bg: '#FEF3E0',
+                    bg: 'var(--warning-bg)',
                     border: 'var(--warning)',
                     text: 'var(--warning)',
                     label: 'Needs Review',
@@ -323,7 +323,7 @@ export default function ReviewPage() {
     });
 
     return (
-        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
+        <div className="min-h-full" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
@@ -752,6 +752,6 @@ export default function ReviewPage() {
                     )}
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

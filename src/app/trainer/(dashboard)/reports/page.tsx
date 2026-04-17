@@ -70,8 +70,8 @@ function ReportsContent() {
       {/* Cohort PDF export card */}
       <div
         style={{
-          background: 'var(--surface, #FAF8F5)',
-          border: '1px solid var(--border, #E8E2D9)',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '10px',
           padding: '24px',
           display: 'flex',
@@ -85,7 +85,7 @@ function ReportsContent() {
             width: '40px',
             height: '40px',
             borderRadius: '8px',
-            background: 'var(--accent, #C85A2E)',
+            background: 'var(--accent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -141,7 +141,7 @@ function ReportsContent() {
               style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '13px',
-                color: 'var(--danger, #B83B2E)',
+                color: 'var(--danger)',
                 marginBottom: '12px',
               }}
             >
@@ -157,8 +157,8 @@ function ReportsContent() {
               alignItems: 'center',
               gap: '6px',
               padding: '8px 18px',
-              background: exporting ? 'var(--muted, #7A7267)' : 'var(--accent, #C85A2E)',
-              color: '#fff',
+              background: exporting ? 'var(--muted)' : 'var(--accent)',
+              color: 'white',
               border: 'none',
               borderRadius: '6px',
               fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif',

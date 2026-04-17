@@ -78,7 +78,7 @@ function buildGapChartData(
   return { main, topics }
 }
 
-const TOPIC_COLORS = ['#2D6A4F', '#B7791F', '#7A7267', '#C85A2E']
+const TOPIC_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-4)', 'var(--accent)']
 
 export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProps) {
   // Extract unique skills alphabetically
@@ -129,7 +129,7 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
 
   if (skills.length === 0) {
     return (
-      <p style={{ fontSize: '14px', fontFamily: 'DM Sans, sans-serif', color: '#7A7267' }}>
+      <p style={{ fontSize: '14px', fontFamily: 'DM Sans, sans-serif', color: 'var(--muted)' }}>
         No gap data available
       </p>
     )
@@ -151,10 +151,10 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
           />
         </div>
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
-          <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'DM Sans, sans-serif', color: '#1A1A1A' }}>
+          <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'DM Sans, sans-serif', color: 'var(--ink)' }}>
             {main[0]?.score ?? '—'}
           </span>
-          <p style={{ color: '#7A7267', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', marginTop: '4px' }}>
+          <p style={{ color: 'var(--muted)', fontSize: '13px', fontFamily: 'DM Sans, sans-serif', marginTop: '4px' }}>
             Current weighted score (aggregate across {skillLevelScores[0]?.sessionCount ?? 0} sessions)
           </p>
         </div>
@@ -174,23 +174,23 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
 
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#DDD5C8" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
           <XAxis
             dataKey="session"
-            tick={{ fill: '#7A7267', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
+            tick={{ fill: 'var(--muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fill: '#7A7267', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
+            tick={{ fill: 'var(--muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #DDD5C8',
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
               borderRadius: '6px',
               fontFamily: 'DM Sans, sans-serif',
               fontSize: '13px',
-              color: '#1A1A1A',
+              color: 'var(--ink)',
             }}
           />
           {allDataKeys.length > 1 && (
@@ -198,7 +198,7 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
               wrapperStyle={{
                 fontSize: '12px',
                 fontFamily: 'DM Sans, sans-serif',
-                color: '#7A7267',
+                color: 'var(--muted)',
               }}
             />
           )}
@@ -207,9 +207,9 @@ export default function GapTrendChart({ gapScores, sessions }: GapTrendChartProp
             type="monotone"
             dataKey="score"
             name={selectedSkill}
-            stroke="#C85A2E"
+            stroke="var(--accent)"
             strokeWidth={2}
-            dot={{ r: 4, fill: '#C85A2E' }}
+            dot={{ r: 4, fill: 'var(--accent)' }}
             activeDot={{ r: 5 }}
           />
           {/* Secondary lines — topic breakdown */}

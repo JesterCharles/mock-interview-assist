@@ -4,7 +4,6 @@ import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { PublicShell } from '@/components/layout/PublicShell';
 import {
   ReadinessSignal,
   type ReadinessTrend,
@@ -107,37 +106,33 @@ interface PageProps {
 
 function renderForbidden() {
   return (
-    <PublicShell
-      title="Access denied"
+    <div
       data-testid="associate-forbidden"
       data-http-status="403"
+      style={{
+        maxWidth: '480px',
+        margin: '0 auto',
+        textAlign: 'center',
+        padding: '48px 0',
+      }}
     >
-      <div
+      <h1
         style={{
-          maxWidth: '480px',
-          margin: '0 auto',
-          textAlign: 'center',
-          padding: '48px 0',
+          fontFamily:
+            "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+          fontSize: '28px',
+          fontWeight: 600,
+          margin: '0 0 8px 0',
+          color: 'var(--ink)',
         }}
       >
-        <h1
-          style={{
-            fontFamily:
-              "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
-            fontSize: '28px',
-            fontWeight: 600,
-            margin: '0 0 8px 0',
-            color: 'var(--ink)',
-          }}
-        >
-          Access denied
-        </h1>
-        <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
-          You are signed in as a different associate. Contact your trainer if
-          you believe this is an error.
-        </p>
-      </div>
-    </PublicShell>
+        Access denied
+      </h1>
+      <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
+        You are signed in as a different associate. Contact your trainer if
+        you believe this is an error.
+      </p>
+    </div>
   );
 }
 

@@ -19,9 +19,27 @@
   --success: #2D6A4F;
   --warning: #B7791F;
   --danger: #B83B2E;
+  --mastery: #2B6CB0;  /* Blue — 90-100% score band */
   --border: #DDD5C8;
   --border-subtle: #E8E2D9;
   --highlight: #FFF8F0;
+  --success-bg: #E8F5EE;
+  --warning-bg: #FEF3E0;
+  --danger-bg: #FDECEB;
+
+  /* Chart palette — DESIGN.md §Data Visualization */
+  --chart-1: #2D6A4F;
+  --chart-2: #B7791F;
+  --chart-3: #B83B2E;
+  --chart-4: #8C7B6E;
+  --chart-5: #5C4A3A;
+  --chart-highlight: rgba(200, 90, 46, 0.15);
+
+  /* Border radius tokens — DESIGN.md §Layout */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
   --font-clash-display: 'Clash Display', 'DM Sans', system-ui, sans-serif;
 }
 
@@ -37,9 +55,26 @@
   --success: #3D8B6A;
   --warning: #D4952A;
   --danger: #D45040;
+  --mastery: #4A90C4;  /* Blue desaturated 10-15% for dark mode */
   --border: #3D3733;
   --border-subtle: #332F2B;
   --highlight: #2E2520;
+  --success-bg: #1A2E24;
+  --warning-bg: #2E2518;
+  --danger-bg: #2E1C1A;
+
+  /* Chart palette — dark (desaturated 10-15%) */
+  --chart-1: #3D8B6A;
+  --chart-2: #D4952A;
+  --chart-3: #D45040;
+  --chart-4: #A89080;
+  --chart-5: #7A6555;
+  --chart-highlight: rgba(212, 116, 63, 0.2);
+
+  /* Border radius tokens */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 @theme inline {
@@ -54,9 +89,19 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-mastery: var(--mastery);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
   --color-highlight: var(--highlight);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-highlight: var(--chart-highlight);
+  --color-success-bg: var(--success-bg);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger-bg: var(--danger-bg);
   --font-display: var(--font-clash-display);
   --font-sans-new: var(--font-dm-sans);
   --font-jetbrains-mono: var(--font-jetbrains-mono);

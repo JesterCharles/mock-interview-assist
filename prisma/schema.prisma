@@ -114,6 +114,18 @@ model CurriculumWeek {
   @@index([cohortId])
 }
 
+model Profile {
+  id             Int       @id @default(autoincrement())
+  authUserId     String    @unique // Supabase auth.users.id — one profile per user
+  displayName    String?
+  githubUsername String?
+  bio            String?
+  learningGoals  String?
+  passwordSetAt  DateTime? // Replaces user_metadata.password_set detection
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
 // Auth event log for rate-limit abuse tracking and admin visibility
 model AuthEvent {
   id        String   @id @default(cuid())

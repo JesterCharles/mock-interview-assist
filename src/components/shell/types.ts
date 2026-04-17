@@ -13,3 +13,16 @@ export interface SidebarGroup {
   label: string;
   items: SidebarItem[];
 }
+
+export interface SettingsSubItem {
+  label: string;
+  icon: IconComponent;
+  href?: string;
+  action?: () => void;
+}
+
+export interface SettingsAccordionGroup {
+  label: string;
+  icon: IconComponent;
+  items: SettingsSubItem[];
+}

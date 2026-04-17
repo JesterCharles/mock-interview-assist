@@ -2,54 +2,34 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AvatarMenu } from './AvatarMenu';
 import { CohortSwitcher } from './CohortSwitcher';
 import { MobileSidebar } from './MobileSidebar';
-import { dashboardSidebarGroups, settingsSidebarGroups } from './sidebar-configs';
-import type { SidebarGroup } from './types';
-
-function resolveGroups(pathname: string): SidebarGroup[] {
-  if (pathname.startsWith('/trainer/settings')) return settingsSidebarGroups;
-  if (pathname.startsWith('/trainer')) return dashboardSidebarGroups;
-  return [];
-}
-
-interface NavItem {
-  label: string;
-  prefix: string;
-  href: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', prefix: '/trainer', href: '/trainer' },
-  { label: 'Interviews', prefix: '/interview', href: '/interview/new' },
-  { label: 'Question Banks', prefix: '/question-banks', href: '/question-banks' },
-  { label: 'Settings', prefix: '/trainer/settings', href: '/trainer/settings' },
-];
-
-function isNavItemActive(item: NavItem, pathname: string): boolean {
-  if (item.prefix === '/trainer/settings') {
-    return pathname.startsWith('/trainer/settings');
-  }
-  if (item.prefix === '/trainer') {
-    // Active for exact /trainer OR /trainer/* but NOT /trainer/settings
-    return (
-      pathname === '/trainer' ||
-      (pathname.startsWith('/trainer/') && !pathname.startsWith('/trainer/settings'))
-    );
-  }
-  return pathname === item.href || pathname.startsWith(`${item.prefix}/`);
-}
+import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
 interface TopBarProps {
   sidebarGroups?: SidebarGroup[];
+  settingsGroup?: SettingsAccordionGroup;
+  role?: 'trainer' | 'associate';
+  associateSlug?: string;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
-export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
-  const pathname = usePathname();
-  const sidebarGroups = propGroups ?? resolveGroups(pathname);
+export function TopBar({
+  sidebarGroups = [],
+  settingsGroup,
+  role = 'trainer',
+  associateSlug,
+  onToggleSidebar,
+  sidebarCollapsed = false,
+}: TopBarProps) {
+  const wordmarkHref =
+    role === 'associate' && associateSlug
+      ? `/associate/${associateSlug}/dashboard`
+      : '/trainer';
 
   return (
     <header
@@ -67,62 +47,70 @@ export function TopBar({ sidebarGroups: propGroups }: TopBarProps) {
         gap: 16,
       }}
     >
-      {/* Left zone: wordmark + mobile hamburger */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {sidebarGroups && sidebarGroups.length > 0 && (
-          <MobileSidebar groups={sidebarGroups} />
-        )}
-        <Link
-          href="/trainer"
+      {/* Desktop: sidebar collapse toggle */}
+      {onToggleSidebar && (
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="hidden md:inline-flex hover:bg-[var(--highlight)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           style={{
-            fontFamily: 'var(--font-display), "Clash Display", sans-serif',
-            fontWeight: 500,
-            fontSize: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 34,
+            height: 34,
+            borderRadius: 6,
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            cursor: 'pointer',
             color: 'var(--ink)',
-            textDecoration: 'none',
-            letterSpacing: '-0.01em',
+            flexShrink: 0,
           }}
         >
-          NLM
-        </Link>
-      </div>
+          {sidebarCollapsed ? (
+            <PanelLeftOpen style={{ width: 18, height: 18 }} aria-hidden="true" />
+          ) : (
+            <PanelLeftClose style={{ width: 18, height: 18 }} aria-hidden="true" />
+          )}
+        </button>
+      )}
 
-      {/* Center zone: section nav links (desktop only) */}
-      <nav
-        className="hidden md:flex"
-        style={{ flex: 1, alignItems: 'center', gap: 4 }}
-        aria-label="Main navigation"
+      {/* Mobile hamburger — narrow viewports only */}
+      {sidebarGroups.length > 0 && (
+        <div style={{ alignItems: 'center', flexShrink: 0 }} className="md:hidden flex">
+          <MobileSidebar groups={sidebarGroups} settingsGroup={settingsGroup} />
+        </div>
+      )}
+
+      {/* Wordmark — hidden on desktop only when a sidebar owns it (onToggleSidebar
+          indicates AppShell/AssociateShell provides the sidebar wordmark).
+          Bare-TopBar layouts (/history, /question-banks) keep the wordmark visible. */}
+      <Link
+        href={wordmarkHref}
+        className={onToggleSidebar ? 'md:hidden' : ''}
+        style={{
+          fontFamily: 'var(--font-display), "Clash Display", sans-serif',
+          fontWeight: 500,
+          fontSize: 16,
+          color: 'var(--ink)',
+          textDecoration: 'none',
+          letterSpacing: '-0.01em',
+          flexShrink: 0,
+        }}
       >
-        {NAV_ITEMS.map((item) => {
-          const active = isNavItemActive(item, pathname);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                padding: '4px 10px',
-                borderRadius: 6,
-                fontSize: 13,
-                fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
-                fontWeight: 500,
-                color: active ? 'var(--accent)' : 'var(--ink)',
-                textDecoration: 'none',
-                borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                transition: 'background 120ms ease-out, color 120ms ease-out',
-              }}
-              className="hover:bg-[var(--highlight)]"
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+        NLM
+      </Link>
 
-      {/* Right zone: CohortSwitcher + ThemeToggle + AvatarMenu */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 'auto' }}>
-        <Suspense fallback={null}>
-          <CohortSwitcher />
-        </Suspense>
+      {/* Spacer — pushes right zone to the edge */}
+      <div style={{ flex: 1 }} />
+
+      {/* Right zone: CohortSwitcher (trainer only) + ThemeToggle + AvatarMenu */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {role === 'trainer' && (
+          <Suspense fallback={null}>
+            <CohortSwitcher />
+          </Suspense>
+        )}
         <ThemeToggle />
         <AvatarMenu />
       </div>

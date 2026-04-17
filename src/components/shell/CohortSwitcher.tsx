@@ -6,9 +6,9 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDown, Check } from 'lucide-react';
 
 interface Cohort {
-  id: string;
+  id: number;
   name: string;
-  _count: { associates: number };
+  associateCount: number;
 }
 
 export function CohortSwitcher() {
@@ -20,20 +20,25 @@ export function CohortSwitcher() {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
-  // Resolve selected cohort: URL param first, then localStorage
+  // Keep selected cohort in sync with URL + localStorage on every navigation.
+  // If URL has the param, that wins. Otherwise re-apply the stored cohort so
+  // every page (reports, gap-analysis, calibration, etc.) stays filtered.
   useEffect(() => {
     const fromParam = searchParams.get('cohort');
     if (fromParam) {
-      setSelected(fromParam);
-    } else {
-      const stored = typeof window !== 'undefined' ? localStorage.getItem('nlm_cohort_id') : null;
-      if (stored) {
-        router.replace(`${pathname}?cohort=${stored}`);
-        setSelected(stored);
-      }
+      if (selected !== fromParam) setSelected(fromParam);
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('nlm_cohort_id') : null;
+    if (stored) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('cohort', stored);
+      router.replace(`${pathname}?${params.toString()}`);
+      if (selected !== stored) setSelected(stored);
+    } else if (selected !== null) {
+      setSelected(null);
+    }
+  }, [pathname, searchParams, router, selected]);
 
   // Fetch cohorts
   useEffect(() => {
@@ -43,8 +48,8 @@ export function CohortSwitcher() {
         if (!res.ok) throw new Error('Failed to fetch cohorts');
         return res.json();
       })
-      .then((data: { cohorts: Cohort[] }) => {
-        if (!cancelled) setCohorts(data.cohorts ?? []);
+      .then((data: Cohort[]) => {
+        if (!cancelled) setCohorts(Array.isArray(data) ? data : []);
       })
       .catch(() => {
         if (!cancelled) setError(true);
@@ -66,7 +71,7 @@ export function CohortSwitcher() {
     setSelected(cohortId);
   };
 
-  const selectedCohort = cohorts.find((c) => c.id === selected);
+  const selectedCohort = cohorts.find((c) => String(c.id) === selected);
   const triggerLabel = selectedCohort ? selectedCohort.name : 'All Cohorts';
 
   return (
@@ -150,7 +155,7 @@ export function CohortSwitcher() {
               {cohorts.map((cohort) => (
                 <DropdownMenu.Item
                   key={cohort.id}
-                  onSelect={() => handleSelect(cohort.id)}
+                  onSelect={() => handleSelect(String(cohort.id))}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -170,9 +175,9 @@ export function CohortSwitcher() {
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                     <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 400 }}>
-                      {cohort._count.associates}
+                      {cohort.associateCount}
                     </span>
-                    {selected === cohort.id && (
+                    {selected === String(cohort.id) && (
                       <Check className="w-3 h-3" style={{ color: 'var(--accent)' }} />
                     )}
                   </span>

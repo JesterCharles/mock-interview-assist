@@ -14,11 +14,11 @@ const ACTION_BADGE_STYLES: Record<
   PreviewRow['action'],
   { background: string; color: string }
 > = {
-  new: { background: '#E8F5EE', color: '#2D6A4F' },
-  reassign: { background: '#E8F5EE', color: '#2D6A4F' },
+  new: { background: 'var(--success-bg)', color: 'var(--success)' },
+  reassign: { background: 'var(--success-bg)', color: 'var(--success)' },
   'skip-same-cohort': { background: 'var(--surface-muted)', color: 'var(--muted)' },
   'skip-recently-invited': { background: 'var(--surface-muted)', color: 'var(--muted)' },
-  'skip-invalid': { background: '#FDECEB', color: '#B83B2E' },
+  'skip-invalid': { background: 'var(--danger-bg)', color: 'var(--danger)' },
 };
 
 const ACTION_LABELS: Record<PreviewRow['action'], string> = {

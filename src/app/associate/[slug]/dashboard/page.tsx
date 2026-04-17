@@ -4,16 +4,14 @@ import { getAssociateIdBySlug } from '@/lib/associateService';
 import { validateSlug } from '@/lib/slug-validation';
 import { getSettings } from '@/lib/settingsService';
 import { redirect, notFound } from 'next/navigation';
-import { PublicShell } from '@/components/layout/PublicShell';
-import { RecommendedAreaCard } from '@/components/associate/RecommendedAreaCard';
-import { ReadinessProgressBar } from '@/components/associate/ReadinessProgressBar';
-import GapTrendChart from '@/components/trainer/GapTrendChart';
+import { AssociateDashboardClient } from './AssociateDashboardClient';
 import type { GapScoreEntry, SessionSummary } from '@/lib/trainer-types';
 
 /**
- * Associate Self-Dashboard (Phase 23 Plan 02).
+ * Associate Self-Dashboard (Phase 29 Plan 03).
  *
- * Server-rendered. Full implementation replacing the P19 placeholder page.
+ * Server-rendered. Restructured with 2-column layout, all new visualization
+ * components wired via AssociateDashboardClient. RecommendedAreaCard removed.
  * Identity guard matches the profile page matrix:
  *   anonymous → /signin
  *   wrong-slug associate → 403
@@ -26,37 +24,33 @@ interface PageProps {
 
 function renderForbidden() {
   return (
-    <PublicShell
-      title="Access denied"
+    <div
       data-testid="dashboard-forbidden"
       data-http-status="403"
+      style={{
+        maxWidth: '480px',
+        margin: '0 auto',
+        textAlign: 'center',
+        padding: '48px 0',
+      }}
     >
-      <div
+      <h1
         style={{
-          maxWidth: '480px',
-          margin: '0 auto',
-          textAlign: 'center',
-          padding: '48px 0',
+          fontFamily:
+            "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
+          fontSize: '28px',
+          fontWeight: 600,
+          margin: '0 0 8px 0',
+          color: 'var(--ink)',
         }}
       >
-        <h1
-          style={{
-            fontFamily:
-              "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
-            fontSize: '28px',
-            fontWeight: 600,
-            margin: '0 0 8px 0',
-            color: 'var(--ink)',
-          }}
-        >
-          Access denied
-        </h1>
-        <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
-          You are signed in as a different associate. Contact your trainer if
-          you believe this is an error.
-        </p>
-      </div>
-    </PublicShell>
+        Access denied
+      </h1>
+      <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
+        You are signed in as a different associate. Contact your trainer if
+        you believe this is an error.
+      </p>
+    </div>
   );
 }
 
@@ -101,7 +95,7 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
       sessions: {
         where: { status: 'completed' },
         orderBy: { createdAt: 'desc' },
-        take: 10,
+        take: 20,
         select: {
           id: true,
           createdAt: true,
@@ -127,19 +121,20 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
   const readinessPercent =
     skillLevelScores.length > 0
       ? Math.round(
-          skillLevelScores.reduce((sum, g) => sum + g.weightedScore, 0) /
-            skillLevelScores.length,
+          (skillLevelScores.reduce((sum, g) => sum + g.weightedScore, 0) /
+            skillLevelScores.length) *
+            100,
         )
       : 0;
 
-  // Lowest skill for RecommendedAreaCard
+  // Lowest skill for FocusHero
   const sortedSkills = [...skillLevelScores].sort(
     (a, b) => a.weightedScore - b.weightedScore,
   );
   const lowestSkill = sortedSkills[0];
   const lowestScore = lowestSkill?.weightedScore ?? null;
 
-  // Map Prisma data to trainer-types for GapTrendChart
+  // Map Prisma data to trainer-types for visualization components
   const gapScoreEntries: GapScoreEntry[] = (associate.gapScores ?? []).map((g) => ({
     skill: g.skill,
     topic: g.topic,
@@ -157,12 +152,11 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
   }));
 
   const displayName = associate.displayName || associate.slug;
-  const hasSessions = sessionSummaries.length > 0;
 
   return (
     <div
       style={{
-        maxWidth: '800px',
+        maxWidth: '1120px',
         margin: '0 auto',
         padding: '32px 24px',
       }}
@@ -181,62 +175,17 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
         {displayName}&rsquo;s Dashboard
       </h1>
 
-      {/* 1. Readiness progress bar */}
-      <section style={{ marginBottom: '24px' }}>
-        <ReadinessProgressBar
-          readinessPercent={readinessPercent}
-          threshold={settings.readinessThreshold}
-        />
-      </section>
-
-      {/* 2. Recommended area card */}
-      <section style={{ marginBottom: '24px' }}>
-        <RecommendedAreaCard
-          recommendedArea={associate.recommendedArea}
-          lowestScore={lowestScore}
-          slug={slugValidation.slug}
-        />
-      </section>
-
-      {/* 3. Gap trend chart or empty state */}
-      <section>
-        <h2
-          style={{
-            fontFamily:
-              "var(--font-clash-display), 'Clash Display', system-ui, sans-serif",
-            fontSize: '18px',
-            fontWeight: 600,
-            color: 'var(--ink)',
-            margin: '0 0 16px 0',
-          }}
-        >
-          Skill Trends
-        </h2>
-
-        {hasSessions ? (
-          <GapTrendChart
-            gapScores={gapScoreEntries}
-            sessions={sessionSummaries}
-          />
-        ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '48px 16px',
-              color: 'var(--muted)',
-              fontSize: '16px',
-              backgroundColor: 'var(--surface)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '12px',
-            }}
-          >
-            <p style={{ margin: '0 0 8px 0' }}>No mock interviews yet.</p>
-            <p style={{ margin: 0, fontSize: '14px' }}>
-              Book a mock to get started!
-            </p>
-          </div>
-        )}
-      </section>
+      {/* Client component holds all filter state and renders the 2-column layout */}
+      <AssociateDashboardClient
+        displayName={displayName}
+        gapScores={gapScoreEntries}
+        sessions={sessionSummaries}
+        readinessPercent={readinessPercent}
+        threshold={settings.readinessThreshold}
+        recommendedArea={associate.recommendedArea}
+        lowestScore={lowestScore}
+        lowestSkillSessionCount={lowestSkill?.sessionCount ?? 0}
+      />
     </div>
   );
 }

@@ -56,21 +56,22 @@ Middleware (`src/middleware.ts`) was rewritten to Supabase-primary in Phase 18. 
 
 The PIN-based associate auth was never shipped to production. No grace window code exists — `getCallerIdentity()` reads Supabase session only.
 
-## Current Milestone: v1.2 Analytics & Auth Overhaul
+## Current Milestone: v1.3 UX Unification & Polish
 
-**Goal:** Actionable analytics dashboard, Supabase auth cutover, bulk cohort onboarding via magic-link invites.
+**Goal:** Unify all surfaces to the two-level shell, enrich associate experience with curriculum visibility and richer data visualization, polish dark mode.
 
 **Target features:**
 
-- **Trainer Analytics + Reporting** — KPI strip (Avg Readiness, Mocks This Week, Top Gap, AI/Trainer Variance), cohort-wide readiness trends, individual sparklines in roster, skill + **topic**-level gap aggregation across cohort (topic sourced from question-bank markdown `topic:` frontmatter, fallback to first keyword), PDF export of analytics (cohort + per-associate)
-- **App Shell Redesign (per `finalized.html`) — two-level nav** — Topbar (primary sections): Dashboard · Interviews · Question Banks · Settings. Sidebar is section-scoped (changes per topbar choice). Dashboard section sidebar: Overview (Roster / Gap Analysis / Calibration), Actions (New Mock / Reports). Existing routes reorganize: `/trainer` → Dashboard, `/interview/new` → Interviews, `/question-banks` → Question Banks, new `/trainer/settings` (threshold, cohorts, curriculum, users). KPI strip on Roster with 4 fixed cards: Avg Readiness / Mocks This Week / Top Gap / AI-Trainer Variance.
-- **Associate Dashboard Upgrade** — self-view gap scores + trend charts, recommended next practice area CTA, goals/progress streaks, book-next-mock action
-- **Full Supabase Auth + Bulk Onboarding (invite-only platform)** — trainer login via Supabase email/password (or OAuth), associate login via Supabase magic link; **platform becomes invite-only** (public automated interview still open, but associate accounts require trainer invite). Bulk invite flow (trainer pastes emails → picks cohort + curriculum → per-email transaction creates Associate, assigns cohort, `admin.generateLink` + Resend delivery, 50/call cap). Existing Associate rows have no emails — trainer email-backfill UI before cutover (slug-only rows with no sessions wiped, rows with sessions get trainer-typed emails). Add `Associate.authUserId` nullable FK to `auth.users` + `Associate.email` + `Associate.lastInvitedAt`. RLS policies on Session/GapScore/Cohort/CurriculumWeek as defense-in-depth (Prisma remains app-layer primary). PIN system removed in Phase 25 — Supabase auth is now the sole identity mechanism.
-- **Cached Question-Bank Manifest** — cache GitHub manifest to hit wizard `<400ms` target; TTL or hash-based invalidation
+- **Unified App Shell** — Associate pages adopt same topbar+sidebar shell as trainer (restricted views: Dashboard · Interviews only). Old single-navbar layout removed from all surfaces.
+- **Sign-in Redesign** — Single page with two stacked buttons ("Sign in with email" for magic link, "Sign in with password"). No tabs. First-login password setup prompt for associates so all users can use both auth methods.
+- **Associate Data Visualization** — Strengths/weaknesses list sourced from gap scores with trend arrows, trend charts with per-skill filtering across cumulative interviews, trajectory graphs for easier understanding of focus areas.
+- **Associate Curriculum View** — Associates see their assigned cohort and curriculum schedule so they can prep for upcoming topics.
+- **DESIGN.md Data-Viz Section** — Chart palette, informational hierarchy, trajectory/trend presentation patterns for all surfaces.
+- **Dark Mode QA** — Full consistency sweep fixing pages stuck on parchment-light.
 
-**Deferred to v1.3 (CI/CD pipeline milestone):** production deploy automation, scheduled readiness sweep cron, dark-mode visual QA, Nyquist validation hygiene backfill.
+**Deferred to v1.4 (Deploy milestone):** CI/CD pipeline, production deploy automation, readiness sweep cron.
 
-**Deferred features (see `milestones/v1.1-REQUIREMENTS.md` deferred list):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications.
+**Deferred features (see prior milestones):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, Nyquist validation backfill.
 
 ## Requirements
 
@@ -110,7 +111,7 @@ The PIN-based associate auth was never shipped to production. No grace window co
 - ✓ CURRIC-01..02: Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
 - ✓ DESIGN-01..03: Unified DESIGN.md token system; legacy `--nlm-*` deleted; single `/signin` tabs — v1.1
 
-### Active (v1.2 — populated by roadmap)
+### Active (v1.3 — populated by roadmap)
 
 (REQ-IDs to be filled by requirements gathering)
 
@@ -175,4 +176,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 — v1.2 Analytics & Auth Overhaul milestone started*
+*Last updated: 2026-04-16 — v1.3 UX Unification & Polish milestone started*

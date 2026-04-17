@@ -110,7 +110,7 @@ export default function InterviewPage() {
     if (!session || !currentQuestion || !currentAssessment) {
         return (
             <div
-                className="flex flex-col items-center justify-center p-4 min-h-screen"
+                className="flex flex-col items-center justify-center p-4 min-h-full"
                 style={{ background: 'var(--bg)' }}
             >
                 <div className="flex flex-col items-center animate-fade-in">
@@ -124,7 +124,7 @@ export default function InterviewPage() {
     const isLastQuestion = progress.current === progress.total;
 
     return (
-        <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
+        <div className="min-h-full" style={{ background: 'var(--bg)' }}>
             <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col">
                 {/* Header */}
                 <header
@@ -225,6 +225,6 @@ export default function InterviewPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

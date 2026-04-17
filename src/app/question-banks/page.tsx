@@ -438,7 +438,7 @@ export default function QuestionBanksPage() {
                                                         className="text-sm font-bold w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                                         style={{
                                                             background: 'var(--accent)',
-                                                            color: '#FFFFFF',
+                                                            color: 'white',
                                                             fontFamily: 'var(--font-mono)',
                                                         }}
                                                     >
@@ -458,9 +458,9 @@ export default function QuestionBanksPage() {
                                                                     style={{
                                                                         ...monoLabel,
                                                                         background:
-                                                                            q.difficulty === 'beginner' ? '#E8F5EE'
-                                                                            : q.difficulty === 'intermediate' ? '#FEF3E0'
-                                                                            : '#FDECEB',
+                                                                            q.difficulty === 'beginner' ? 'var(--success-bg)'
+                                                                            : q.difficulty === 'intermediate' ? 'var(--warning-bg)'
+                                                                            : 'var(--danger-bg)',
                                                                         color:
                                                                             q.difficulty === 'beginner' ? 'var(--success)'
                                                                             : q.difficulty === 'intermediate' ? 'var(--warning)'

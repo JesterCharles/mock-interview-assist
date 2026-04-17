@@ -65,6 +65,28 @@ export async function middleware(request: NextRequest) {
     return redirect;
   }
 
+  // STEP 4: Profile — any authenticated user passes.
+  if (matchesPrefix(pathname, '/profile')) {
+    if (user) {
+      return response;
+    }
+    const redirectUrl = new URL('/signin', request.url);
+    redirectUrl.searchParams.set('next', pathname);
+    const redirect = NextResponse.redirect(redirectUrl);
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
+  }
+
+  // STEP 5: Set-password — any authenticated user passes.
+  if (pathname === '/auth/set-password') {
+    if (user) {
+      return response;
+    }
+    const redirect = NextResponse.redirect(new URL('/signin', request.url));
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
+  }
+
   // Everything else is public.
   return response;
 }
@@ -76,5 +98,7 @@ export const config = {
     '/review/:path*',
     '/trainer/:path*',
     '/associate/:path*',
+    '/profile/:path*',
+    '/auth/set-password',
   ],
 };

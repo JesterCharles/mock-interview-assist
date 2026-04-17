@@ -157,7 +157,7 @@ function TrainerDashboard() {
             fontFamily: 'Clash Display, sans-serif',
             fontWeight: 600,
             fontSize: '48px',
-            color: '#1A1A1A',
+            color: 'var(--ink)',
             lineHeight: 1.1,
             marginBottom: '40px',
             letterSpacing: '-0.02em',
@@ -191,8 +191,8 @@ function TrainerDashboard() {
                   className="animate-pulse"
                   style={{
                     height: '48px',
-                    borderBottom: '1px solid #E8E2D9',
-                    backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F0EBE2',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    backgroundColor: i % 2 === 0 ? 'var(--surface)' : 'var(--surface-muted)',
                   }}
                 />
               ))}
@@ -203,11 +203,11 @@ function TrainerDashboard() {
         {rosterError && !rosterLoading && (
           <div
             style={{
-              backgroundColor: '#FDECEB',
-              border: '1px solid #B83B2E',
+              backgroundColor: 'var(--danger-bg)',
+              border: '1px solid var(--danger)',
               borderRadius: '8px',
               padding: '16px',
-              color: '#B83B2E',
+              color: 'var(--danger)',
               fontSize: '14px',
               fontFamily: 'DM Sans, sans-serif',
             }}

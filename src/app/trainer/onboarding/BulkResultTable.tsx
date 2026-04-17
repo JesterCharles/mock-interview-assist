@@ -19,10 +19,10 @@ const STATUS_ORDER: Record<string, number> = {
 };
 
 const STATUS_BADGE_STYLES: Record<string, { background: string; color: string }> = {
-  invited: { background: '#E8F5EE', color: '#2D6A4F' },
-  reassigned: { background: '#E8F5EE', color: '#2D6A4F' },
+  invited: { background: 'var(--success-bg)', color: 'var(--success)' },
+  reassigned: { background: 'var(--success-bg)', color: 'var(--success)' },
   skipped: { background: 'var(--surface-muted)', color: 'var(--muted)' },
-  failed: { background: '#FDECEB', color: '#B83B2E' },
+  failed: { background: 'var(--danger-bg)', color: 'var(--danger)' },
 };
 
 function getStatusStyle(status: string): { background: string; color: string } {

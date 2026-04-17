@@ -51,21 +51,9 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-// Stub client components — they return JSX-like objects in node env
-vi.mock('@/components/associate/RecommendedAreaCard', () => ({
-  RecommendedAreaCard: () => null,
-}));
-vi.mock('@/components/associate/ReadinessProgressBar', () => ({
-  ReadinessProgressBar: () => null,
-}));
-vi.mock('@/components/trainer/GapTrendChart', () => ({
-  default: () => null,
-}));
-vi.mock('@/components/layout/PublicShell', () => ({
-  PublicShell: ({ children, ...props }: { children?: unknown; [key: string]: unknown }) => ({
-    type: 'div',
-    props: { ...props, children },
-  }),
+// Stub client components — they return null in node env
+vi.mock('./AssociateDashboardClient', () => ({
+  AssociateDashboardClient: () => null,
 }));
 
 import AssociateDashboardPage from './page';

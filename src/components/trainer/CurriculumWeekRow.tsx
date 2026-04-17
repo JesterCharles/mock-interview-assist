@@ -127,13 +127,13 @@ export default function CurriculumWeekRow({
   }
 
   const inputStyle: React.CSSProperties = {
-    background: '#FFFFFF',
-    border: '1px solid #DDD5C8',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
     borderRadius: '6px',
     padding: '6px 8px',
     fontFamily: "'DM Sans', sans-serif",
     fontSize: '13px',
-    color: '#1A1A1A',
+    color: 'var(--ink)',
     outline: 'none',
     width: '100%',
     boxSizing: 'border-box',
@@ -142,7 +142,7 @@ export default function CurriculumWeekRow({
   if (mode === 'edit') {
     return (
       <>
-        <tr style={{ background: '#FFF8F0' }}>
+        <tr style={{ background: 'var(--highlight)' }}>
           <td>
             <input
               type="number"
@@ -203,9 +203,9 @@ export default function CurriculumWeekRow({
                 onClick={handleSave}
                 disabled={saving}
                 style={{
-                  background: '#C85A2E',
-                  color: '#FFFFFF',
-                  border: '1px solid #C85A2E',
+                  background: 'var(--accent)',
+                  color: 'white',
+                  border: '1px solid var(--accent)',
                   borderRadius: '6px',
                   padding: '6px 12px',
                   fontFamily: "'DM Sans', sans-serif",
@@ -222,8 +222,8 @@ export default function CurriculumWeekRow({
                 disabled={saving}
                 style={{
                   background: 'transparent',
-                  color: '#1A1A1A',
-                  border: '1px solid #DDD5C8',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--border)',
                   borderRadius: '6px',
                   padding: '6px 12px',
                   fontFamily: "'DM Sans', sans-serif",
@@ -243,8 +243,8 @@ export default function CurriculumWeekRow({
               colSpan={6}
               style={{
                 padding: '6px 12px',
-                background: '#FDECEB',
-                color: '#B83B2E',
+                background: 'var(--danger-bg)',
+                color: 'var(--danger)',
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: '12px',
               }}
@@ -266,14 +266,14 @@ export default function CurriculumWeekRow({
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '12px',
-            color: '#7A7267',
+            color: 'var(--muted)',
           }}
         >
           {week.skillSlug}
         </span>
       </td>
       <td>
-        <span style={{ fontSize: '13px', color: '#7A7267' }}>
+        <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
           {week.topicTags.length > 0 ? week.topicTags.join(', ') : '—'}
         </span>
       </td>
@@ -281,7 +281,7 @@ export default function CurriculumWeekRow({
       <td>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
           {error && (
-            <span style={{ fontSize: '12px', color: '#B83B2E', alignSelf: 'center' }}>
+            <span style={{ fontSize: '12px', color: 'var(--danger)', alignSelf: 'center' }}>
               {error}
             </span>
           )}
@@ -291,7 +291,7 @@ export default function CurriculumWeekRow({
             style={{
               background: 'none',
               border: 'none',
-              color: '#C85A2E',
+              color: 'var(--accent)',
               fontFamily: "'DM Sans', sans-serif",
               fontSize: '13px',
               fontWeight: 500,
@@ -309,7 +309,7 @@ export default function CurriculumWeekRow({
             style={{
               background: 'none',
               border: 'none',
-              color: '#B83B2E',
+              color: 'var(--danger)',
               fontFamily: "'DM Sans', sans-serif",
               fontSize: '13px',
               fontWeight: 500,

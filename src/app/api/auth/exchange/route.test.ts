@@ -30,7 +30,14 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    profile: {
+      findUnique: vi.fn(),
+    },
   },
+}));
+
+vi.mock('@/lib/profileService', () => ({
+  lazyBackfillProfile: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { GET } from './route';
@@ -40,6 +47,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 const mockFindUnique = prisma.associate.findUnique as ReturnType<typeof vi.fn>;
 const mockUpdate = prisma.associate.update as ReturnType<typeof vi.fn>;
 const mockUpdateUser = supabaseAdmin.auth.admin.updateUserById as ReturnType<typeof vi.fn>;
+const mockProfileFindUnique = prisma.profile.findUnique as ReturnType<typeof vi.fn>;
 
 function makeRequest(params: Record<string, string>): NextRequest {
   const url = new URL('http://localhost:3000/api/auth/exchange');
@@ -64,9 +72,10 @@ describe('GET /api/auth/exchange', () => {
     mockSetSession.mockResolvedValue({ error: null });
     mockExchangeCode.mockResolvedValue({ error: null });
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'assoc@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u1', email: 'assoc@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     mockFindUnique.mockResolvedValue(null);
+    mockProfileFindUnique.mockResolvedValue({ passwordSetAt: new Date() });
   });
 
   it('redirects to /signin?error=missing-code with no tokens or code', async () => {
@@ -120,19 +129,19 @@ describe('GET /api/auth/exchange', () => {
 
   it('auto-assigns associate role when no role set', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'new@test.com', user_metadata: {} } },
+      data: { user: { id: 'u1', email: 'new@test.com', user_metadata: { password_set: true } } },
     });
     mockFindUnique.mockResolvedValue({ slug: 'new-user' });
     await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(mockUpdateUser).toHaveBeenCalledWith('u1', {
-      user_metadata: { role: 'associate' },
+      user_metadata: { password_set: true, role: 'associate' },
       app_metadata: { role: 'associate' },
     });
   });
 
   it('links authUserId on first sign-in by email match', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u2', email: 'assoc@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u2', email: 'assoc@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     // First findUnique (by authUserId) returns null
     // Second findUnique (by email) returns match with null authUserId
@@ -152,7 +161,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('handles P2002 race on authUserId linkage', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u3', email: 'race@test.com', user_metadata: { role: 'associate' } } },
+      data: { user: { id: 'u3', email: 'race@test.com', user_metadata: { role: 'associate', password_set: true } } },
     });
     mockFindUnique
       .mockResolvedValueOnce(null)

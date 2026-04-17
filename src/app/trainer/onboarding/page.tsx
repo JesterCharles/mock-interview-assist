@@ -292,8 +292,8 @@ export default function OnboardingPage() {
           {apiError && (
             <div
               style={{
-                background: '#FDECEB',
-                border: '1px solid #B83B2E',
+                background: 'var(--danger-bg)',
+                border: '1px solid var(--danger)',
                 borderRadius: '8px',
                 padding: '16px',
                 marginBottom: '16px',

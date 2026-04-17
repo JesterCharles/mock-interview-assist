@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
+import { lazyBackfillProfile } from '@/lib/profileService';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -79,6 +80,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (role === 'trainer' || role === 'admin') {
       return redirectWith('/trainer');
+    }
+
+    // Lazy backfill: migrate user_metadata.password_set to Profile.passwordSetAt (per D-12)
+    await lazyBackfillProfile(user.id, user.user_metadata as { password_set?: boolean });
+
+    // First-login detection: Profile-first, metadata fallback (per D-13)
+    const profile = await prisma.profile.findUnique({
+      where: { authUserId: user.id },
+      select: { passwordSetAt: true },
+    });
+
+    const passwordSet =
+      profile?.passwordSetAt != null || user.user_metadata?.password_set === true;
+
+    if (!passwordSet) {
+      return redirectWith('/auth/set-password');
     }
 
     // Associate — authUserId linkage
