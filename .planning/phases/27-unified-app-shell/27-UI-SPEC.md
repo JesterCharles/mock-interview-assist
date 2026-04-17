@@ -56,6 +56,8 @@ Exceptions for this phase:
 - Cohort label padding: `0 12px 4px` top-of-sidebar header (matches group label pattern)
 - Touch target minimum: 44px height for collapse toggle button
 
+> **Grid exemption — SectionSidebar internal values:** The `6px`, `12px` (padding), and `1px` (margin) values above are locked to the existing `SectionSidebar` implementation and its companion `sidebar-configs.ts` styles. This phase does not modify `SectionSidebar` internals — it reuses the component as-is. These values are exempt from the 4-multiple grid rule for this phase. A separate refactor phase would be required to remap them to grid-aligned equivalents.
+
 ---
 
 ## Typography
