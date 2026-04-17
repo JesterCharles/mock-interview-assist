@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 interface ProfileData {
@@ -109,10 +109,28 @@ export function ProfileTabs({ profile, email, role, readiness, initialTab }: Pro
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordStatus, setPasswordStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
 
+  // Re-verification state (D-14)
+  const [oldPassword, setOldPassword] = useState('');
+  const [hasPasswordSet, setHasPasswordSet] = useState<boolean | null>(null); // null = loading
+  const [verificationStep, setVerificationStep] = useState<'verify' | 'update'>('verify');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState<string | null>(null);
+
   // Learning tab state
   const [learningGoals, setLearningGoals] = useState(profile.learningGoals ?? '');
   const [goalsSaving, setGoalsSaving] = useState(false);
   const [goalsSaved, setGoalsSaved] = useState(false);
+
+  // Detect password-set status when Security tab is active
+  useEffect(() => {
+    if (activeTab !== 'security') return;
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const pwSet = data.user?.user_metadata?.password_set === true;
+      setHasPasswordSet(pwSet);
+    });
+  }, [activeTab]);
 
   async function saveProfile() {
     setProfileSaving(true);
@@ -142,6 +160,60 @@ export function ProfileTabs({ profile, email, role, readiness, initialTab }: Pro
     } finally {
       setGoalsSaving(false);
     }
+  }
+
+  // Path A: verify old password, then show new password fields
+  async function handleVerifyOldPassword(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (passwordStatus === 'submitting') return;
+    setPasswordError(null);
+    setPasswordStatus('submitting');
+
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: oldPassword,
+    });
+
+    setPasswordStatus('idle');
+    if (error) {
+      setPasswordError('Current password is incorrect.');
+      return;
+    }
+    setVerificationStep('update');
+  }
+
+  // Path B: send OTP via reauthenticate
+  async function handleSendOtp() {
+    setOtpError(null);
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.reauthenticate();
+    if (error) {
+      setOtpError(error.message || 'Failed to send verification email. Please try again.');
+      return;
+    }
+    setOtpSent(true);
+  }
+
+  // Path B: verify OTP
+  async function handleVerifyOtp(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setOtpError(null);
+    setPasswordStatus('submitting');
+
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: 'email',
+    });
+
+    setPasswordStatus('idle');
+    if (error) {
+      setOtpError(error.message || 'Invalid verification code. Please try again.');
+      return;
+    }
+    setVerificationStep('update');
   }
 
   async function handlePasswordSubmit(e: FormEvent<HTMLFormElement>) {
@@ -184,7 +256,14 @@ export function ProfileTabs({ profile, email, role, readiness, initialTab }: Pro
     setPasswordStatus('success');
     setNewPassword('');
     setConfirmPassword('');
-    setTimeout(() => setPasswordStatus('idle'), 3000);
+    setOldPassword('');
+    setOtpCode('');
+    setOtpSent(false);
+    // Reset verification step so next password change requires re-verification
+    setTimeout(() => {
+      setPasswordStatus('idle');
+      setVerificationStep('verify');
+    }, 3000);
   }
 
   const tabButtonStyle = (tab: Tab): React.CSSProperties => ({
@@ -383,7 +462,108 @@ export function ProfileTabs({ profile, email, role, readiness, initialTab }: Pro
               >
                 Password updated successfully.
               </div>
+            ) : hasPasswordSet === null ? (
+              <p style={{ fontSize: 14, color: 'var(--muted)' }}>Checking…</p>
+            ) : verificationStep === 'verify' ? (
+              /* Verification step — Path A (password) or Path B (OTP) */
+              hasPasswordSet ? (
+                /* Path A: verify old password */
+                <form onSubmit={handleVerifyOldPassword} noValidate>
+                  <div style={fieldGroup}>
+                    <label htmlFor="old-password" style={labelStyle}>
+                      Current password
+                    </label>
+                    <input
+                      id="old-password"
+                      type="password"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      autoComplete="current-password"
+                      required
+                      disabled={passwordStatus === 'submitting'}
+                      style={inputBase}
+                    />
+                  </div>
+
+                  {passwordError && (
+                    <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                      {passwordError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={passwordStatus === 'submitting' || !oldPassword}
+                    className="btn-accent-flat"
+                    style={{ width: '100%' }}
+                  >
+                    {passwordStatus === 'submitting' ? 'Verifying…' : 'Verify current password'}
+                  </button>
+                </form>
+              ) : (
+                /* Path B: email OTP for magic-link-only users */
+                <div>
+                  <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+                    To set a password, we need to verify your identity.
+                  </p>
+
+                  {!otpSent ? (
+                    <button
+                      onClick={handleSendOtp}
+                      className="btn-accent-flat"
+                      style={{ width: '100%' }}
+                    >
+                      Send verification email
+                    </button>
+                  ) : (
+                    <form onSubmit={handleVerifyOtp} noValidate>
+                      <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 16px 0' }}>
+                        A verification code was sent to {email}. Enter it below.
+                      </p>
+                      <div style={{ ...fieldGroup, display: 'flex', justifyContent: 'center' }}>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          placeholder="000000"
+                          style={{
+                            ...inputBase,
+                            textAlign: 'center',
+                            letterSpacing: '8px',
+                            fontSize: 20,
+                            maxWidth: 200,
+                          }}
+                        />
+                      </div>
+
+                      {otpError && (
+                        <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 16 }}>
+                          {otpError}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={passwordStatus === 'submitting' || otpCode.length < 6}
+                        className="btn-accent-flat"
+                        style={{ width: '100%' }}
+                      >
+                        {passwordStatus === 'submitting' ? 'Verifying…' : 'Verify code'}
+                      </button>
+                    </form>
+                  )}
+
+                  {otpError && !otpSent && (
+                    <div role="alert" style={{ color: 'var(--danger)', fontSize: 13, marginTop: 12 }}>
+                      {otpError}
+                    </div>
+                  )}
+                </div>
+              )
             ) : (
+              /* Update step — shown after verification passes */
               <form onSubmit={handlePasswordSubmit} noValidate>
                 <div style={fieldGroup}>
                   <label htmlFor="new-password" style={labelStyle}>
