@@ -148,7 +148,10 @@ Plans:
   1. An associate assigned to a cohort can navigate to a curriculum view and see the full weekly schedule
   2. The current week is visually highlighted; past weeks appear greyed; future weeks appear muted
   3. An associate with no cohort assignment sees a clear empty state message ("You haven't been assigned to a cohort yet") with no errors
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 30-01-PLAN.md — Curriculum schedule grid with score coloring, collapsible weeks, banner, and empty state
 **UI hint**: yes
 
 ### Phase 31: Dark Mode QA Sweep
@@ -175,5 +178,5 @@ Plans:
 | 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
 | 28.1. User Profile | v1.3 | 0/1 | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
-| 30. Associate Curriculum View | v1.3 | 0/? | Not started | - |
+| 30. Associate Curriculum View | v1.3 | 0/1 | Not started | - |
 | 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
