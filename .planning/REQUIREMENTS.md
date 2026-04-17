@@ -47,6 +47,18 @@ Requirements for UX Unification & Polish milestone.
 - [ ] **DARK-01**: All pages and components respect dark mode theme (no hardcoded hex, no light-only Tailwind classes)
 - [ ] **DARK-02**: All recharts components use CSS var tokens for fills, strokes, and tooltip styles
 
+### Shell Architecture Overhaul
+
+- [ ] **SHELL-32-01**: Sidebar is primary navigation surface for all roles with Settings as collapsible bottom accordion
+- [ ] **SHELL-32-02**: TopBar stripped to utility-only (wordmark, CohortSwitcher, ThemeToggle, AvatarMenu) with no center nav links
+- [ ] **SHELL-32-03**: Batch Upload appears in trainer sidebar Actions group
+- [ ] **SHELL-32-04**: Profile is a modal overlay triggered from avatar menu, not a standalone page
+- [ ] **SHELL-32-05**: Landing page has minimal header with NLM logo and Sign In button
+- [ ] **SHELL-32-06**: /profile route redirects to appropriate dashboard (profile is modal-only)
+- [ ] **SHELL-32-07**: Roster table has no slug column
+- [ ] **SHELL-32-08**: Trainer associate detail page renders same AssociateDashboardClient as associate view
+- [ ] **SHELL-32-09**: Password change requires old password verification or email OTP before allowing update
+
 ## Future Requirements
 
 Deferred to subsequent milestones.
@@ -99,12 +111,21 @@ Deferred to subsequent milestones.
 | CURRIC-02 | Phase 30 | Pending |
 | DARK-01 | Phase 31 | Pending |
 | DARK-02 | Phase 31 | Pending |
+| SHELL-32-01 | Phase 32 | Pending |
+| SHELL-32-02 | Phase 32 | Pending |
+| SHELL-32-03 | Phase 32 | Pending |
+| SHELL-32-04 | Phase 32 | Pending |
+| SHELL-32-05 | Phase 32 | Pending |
+| SHELL-32-06 | Phase 32 | Pending |
+| SHELL-32-07 | Phase 32 | Pending |
+| SHELL-32-08 | Phase 32 | Pending |
+| SHELL-32-09 | Phase 32 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 18 total
-- Mapped to phases: 18
+- v1.3 requirements: 28 total
+- Mapped to phases: 28
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 — traceability populated by roadmap*
+*Last updated: 2026-04-17 — Phase 32 requirements added*

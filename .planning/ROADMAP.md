@@ -5,7 +5,7 @@
 - **v1.0 Readiness Loop MVP** -- Phases 1-7 (shipped 2026-04-14) | [Archive](milestones/v1.0-ROADMAP.md)
 - **v1.1 Cohort Readiness System** -- Phases 8-15, 22 plans, 14 reqs (shipped 2026-04-14) | [Archive](milestones/v1.1-ROADMAP.md)
 - **v1.2 Analytics & Auth Overhaul** -- Phases 16-25, 26 plans, 30 reqs (shipped 2026-04-16) | [Archive](milestones/v1.2-ROADMAP.md)
-- **v1.3 UX Unification & Polish** -- Phases 26-31 (in progress)
+- **v1.3 UX Unification & Polish** -- Phases 26-32 (in progress)
 
 ## Phases
 
@@ -63,6 +63,7 @@
 - [x] **Phase 29: Associate Data Visualization** - Skill bars with trend arrows, focus area hero, per-skill trend chart, radar plot, dashboard skill filter (completed 2026-04-17)
 - [x] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state (completed 2026-04-17)
 - [x] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface (completed 2026-04-17)
+- [ ] **Phase 32: Shell Architecture Overhaul** - Sidebar-primary nav, TopBar utility-only, profile modal, landing header, roster cleanup, password security
 
 ## Phase Details
 
@@ -172,9 +173,21 @@ Plans:
 Plans:
 - [x] 31-01-PLAN.md — Replace all hardcoded hex colors with CSS variable tokens and add badge-background tokens
 
+### Phase 32: Shell Architecture Overhaul
+**Goal:** Restructure AppShell with sidebar-primary navigation for all roles, strip TopBar to utility items only, add profile modal, landing page header, roster cleanup, and password security.
+**Requirements**: SHELL-32-01, SHELL-32-02, SHELL-32-03, SHELL-32-04, SHELL-32-05, SHELL-32-06, SHELL-32-07, SHELL-32-08, SHELL-32-09
+**Depends on:** Phase 31
+**Plans:** 4 plans
+
+Plans:
+- [ ] 32-01-PLAN.md — Sidebar Settings accordion + TopBar center nav removal + Batch Upload in sidebar
+- [ ] 32-02-PLAN.md — Profile modal from avatar menu + landing page minimal header + /profile redirect
+- [ ] 32-03-PLAN.md — Roster slug column removal + trainer detail reuses AssociateDashboardClient
+- [ ] 32-04-PLAN.md — Password change requires old password or email OTP verification
+
 ## Progress
 
-**Execution Order:** 26 → 27 → 28 → 28.1 → 29 → 30 → 31
+**Execution Order:** 26 → 27 → 28 → 28.1 → 29 → 30 → 31 → 32
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -185,13 +198,4 @@ Plans:
 | 29. Associate Data Visualization | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 30. Associate Curriculum View | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 31. Dark Mode QA Sweep | v1.3 | 1/1 | Complete    | 2026-04-17 |
-
-### Phase 32: Shell Architecture Overhaul
-
-**Goal:** Restructure AppShell with sidebar-primary navigation for all roles, strip TopBar to utility items only (home, cohort status, user icon, dark mode). Fix profile outside shell, landing page missing signin nav, roster slug column, batch upload missing from settings, update-password security. Trainer associate detail matches associate dashboard view.
-**Requirements**: TBD
-**Depends on:** Phase 31
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd-plan-phase 32 to break down)
+| 32. Shell Architecture Overhaul | v1.3 | 0/4 | Not started | - |
