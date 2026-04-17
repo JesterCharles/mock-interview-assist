@@ -4,41 +4,25 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
 interface SectionSidebarProps {
   groups: SidebarGroup[];
   sidebarHeader?: string | null;
   settingsGroup?: SettingsAccordionGroup;
-  startCollapsed?: boolean;
+  collapsed: boolean;
+  mounted: boolean;
 }
 
-export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startCollapsed = false }: SectionSidebarProps) {
+export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed, mounted }: SectionSidebarProps) {
   const pathname = usePathname();
-  // Server and first client render use the same prop-derived defaults — no
-  // hydration mismatch. localStorage is applied in the effect below, and
-  // transitions stay disabled until mounted so the adjustment is invisible.
-  const [collapsed, setCollapsed] = useState(startCollapsed);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const storedCollapsed = window.localStorage.getItem('nlm_sidebar_collapsed');
-    if (storedCollapsed === 'true') setCollapsed(true);
-    else if (storedCollapsed === 'false') setCollapsed(false);
-    const storedSettings = window.localStorage.getItem('nlm_settings_open');
-    if (storedSettings === 'true') setSettingsOpen(true);
-    setMounted(true);
+    const stored = window.localStorage.getItem('nlm_settings_open');
+    if (stored === 'true') setSettingsOpen(true);
   }, []);
-
-  const toggle = () => {
-    setCollapsed((c) => {
-      const next = !c;
-      localStorage.setItem('nlm_sidebar_collapsed', String(next));
-      return next;
-    });
-  };
 
   const toggleSettings = () => {
     setSettingsOpen((o) => {
@@ -66,6 +50,15 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startColl
         minHeight: 0,
       }}
     >
+      {/* Top spacer aligns nav content with the TopBar baseline */}
+      <div
+        style={{
+          height: 56,
+          borderBottom: '1px solid var(--border)',
+          flexShrink: 0,
+        }}
+      />
+
       <nav
         className="overflow-y-auto py-4"
         style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
@@ -154,8 +147,6 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startColl
                 title="Settings"
                 aria-label="Settings"
                 onClick={() => {
-                  setCollapsed(false);
-                  localStorage.setItem('nlm_sidebar_collapsed', 'false');
                   setSettingsOpen(true);
                   localStorage.setItem('nlm_settings_open', 'true');
                 }}
@@ -279,33 +270,6 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startColl
         )}
       </nav>
 
-      {/* Collapse toggle */}
-      <button
-        onClick={toggle}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '12px',
-          borderTop: '1px solid var(--border)',
-          background: 'transparent',
-          color: 'var(--muted)',
-          cursor: 'pointer',
-          border: 'none',
-          borderTopColor: 'var(--border)',
-          borderTopWidth: 1,
-          borderTopStyle: 'solid',
-          width: '100%',
-        }}
-        className="hover:bg-[var(--highlight)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-      >
-        {collapsed ? (
-          <ChevronRight className="w-4 h-4" aria-hidden="true" />
-        ) : (
-          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-        )}
-      </button>
     </aside>
   );
 }

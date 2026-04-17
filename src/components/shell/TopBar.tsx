@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AvatarMenu } from './AvatarMenu';
 import { CohortSwitcher } from './CohortSwitcher';
@@ -13,6 +14,8 @@ interface TopBarProps {
   settingsGroup?: SettingsAccordionGroup;
   role?: 'trainer' | 'associate';
   associateSlug?: string;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
 export function TopBar({
@@ -20,6 +23,8 @@ export function TopBar({
   settingsGroup,
   role = 'trainer',
   associateSlug,
+  onToggleSidebar,
+  sidebarCollapsed = false,
 }: TopBarProps) {
   const wordmarkHref =
     role === 'associate' && associateSlug
@@ -42,8 +47,36 @@ export function TopBar({
         gap: 16,
       }}
     >
-      {/* Left zone: mobile hamburger + wordmark */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      {/* Desktop: sidebar collapse toggle lives here */}
+      {onToggleSidebar && (
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="hidden md:inline-flex hover:bg-[var(--highlight)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
+            borderRadius: 6,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--muted)',
+            flexShrink: 0,
+          }}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen style={{ width: 18, height: 18 }} aria-hidden="true" />
+          ) : (
+            <PanelLeftClose style={{ width: 18, height: 18 }} aria-hidden="true" />
+          )}
+        </button>
+      )}
+
+      {/* Mobile hamburger + wordmark — narrow viewports where sidebar is hidden */}
+      <div style={{ alignItems: 'center', gap: 8, flexShrink: 0 }} className="md:hidden flex">
         {sidebarGroups.length > 0 && (
           <MobileSidebar groups={sidebarGroups} settingsGroup={settingsGroup} />
         )}
@@ -62,7 +95,7 @@ export function TopBar({
         </Link>
       </div>
 
-      {/* Spacer — no center nav */}
+      {/* Spacer — pushes right zone to the edge */}
       <div style={{ flex: 1 }} />
 
       {/* Right zone: CohortSwitcher (trainer only) + ThemeToggle + AvatarMenu */}
