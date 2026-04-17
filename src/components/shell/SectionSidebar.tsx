@@ -16,20 +16,19 @@ interface SectionSidebarProps {
 
 export function SectionSidebar({ groups, sidebarHeader, settingsGroup, startCollapsed = false }: SectionSidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return startCollapsed;
-    const stored = window.localStorage.getItem('nlm_sidebar_collapsed');
-    if (stored === 'true') return true;
-    if (stored === 'false') return false;
-    return startCollapsed;
-  });
-  const [settingsOpen, setSettingsOpen] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem('nlm_settings_open') === 'true';
-  });
+  // Server and first client render use the same prop-derived defaults — no
+  // hydration mismatch. localStorage is applied in the effect below, and
+  // transitions stay disabled until mounted so the adjustment is invisible.
+  const [collapsed, setCollapsed] = useState(startCollapsed);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const storedCollapsed = window.localStorage.getItem('nlm_sidebar_collapsed');
+    if (storedCollapsed === 'true') setCollapsed(true);
+    else if (storedCollapsed === 'false') setCollapsed(false);
+    const storedSettings = window.localStorage.getItem('nlm_settings_open');
+    if (storedSettings === 'true') setSettingsOpen(true);
     setMounted(true);
   }, []);
 

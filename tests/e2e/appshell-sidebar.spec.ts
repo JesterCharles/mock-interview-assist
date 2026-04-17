@@ -1,6 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 
-const EMAIL = process.env.TRAINER_EMAIL ?? 'jestercharles@gmail.com';
+const EMAIL = process.env.TRAINER_EMAIL ?? '';
 const PASSWORD = process.env.TRAINER_PASSWORD ?? process.env.APP_PASSWORD ?? '';
 
 async function signIn(page: Page) {
@@ -14,7 +14,7 @@ async function signIn(page: Page) {
 
 test.describe('AppShell sidebar unification', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(!PASSWORD, 'Requires APP_PASSWORD/TRAINER_PASSWORD');
+    test.skip(!EMAIL || !PASSWORD, 'Requires TRAINER_EMAIL + TRAINER_PASSWORD (or APP_PASSWORD)');
     await signIn(page);
   });
 
