@@ -5,7 +5,6 @@ import {
   getTrajectoryWord,
   getTrajectoryNarrative,
   computeSkillTrend,
-  type TrendDirection,
 } from './vizUtils';
 
 describe('getScoreColor', () => {
