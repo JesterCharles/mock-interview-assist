@@ -8,7 +8,7 @@ import { SignInTabs } from './SignInTabs';
  */
 
 interface PageProps {
-  searchParams: Promise<{ as?: string; next?: string }>;
+  searchParams: Promise<{ next?: string }>;
 }
 
 function safeNext(raw: string | undefined): string | null {
@@ -18,9 +18,8 @@ function safeNext(raw: string | undefined): string | null {
 }
 
 export default async function SignInPage({ searchParams }: PageProps) {
-  const { as, next } = await searchParams;
+  const { next } = await searchParams;
   const nextPath = safeNext(next);
-  const initialTab: 'trainer' | 'associate' = as === 'associate' ? 'associate' : 'trainer';
 
   // Bounce if already signed in via Supabase session
   const supabase = await createSupabaseServerClient();
@@ -73,7 +72,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
           >
             Sign in
           </h1>
-          <SignInTabs initialTab={initialTab} nextPath={nextPath} showAssociateTab={true} />
+          <SignInTabs nextPath={nextPath} />
         </div>
       </main>
     </div>
