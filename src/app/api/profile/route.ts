@@ -9,7 +9,7 @@ const putSchema = z.object({
   githubUsername: z.string().max(100).nullish(),
   bio: z.string().max(500).nullish(),
   learningGoals: z.string().max(1000).nullish(),
-  passwordSetAt: z.string().nullish(),
+  // passwordSetAt is NOT exposed — only set-password page writes it via profileService
 });
 
 export async function GET() {
@@ -80,14 +80,13 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const { displayName, githubUsername, bio, learningGoals, passwordSetAt } = parsed.data;
+  const { displayName, githubUsername, bio, learningGoals } = parsed.data;
 
   const updated = await updateProfile(identity.userId, {
     displayName: displayName ?? undefined,
     githubUsername: githubUsername ?? undefined,
     bio: bio ?? undefined,
     learningGoals: learningGoals ?? undefined,
-    passwordSetAt: passwordSetAt ? new Date(passwordSetAt) : undefined,
   });
 
   return NextResponse.json({ profile: updated });

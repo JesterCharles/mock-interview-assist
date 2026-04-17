@@ -77,6 +77,16 @@ export async function middleware(request: NextRequest) {
     return redirect;
   }
 
+  // STEP 5: Set-password — any authenticated user passes.
+  if (pathname === '/auth/set-password') {
+    if (user) {
+      return response;
+    }
+    const redirect = NextResponse.redirect(new URL('/signin', request.url));
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
+  }
+
   // Everything else is public.
   return response;
 }
@@ -89,5 +99,6 @@ export const config = {
     '/trainer/:path*',
     '/associate/:path*',
     '/profile/:path*',
+    '/auth/set-password',
   ],
 };
