@@ -50,14 +50,28 @@ export function SectionSidebar({ groups, sidebarHeader, settingsGroup, collapsed
         minHeight: 0,
       }}
     >
-      {/* Top spacer aligns nav content with the TopBar baseline */}
-      <div
+      {/* NLM wordmark — top corner of sidebar, aligns with TopBar baseline */}
+      <Link
+        href="/trainer"
         style={{
           height: 56,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          paddingLeft: collapsed ? 0 : 16,
+          paddingRight: collapsed ? 0 : 16,
           borderBottom: '1px solid var(--border)',
+          fontFamily: 'var(--font-display), "Clash Display", sans-serif',
+          fontWeight: 500,
+          fontSize: 16,
+          color: 'var(--ink)',
+          textDecoration: 'none',
+          letterSpacing: '-0.01em',
           flexShrink: 0,
         }}
-      />
+      >
+        NLM
+      </Link>
 
       <nav
         className="overflow-y-auto py-4"
