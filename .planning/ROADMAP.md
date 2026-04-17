@@ -137,7 +137,12 @@ Plans:
   4. A per-skill trend chart renders with a skill filter dropdown; selecting a skill updates the chart to show that skill's history
   5. A radar/spider plot shows all cohort skills; labels are visually distinct only for skills with enough sessions to be assessment-ready
   6. Selecting a skill anywhere on the dashboard transitions all dashboard elements to focus on that skill
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 29-01-PLAN.md — Tokens + vizUtils + SkillCardList + FocusHero
+- [ ] 29-02-PLAN.md — SkillTrendChart + SkillRadar
+- [ ] 29-03-PLAN.md — Dashboard 2-column layout + skill filter wiring + cleanup
 **UI hint**: yes
 
 ### Phase 30: Associate Curriculum View
@@ -177,6 +182,6 @@ Plans:
 | 27. Unified App Shell | v1.3 | 0/2 | Not started | - |
 | 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
 | 28.1. User Profile | v1.3 | 0/1 | Not started | - |
-| 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
+| 29. Associate Data Visualization | v1.3 | 0/3 | Not started | - |
 | 30. Associate Curriculum View | v1.3 | 0/1 | Not started | - |
 | 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
