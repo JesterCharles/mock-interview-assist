@@ -59,10 +59,10 @@
 - [x] **Phase 26: Design Tokens (Data-Viz)** - Add chart palette, typography, and trajectory-language conventions to DESIGN.md and globals.css (completed 2026-04-17)
 - [ ] **Phase 27: Unified App Shell** - Extend AppShell to serve associate role; remove PublicShell + AssociateNav
 - [ ] **Phase 28: Sign-in Redesign** - Replace tabbed SignInTabs with stacked-button single page + first-login password upgrade
-- [ ] **Phase 28.1: User Profile** - Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED)
-- [ ] **Phase 29: Associate Data Visualization** - Skill bars with trend arrows, focus area hero, per-skill trend chart, radar plot, dashboard skill filter
-- [ ] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state
-- [ ] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface
+- [x] **Phase 28.1: User Profile** - Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED) (completed 2026-04-17)
+- [x] **Phase 29: Associate Data Visualization** - Skill bars with trend arrows, focus area hero, per-skill trend chart, radar plot, dashboard skill filter (completed 2026-04-17)
+- [x] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state (completed 2026-04-17)
+- [x] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface (completed 2026-04-17)
 
 ## Phase Details
 
@@ -120,10 +120,10 @@ Plans:
   2. Avatar menu dropdown links to a profile/settings page
   3. Profile page allows updating password, viewing email, and entering github username
   4. First-login detection reads from Profile.passwordSetAt instead of Supabase user_metadata
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 28.1-01-PLAN.md — Profile model + tabbed profile page + password detection migration
+- [x] 28.1-01-PLAN.md — Profile model + tabbed profile page + password detection migration
 **UI hint**: yes
 
 ### Phase 29: Associate Data Visualization
@@ -140,9 +140,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 29-01-PLAN.md — Tokens + vizUtils + SkillCardList + FocusHero
-- [ ] 29-02-PLAN.md — SkillTrendChart + SkillRadar
-- [ ] 29-03-PLAN.md — Dashboard 2-column layout + skill filter wiring + cleanup
+- [x] 29-01-PLAN.md — Tokens + vizUtils + SkillCardList + FocusHero
+- [x] 29-02-PLAN.md — SkillTrendChart + SkillRadar
+- [x] 29-03-PLAN.md — Dashboard 2-column layout + skill filter wiring + cleanup
 **UI hint**: yes
 
 ### Phase 30: Associate Curriculum View
@@ -153,10 +153,10 @@ Plans:
   1. An associate assigned to a cohort can navigate to a curriculum view and see the full weekly schedule
   2. The current week is visually highlighted; past weeks appear greyed; future weeks appear muted
   3. An associate with no cohort assignment sees a clear empty state message ("You haven't been assigned to a cohort yet") with no errors
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 30-01-PLAN.md — Curriculum schedule grid with score coloring, collapsible weeks, banner, and empty state
+- [x] 30-01-PLAN.md — Curriculum schedule grid with score coloring, collapsible weeks, banner, and empty state
 **UI hint**: yes
 
 ### Phase 31: Dark Mode QA Sweep
@@ -167,10 +167,10 @@ Plans:
   1. Switching to dark mode on any page produces no parchment-white backgrounds, no dark-on-dark text, and no invisible borders
   2. All recharts components (line charts, area charts, radar plots, sparklines) use CSS variable tokens for fills, strokes, and tooltip backgrounds in both themes
   3. No component file contains a hardcoded hex color or light-only Tailwind utility that bypasses the design token system
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 31-01-PLAN.md — Replace all hardcoded hex colors with CSS variable tokens and add badge-background tokens
+- [x] 31-01-PLAN.md — Replace all hardcoded hex colors with CSS variable tokens and add badge-background tokens
 
 ## Progress
 
@@ -181,7 +181,17 @@ Plans:
 | 26. Design Tokens (Data-Viz) | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 27. Unified App Shell | v1.3 | 0/2 | Not started | - |
 | 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
-| 28.1. User Profile | v1.3 | 0/1 | Not started | - |
-| 29. Associate Data Visualization | v1.3 | 0/3 | Not started | - |
-| 30. Associate Curriculum View | v1.3 | 0/1 | Not started | - |
-| 31. Dark Mode QA Sweep | v1.3 | 0/1 | Not started | - |
+| 28.1. User Profile | v1.3 | 1/1 | Complete    | 2026-04-17 |
+| 29. Associate Data Visualization | v1.3 | 3/3 | Complete    | 2026-04-17 |
+| 30. Associate Curriculum View | v1.3 | 1/1 | Complete    | 2026-04-17 |
+| 31. Dark Mode QA Sweep | v1.3 | 1/1 | Complete    | 2026-04-17 |
+
+### Phase 32: Shell Architecture Overhaul
+
+**Goal:** Restructure AppShell with sidebar-primary navigation for all roles, strip TopBar to utility items only (home, cohort status, user icon, dark mode). Fix profile outside shell, landing page missing signin nav, roster slug column, batch upload missing from settings, update-password security. Trainer associate detail matches associate dashboard view.
+**Requirements**: TBD
+**Depends on:** Phase 31
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 32 to break down)
