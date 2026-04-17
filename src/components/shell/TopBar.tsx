@@ -2,58 +2,25 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AvatarMenu } from './AvatarMenu';
 import { CohortSwitcher } from './CohortSwitcher';
 import { MobileSidebar } from './MobileSidebar';
-import { dashboardSidebarGroups, settingsSidebarGroups } from './sidebar-configs';
-import type { SidebarGroup } from './types';
-
-function resolveGroups(pathname: string): SidebarGroup[] {
-  if (pathname.startsWith('/associate/')) return [];
-  if (pathname.startsWith('/trainer/settings')) return settingsSidebarGroups;
-  if (pathname.startsWith('/trainer')) return dashboardSidebarGroups;
-  return [];
-}
-
-interface NavItem {
-  label: string;
-  prefix: string;
-  href: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', prefix: '/trainer', href: '/trainer' },
-  { label: 'Interviews', prefix: '/interview', href: '/interview/new' },
-  { label: 'Question Banks', prefix: '/question-banks', href: '/question-banks' },
-  { label: 'Settings', prefix: '/trainer/settings', href: '/trainer/settings' },
-];
-
-function isNavItemActive(item: NavItem, pathname: string): boolean {
-  if (item.prefix === '/trainer/settings') {
-    return pathname.startsWith('/trainer/settings');
-  }
-  if (item.prefix === '/trainer') {
-    // Active for exact /trainer OR /trainer/* but NOT /trainer/settings
-    return (
-      pathname === '/trainer' ||
-      (pathname.startsWith('/trainer/') && !pathname.startsWith('/trainer/settings'))
-    );
-  }
-  return pathname === item.href || pathname.startsWith(`${item.prefix}/`);
-}
+import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
 interface TopBarProps {
   sidebarGroups?: SidebarGroup[];
+  settingsGroup?: SettingsAccordionGroup;
   role?: 'trainer' | 'associate';
   associateSlug?: string;
 }
 
-export function TopBar({ sidebarGroups: propGroups, role = 'trainer', associateSlug }: TopBarProps) {
-  const pathname = usePathname();
-  const sidebarGroups = propGroups ?? resolveGroups(pathname);
-
+export function TopBar({
+  sidebarGroups = [],
+  settingsGroup,
+  role = 'trainer',
+  associateSlug,
+}: TopBarProps) {
   const wordmarkHref =
     role === 'associate' && associateSlug
       ? `/associate/${associateSlug}/dashboard`
@@ -75,10 +42,10 @@ export function TopBar({ sidebarGroups: propGroups, role = 'trainer', associateS
         gap: 16,
       }}
     >
-      {/* Left zone: wordmark + mobile hamburger */}
+      {/* Left zone: mobile hamburger + wordmark */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {sidebarGroups && sidebarGroups.length > 0 && (
-          <MobileSidebar groups={sidebarGroups} />
+        {sidebarGroups.length > 0 && (
+          <MobileSidebar groups={sidebarGroups} settingsGroup={settingsGroup} />
         )}
         <Link
           href={wordmarkHref}
@@ -95,44 +62,11 @@ export function TopBar({ sidebarGroups: propGroups, role = 'trainer', associateS
         </Link>
       </div>
 
-      {/* Center zone: section nav links — trainer only */}
-      {role === 'trainer' && (
-        <nav
-          className="hidden md:flex"
-          style={{ flex: 1, alignItems: 'center', gap: 4 }}
-          aria-label="Main navigation"
-        >
-          {NAV_ITEMS.map((item) => {
-            const active = isNavItemActive(item, pathname);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  fontSize: 13,
-                  fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
-                  fontWeight: 500,
-                  color: active ? 'var(--accent)' : 'var(--ink)',
-                  textDecoration: 'none',
-                  borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
-                  transition: 'background 120ms ease-out, color 120ms ease-out',
-                }}
-                className="hover:bg-[var(--highlight)]"
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      )}
-
-      {/* Spacer for associate role (no center nav) */}
-      {role === 'associate' && <div style={{ flex: 1 }} />}
+      {/* Spacer — no center nav */}
+      <div style={{ flex: 1 }} />
 
       {/* Right zone: CohortSwitcher (trainer only) + ThemeToggle + AvatarMenu */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {role === 'trainer' && (
           <Suspense fallback={null}>
             <CohortSwitcher />

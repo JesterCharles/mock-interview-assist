@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Menu, X } from 'lucide-react';
-import type { SidebarGroup } from './types';
+import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
 interface MobileSidebarProps {
   groups: SidebarGroup[];
+  settingsGroup?: SettingsAccordionGroup;
 }
 
-export function MobileSidebar({ groups }: MobileSidebarProps) {
+export function MobileSidebar({ groups, settingsGroup }: MobileSidebarProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -71,19 +72,21 @@ export function MobileSidebar({ groups }: MobileSidebarProps) {
             {groups.map((group) => (
               <div key={group.label} style={{ marginBottom: 16 }}>
                 {/* Group label */}
-                <div
-                  style={{
-                    padding: '0 16px 4px',
-                    fontSize: 12,
-                    fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
-                    fontWeight: 500,
-                    color: 'var(--muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                  }}
-                >
-                  {group.label}
-                </div>
+                {group.label && (
+                  <div
+                    style={{
+                      padding: '0 16px 4px',
+                      fontSize: 12,
+                      fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+                      fontWeight: 500,
+                      color: 'var(--muted)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                    }}
+                  >
+                    {group.label}
+                  </div>
+                )}
 
                 {/* Items — always expanded in mobile sheet */}
                 {group.items.map((item) => {
@@ -123,6 +126,84 @@ export function MobileSidebar({ groups }: MobileSidebarProps) {
                 })}
               </div>
             ))}
+
+            {/* Settings sub-items — always expanded in mobile (no accordion) */}
+            {settingsGroup && (
+              <div style={{ marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 8 }}>
+                <div
+                  style={{
+                    padding: '0 16px 4px',
+                    fontSize: 12,
+                    fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+                    fontWeight: 500,
+                    color: 'var(--muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                  }}
+                >
+                  {settingsGroup.label}
+                </div>
+                {settingsGroup.items.map((item) => {
+                  const Icon = item.icon;
+                  const subItemStyle = {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '6px 16px',
+                    margin: '1px 8px',
+                    borderRadius: 6,
+                    fontSize: 13,
+                    fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif',
+                    fontWeight: 500,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                    width: 'calc(100% - 16px)',
+                  };
+
+                  if (item.href) {
+                    const active = isItemActive(item.href);
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        style={{
+                          ...subItemStyle,
+                          color: active ? 'var(--accent)' : 'var(--ink)',
+                          borderLeft: active ? '2px solid var(--accent)' : '2px solid transparent',
+                        }}
+                        className="hover:bg-[var(--highlight)]"
+                      >
+                        <Icon
+                          className="shrink-0"
+                          style={{ width: 16, height: 16, color: active ? 'var(--accent)' : 'var(--ink)' }}
+                          aria-hidden="true"
+                        />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => { item.action?.(); setOpen(false); }}
+                      style={{ ...subItemStyle, color: 'var(--ink)' }}
+                      className="hover:bg-[var(--highlight)]"
+                    >
+                      <Icon
+                        className="shrink-0"
+                        style={{ width: 16, height: 16 }}
+                        aria-hidden="true"
+                      />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </nav>
         </Dialog.Content>
       </Dialog.Portal>
