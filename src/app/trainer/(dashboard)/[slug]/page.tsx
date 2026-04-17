@@ -111,7 +111,7 @@ export default function AssociateDetailPage() {
             fontSize: '13px',
             fontFamily: 'DM Sans, sans-serif',
             fontWeight: 500,
-            color: '#7A7267',
+            color: 'var(--muted)',
             textDecoration: 'none',
             marginBottom: '24px',
           }}
@@ -127,7 +127,7 @@ export default function AssociateDetailPage() {
                 height: '52px',
                 width: '300px',
                 borderRadius: '6px',
-                backgroundColor: '#E8E2D9',
+                backgroundColor: 'var(--border-subtle)',
                 marginBottom: '12px',
               }}
             />
@@ -137,7 +137,7 @@ export default function AssociateDetailPage() {
                 height: '16px',
                 width: '160px',
                 borderRadius: '4px',
-                backgroundColor: '#F0EBE2',
+                backgroundColor: 'var(--surface-muted)',
               }}
             />
           </div>
@@ -146,11 +146,11 @@ export default function AssociateDetailPage() {
         {error && !dataLoading && (
           <div
             style={{
-              backgroundColor: '#FDECEB',
-              border: '1px solid #B83B2E',
+              backgroundColor: 'var(--danger-bg)',
+              border: '1px solid var(--danger)',
               borderRadius: '8px',
               padding: '16px',
-              color: '#B83B2E',
+              color: 'var(--danger)',
               fontSize: '14px',
               fontFamily: 'DM Sans, sans-serif',
             }}
@@ -168,7 +168,7 @@ export default function AssociateDetailPage() {
                   fontFamily: 'Clash Display, sans-serif',
                   fontWeight: 600,
                   fontSize: '48px',
-                  color: '#1A1A1A',
+                  color: 'var(--ink)',
                   lineHeight: 1.1,
                   marginBottom: '8px',
                   letterSpacing: '-0.02em',
@@ -180,7 +180,7 @@ export default function AssociateDetailPage() {
                 style={{
                   fontSize: '14px',
                   fontFamily: 'DM Sans, sans-serif',
-                  color: '#7A7267',
+                  color: 'var(--muted)',
                   marginBottom: '12px',
                 }}
               >
@@ -200,7 +200,7 @@ export default function AssociateDetailPage() {
                   style={{
                     fontSize: '13px',
                     fontFamily: 'DM Sans, sans-serif',
-                    color: '#7A7267',
+                    color: 'var(--muted)',
                     marginTop: '6px',
                     marginBottom: 0,
                   }}
@@ -220,8 +220,8 @@ export default function AssociateDetailPage() {
                     gap: '6px',
                     padding: '7px 16px',
                     background: 'transparent',
-                    color: exportingPdf ? '#7A7267' : '#1A1A1A',
-                    border: '1px solid #C9C2B8',
+                    color: exportingPdf ? 'var(--muted)' : 'var(--ink)',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontFamily: 'DM Sans, sans-serif',
                     fontWeight: 500,
@@ -280,7 +280,7 @@ export default function AssociateDetailPage() {
                       style={{
                         fontSize: '14px',
                         fontFamily: 'DM Sans, sans-serif',
-                        color: '#7A7267',
+                        color: 'var(--muted)',
                         margin: 0,
                         paddingTop: '8px',
                         paddingBottom: '8px',

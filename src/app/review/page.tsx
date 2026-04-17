@@ -285,7 +285,7 @@ export default function ReviewPage() {
             case 'validated':
                 return {
                     icon: CheckCircle2,
-                    bg: '#E8F5EE',
+                    bg: 'var(--success-bg)',
                     border: 'var(--success)',
                     text: 'var(--success)',
                     label: 'Validated',
@@ -293,7 +293,7 @@ export default function ReviewPage() {
             case 'ready':
                 return {
                     icon: AlertCircle,
-                    bg: '#FEF3E0',
+                    bg: 'var(--warning-bg)',
                     border: 'var(--warning)',
                     text: 'var(--warning)',
                     label: 'Needs Review',

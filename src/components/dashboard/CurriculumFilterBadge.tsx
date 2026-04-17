@@ -40,9 +40,9 @@ export function CurriculumFilterBadge({ taughtWeeks }: CurriculumFilterBadgeProp
         onClick={() => setOpen(o => !o)}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
         style={{
-          backgroundColor: 'var(--surface-muted, #2E2A27)',
-          color: 'var(--accent, #D4743F)',
-          border: '1px solid var(--border, #3D3733)',
+          backgroundColor: 'var(--surface-muted)',
+          color: 'var(--accent)',
+          border: '1px solid var(--border)',
         }}
         data-testid="curriculum-filter-badge"
         aria-expanded={open}
@@ -51,8 +51,8 @@ export function CurriculumFilterBadge({ taughtWeeks }: CurriculumFilterBadgeProp
         <span
           className="font-bold rounded-full px-1.5 py-0.5 text-[10px]"
           style={{
-            backgroundColor: 'var(--accent, #D4743F)',
-            color: '#fff',
+            backgroundColor: 'var(--accent)',
+            color: 'white',
           }}
           data-testid="curriculum-filter-count"
         >
@@ -69,14 +69,14 @@ export function CurriculumFilterBadge({ taughtWeeks }: CurriculumFilterBadgeProp
         <div
           className="mt-1.5 rounded-lg border p-3 space-y-1 shadow-sm"
           style={{
-            backgroundColor: 'var(--surface, #262220)',
-            borderColor: 'var(--border, #3D3733)',
+            backgroundColor: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
           data-testid="curriculum-filter-dropdown"
         >
           <p
             className="text-[11px] uppercase tracking-wide mb-2"
-            style={{ color: 'var(--muted, #9C9488)', fontFamily: 'JetBrains Mono, monospace' }}
+            style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}
           >
             Taught skills
           </p>
@@ -85,11 +85,11 @@ export function CurriculumFilterBadge({ taughtWeeks }: CurriculumFilterBadgeProp
               <li
                 key={week.weekNumber}
                 className="flex items-center gap-2 text-sm"
-                style={{ color: 'var(--ink, #E8E2D9)' }}
+                style={{ color: 'var(--ink)' }}
               >
                 <span
                   className="text-[10px] font-mono tabular-nums w-8 text-right flex-shrink-0"
-                  style={{ color: 'var(--muted, #9C9488)' }}
+                  style={{ color: 'var(--muted)' }}
                 >
                   W{week.weekNumber}
                 </span>

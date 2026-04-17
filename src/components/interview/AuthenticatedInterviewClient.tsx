@@ -8,13 +8,13 @@ interface AuthenticatedInterviewClientProps {
 }
 
 const tokens = {
-  bg: '#F5F0E8',
-  surface: '#FFFFFF',
-  ink: '#1A1A1A',
-  muted: '#7A7267',
-  accent: '#C85A2E',
-  border: '#DDD5C8',
-  surfaceMuted: '#F0EBE2',
+  bg: 'var(--bg)',
+  surface: 'var(--surface)',
+  ink: 'var(--ink)',
+  muted: 'var(--muted)',
+  accent: 'var(--accent)',
+  border: 'var(--border)',
+  surfaceMuted: 'var(--surface-muted)',
 } as const;
 
 /**

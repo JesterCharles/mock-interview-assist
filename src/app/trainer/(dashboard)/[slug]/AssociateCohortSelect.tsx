@@ -81,7 +81,7 @@ export default function AssociateCohortSelect({
     fontWeight: 500,
     textTransform: 'uppercase',
     letterSpacing: '0.07em',
-    color: '#7A7267',
+    color: 'var(--muted)',
     display: 'block',
     marginBottom: '8px',
   }
@@ -89,9 +89,9 @@ export default function AssociateCohortSelect({
   const selectStyle: React.CSSProperties = {
     fontFamily: 'DM Sans, sans-serif',
     fontSize: '14px',
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #DDD5C8',
+    color: 'var(--ink)',
+    backgroundColor: 'var(--surface)',
+    border: '1px solid var(--border)',
     borderRadius: '6px',
     padding: '8px 12px',
     minWidth: '240px',
@@ -115,7 +115,7 @@ export default function AssociateCohortSelect({
           style={{
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '14px',
-            color: '#7A7267',
+            color: 'var(--muted)',
             margin: 0,
           }}
         >
@@ -128,7 +128,7 @@ export default function AssociateCohortSelect({
           style={{
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '14px',
-            color: '#B83B2E',
+            color: 'var(--danger)',
             margin: 0,
           }}
         >
@@ -154,13 +154,13 @@ export default function AssociateCohortSelect({
           </select>
 
           {status === 'saving' && (
-            <span style={{ ...statusTextStyle, color: '#7A7267' }}>Saving…</span>
+            <span style={{ ...statusTextStyle, color: 'var(--muted)' }}>Saving…</span>
           )}
           {status === 'saved' && (
-            <span style={{ ...statusTextStyle, color: '#2D6A4F' }}>Saved</span>
+            <span style={{ ...statusTextStyle, color: 'var(--success)' }}>Saved</span>
           )}
           {status === 'error' && errorMsg && (
-            <span style={{ ...statusTextStyle, color: '#B83B2E' }}>{errorMsg}</span>
+            <span style={{ ...statusTextStyle, color: 'var(--danger)' }}>{errorMsg}</span>
           )}
         </div>
       )}

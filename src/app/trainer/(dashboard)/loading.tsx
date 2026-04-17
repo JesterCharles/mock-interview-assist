@@ -10,7 +10,7 @@ export default function TrainerLoading() {
           style={{
             height: '48px',
             width: '280px',
-            backgroundColor: '#DDD5C8',
+            backgroundColor: 'var(--border)',
             borderRadius: '6px',
             marginBottom: '40px',
           }}
@@ -22,7 +22,7 @@ export default function TrainerLoading() {
           style={{
             height: '12px',
             width: '60px',
-            backgroundColor: '#E8E2D9',
+            backgroundColor: 'var(--border-subtle)',
             borderRadius: '4px',
             marginBottom: '12px',
           }}
@@ -37,7 +37,7 @@ export default function TrainerLoading() {
               gridTemplateColumns: '2fr 1fr 1.5fr 0.8fr 1.2fr 1.5fr',
               gap: '12px',
               padding: '12px',
-              borderBottom: '1px solid #DDD5C8',
+              borderBottom: '1px solid var(--border)',
             }}
           >
             {[60, 40, 80, 55, 80, 100].map((w, i) => (
@@ -47,7 +47,7 @@ export default function TrainerLoading() {
                 style={{
                   height: '11px',
                   width: `${w}px`,
-                  backgroundColor: '#E8E2D9',
+                  backgroundColor: 'var(--border-subtle)',
                   borderRadius: '4px',
                 }}
               />
@@ -63,7 +63,7 @@ export default function TrainerLoading() {
                 gridTemplateColumns: '2fr 1fr 1.5fr 0.8fr 1.2fr 1.5fr',
                 gap: '12px',
                 padding: '14px 12px',
-                borderBottom: '1px solid #E8E2D9',
+                borderBottom: '1px solid var(--border-subtle)',
               }}
             >
               {[120, 80, 90, 30, 90, 110].map((w, i) => (
@@ -73,7 +73,7 @@ export default function TrainerLoading() {
                   style={{
                     height: '14px',
                     width: `${w}px`,
-                    backgroundColor: '#F0EBE2',
+                    backgroundColor: 'var(--surface-muted)',
                     borderRadius: '4px',
                   }}
                 />

@@ -651,7 +651,7 @@ export default function DashboardPage() {
             <div
               className="text-center py-4 text-sm rounded-lg px-3"
               style={{
-                background: '#FDECEB',
+                background: 'var(--danger-bg)',
                 border: '1px solid var(--danger)',
                 color: 'var(--danger)',
               }}
@@ -688,7 +688,7 @@ export default function DashboardPage() {
                           className="text-xs px-2 py-0.5 rounded-full font-medium"
                           style={{
                             background: 'var(--accent)',
-                            color: '#FFFFFF',
+                            color: 'white',
                             fontFamily: 'var(--font-mono)',
                           }}
                         >
@@ -734,7 +734,7 @@ export default function DashboardPage() {
                                 className="w-5 h-5 rounded text-center transition-all font-medium"
                                 style={{
                                   background: active ? 'var(--accent)' : 'var(--surface)',
-                                  color: active ? '#FFFFFF' : 'var(--muted)',
+                                  color: active ? 'white' : 'var(--muted)',
                                   border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
                                   fontFamily: 'var(--font-mono)',
                                 }}
@@ -942,7 +942,7 @@ export default function DashboardPage() {
           <div
             className="rounded-xl p-4 flex items-center gap-3"
             style={{
-              background: '#FEF3E0',
+              background: 'var(--warning-bg)',
               border: '1px solid var(--warning)',
             }}
           >
@@ -956,7 +956,7 @@ export default function DashboardPage() {
           <div
             className="rounded-xl p-4 flex items-center gap-3"
             style={{
-              background: '#E8F5EE',
+              background: 'var(--success-bg)',
               border: '1px solid var(--success)',
             }}
           >
@@ -1054,7 +1054,7 @@ export default function DashboardPage() {
           <div
             className="mb-8 rounded-xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2"
             style={{
-              background: session.status === 'review' ? 'var(--highlight)' : '#FEF3E0',
+              background: session.status === 'review' ? 'var(--highlight)' : 'var(--warning-bg)',
               border: `1px solid ${session.status === 'review' ? 'var(--accent)' : 'var(--warning)'}`,
             }}
           >

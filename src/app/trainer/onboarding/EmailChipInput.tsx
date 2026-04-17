@@ -12,9 +12,9 @@ import {
 const CAP = 50;
 
 const CHIP_STYLES: Record<ParsedEmail['state'], { background: string; color: string }> = {
-  valid: { background: '#E8F5EE', color: '#2D6A4F' },
-  invalid: { background: '#FDECEB', color: '#B83B2E' },
-  duplicate: { background: '#FEF3E0', color: '#B7791F' },
+  valid: { background: 'var(--success-bg)', color: 'var(--success)' },
+  invalid: { background: 'var(--danger-bg)', color: 'var(--danger)' },
+  duplicate: { background: 'var(--warning-bg)', color: 'var(--warning)' },
 };
 
 interface EmailChipInputProps {

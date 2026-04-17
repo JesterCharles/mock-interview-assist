@@ -765,7 +765,7 @@ export default function PublicInterviewPage() {
                             <div
                                 className="mt-4 inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium animate-slide-up"
                                 style={{
-                                    background: '#FDECEB',
+                                    background: 'var(--danger-bg)',
                                     border: '1px solid var(--danger)',
                                     color: 'var(--danger)',
                                 }}
@@ -947,7 +947,7 @@ export default function PublicInterviewPage() {
                                         <div
                                             className="p-4"
                                             style={{
-                                                background: '#FEF3E0',
+                                                background: 'var(--warning-bg)',
                                                 border: '1px solid var(--warning)',
                                                 borderRadius: 12,
                                             }}
@@ -1258,7 +1258,7 @@ export default function PublicInterviewPage() {
                             <div className="max-w-md w-full p-8 text-center animate-slide-up" style={surfaceCard}>
                                 <div
                                     className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                                    style={{ background: '#FEF3E0', border: '1px solid var(--warning)' }}
+                                    style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)' }}
                                 >
                                     <AlertTriangle className="w-8 h-8" style={{ color: 'var(--warning)' }} />
                                 </div>
@@ -1365,7 +1365,7 @@ export default function PublicInterviewPage() {
                                                         key={i}
                                                         className="px-2 py-0.5 text-xs"
                                                         style={{
-                                                            background: '#E8F5EE',
+                                                            background: 'var(--success-bg)',
                                                             border: '1px solid var(--success)',
                                                             borderRadius: 4,
                                                             color: 'var(--success)',
