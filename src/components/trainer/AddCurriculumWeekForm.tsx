@@ -118,13 +118,13 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
   }
 
   const inputStyle: React.CSSProperties = {
-    background: '#FFFFFF',
-    border: '1px solid #DDD5C8',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
     padding: '10px 12px',
     fontFamily: "'DM Sans', sans-serif",
     fontSize: '14px',
-    color: '#1A1A1A',
+    color: 'var(--ink)',
     outline: 'none',
     width: '100%',
     boxSizing: 'border-box',
@@ -133,7 +133,7 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
 
   const inputErrorStyle: React.CSSProperties = {
     ...inputStyle,
-    borderColor: '#B83B2E',
+    borderColor: 'var(--danger)',
   }
 
   const fieldLabelStyle: React.CSSProperties = {
@@ -142,14 +142,14 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
     fontWeight: 500,
     textTransform: 'uppercase',
     letterSpacing: '0.07em',
-    color: '#7A7267',
+    color: 'var(--muted)',
     display: 'block',
     marginBottom: '6px',
   }
 
   const fieldErrorStyle: React.CSSProperties = {
     fontSize: '12px',
-    color: '#B83B2E',
+    color: 'var(--danger)',
     fontFamily: "'DM Sans', sans-serif",
     marginTop: '4px',
   }
@@ -157,8 +157,8 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
   return (
     <div
       style={{
-        background: '#FFFFFF',
-        border: '1px solid #DDD5C8',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         padding: '24px',
         marginTop: '24px',
@@ -169,7 +169,7 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
           fontFamily: "'Clash Display', sans-serif",
           fontWeight: 600,
           fontSize: '22px',
-          color: '#1A1A1A',
+          color: 'var(--ink)',
           margin: '0 0 16px 0',
         }}
       >
@@ -179,11 +179,11 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
       {errors.form && (
         <div
           style={{
-            background: '#FDECEB',
-            border: '1px solid #B83B2E',
+            background: 'var(--danger-bg)',
+            border: '1px solid var(--danger)',
             borderRadius: '8px',
             padding: '10px 12px',
-            color: '#B83B2E',
+            color: 'var(--danger)',
             fontFamily: "'DM Sans', sans-serif",
             fontSize: '13px',
             marginBottom: '16px',
@@ -295,7 +295,7 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
           <div>
             <label style={fieldLabelStyle} htmlFor="add-topicTags">
               Topic Tags{' '}
-              <span style={{ textTransform: 'none', letterSpacing: 0, fontFamily: "'DM Sans', sans-serif", color: '#DDD5C8' }}>
+              <span style={{ textTransform: 'none', letterSpacing: 0, fontFamily: "'DM Sans', sans-serif", color: 'var(--border)' }}>
                 (comma-separated, optional)
               </span>
             </label>
@@ -338,9 +338,9 @@ export default function AddCurriculumWeekForm({ cohortId, onWeekAdded }: AddCurr
             type="submit"
             disabled={submitting}
             style={{
-              background: submitting ? '#DDD5C8' : '#C85A2E',
-              color: '#FFFFFF',
-              border: `1px solid ${submitting ? '#DDD5C8' : '#C85A2E'}`,
+              background: submitting ? 'var(--border)' : 'var(--accent)',
+              color: 'white',
+              border: `1px solid ${submitting ? 'var(--border)' : 'var(--accent)'}`,
               borderRadius: '8px',
               padding: '10px 24px',
               fontFamily: "'DM Sans', sans-serif",

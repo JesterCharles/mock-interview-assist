@@ -23,12 +23,12 @@ function formatDate(dateStr: string): string {
 function DeltaCell({ delta }: { delta: number | null }) {
   if (delta === null) {
     return (
-      <span style={{ color: '#7A7267', fontVariantNumeric: 'tabular-nums' }}>---</span>
+      <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>---</span>
     )
   }
 
   const color =
-    delta > 0 ? '#2D6A4F' : delta < 0 ? '#B83B2E' : '#7A7267'
+    delta > 0 ? 'var(--success)' : delta < 0 ? 'var(--danger)' : 'var(--muted)'
   const prefix = delta > 0 ? '+' : ''
 
   return (
@@ -80,7 +80,7 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
         style={{
           fontSize: '14px',
           fontFamily: 'DM Sans, sans-serif',
-          color: '#7A7267',
+          color: 'var(--muted)',
           margin: 0,
           paddingTop: '8px',
           paddingBottom: '8px',
@@ -106,7 +106,7 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
             fontWeight: 500,
             textTransform: 'uppercase',
             letterSpacing: '0.07em',
-            color: '#7A7267',
+            color: 'var(--muted)',
           }}
         >
           session
@@ -118,9 +118,9 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: '14px',
             fontWeight: 400,
-            color: '#1A1A1A',
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #DDD5C8',
+            color: 'var(--ink)',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
             padding: '6px 10px',
             cursor: 'pointer',
@@ -142,7 +142,7 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
           style={{
             fontSize: '14px',
             fontFamily: 'DM Sans, sans-serif',
-            color: '#7A7267',
+            color: 'var(--muted)',
             margin: 0,
           }}
         >
@@ -169,8 +169,8 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     fontWeight: 500,
                     textTransform: 'uppercase',
                     letterSpacing: '0.07em',
-                    color: '#7A7267',
-                    borderBottom: '1px solid #DDD5C8',
+                    color: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
                     padding: '8px 12px 8px 0',
                   }}
                 >
@@ -184,8 +184,8 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     fontWeight: 500,
                     textTransform: 'uppercase',
                     letterSpacing: '0.07em',
-                    color: '#7A7267',
-                    borderBottom: '1px solid #DDD5C8',
+                    color: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
                     padding: '8px 12px',
                   }}
                 >
@@ -199,8 +199,8 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     fontWeight: 500,
                     textTransform: 'uppercase',
                     letterSpacing: '0.07em',
-                    color: '#7A7267',
-                    borderBottom: '1px solid #DDD5C8',
+                    color: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
                     padding: '8px 12px',
                   }}
                 >
@@ -214,8 +214,8 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     fontWeight: 500,
                     textTransform: 'uppercase',
                     letterSpacing: '0.07em',
-                    color: '#7A7267',
-                    borderBottom: '1px solid #DDD5C8',
+                    color: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
                     padding: '8px 0 8px 12px',
                   }}
                 >
@@ -240,7 +240,7 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     }}
                     onMouseEnter={(e) => {
                       ;(e.currentTarget as HTMLTableRowElement).style.backgroundColor =
-                        '#FFF8F0'
+                        'var(--highlight)'
                     }}
                     onMouseLeave={(e) => {
                       ;(e.currentTarget as HTMLTableRowElement).style.backgroundColor =
@@ -250,8 +250,8 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     <td
                       style={{
                         padding: '10px 12px 10px 0',
-                        borderBottom: '1px solid #E8E2D9',
-                        color: '#7A7267',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        color: 'var(--muted)',
                         fontSize: '13px',
                         maxWidth: '120px',
                         overflow: 'hidden',
@@ -264,10 +264,10 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     <td
                       style={{
                         padding: '10px 12px',
-                        borderBottom: '1px solid #E8E2D9',
+                        borderBottom: '1px solid var(--border-subtle)',
                         textAlign: 'right',
                         fontVariantNumeric: 'tabular-nums',
-                        color: llm !== null ? '#1A1A1A' : '#7A7267',
+                        color: llm !== null ? 'var(--ink)' : 'var(--muted)',
                       }}
                     >
                       {llm !== null ? Math.round(llm) : '---'}
@@ -275,10 +275,10 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     <td
                       style={{
                         padding: '10px 12px',
-                        borderBottom: '1px solid #E8E2D9',
+                        borderBottom: '1px solid var(--border-subtle)',
                         textAlign: 'right',
                         fontVariantNumeric: 'tabular-nums',
-                        color: trainer !== null ? '#1A1A1A' : '#7A7267',
+                        color: trainer !== null ? 'var(--ink)' : 'var(--muted)',
                       }}
                     >
                       {trainer !== null ? Math.round(trainer) : '---'}
@@ -286,7 +286,7 @@ export default function CalibrationView({ sessions }: CalibrationViewProps) {
                     <td
                       style={{
                         padding: '10px 0 10px 12px',
-                        borderBottom: '1px solid #E8E2D9',
+                        borderBottom: '1px solid var(--border-subtle)',
                         textAlign: 'right',
                       }}
                     >

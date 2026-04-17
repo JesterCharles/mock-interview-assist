@@ -30,20 +30,20 @@ export default function CohortSummaryBar({ summary }: CohortSummaryBarProps) {
     {
       label: 'Ready',
       count: summary.ready,
-      color: '#2D6A4F', // --success
-      background: '#E8F5EE',
+      color: 'var(--success)',
+      background: 'var(--success-bg)',
     },
     {
       label: 'Improving',
       count: summary.improving,
-      color: '#C85A2E', // --accent (matches RosterTable .readiness-improving)
-      background: '#FFF1E6',
+      color: 'var(--accent)',
+      background: 'var(--warning-bg)',
     },
     {
       label: 'Not Ready',
       count: summary.notReady,
-      color: '#B83B2E', // --danger
-      background: '#FDECEB',
+      color: 'var(--danger)',
+      background: 'var(--danger-bg)',
     },
   ]
 
@@ -56,8 +56,8 @@ export default function CohortSummaryBar({ summary }: CohortSummaryBarProps) {
         gap: '12px',
         padding: '16px',
         marginBottom: '24px',
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #DDD5C8',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         fontFamily: 'DM Sans, sans-serif',
       }}

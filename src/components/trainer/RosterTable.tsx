@@ -142,7 +142,7 @@ export default function RosterTable({ associates, sparklineData }: RosterTablePr
                   style={{
                     textAlign: 'center',
                     padding: '48px 16px',
-                    color: '#7A7267',
+                    color: 'var(--muted)',
                     fontStyle: 'italic',
                   }}
                 >
@@ -179,7 +179,7 @@ export default function RosterTable({ associates, sparklineData }: RosterTablePr
                 <td className="trainer-meta">{formatDate(associate.lastSessionDate)}</td>
                 <td className="trainer-meta">
                   {associate.recommendedArea ?? (
-                    <span style={{ color: '#DDD5C8' }}>—</span>
+                    <span style={{ color: 'var(--border)' }}>—</span>
                   )}
                 </td>
                 {(() => {

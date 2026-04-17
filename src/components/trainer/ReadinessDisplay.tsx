@@ -9,17 +9,17 @@ const STATUS_CONFIG = {
   ready: {
     trendWord: 'ascending',
     colorClass: 'readiness-ready',
-    color: '#2D6A4F',
+    color: 'var(--success)',
   },
   improving: {
     trendWord: 'climbing',
     colorClass: 'readiness-improving',
-    color: '#C85A2E',
+    color: 'var(--accent)',
   },
   not_ready: {
     trendWord: 'stalling',
     colorClass: 'readiness-not-ready',
-    color: '#B83B2E',
+    color: 'var(--danger)',
   },
 } as const
 
@@ -28,7 +28,7 @@ export default function ReadinessDisplay({ score, status }: ReadinessDisplayProp
 
   if (score === null) {
     return (
-      <span style={{ color: '#7A7267', fontSize: '14px', fontFamily: 'DM Sans, sans-serif' }}>
+      <span style={{ color: 'var(--muted)', fontSize: '14px', fontFamily: 'DM Sans, sans-serif' }}>
         -- pending
       </span>
     )

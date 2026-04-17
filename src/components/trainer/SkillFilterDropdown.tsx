@@ -20,7 +20,7 @@ export default function SkillFilterDropdown({
           fontWeight: 500,
           textTransform: 'uppercase',
           letterSpacing: '0.07em',
-          color: '#7A7267',
+          color: 'var(--muted)',
         }}
       >
         skill
@@ -32,9 +32,9 @@ export default function SkillFilterDropdown({
           fontFamily: 'DM Sans, sans-serif',
           fontSize: '14px',
           fontWeight: 400,
-          color: '#1A1A1A',
-          backgroundColor: '#FFFFFF',
-          border: '1px solid #DDD5C8',
+          color: 'var(--ink)',
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: '8px',
           padding: '6px 10px',
           cursor: 'pointer',

@@ -24,8 +24,8 @@ function StatusBadge({ status }: { status: string }) {
   const isComplete = normalized.includes('complet')
   const isProgress = normalized.includes('progress') || normalized.includes('active')
 
-  const bgColor = isComplete ? '#E8F5EE' : isProgress ? '#FEF3E0' : '#F0EBE2'
-  const textColor = isComplete ? '#2D6A4F' : isProgress ? '#B7791F' : '#7A7267'
+  const bgColor = isComplete ? 'var(--success-bg)' : isProgress ? 'var(--warning-bg)' : 'var(--surface-muted)'
+  const textColor = isComplete ? 'var(--success)' : isProgress ? 'var(--warning)' : 'var(--muted)'
 
   return (
     <span
@@ -62,7 +62,7 @@ export default function SessionHistoryList({ sessions }: SessionHistoryListProps
             style={{
               fontSize: '14px',
               fontFamily: 'DM Sans, sans-serif',
-              color: '#7A7267',
+              color: 'var(--muted)',
               margin: 0,
             }}
           >
@@ -89,7 +89,7 @@ export default function SessionHistoryList({ sessions }: SessionHistoryListProps
                         fontSize: '14px',
                         fontFamily: 'DM Sans, sans-serif',
                         fontWeight: 400,
-                        color: '#1A1A1A',
+                        color: 'var(--ink)',
                       }}
                     >
                       {formatDate(session.date)}
@@ -101,7 +101,7 @@ export default function SessionHistoryList({ sessions }: SessionHistoryListProps
                         fontSize: '14px',
                         fontFamily: 'DM Sans, sans-serif',
                         fontVariantNumeric: 'tabular-nums',
-                        color: session.overallTechnicalScore !== null ? '#1A1A1A' : '#7A7267',
+                        color: session.overallTechnicalScore !== null ? 'var(--ink)' : 'var(--muted)',
                       }}
                     >
                       {session.overallTechnicalScore !== null
@@ -115,7 +115,7 @@ export default function SessionHistoryList({ sessions }: SessionHistoryListProps
                         fontSize: '14px',
                         fontFamily: 'DM Sans, sans-serif',
                         fontVariantNumeric: 'tabular-nums',
-                        color: session.overallSoftSkillScore !== null ? '#1A1A1A' : '#7A7267',
+                        color: session.overallSoftSkillScore !== null ? 'var(--ink)' : 'var(--muted)',
                       }}
                     >
                       {session.overallSoftSkillScore !== null
