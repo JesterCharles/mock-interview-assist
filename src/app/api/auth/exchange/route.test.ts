@@ -104,7 +104,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('redirects trainer to /trainer', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer', password_set: true } } },
+      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer' } } },
     });
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(getRedirectPath(res)).toBe('/trainer');
@@ -112,7 +112,7 @@ describe('GET /api/auth/exchange', () => {
 
   it('redirects admin to /trainer', async () => {
     mockGetUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'a@test.com', user_metadata: { role: 'admin', password_set: true } } },
+      data: { user: { id: 'u1', email: 'a@test.com', user_metadata: { role: 'admin' } } },
     });
     const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
     expect(getRedirectPath(res)).toBe('/trainer');

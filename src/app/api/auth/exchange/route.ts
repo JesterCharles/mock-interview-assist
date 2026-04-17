@@ -68,12 +68,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return redirectWith('/signin?error=invalid-link');
 
-    // First-login detection: if user has never set a password, redirect to set-password page
-    const passwordSet = user.user_metadata?.password_set === true;
-    if (!passwordSet) {
-      return redirectWith('/auth/set-password');
-    }
-
     const role = user.user_metadata?.role as string | undefined;
 
     if (!role) {
@@ -85,6 +79,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (role === 'trainer' || role === 'admin') {
       return redirectWith('/trainer');
+    }
+
+    // First-login detection (associates only): redirect to set password if never set
+    const passwordSet = user.user_metadata?.password_set === true;
+    if (!passwordSet) {
+      return redirectWith('/auth/set-password');
     }
 
     // Associate — authUserId linkage
