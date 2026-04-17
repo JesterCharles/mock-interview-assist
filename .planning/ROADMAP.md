@@ -56,7 +56,7 @@
 
 **Milestone Goal:** Unify all surfaces to the two-level shell, enrich associate experience with curriculum visibility and richer data visualization, polish dark mode.
 
-- [ ] **Phase 26: Design Tokens (Data-Viz)** - Add chart palette, typography, and trajectory-language conventions to DESIGN.md and globals.css
+- [x] **Phase 26: Design Tokens (Data-Viz)** - Add chart palette, typography, and trajectory-language conventions to DESIGN.md and globals.css (completed 2026-04-17)
 - [ ] **Phase 27: Unified App Shell** - Extend AppShell to serve associate role; remove PublicShell + AssociateNav
 - [ ] **Phase 28: Sign-in Redesign** - Replace tabbed SignInTabs with stacked-button single page + first-login password upgrade
 - [ ] **Phase 28.1: User Profile** - Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED)
@@ -74,10 +74,10 @@
   1. DESIGN.md contains a Data Visualization section with chart palette, axis conventions, tooltip patterns, and trajectory language rules
   2. globals.css contains named CSS custom properties for chart colors with light and dark mode pairs
   3. A developer building a new recharts component can find the correct color token in globals.css without guessing
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 26-01-PLAN.md — Add chart tokens to globals.css and Data Visualization section to DESIGN.md
+- [x] 26-01-PLAN.md — Add chart tokens to globals.css and Data Visualization section to DESIGN.md
 
 ### Phase 27: Unified App Shell
 **Goal**: Associates access all pages through the same topbar+sidebar shell as trainers, with a role-restricted nav (Dashboard and Interviews only)
@@ -161,7 +161,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 26. Design Tokens (Data-Viz) | v1.3 | 0/1 | Not started | - |
+| 26. Design Tokens (Data-Viz) | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 27. Unified App Shell | v1.3 | 0/? | Not started | - |
 | 28. Sign-in Redesign | v1.3 | 0/? | Not started | - |
 | 29. Associate Data Visualization | v1.3 | 0/? | Not started | - |
