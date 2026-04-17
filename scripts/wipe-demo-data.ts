@@ -1,10 +1,11 @@
 /**
  * Wipe all demo data seeded by scripts/seed-demo-data.ts.
  *
- * Matches:
+ * Matches (all keyed on the `demo-` prefix so this is impossible to run
+ * against real data):
  *   - Associate.slug LIKE 'demo-%'
  *   - Session.id LIKE 'demo-%'
- *   - Cohort.name IN known demo cohort names
+ *   - Cohort.name LIKE 'demo-%'
  *
  * Usage:
  *   npx tsx scripts/wipe-demo-data.ts
@@ -12,8 +13,6 @@
 
 import 'dotenv/config';
 import { prisma } from '../src/lib/prisma.js';
-
-const DEMO_COHORT_NAMES = ['Spring-26', 'Summer-26', 'Fall-26'];
 
 async function main() {
   console.log('Wiping demo data…');
@@ -41,7 +40,7 @@ async function main() {
   console.log(`Associates deleted: ${assocDeleted}`);
 
   const demoCohorts = await prisma.cohort.findMany({
-    where: { name: { in: DEMO_COHORT_NAMES } },
+    where: { name: { startsWith: 'demo-' } },
     select: { id: true },
   });
   const cohortIds = demoCohorts.map((c) => c.id);
@@ -49,7 +48,7 @@ async function main() {
     where: { cohortId: { in: cohortIds } },
   });
   const { count: cohortsDeleted } = await prisma.cohort.deleteMany({
-    where: { name: { in: DEMO_COHORT_NAMES } },
+    where: { name: { startsWith: 'demo-' } },
   });
   console.log(`Curriculum weeks deleted: ${weeksDeleted}`);
   console.log(`Cohorts deleted: ${cohortsDeleted}`);

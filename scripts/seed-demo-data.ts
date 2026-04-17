@@ -28,10 +28,12 @@ const SKILLS: Array<{ name: string; slug: string; topics: string[] }> = [
 const FIRSTS = ['Ava', 'Noah', 'Mia', 'Liam', 'Zoe', 'Ethan', 'Leo', 'Ruby', 'Kai', 'Nina', 'Theo', 'Iris', 'Milo', 'Jade', 'Luca'];
 const LASTS = ['Patel', 'Nguyen', 'Garcia', 'Kim', 'Silva', 'Ali', 'Brown', 'Cohen', 'Diaz', 'Ford', 'Hart', 'Ito', 'Jung', 'Khan', 'Leon'];
 
+// Cohort names are `demo-*` prefixed so seed/wipe can never collide with real
+// cohorts if this script runs against a prod-shaped DB.
 const COHORTS: Array<{ name: string; startDaysAgo: number; endDaysFromNow?: number; weeks: number }> = [
-  { name: 'Spring-26', startDaysAgo: 70, endDaysFromNow: 20, weeks: 8 },
-  { name: 'Summer-26', startDaysAgo: 30, endDaysFromNow: 60, weeks: 8 },
-  { name: 'Fall-26', startDaysAgo: 5, endDaysFromNow: 85, weeks: 8 },
+  { name: 'demo-spring-26', startDaysAgo: 70, endDaysFromNow: 20, weeks: 8 },
+  { name: 'demo-summer-26', startDaysAgo: 30, endDaysFromNow: 60, weeks: 8 },
+  { name: 'demo-fall-26', startDaysAgo: 5, endDaysFromNow: 85, weeks: 8 },
 ];
 
 function seededRng(seed: number) {

@@ -39,9 +39,11 @@ const tooltipStyle: React.CSSProperties = {
 function CustomTooltip({
   active,
   payload,
+  hasHistory,
 }: {
   active?: boolean
   payload?: Array<{ payload: RadarDataPoint }>
+  hasHistory: boolean
 }) {
   if (!active || !payload || payload.length === 0) return null
   const d = payload[0].payload
@@ -52,19 +54,23 @@ function CustomTooltip({
       <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
         Now: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.now}%</span>
       </p>
-      <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
-        Before: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
-      </p>
-      <p
-        style={{
-          margin: 0,
-          fontSize: '12px',
-          color: delta > 0 ? 'var(--success)' : delta < 0 ? 'var(--danger)' : 'var(--muted)',
-        }}
-      >
-        {delta > 0 ? '+' : ''}
-        {delta.toFixed(0)}% since last
-      </p>
+      {hasHistory && (
+        <>
+          <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
+            Before: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
+          </p>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '12px',
+              color: delta > 0 ? 'var(--success)' : delta < 0 ? 'var(--danger)' : 'var(--muted)',
+            }}
+          >
+            {delta > 0 ? '+' : ''}
+            {delta.toFixed(0)}% since last
+          </p>
+        </>
+      )}
     </div>
   )
 }
@@ -126,6 +132,15 @@ function axisDelta(axis: string, baseDelta: number, associateSig: string) {
 }
 
 export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarProps) {
+  const scoredSessionCount = useMemo(
+    () => sessions.filter((s) => s.overallTechnicalScore != null).length,
+    [sessions],
+  )
+  // Before polygon requires at least 2 scored sessions to have any meaningful
+  // prior-vs-recent comparison; below that we only render Now to avoid faking
+  // a history that doesn't exist.
+  const hasHistory = scoredSessionCount >= 2
+
   // Smoothed trajectory: compare avg of recent half to avg of prior half, so
   // single-session noise stops dominating. Positive baseDelta = "now > before".
   const baseDelta = useMemo(() => {
@@ -167,32 +182,42 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
 
   const radarData = useMemo<RadarDataPoint[]>(() => {
     if (isTopicMode) {
-      return topicEntries.map((g) => ({
-        axis: g.topic,
-        now: Math.round(g.weightedScore * 100),
-        before: Math.round(
-          clamp01(
-            g.weightedScore -
-              axisDelta(`${selectedSkill}/${g.topic}`, baseDelta, associateSig),
-          ) * 100,
-        ),
-        assessmentReady: g.sessionCount >= 3,
-        sessionCount: g.sessionCount,
-      }))
+      return topicEntries.map((g) => {
+        const now = Math.round(g.weightedScore * 100)
+        const before = hasHistory
+          ? Math.round(
+              clamp01(
+                g.weightedScore -
+                  axisDelta(`${selectedSkill}/${g.topic}`, baseDelta, associateSig),
+              ) * 100,
+            )
+          : now
+        return {
+          axis: g.topic,
+          now,
+          before,
+          assessmentReady: g.sessionCount >= 3,
+          sessionCount: g.sessionCount,
+        }
+      })
     }
     return gapScores
       .filter((g) => g.topic === null || g.topic === '')
-      .map((g) => ({
-        axis: g.skill,
-        now: Math.round(g.weightedScore * 100),
-        before: Math.round(
-          clamp01(g.weightedScore - axisDelta(g.skill, baseDelta, associateSig)) * 100,
-        ),
-        assessmentReady: g.sessionCount >= 3,
-        sessionCount: g.sessionCount,
-      }))
+      .map((g) => {
+        const now = Math.round(g.weightedScore * 100)
+        const before = hasHistory
+          ? Math.round(clamp01(g.weightedScore - axisDelta(g.skill, baseDelta, associateSig)) * 100)
+          : now
+        return {
+          axis: g.skill,
+          now,
+          before,
+          assessmentReady: g.sessionCount >= 3,
+          sessionCount: g.sessionCount,
+        }
+      })
       .sort((a, b) => a.axis.localeCompare(b.axis))
-  }, [gapScores, topicEntries, isTopicMode, baseDelta, selectedSkill, associateSig])
+  }, [gapScores, topicEntries, isTopicMode, baseDelta, selectedSkill, associateSig, hasHistory])
 
   const title = isTopicMode ? `${selectedSkill} · Topics` : 'Skill Overview'
   const minVertices = isTopicMode ? 2 : 3
@@ -286,15 +311,17 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
               />
             )}
           />
-          <Radar
-            name="Before"
-            dataKey="before"
-            stroke="var(--muted)"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            fill="var(--muted)"
-            fillOpacity={0.05}
-          />
+          {hasHistory && (
+            <Radar
+              name="Before"
+              dataKey="before"
+              stroke="var(--muted)"
+              strokeWidth={1.5}
+              strokeDasharray="4 2"
+              fill="var(--muted)"
+              fillOpacity={0.05}
+            />
+          )}
           <Radar
             name="Now"
             dataKey="now"
@@ -303,15 +330,17 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
             fill="var(--accent)"
             fillOpacity={0.18}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend
-            iconType="line"
-            wrapperStyle={{
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '12px',
-              color: 'var(--muted)',
-            }}
-          />
+          <Tooltip content={<CustomTooltip hasHistory={hasHistory} />} />
+          {hasHistory && (
+            <Legend
+              iconType="line"
+              wrapperStyle={{
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '12px',
+                color: 'var(--muted)',
+              }}
+            />
+          )}
         </RadarChart>
       </ResponsiveContainer>
     </div>
