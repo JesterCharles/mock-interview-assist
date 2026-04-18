@@ -13,6 +13,7 @@ import {
   Upload,
   Settings,
   Shield,
+  Code2,
 } from 'lucide-react';
 import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
@@ -29,6 +30,7 @@ export const dashboardSidebarGroups: SidebarGroup[] = [
     label: 'Actions',
     items: [
       { href: '/interview/new', label: 'New Mock', icon: PlayCircle },
+      { href: '/coding', label: 'Coding', icon: Code2 },
       { href: '/trainer/reports', label: 'Reports', icon: FileText },
       { href: '/trainer/onboarding', label: 'Batch Upload', icon: Upload },
     ],
@@ -42,6 +44,7 @@ export function associateSidebarGroups(slug: string): SidebarGroup[] {
       items: [
         { href: `/associate/${slug}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
         { href: '/', label: 'Interviews', icon: PlayCircle },
+        { href: '/coding', label: 'Coding', icon: Code2 },
         { href: `/associate/${slug}/curriculum`, label: 'Curriculum', icon: BookOpen },
       ],
     },

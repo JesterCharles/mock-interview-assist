@@ -65,6 +65,18 @@ export async function middleware(request: NextRequest) {
     return redirect;
   }
 
+  // STEP 3b: /coding/* (Phase 40) — any authenticated user passes (trainers + associates share this surface).
+  if (matchesPrefix(pathname, '/coding')) {
+    if (user) {
+      return response;
+    }
+    const redirectUrl = new URL('/signin', request.url);
+    redirectUrl.searchParams.set('next', pathname);
+    const redirect = NextResponse.redirect(redirectUrl);
+    response.headers.getSetCookie().forEach((c) => redirect.headers.append('set-cookie', c));
+    return redirect;
+  }
+
   // STEP 4: Profile — any authenticated user passes.
   if (matchesPrefix(pathname, '/profile')) {
     if (user) {
@@ -98,6 +110,7 @@ export const config = {
     '/review/:path*',
     '/trainer/:path*',
     '/associate/:path*',
+    '/coding/:path*',
     '/profile/:path*',
     '/auth/set-password',
   ],
