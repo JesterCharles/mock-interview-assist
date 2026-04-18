@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-two-sum-ts",
+  "language": "typescript",
+  "code": "const fs = require('fs') as typeof import('fs');\nconst line: string = fs.readFileSync(0, 'utf8').trim().split('\\n')[0];\nconst [numsStr, targetStr] = line.split('|');\nconst nums: number[] = numsStr.split(',').map((v) => parseInt(v, 10));\nconst target: number = parseInt(targetStr, 10);\nconst seen = new Map<number, number>();\nfor (let i = 0; i < nums.length; i++) {\n  const need = target - nums[i];\n  if (seen.has(need)) { console.log(`${seen.get(need)},${i}`); break; }\n  seen.set(nums[i], i);\n}\n",
+  "expectedVerdict": "pass"
+}

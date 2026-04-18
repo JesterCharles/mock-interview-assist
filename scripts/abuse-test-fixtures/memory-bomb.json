@@ -1,0 +1,12 @@
+{
+  "name": "memory-bomb",
+  "challengeId": "test-abuse-memory-bomb",
+  "languages": {
+    "python": "a = []\nwhile True:\n    a.append(bytearray(10 * 1024 * 1024))\n",
+    "javascript": "const a = [];\nwhile (true) a.push(Buffer.alloc(10 * 1024 * 1024));\n",
+    "typescript": "const a: Buffer[] = [];\nwhile (true) a.push(Buffer.alloc(10 * 1024 * 1024));\n",
+    "java": "import java.util.*;\npublic class Main {\n  public static void main(String[] a) {\n    List<byte[]> list = new ArrayList<>();\n    while (true) list.add(new byte[10 * 1024 * 1024]);\n  }\n}\n",
+    "csharp": "using System; using System.Collections.Generic;\nclass Program { static void Main() { var l = new List<byte[]>(); while (true) l.Add(new byte[10 * 1024 * 1024]); } }\n"
+  },
+  "expectedContainment": ["mle", "runtime_error", "fail"]
+}

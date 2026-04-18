@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-two-sum-js",
+  "language": "javascript",
+  "code": "const [line] = require('fs').readFileSync(0, 'utf8').trim().split('\\n');\nconst [numsStr, targetStr] = line.split('|');\nconst nums = numsStr.split(',').map(Number);\nconst target = Number(targetStr);\nconst seen = new Map();\nfor (let i = 0; i < nums.length; i++) {\n  const need = target - nums[i];\n  if (seen.has(need)) { console.log(`${seen.get(need)},${i}`); break; }\n  seen.set(nums[i], i);\n}\n",
+  "expectedVerdict": "pass"
+}

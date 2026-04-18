@@ -1,0 +1,9 @@
+{
+  "name": "js-count",
+  "language": "javascript",
+  "sourceCode": "const s = require('fs').readFileSync(0,'utf-8').trim();\nconst vowels = s.match(/[aeiou]/gi) || [];\nconsole.log(vowels.length);\n",
+  "stdin": "programming\n",
+  "expectedStdout": "3\n",
+  "maxWallTimeSec": 15,
+  "notes": "Regex + counting"
+}

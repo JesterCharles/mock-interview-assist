@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-two-sum-py",
+  "language": "python",
+  "code": "import sys\nline = sys.stdin.readline().strip()\nnums, target = line.split('|')\narr = list(map(int, nums.split(',')))\nt = int(target)\nseen = {}\nfor i, v in enumerate(arr):\n    if t - v in seen:\n        print(f\"{seen[t-v]},{i}\")\n        break\n    seen[v] = i\n",
+  "expectedVerdict": "pass"
+}

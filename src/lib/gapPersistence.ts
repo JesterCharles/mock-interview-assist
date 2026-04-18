@@ -9,6 +9,39 @@ import { prisma } from '@/lib/prisma';
 import { computeGapScores } from '@/lib/gapService';
 import type { InterviewSession, QuestionAssessment } from '@/lib/types';
 
+/**
+ * Difficulty multiplier applied to coding-signal mappedScore BEFORE it enters
+ * the GapScore table. Prevents easy-attempt farming from inflating readiness
+ * (CODING-SCORE-02, Phase 41 D-02).
+ *
+ * Locked values:
+ *   easy   × 0.7
+ *   medium × 1.0
+ *   hard   × 1.3
+ *
+ * Tune via code review only — never via env (kept a constant on purpose).
+ */
+export const DIFFICULTY_MULTIPLIERS: Record<'easy' | 'medium' | 'hard', number> = {
+  easy: 0.7,
+  medium: 1.0,
+  hard: 1.3,
+};
+
+/** Shape of the `CodingSkillSignal` row fields this function consumes. */
+export interface CodingSignalForGap {
+  attemptId: string;
+  skillSlug: string;
+  signalType: 'pass' | 'partial' | 'fail' | 'compile_error' | 'timeout';
+  weight: number;
+  mappedScore: number;
+}
+
+/** Subset of `CodingChallenge` this function needs. */
+export interface CodingChallengeForGap {
+  difficulty: 'easy' | 'medium' | 'hard';
+  language: string;
+}
+
 export interface GapScoreResult {
   gated: boolean;
   sessionCount: number;
@@ -173,4 +206,90 @@ export async function getGapScores(associateId: number): Promise<GapScoreResult>
       lastUpdated: s.lastUpdated,
     })),
   };
+}
+
+/**
+ * Persist a coding attempt's skill signal into the GapScore table.
+ *
+ * Keyed on (associateId, skill=signal.skillSlug, topic="coding:<language>") per
+ * Phase 41 D-03. Applies DIFFICULTY_MULTIPLIERS[difficulty] × signal.weight to
+ * signal.mappedScore before upsert (D-02). Preserves the prevWeightedScore
+ * invariant (matches saveGapScores lost-update fix — read prior value inside
+ * the same transaction before writing).
+ *
+ * NOTE: Does NOT invoke `gapService.computeGapScores` — Phase 36 contract
+ * locks `gapService.ts` as unchanged (D-04). The existing recency decay is
+ * applied by `readinessSweep` / next-session-triggered `saveGapScores`, which
+ * aggregate this row alongside interview signals via the shared
+ * (associateId, skill, topic) key.
+ *
+ * ⚠ Dual-semantic on `sessionCount` (Phase 41 WR-02):
+ *   • interview path (`saveGapScores`) writes `sessionCount` = distinct
+ *     completed-session count feeding the skill (gapService line 179).
+ *   • THIS coding path writes `sessionCount` = raw coding-attempt count for
+ *     (associate, skill, topic), incremented by 1 per attempt.
+ *   • `weightedScore` here is a single raw (per-attempt) signal, not the
+ *     recency-decayed average that the interview path stores.
+ *   Downstream consumers aggregating across both sources (e.g.
+ *   `/api/trainer/[slug]/coding`) must cap or normalise the weighting to
+ *   prevent attempt-count farming — see MAX_WEIGHT_PER_TOPIC in that route.
+ *
+ * Contract:
+ *  - Caller is fire-and-forget (poll route wraps with `.catch(log)`).
+ *  - Throws on unknown difficulty (defense-in-depth against T-41-03).
+ *
+ * @param signal    CodingSkillSignal row fields.
+ * @param challenge Subset of CodingChallenge (difficulty + language).
+ * @param associateId Numeric id of the Associate owning the attempt.
+ */
+export async function persistCodingSignalToGapScore(
+  signal: CodingSignalForGap,
+  challenge: CodingChallengeForGap,
+  associateId: number,
+): Promise<void> {
+  const multiplier = DIFFICULTY_MULTIPLIERS[challenge.difficulty];
+  if (multiplier === undefined) {
+    throw new Error(
+      `[persistCodingSignalToGapScore] Unknown difficulty: ${challenge.difficulty}`,
+    );
+  }
+
+  const weightedScore = signal.mappedScore * multiplier * signal.weight;
+  const topic = `coding:${challenge.language}`;
+  const skill = signal.skillSlug;
+
+  // Transaction wraps findUnique + upsert so the prior value captured for
+  // prevWeightedScore is consistent with the row we write (same lost-update
+  // fix as saveGapScores lines 73-83). Concurrent calls for the same key
+  // serialize on the per-row upsert conflict.
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.gapScore.findUnique({
+      where: {
+        associateId_skill_topic: { associateId, skill, topic },
+      },
+      select: { weightedScore: true, sessionCount: true },
+    });
+
+    const prior = existing?.weightedScore ?? null;
+    const nextSessionCount = (existing?.sessionCount ?? 0) + 1;
+
+    await tx.gapScore.upsert({
+      where: {
+        associateId_skill_topic: { associateId, skill, topic },
+      },
+      update: {
+        weightedScore,
+        prevWeightedScore: prior,
+        sessionCount: nextSessionCount,
+      },
+      create: {
+        associateId,
+        skill,
+        topic,
+        weightedScore,
+        prevWeightedScore: null,
+        sessionCount: 1,
+      },
+    });
+  });
 }

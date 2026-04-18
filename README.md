@@ -65,6 +65,39 @@ Playwright E2E specs live under `tests/e2e/` and `tests/visual/phase-*/`; run vi
 docker compose up    # Uses .env.docker, maps port 80 -> 3000
 ```
 
+## Coding Challenges — Local Dev
+
+Run the full v1.4 coding-challenge pipeline locally against Dockerized Judge0.
+
+1. Start Judge0 + the app:
+   ```bash
+   docker compose up -d judge0-db judge0-redis judge0-server judge0-workers
+   docker compose up -d interview-assistant
+   ```
+
+2. Confirm Judge0 is healthy:
+   ```bash
+   curl http://localhost:3000/api/health | jq .checks.judge0
+   # Expected: "ok"
+   ```
+
+3. Seed a sample challenge into your local cohort. (Bulk seeding is trainer-run
+   through the public GitHub repo; for local development, follow
+   [docs/trainer-authoring.md](./docs/trainer-authoring.md) §Local Validation
+   to copy a challenge directory under `challenges/` and point your repo env
+   vars at the local clone.)
+
+4. Validate a new challenge directory before opening a PR:
+   ```bash
+   npm run validate-challenge ./challenges/my-new-challenge
+   ```
+
+5. Open the UI: http://localhost:3000/coding
+
+See [docs/trainer-authoring.md](./docs/trainer-authoring.md) for the full
+authoring workflow and [ARCHITECTURE.md](./ARCHITECTURE.md) for the stack
+diagram.
+
 ## Tech Stack
 
 - **Framework**: Next.js 16, React 19, TypeScript 5

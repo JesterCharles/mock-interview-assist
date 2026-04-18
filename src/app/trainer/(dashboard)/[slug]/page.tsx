@@ -8,6 +8,7 @@ import { AssociateDetail } from '@/lib/trainer-types'
 import ReadinessDisplay from '@/components/trainer/ReadinessDisplay'
 import AssociateCohortSelect from './AssociateCohortSelect'
 import { AssociateDashboardClient } from '@/app/associate/[slug]/dashboard/AssociateDashboardClient'
+import { CodingPanel } from './CodingPanel'
 import '../trainer.css'
 
 export default function AssociateDetailPage() {
@@ -254,6 +255,10 @@ export default function AssociateDetailPage() {
               lowestScore={lowestScore}
               lowestSkillSessionCount={lowestSkillSessionCount}
             />
+
+            {/* Phase 41: coding panel (adjacent to — not merged with — interview
+                dashboard). Fetches its own data so interview view stays unchanged. */}
+            <CodingPanel slug={slug} />
           </>
         )}
       </div>

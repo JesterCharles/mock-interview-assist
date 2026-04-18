@@ -1,19 +1,89 @@
 # Pipeline Status
 
-## Current Run — v1.3 Gap Closure (Phases 33-35)
-- Started: 2026-04-17
-- Current stage: PLAN (auto-discuss → plan → execute for P33-35)
-- Mode: unattended + auto-discuss (--resume --unattended --discuss)
-- Previous: v1.3 main run shipped 2026-04-17 (PR #5 c444f9e)
+## Current Run — v1.4 (EXECUTE PARTIAL — HALTED ON SPIKE GATE)
+- Started: 2026-04-18
+- Current stage: EXECUTE partial — P36/37/38 code complete + reviewed + validated. P39-44 BLOCKED on JUDGE-06 spike gate (human-only: docker daemon unavailable on exec host)
+- Mode: `--resume --unattended --discuss` (autonomous)
+- Session 1 summary: 3 phases shipped, 27 commits, 680 tests passing, 1 P0 + 5 P2 review findings fixed
+- Report: `.planning/AUTONOMOUS-REPORT.md`
+- Previous: v1.3 shipped + tagged 2026-04-18 (commit 42cd703, tag v1.3)
+- Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (9 phases 36-44, 44 reqs, Approach B MSA-from-day-1)
 
-## Resume Point
+### Plan summary per phase (commits)
+| Phase | Plans | Commit | Notes |
+|-------|-------|--------|-------|
+| 36 Data Model & Schema | 3 | 550cb10 | Checker PASSED |
+| 37 Challenge Bank | 3 | 05f5b6f | Needs `@@unique([challengeId, id])` on CodingTestCase (Phase 36 delta) |
+| 38 Judge0 Infrastructure | 3 | e748aaf | SPIKE GATE (human-verify) blocks Phase 39 |
+| 39 Execution API | 3 | e737a50 | Trainer submit = 403 in v1.4 (associateId non-null) |
+| 40 UI MVP | 4 | 6069633 | UI-SPEC gate (`/gsd-ui-phase 40`) is first task |
+| 41 GapScore Integration | 3 | 9842c4b | Depends on Phase 39 poll route |
+| 42 SQL MVP (SQLite) | 2 | f524483 | SQLite Judge0 id verification blocking |
+| 43 MSA Deployment | 4 | 0b763d4 | GCP creds + VM import checkpoint |
+| 44 Hardening + Load Test | 3 | e366296 | /cso + codex adversarial gates |
 
-3 gap-closure phases added post-audit need full discuss→plan→execute→review→test→ship cycle:
-- **Phase 33** — Trainer First-Login Password Gate (closes SIGNIN-02 gap from P28)
-- **Phase 34** — SkillRadar Quality + VIZ Scope Reconciliation
-- **Phase 35** — Shell Scope Reconciliation + Cleanup
+### Discover complete (2026-04-18)
+- Office hours + codex consult → Approach B selected (MSA-from-day-1)
+- REQUIREMENTS.md: 44 reqs across 9 themes
+- ROADMAP.md: phases 36-44 added
+- PROJECT.md: updated for v1.4 active
+- Discovery brief: `.planning/PIPELINE-DISCOVER.md`
+- Seeds: `.planning/seeds/v1.4-discovery-seeds.md`
 
-Empty phase dirs — no CONTEXT.md yet. Auto-discuss flag will generate them non-interactively.
+### Plan stage next:
+- `/gsd-plan-phase 36` — Data Model & Schema (CodingChallenge/CodingAttempt/CodingTestCase/CodingSkillSignal + idempotent migration)
+- Then sequential: 37 (Challenge Bank) → 38 (Judge0 spike GATE) → 39 (Submission API) → 40-44
+
+## Stages (v1.4 — EXECUTE PARTIAL)
+| Stage | Status | Started | Completed | Notes |
+|-------|--------|---------|-----------|-------|
+| discover | done | 2026-04-18 | 2026-04-18 | Office-hours + codex consult → Approach B MSA. PIPELINE-DISCOVER.md |
+| init | done | 2026-04-18 | 2026-04-18 | Milestone initialized; REQUIREMENTS.md (44 reqs), ROADMAP expanded (P36-44), PROJECT.md updated |
+| design | pending | | | Evaluate per-phase — UI surfaces likely in P40 (UI MVP) |
+| plan | done | 2026-04-18 | 2026-04-18 | All 9 phases planned (36-44), 28 plans across 28 waves |
+| execute | **partial** | 2026-04-18 | | P36/37/38 DONE. P39-44 BLOCKED on JUDGE-06 spike gate (human-verify, docker unavailable on exec host). AUTONOMOUS-REPORT.md |
+| review | partial | 2026-04-18 | | P36/37/38 done. P37 1xP0+3xP2 fixed. P38 2xP2 fixed. P39-44 pending execute unblock |
+| test | partial | 2026-04-18 | | P36/37/38 validate audits done. Full suite 680 passing / 4 skipped |
+| ship | pending | | | PR + merge gate at milestone end |
+| reflect | pending | | | Retro + seeds at milestone end |
+| maintain | pending | | | Health check after ship |
+
+## Session 1 outcome (2026-04-18 autonomous run)
+
+| Phase | Result | Commits |
+|-------|--------|---------|
+| 36 | ✓ shipped + reviewed + validated | e7642ea, 4bb0ecd, a22873c, b5efb88, a7ffa9e, 21e26b4 |
+| 37 | ✓ shipped + reviewed (1 P0 fixed) + validated | c2d4d66, d82ff7c, 4c1e42e, af1f18d, a65921b, 3d4462c, e3d77f0, bb89da2, 13dfc2a |
+| 38 | ⚠️ code complete + reviewed (2 P2 fixed), **spike DEFERRED** | c6a3379, 1ebc69c, af2113d, e69ff96, ca8f14f, d20a5a3, 66fdc36, 7878bd4, 22e33de, 4295efa |
+| 42 | ✗ halted gracefully (deps upstream) | 5a60ebc |
+| (meta) | pipeline artifacts | ebde8a8 |
+
+## Next human action
+
+Run spike verification manually — see `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Expected <30 min. After PASS, resume with `/pipeline-coordinator --resume --unattended --discuss` to execute P39-44.
+
+## HITL Gates (v1.4)
+| Gate | Stage | Type | Status | Decision |
+|------|-------|------|--------|----------|
+| Phase 38 Judge0 spike gate | plan→execute | sync | pending | Required before Phase 39 per codex consult |
+| Design selection | design | sync | pending | P41 challenge UI only |
+| Taste decisions | plan | async | pending | Per-phase |
+| Review findings | review | async | pending | Per-phase |
+| Merge approval | ship | sync | pending | No auto-merge |
+| Milestone closure | ship | async | pending | |
+
+## Artifacts (v1.4)
+- .planning/PIPELINE-DISCOVER.md (2026-04-18)
+- .planning/REQUIREMENTS.md (44 reqs)
+- .planning/ROADMAP.md (phases 36-44 added)
+- .planning/PROJECT.md (v1.4 active)
+- .planning/seeds/v1.4-discovery-seeds.md
+
+---
+
+## v1.3 Gap Closure (P33-35) — shipped
+
+Empty phase dirs → auto-discussed → planned → executed → reviewed → tested → PR #6 (merge deferred).
 
 ## v1.3 Milestone Scope
 

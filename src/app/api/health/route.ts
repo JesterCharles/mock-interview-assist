@@ -1,16 +1,40 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { systemInfo } from '@/lib/judge0Client';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
+
+type DbStatus = 'connected' | 'disconnected';
+type Judge0Status = 'ok' | 'unreachable' | 'degraded';
+
+async function checkDb(): Promise<DbStatus> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return 'connected';
+  } catch {
+    return 'disconnected';
+  }
+}
+
+async function checkJudge0(): Promise<{ status: Judge0Status; version?: string }> {
+  try {
+    const info = await systemInfo(2000);
+    return {
+      status: 'ok',
+      version: typeof info.version === 'string' ? info.version : undefined,
+    };
+  } catch {
+    return { status: 'unreachable' };
+  }
+}
 
 export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`
-    return NextResponse.json({ status: 'ok', db: 'connected' })
-  } catch (error) {
-    return NextResponse.json(
-      { status: 'error', db: 'disconnected' },
-      { status: 503 }
-    )
-  }
+  const [db, judge0] = await Promise.all([checkDb(), checkJudge0()]);
+  const allOk = db === 'connected' && judge0.status === 'ok';
+  const body = {
+    status: allOk ? ('ok' as const) : ('error' as const),
+    checks: { db, judge0: judge0.status },
+    ...(judge0.version ? { judge0Version: judge0.version } : {}),
+  };
+  return NextResponse.json(body, { status: allOk ? 200 : 503 });
 }

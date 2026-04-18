@@ -1,0 +1,12 @@
+{
+  "name": "network-egress",
+  "challengeId": "test-abuse-network-egress",
+  "languages": {
+    "python": "import urllib.request\nurllib.request.urlopen('http://example.com', timeout=3)\nprint('reached-network')\n",
+    "javascript": "const http = require('http');\nhttp.get('http://example.com', () => console.log('reached-network'));\nsetTimeout(()=>{}, 5000);\n",
+    "typescript": "const http = require('http');\nhttp.get('http://example.com', () => console.log('reached-network'));\nsetTimeout(()=>{}, 5000);\n",
+    "java": "import java.net.*; import java.io.*;\npublic class Main {\n  public static void main(String[] a) throws Exception {\n    URL u = new URL(\"http://example.com\");\n    u.openConnection().getInputStream().read();\n    System.out.println(\"reached-network\");\n  }\n}\n",
+    "csharp": "using System; using System.Net; class Program { static void Main() { var c = new WebClient(); c.DownloadString(\"http://example.com\"); Console.WriteLine(\"reached-network\"); } }\n"
+  },
+  "expectedContainment": ["runtime_error", "fail", "timeout"]
+}

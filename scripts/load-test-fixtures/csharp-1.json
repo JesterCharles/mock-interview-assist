@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-two-sum-cs",
+  "language": "csharp",
+  "code": "using System;\nusing System.Collections.Generic;\nclass Program {\n  static void Main() {\n    var line = Console.ReadLine().Trim();\n    var parts = line.Split('|');\n    var nums = Array.ConvertAll(parts[0].Split(','), int.Parse);\n    int t = int.Parse(parts[1]);\n    var seen = new Dictionary<int, int>();\n    for (int i = 0; i < nums.Length; i++) {\n      int need = t - nums[i];\n      if (seen.ContainsKey(need)) { Console.WriteLine(seen[need] + \",\" + i); return; }\n      seen[nums[i]] = i;\n    }\n  }\n}\n",
+  "expectedVerdict": "pass"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "fork-bomb",
+  "challengeId": "test-abuse-fork-bomb",
+  "languages": {
+    "python": "import os\nwhile True:\n    try:\n        os.fork()\n    except OSError:\n        pass\n",
+    "javascript": "const cp = require('child_process');\nwhile (true) {\n  try { cp.spawn('node', ['-e', 'while(1){}']); } catch (e) {}\n}\n",
+    "java": "public class Main {\n  public static void main(String[] a) throws Exception {\n    while (true) {\n      try { new ProcessBuilder(\"java\",\"-e\",\"\").start(); } catch (Exception e) {}\n    }\n  }\n}\n"
+  },
+  "expectedContainment": ["timeout", "runtime_error", "fail", "mle"]
+}

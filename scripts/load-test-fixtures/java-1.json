@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-two-sum-java",
+  "language": "java",
+  "code": "import java.util.*;\nimport java.io.*;\npublic class Main {\n  public static void main(String[] a) throws Exception {\n    BufferedReader r = new BufferedReader(new InputStreamReader(System.in));\n    String line = r.readLine().trim();\n    String[] parts = line.split(\"\\\\|\");\n    String[] ns = parts[0].split(\",\");\n    int[] nums = new int[ns.length];\n    for (int i = 0; i < ns.length; i++) nums[i] = Integer.parseInt(ns[i]);\n    int t = Integer.parseInt(parts[1]);\n    Map<Integer, Integer> seen = new HashMap<>();\n    for (int i = 0; i < nums.length; i++) {\n      int need = t - nums[i];\n      if (seen.containsKey(need)) { System.out.println(seen.get(need) + \",\" + i); return; }\n      seen.put(nums[i], i);\n    }\n  }\n}\n",
+  "expectedVerdict": "pass"
+}

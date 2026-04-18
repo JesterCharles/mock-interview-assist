@@ -1,5 +1,60 @@
 # Milestones
 
+## v1.4 Coding Challenges + Multi-Language Sandbox (PLANNING — initialized 2026-04-18)
+
+**Phases planned:** 9 (36-44)
+**Requirements:** 44 across 9 themes (CODING-MODEL, CODING-BANK, JUDGE, CODING-API, CODING-UI, CODING-SCORE, SQL, IAC, HARD)
+**Approach:** B — MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD)
+**Estimate:** 8-10 weeks
+**Status:** Planning — ready for `/gsd-plan-phase 36`
+
+**Scope summary:**
+
+- Adds coding challenges as a continuous-practice rep type alongside mock interviews
+- Judge0-based multi-language sandbox: Python, JavaScript/TypeScript, Java, SQL (SQLite), C# (Mono)
+- Public GitHub repo for prompts + starter code; private GitHub repo for hidden tests (token-scoped server fetch)
+- New Prisma models: `CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal`
+- `CodingSkillSignal` → `GapScore` mapping gives trainers continuous skill telemetry across all 11 cohort weeks (replaces current 3-point front-loaded assessment)
+- MSA-from-day-1 deploy: dedicated Judge0 GCE host + Terraform IaC + GitHub Actions CI/CD (folds in deferred DEPLOY-01/02/03)
+- v1.5 seeds captured: function-level test harness, Postgres SQL runner, in-app authoring, .NET 8+ runtime, multi-modal platform, anti-cheat
+
+**Artifacts:**
+
+- [Discovery brief](PIPELINE-DISCOVER.md)
+- [Requirements](REQUIREMENTS.md)
+- [Seeds for v1.5+](seeds/v1.4-discovery-seeds.md)
+
+---
+
+## v1.3 UX Unification & Polish (Shipped: 2026-04-18)
+
+**Phases completed:** 11 phases (26-35, incl. decimal 28.1), 18 plans
+**Timeline:** 2026-04-16 → 2026-04-18 (~2 days wall time)
+**Requirements:** 27/27 met (28 defined — VIZ-03 formally cut, VIZ-07 added as replacement)
+**Merge commit:** `05d2546` on `main` (PR #6 — v1.3 Gap Closure: P33-35)
+**Tests:** 524 passing / 4 skipped (npm run test, 2026-04-18)
+**Audit:** TECH_DEBT (no blocking gaps; verification-hygiene items only — see [v1.3-MILESTONE-AUDIT](milestones/v1.3-MILESTONE-AUDIT.md))
+
+**Key accomplishments:**
+
+- Unified two-level app shell for associates — same topbar + SectionSidebar as trainers with role-aware nav (Dashboard / Interviews / Curriculum) + cohort name header; PublicShell + AssociateNav deleted
+- Accordion sign-in replacing tab UI (Mail + KeyRound icons, grid-row animation) with mandatory first-login password gate (trainer path closed in gap-closure Phase 33)
+- Profile model + tabbed profile page + first-login detection migrated from `user_metadata` to `Profile.passwordSetAt` via lazy backfill
+- Associate data-viz suite: ranked `SkillCardList` with trajectory language, `FocusHero` recommendation, `SkillRadar` Before/Now overlay backed by real `GapScore.prevWeightedScore` snapshots
+- Associate curriculum schedule page with 5-band score coloring, hover tooltips, current-week highlight, and empty state
+- Dark-mode coverage sweep: hardcoded hex eliminated across trainer + interview + review + PDF surfaces; semantic `--success-bg`/`--warning-bg`/`--danger-bg` tokens added
+- Shell architecture overhaul: sidebar-primary nav for all roles, TopBar stripped to utility-only, Settings collapsible accordion, Profile modal overlay, landing-page minimal header, roster slug column removed, password change gated behind old-password or email OTP verification
+- Chart design tokens + DESIGN.md Data Visualization section (5-series palette, axis/tooltip conventions, trajectory vocabulary) landed before any chart component was built — no dark-mode retrofit needed
+- Gap-closure wave (Phases 33-35, PR #6) closed 5 audit gaps: trainer first-login gate, synthetic radar prior replaced with real snapshots, associate Settings accordion wired, `@deprecated settingsSidebarGroups` removed
+
+**Archives:**
+
+- [Roadmap](milestones/v1.3-ROADMAP.md)
+- [Requirements](milestones/v1.3-REQUIREMENTS.md)
+- [Audit](milestones/v1.3-MILESTONE-AUDIT.md)
+
+---
+
 ## v1.2 Analytics & Auth Overhaul (Shipped: 2026-04-16)
 
 **Phases completed:** 10 phases (16-25), 26 plans

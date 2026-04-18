@@ -1,75 +1,131 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: UX Unification & Polish
-status: executing
-last_updated: "2026-04-18T00:38:46.899Z"
-last_activity: 2026-04-18 -- Phase 34 planning complete
+milestone: v1.4
+milestone_name: Coding Challenges + Multi-Language Sandbox
+status: Phase 44 PARTIAL — harnesses + docs + CLI shipped; deployment-gated tasks HALTED per unattended mandate
+stopped_at: "Phase 44 partial: shipped harnesses + docs + CLI; halted gracefully on deployment-gated tasks"
+last_updated: "2026-04-18T12:29:16.888Z"
+last_activity: 2026-04-18 -- Phase 44 autonomous pass complete (HARD-04 closed; HARD-01/02/03 await deployed stack)
 progress:
-  total_phases: 11
-  completed_phases: 8
-  total_plans: 18
-  completed_plans: 14
-  percent: 78
+  total_phases: 9
+  completed_phases: 9
+  total_plans: 28
+  completed_plans: 28
+  percent: 100
 ---
 
-# v1.3 — UX Unification & Polish
+# v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
 
 ## Current Position
 
-Phase: 32
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-18 -- Phase 34 planning complete
+Status: Phase 44 PARTIAL — harnesses + docs + CLI shipped; deployment-gated tasks HALTED per unattended mandate
+Last activity: 2026-04-18 -- Phase 44 autonomous pass complete (HARD-04 closed; HARD-01/02/03 await deployed stack)
 
 ```
-Progress: [                    ] 0% (0/6 phases)
+Progress: [█████████░] 96% (8/9 phases complete, 27/28 plans; Phase 44 partial)
 ```
+
+Phase 44 delivered (autonomous, deployment-independent):
+
+- `scripts/load-test-coding.ts` — 50-concurrent harness via p-limit, Supabase auth, per-language p50/p95/max, D-03 threshold assertions, metrics sampler (queueDepth + CPU) with UNAVAILABLE fallback, exit 1 on breach
+- `scripts/abuse-test-coding.ts` — 6-payload-class harness, SSH-based docker-stats sampler, cgroup-escape check, SAFE/UNSAFE verdict
+- 16 fixtures: 10 load-test (2 py/2 js/2 ts/2 java/1 sql/1 cs) + 6 abuse (fork-bomb/infinite-loop/network-egress/stdout-flood/memory-bomb/fd-bomb)
+- `scripts/validate-challenge.ts` — local CLI importing `validateChallenge` from Phase 37's coding-bank-schemas (T-44-05 mitigation: single source of truth with server loader)
+- `ARCHITECTURE.md` (NEW, 210 lines) — v1.4 mermaid stack diagram, component responsibilities, submission lifecycle, trust boundaries, Production Readiness Evidence cross-refs
+- `README.md` — Coding Challenges — Local Dev quickstart section
+- `docs/trainer-authoring.md` (NEW, 194 lines) — 6-section guide per D-12
+- `.planning/phases/44-hardening-load-test/SECURITY-AUDIT.md` (NEW) — manual STRIDE baseline covering Phases 38+39+43, upgrade-path to real /cso + codex adversarial-review documented
+- `.planning/phases/44-hardening-load-test/LOAD-TEST-CHECKPOINT.md` (NEW) — full human checklist for deployment-gated tasks
+- Tests: 925 baseline → 949 passing (delta = in-flight Phase 42 SQL work already on-disk; zero Phase 44 test regressions)
+- 5 commits: 222906b, 422f1ca, 004a991, a100b46, (pending: this commit)
+
+Phase 41 delivered:
+
+- `src/lib/gapPersistence.ts` — `DIFFICULTY_MULTIPLIERS` (easy 0.7 / medium 1.0 / hard 1.3) + `persistCodingSignalToGapScore` transaction-wrapped upsert keyed on `(associateId, skill, topic="coding:<language>")`
+- `src/lib/codingAttemptPoll.ts` — fire-and-forget GapScore write wired alongside existing CodingSkillSignal upsert, guarded + logged
+- `GET /api/trainer/[slug]/coding` — trainer-only attempts + coding-skill scores endpoint, hidden-test shield enforced via field whitelist
+- `/trainer/[slug]` CodingPanel — recharts BarChart (var(--chart-4) warm taupe) + attempts table with language/skill filters; mounted adjacent to (not merged with) interview dashboard
+- PROJECT.md readiness-math subsection + Open Items for v1.5 (backfill #1)
+- DESIGN.md Trainer coding panel visual spec + Decisions Log entry
+- Tests: +11 gapPersistence, +2 codingAttemptPoll, +7 trainer coding route = 20 new tests (net +76 including other agents' concurrent work)
+- 6 commits: d33fe7e, f330f58, 28ff159, 025c4e4, ce0f0a4, 27ba489
+
+Phase 38 delivered:
+
+- docker-compose.yml Judge0 stack (server, workers, postgres-15-alpine, redis-7-alpine) on internal judge0-net bridge, pinned to 1.13.1 (GHSA-q7vg-26pg-v5hr patch), port 2358 bound to 127.0.0.1 only
+- .env.judge0.example template + .env.example/.env.docker.example app wiring (JUDGE0_URL, JUDGE0_AUTH_TOKEN, JUDGE0_EXPOSE_LOCAL, COUNT_WORKERS)
+- src/lib/judge0Client.ts locked HTTP contract (submit/getSubmission/systemInfo, lazy env, 1-retry on 5xx/AbortError, no retry on 4xx, X-Auth-Token, no blocking-wait)
+- src/lib/judge0Errors.ts (UnsupportedLanguageError, Judge0UnavailableError, Judge0ConfigError)
+- /api/health extended with judge0 reachability probe (2-sec timeout, parallel db+judge0, 503 on either fail)
+- 19 new unit tests all passing (13 client + 6 health)
+- scripts/judge0-spike.ts + 10 fixture JSONs ready for human-triggered run
+- JUDGE-06 gate DEFERRED — see .planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md
+
+Phase 36 delivered:
+
+- 4 Prisma models (CodingChallenge, CodingAttempt, CodingTestCase, CodingSkillSignal)
+- Idempotent migration 0006_coding_challenges (smoke test deferred — Docker unavailable)
+- Pure-function codingSignalService with 17 Vitest tests (D-16 weight table verbatim)
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-16 — v1.3 started)
+See: .planning/PROJECT.md (updated 2026-04-18 — v1.4 active)
 
-**Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
-**Current focus:** Phase 32 — shell-overhaul
+**Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories. v1.4 extends this from mock interviews into coding challenges.
+
+**Current focus:** Phase 36 — Data Model & Schema. Start with `/gsd-plan-phase 36` or `/pipeline-coordinator --resume`.
 
 ## Performance Metrics
 
 - v1.0: 7 phases, 22 reqs, ~26h
 - v1.1: 8 phases, 14 reqs, ~24h, 131 commits
 - v1.2: 10 phases, 30 reqs, ~16h, 205 commits, 470 tests
-- v1.3: 7 phases, 19 reqs (in progress)
+- v1.3: 11 phases (incl. decimal 28.1), 27 reqs, ~2 days, 18 plans, 524 passing tests
+- v1.4 (PLANNING): 9 phases (36-44), 44 reqs, 8-10 week estimate, ~21-28 plan estimate
 
 ## Accumulated Context
 
-- Supabase auth is sole identity mechanism (PIN removed Phase 25)
-- Two-level shell (topbar+sidebar) exists for trainer; associate pages still use old PublicShell + AssociateNav layout
-- Associate self-dashboard has basic gap trends + recommended area but numbers-only, no trajectory language
-- Dark mode has inconsistencies — some pages stuck on parchment-light; GapTrendChart.tsx has hardcoded hex
-- Sign-in currently uses tab split (trainer/associate) — needs unified stacked buttons (no tabs)
-- Associates cannot see cohort curriculum assignment
-- DESIGN.md has no data visualization section — chart tokens must exist before any new chart is built
-- recharts 3.8.1 already ships AreaChart, Area, ReferenceLine — no new packages needed
-- Phase 27 and Phase 28 are independent; can run in parallel if desired
-- Phase 29 and Phase 30 both depend on Phase 27 (shell) but are independent of each other
-- Phase 31 must be last — sweeps all surfaces built in Phases 26-30
-- Shell refactor risk: default role prop to 'trainer' to prevent trainer layout regression
-- Gap score history query: cap at last 20 sessions; validate query time post-Phase 29
+Inherited from v1.3 close:
+
+- Supabase auth is sole identity mechanism (PIN removed in v1.2 Phase 25)
+- Prisma `Profile` model introduced in v1.3 Phase 28.1 (keyed on `authUserId`, no Associate FK) — lazy backfill pattern
+- `GapScore.prevWeightedScore` captured inline on upsert (nullable, no backfill)
+- Unified two-level AppShell powers all roles; sidebar is primary nav, TopBar is utility-only
+- Chart tokens + DESIGN.md Data Visualization section define canonical recharts style
+- Backlog items 999.1 (staging/prod split) and 999.2 (trainer default cohort) deferred to v1.5 — NOT in v1.4 scope
+- DEPLOY-01/02/03 absorbed into v1.4 Phase 43 (IAC-NN) as part of MSA-from-day-1 approach
+
+New for v1.4:
+
+- Discovery brief at `.planning/PIPELINE-DISCOVER.md` (2026-04-18) — office-hours + codex consult
+- Approved approach: B (MSA-from-day-1)
+- Requirements: `.planning/REQUIREMENTS.md` (44 reqs across 9 themes, traceability mapped)
+- Seeds for v1.5+: `.planning/seeds/v1.4-discovery-seeds.md`
 
 ## Decisions
 
-| Decision | Rationale | Phase |
-|----------|-----------|-------|
-| AppShell role prop defaults to 'trainer' | Prevents trainer layout regression during shell refactor | Phase 27 |
-| Cohort ID derived from auth session (never query params) | Prevents unauthorized curriculum data exposure | Phase 30 |
-| Build chart components with CSS vars from day one | Avoids dark mode retrofit in Phase 31 | Phase 26+ |
-| Cap gap history at 20 sessions for trend charts | Perf guard; materialize if >2s after Phase 29 | Phase 29 |
+Full log in PROJECT.md Key Decisions table. v1.4 decisions logged at milestone init:
+
+- Separate `CodingChallenge`/`CodingAttempt`/`CodingTestCase`/`CodingSkillSignal` models (not merged into Session) — readiness math stays explainable
+- Private GitHub repo for hidden tests (prevents DevTools leak via /api/github)
+- Stdin/stdout matching sufficient for v1.4 pedagogy
+- SQLite only for v1.4 SQL (real Postgres SQL = v1.5 hardened service)
+- Judge0 async submit + poll only, no `wait=true`
+- Judge0 pinned to ≥ 1.13.1 (GHSA-q7vg-26pg-v5hr)
+- MSA-from-day-1 (Approach B) chosen over mono-service
+- Phase 38 Judge0 spike gate required before Phase 39
+- [Phase 44]: Phase 44 autonomous: HARD-04 closed (docs + CLI shipped); HARD-01/02/03 require deployed stack — halted per unattended mandate; human completes per LOAD-TEST-CHECKPOINT.md
 
 ## Roadmap Evolution
 
-- Phase 28.1 inserted after Phase 28: User Profile — Profile model, profile page (avatar menu → settings), migrate first-login detection to Profile table (INSERTED)
+v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex consult) before proceeding to Phase 39. Phases 43-44 fold in deferred DEPLOY-01/02/03 backlog as MSA-from-day-1 deploy work.
 
 ## Session Continuity
 
-Last session: 2026-04-17T03:12:08.355Z
-Resume with: `/gsd-plan-phase 26`
+Last session: 2026-04-18T12:28:30.948Z
+Stopped at: Phase 44 partial: shipped harnesses + docs + CLI; halted gracefully on deployment-gated tasks
+Resume with: **HUMAN ACTION REQUIRED** — run Judge0 spike manually per `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Phase 39 is BLOCKED until spike PASSES and resource limits are committed.
+
+## Active Blockers
+
+- **Phase 39 blocked by JUDGE-06 gate**: docker daemon unavailable at Phase 38 execution time. Manual-run protocol in `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Expected effort: ~30-45 min on a host with colima running or on the GCE n1-standard-2 VM.

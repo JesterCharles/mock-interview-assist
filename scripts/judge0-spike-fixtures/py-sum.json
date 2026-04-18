@@ -1,0 +1,9 @@
+{
+  "name": "py-sum",
+  "language": "python",
+  "sourceCode": "n = int(input())\nnums = list(map(int, input().split()))\nprint(sum(nums))\n",
+  "stdin": "5\n1 2 3 4 5\n",
+  "expectedStdout": "15\n",
+  "maxWallTimeSec": 15,
+  "notes": "stdin parsing + reduce"
+}

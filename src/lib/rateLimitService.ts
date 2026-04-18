@@ -119,6 +119,186 @@ export function checkRateLimit(fingerprint: string): {
     };
 }
 
+// ---------------------------------------------------------------------------
+// Coding-submit rate limit scope (Phase 39 D-07..D-08)
+// Keyed per-user (associate:<id> or trainer:<userId>), hourly + daily windows.
+// Namespaced under 'coding-submit:<userKey>' to avoid collision with interview
+// fingerprint keys (bare strings).
+// ---------------------------------------------------------------------------
+
+const CODING_SUBMIT_HOURLY_DEFAULT = 30;
+const CODING_SUBMIT_DAILY_DEFAULT = 200;
+const CODING_SUBMIT_HOUR_MS = 60 * 60 * 1000;
+
+interface CodingSubmitBucket {
+    hourlyCount: number;
+    hourlyWindowStart: string; // ISO
+    dailyCount: number;
+    dailyWindowStart: string; // ISO
+}
+
+function getCodingHourlyLimit(): number {
+    const raw = process.env.CODING_SUBMIT_RATE_HOURLY;
+    if (!raw) return CODING_SUBMIT_HOURLY_DEFAULT;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : CODING_SUBMIT_HOURLY_DEFAULT;
+}
+
+function getCodingDailyLimit(): number {
+    const raw = process.env.CODING_SUBMIT_RATE_DAILY;
+    if (!raw) return CODING_SUBMIT_DAILY_DEFAULT;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : CODING_SUBMIT_DAILY_DEFAULT;
+}
+
+function codingKey(userKey: string): string {
+    return `coding-submit:${userKey}`;
+}
+
+function getCodingBucket(userKey: string): CodingSubmitBucket | null {
+    const store = getStore() as unknown as Record<string, unknown>;
+    const entry = store[codingKey(userKey)];
+    if (!entry || typeof entry !== 'object') return null;
+    return entry as CodingSubmitBucket;
+}
+
+function setCodingBucket(userKey: string, bucket: CodingSubmitBucket): void {
+    const store = getStore() as unknown as Record<string, unknown>;
+    store[codingKey(userKey)] = bucket;
+    saveStore(store as unknown as RateLimitStore);
+}
+
+function isUtcMidnightPassed(lastResetStr: string, now: Date): boolean {
+    const last = new Date(lastResetStr);
+    const lastUtcDay = Date.UTC(
+        last.getUTCFullYear(),
+        last.getUTCMonth(),
+        last.getUTCDate(),
+    );
+    const nowUtcDay = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+    );
+    return nowUtcDay > lastUtcDay;
+}
+
+function nextUtcMidnightMs(now: Date): number {
+    return Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + 1,
+        0, 0, 0, 0,
+    );
+}
+
+function rolloverBucket(
+    bucket: CodingSubmitBucket,
+    now: Date,
+): CodingSubmitBucket {
+    const hourlyStart = new Date(bucket.hourlyWindowStart);
+
+    let next = { ...bucket };
+    if (now.getTime() - hourlyStart.getTime() >= CODING_SUBMIT_HOUR_MS) {
+        next = { ...next, hourlyCount: 0, hourlyWindowStart: now.toISOString() };
+    }
+    if (isUtcMidnightPassed(bucket.dailyWindowStart, now)) {
+        next = { ...next, dailyCount: 0, dailyWindowStart: now.toISOString() };
+    }
+    return next;
+}
+
+export interface CodingSubmitRateResult {
+    allowed: boolean;
+    hourlyRemaining: number;
+    dailyRemaining: number;
+    retryAfterSeconds?: number;
+    error?: string;
+}
+
+export function checkCodingSubmitRateLimit(userKey: string): CodingSubmitRateResult {
+    const now = new Date();
+    const hourlyLimit = getCodingHourlyLimit();
+    const dailyLimit = getCodingDailyLimit();
+
+    let bucket = getCodingBucket(userKey);
+    if (!bucket) {
+        // No prior usage → full budget available. Do NOT persist here; increment does that.
+        return {
+            allowed: true,
+            hourlyRemaining: hourlyLimit,
+            dailyRemaining: dailyLimit,
+        };
+    }
+
+    // Roll over windows if expired. WR-03 (Phase 39 review): rolloverBucket
+    // always returns a fresh spread-copy, so a reference-identity check was
+    // ALWAYS true and triggered a disk write on every call. Compare the
+    // fields that actually roll (hourly/daily window starts) so we only
+    // persist when a window boundary was crossed.
+    const rolled = rolloverBucket(bucket, now);
+    const windowAdvanced =
+        rolled.hourlyWindowStart !== bucket.hourlyWindowStart ||
+        rolled.dailyWindowStart !== bucket.dailyWindowStart;
+    if (windowAdvanced) {
+        setCodingBucket(userKey, rolled);
+        bucket = rolled;
+    }
+
+    const hourlyRemaining = Math.max(0, hourlyLimit - bucket.hourlyCount);
+    const dailyRemaining = Math.max(0, dailyLimit - bucket.dailyCount);
+
+    if (hourlyRemaining <= 0 || dailyRemaining <= 0) {
+        // Always pick the soonest of next hour window or next UTC midnight.
+        // (earliest reset wins — caller retries whenever capacity opens up first.)
+        const nextHourMs = new Date(bucket.hourlyWindowStart).getTime() + CODING_SUBMIT_HOUR_MS;
+        const nextMidnightMs = nextUtcMidnightMs(now);
+        const soonestResetMs = Math.min(nextHourMs, nextMidnightMs);
+        const retryAfterSeconds = Math.max(1, Math.ceil((soonestResetMs - now.getTime()) / 1000));
+        return {
+            allowed: false,
+            hourlyRemaining,
+            dailyRemaining,
+            retryAfterSeconds,
+            error:
+                dailyRemaining <= 0
+                    ? 'Daily coding-submit limit reached. Try again tomorrow.'
+                    : 'Hourly coding-submit limit reached. Try again later.',
+        };
+    }
+
+    return {
+        allowed: true,
+        hourlyRemaining,
+        dailyRemaining,
+    };
+}
+
+export function incrementCodingSubmitCount(userKey: string): void {
+    const now = new Date();
+    const existing = getCodingBucket(userKey);
+
+    let bucket: CodingSubmitBucket;
+    if (!existing) {
+        bucket = {
+            hourlyCount: 1,
+            hourlyWindowStart: now.toISOString(),
+            dailyCount: 1,
+            dailyWindowStart: now.toISOString(),
+        };
+    } else {
+        const rolled = rolloverBucket(existing, now);
+        bucket = {
+            hourlyCount: rolled.hourlyCount + 1,
+            hourlyWindowStart: rolled.hourlyWindowStart,
+            dailyCount: rolled.dailyCount + 1,
+            dailyWindowStart: rolled.dailyWindowStart,
+        };
+    }
+
+    setCodingBucket(userKey, bucket);
+}
+
 export function incrementInterviewCount(fingerprint: string): void {
     const store = getStore();
     const now = new Date();
