@@ -137,6 +137,9 @@ async function submitAndPoll(
   return { attemptId, verdict: null, latencyMs: null, error: `timeout after ${timeoutMs}ms` };
 }
 
+const DOCKER_STATS_CHILD_TIMEOUT_MS = 10_000;
+const DOCKER_STATS_SIGKILL_GRACE_MS = 2_000;
+
 function startDockerStatsSampler(): { rows: DockerStatsRow[]; stop: () => Promise<void> } {
   const rows: DockerStatsRow[] = [];
   let stopped = false;
@@ -149,11 +152,33 @@ function startDockerStatsSampler(): { rows: DockerStatsRow[]; stop: () => Promis
   }
 
   const cmd = `docker stats --no-stream --format '{{json .}}' judge0-server judge0-workers 2>/dev/null`;
-  const interval = setInterval(() => {
-    const child = spawn('ssh', ['-i', keyPath, '-o', 'StrictHostKeyChecking=yes', target, cmd]);
+  // Track in-flight children so `stop()` can tear them down, and guard each
+  // tick with a per-child AbortController-driven timeout so slow ssh calls
+  // cannot pile up unbounded if they exceed the sampler interval (WR-01).
+  const inflight = new Set<ReturnType<typeof spawn>>();
+
+  const tick = () => {
+    if (stopped) return;
+    const ac = new AbortController();
+    const child = spawn(
+      'ssh',
+      ['-i', keyPath, '-o', 'StrictHostKeyChecking=yes', target, cmd],
+      { signal: ac.signal },
+    );
+    inflight.add(child);
+    const killTimer = setTimeout(() => {
+      // Per-child 10s cap — if ssh stalls, abort and move on.
+      ac.abort();
+    }, DOCKER_STATS_CHILD_TIMEOUT_MS);
+
     let buf = '';
-    child.stdout.on('data', (d) => (buf += d.toString()));
+    child.stdout?.on('data', (d) => (buf += d.toString()));
+    child.on('error', () => {
+      // spawn errors (e.g., aborted) are non-fatal — drop the sample.
+    });
     child.on('close', () => {
+      clearTimeout(killTimer);
+      inflight.delete(child);
       if (stopped) return;
       for (const line of buf.split('\n').filter(Boolean)) {
         try {
@@ -166,13 +191,49 @@ function startDockerStatsSampler(): { rows: DockerStatsRow[]; stop: () => Promis
         }
       }
     });
-  }, DOCKER_STATS_INTERVAL_MS);
+  };
+
+  const interval = setInterval(tick, DOCKER_STATS_INTERVAL_MS);
 
   return {
     rows,
     stop: async () => {
       stopped = true;
       clearInterval(interval);
+      // Signal any outstanding children SIGTERM, grace-wait 2s, then SIGKILL
+      // remainders. Resolves when the in-flight set drains or the grace
+      // window lapses — whichever comes first.
+      if (inflight.size === 0) return;
+      const outstanding = Array.from(inflight);
+      for (const c of outstanding) {
+        try {
+          c.kill('SIGTERM');
+        } catch {
+          // process may already have exited between spawn and stop.
+        }
+      }
+      const drained = new Promise<void>((resolve) => {
+        if (inflight.size === 0) return resolve();
+        const poll = setInterval(() => {
+          if (inflight.size === 0) {
+            clearInterval(poll);
+            resolve();
+          }
+        }, 50);
+      });
+      const graceExpired = new Promise<void>((resolve) =>
+        setTimeout(resolve, DOCKER_STATS_SIGKILL_GRACE_MS),
+      );
+      await Promise.race([drained, graceExpired]);
+      for (const c of outstanding) {
+        if (inflight.has(c)) {
+          try {
+            c.kill('SIGKILL');
+          } catch {
+            // already dead.
+          }
+        }
+      }
     },
   };
 }
