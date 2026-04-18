@@ -2,27 +2,32 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
-status: planning
-last_updated: "2026-04-18T02:48:46.674Z"
-last_activity: 2026-04-18 -- `/gsd-new-milestone v1.4` executed; discovery brief ingested from `.planning/PIPELINE-DISCOVER.md`
+status: executing
+last_updated: "2026-04-18T09:06:49.241Z"
+last_activity: 2026-04-18 -- Phase 36 execution complete (all 3 plans)
 progress:
   total_phases: 9
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 28
+  completed_plans: 3
+  percent: 11
 ---
 
 # v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
 
 ## Current Position
 
-Status: Planning — milestone initialized; ready for `/gsd-plan-phase 36`
-Last activity: 2026-04-18 -- `/gsd-new-milestone v1.4` executed; discovery brief ingested from `.planning/PIPELINE-DISCOVER.md`
+Status: Phase 36 complete — ready for Phase 37 (Challenge Authoring / GitHub Loader)
+Last activity: 2026-04-18 -- Phase 36 execution complete (all 3 plans)
 
 ```
-Progress: [--------------------] 0% (0/9 phases)
+Progress: [██------------------] 11% (1/9 phases complete, 3/28 plans)
 ```
+
+Phase 36 delivered:
+- 4 Prisma models (CodingChallenge, CodingAttempt, CodingTestCase, CodingSkillSignal)
+- Idempotent migration 0006_coding_challenges (smoke test deferred — Docker unavailable)
+- Pure-function codingSignalService with 17 Vitest tests (D-16 weight table verbatim)
 
 ## Project Reference
 
@@ -78,5 +83,6 @@ v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex co
 
 ## Session Continuity
 
-Last session: 2026-04-18T02:48:46.671Z
-Resume with: `/gsd-plan-phase 36` (to begin Phase 36 planning) OR `/pipeline-coordinator --resume` (to let the coordinator sequence the plan stage)
+Last session: 2026-04-18T09:06:49.241Z
+Stopped at: Phase 36 complete (execution). All 3 plans shipped, tests green, schema + migration + service committed.
+Resume with: `/gsd-execute-phase 37` (Challenge Authoring / GitHub Loader)

@@ -83,12 +83,12 @@ Adds coding challenges as a continuous-practice rep type alongside mock intervie
 **Success**: `prisma migrate deploy` clean on existing DB; signal-to-GapScore pure function has unit tests covering all signal types; generated client exports new models
 **Estimate**: ~1 week, 2-3 plans
 
-**Plans:** 3 plans in 2 waves
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 36-01-PLAN.md — Prisma schema: 4 coding models + back-relations (Wave 1)
-- [ ] 36-02-PLAN.md — Hand-written idempotent migration + smoke test (Wave 2)
-- [ ] 36-03-PLAN.md — codingSignalService + Vitest suite (Wave 2)
+- [x] 36-01-PLAN.md — Prisma schema: 4 coding models + back-relations (Wave 1)
+- [x] 36-02-PLAN.md — Hand-written idempotent migration + smoke test (Wave 2)
+- [x] 36-03-PLAN.md — codingSignalService + Vitest suite (Wave 2)
 
 #### Phase 37: Challenge Bank Contract & Loader
 **Goal**: Trainers author coding challenges in GitHub repos (public prompts + private hidden tests); app loader fetches, validates, caches

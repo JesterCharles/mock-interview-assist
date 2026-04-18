@@ -13,12 +13,12 @@
 
 ### Data Model (CODING-MODEL-NN) — Phase 36
 
-- [ ] **CODING-MODEL-01**: Prisma `CodingChallenge` model: id, slug, title, language enum (python/javascript/typescript/java/sql/csharp), difficulty, description (markdown path in public repo), skillSlug (joins to existing curriculum), cohortId nullable, createdAt, updatedAt
-- [ ] **CODING-MODEL-02**: Prisma `CodingAttempt` model: id, associateId FK, challengeId FK, submittedCode, language, verdict enum (pass/fail/timeout/mle/runtime_error/compile_error/pending), visibleTestResults JSON, hiddenTestResults JSON (verdict-only), score (0-100), judge0Token, submittedAt, completedAt
-- [ ] **CODING-MODEL-03**: Prisma `CodingTestCase` model: id, challengeId FK, isHidden bool, stdin, expectedStdout, weight (for partial credit), orderIndex — hidden rows loaded server-only from private repo, never persisted to client responses
-- [ ] **CODING-MODEL-04**: Prisma `CodingSkillSignal` model: id, attemptId FK (unique), skillSlug, signalType enum (pass/partial/fail/compile_error/timeout), weight float, mappedScore 0-100 — explicit mapping that feeds GapScore
-- [ ] **CODING-MODEL-05**: Idempotent `0002_coding_challenges` Prisma migration (`IF NOT EXISTS`, DO-block FK guards) so `prisma migrate deploy` is safe over existing databases
-- [ ] **CODING-MODEL-06**: Pure-function `codingSignalService.ts` maps `CodingSkillSignal` rows into GapScore inputs (weighted by signal type; compile_error weighted lower than wrong-answer)
+- [x] **CODING-MODEL-01**: Prisma `CodingChallenge` model: id, slug, title, language enum (python/javascript/typescript/java/sql/csharp), difficulty, description (markdown path in public repo), skillSlug (joins to existing curriculum), cohortId nullable, createdAt, updatedAt
+- [x] **CODING-MODEL-02**: Prisma `CodingAttempt` model: id, associateId FK, challengeId FK, submittedCode, language, verdict enum (pass/fail/timeout/mle/runtime_error/compile_error/pending), visibleTestResults JSON, hiddenTestResults JSON (verdict-only), score (0-100), judge0Token, submittedAt, completedAt
+- [x] **CODING-MODEL-03**: Prisma `CodingTestCase` model: id, challengeId FK, isHidden bool, stdin, expectedStdout, weight (for partial credit), orderIndex — hidden rows loaded server-only from private repo, never persisted to client responses
+- [x] **CODING-MODEL-04**: Prisma `CodingSkillSignal` model: id, attemptId FK (unique), skillSlug, signalType enum (pass/partial/fail/compile_error/timeout), weight float, mappedScore 0-100 — explicit mapping that feeds GapScore
+- [x] **CODING-MODEL-05**: Idempotent `0002_coding_challenges` Prisma migration (`IF NOT EXISTS`, DO-block FK guards) so `prisma migrate deploy` is safe over existing databases
+- [x] **CODING-MODEL-06**: Pure-function `codingSignalService.ts` maps `CodingSkillSignal` rows into GapScore inputs (weighted by signal type; compile_error weighted lower than wrong-answer)
 
 ### Challenge Bank (CODING-BANK-NN) — Phase 37
 
