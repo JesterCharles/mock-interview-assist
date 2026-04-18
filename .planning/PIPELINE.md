@@ -33,13 +33,13 @@ Empty phase dirs — no CONTEXT.md yet. Auto-discuss flag will generate them non
 | discover | skipped | | | Gap closure scoped from v1.3 milestone audit (`v1.3-MILESTONE-AUDIT.md`) |
 | init | skipped | | | Existing codebase intel current |
 | design | skipped | | | No new surfaces; reuses existing components |
-| plan | in_progress | 2026-04-17 | | Auto-discuss + plan for P33-35 |
-| execute | pending | | | |
-| review | pending | | | |
-| test | pending | | | |
-| ship | pending | | | Merge deferred per --unattended |
-| reflect | pending | | | |
-| maintain | pending | | | |
+| plan | done | 2026-04-17 | 2026-04-17 | 3/3 phases auto-discussed, 4 plans (P33×1, P34×2, P35×1). Artifact: PIPELINE-PLAN.md |
+| execute | done | 2026-04-17 | 2026-04-17 | 19 commits across P33-35, +45 tests, all passing |
+| review | done | 2026-04-17 | 2026-04-17 | Codex: 1 P1 + 2 P2 → all closed (PIPELINE-REVIEW.md + PIPELINE-REVIEW-FIX.md, 73415c3) |
+| test | done | 2026-04-17 | 2026-04-17 | 524 passing / 4 skipped, build clean (PIPELINE-TEST.md) |
+| ship | partial | 2026-04-17 | 2026-04-17 | PR #6 created, **merge deferred** per no-auto-merge policy |
+| reflect | done | 2026-04-17 | 2026-04-17 | Retro + session notes + 3 seeds. Artifact: `.planning/PIPELINE-REFLECT-GAP.md`. 2 notes in `~/second-brain/projects/nlm/notes/` |
+| maintain | done | 2026-04-17 | 2026-04-17 | Health 8.0/10 (flat). PIPELINE-MAINTAIN-GAP.md |
 
 ## Stages (v1.3 main run — SHIPPED)
 | Stage | Status | Started | Completed | Notes |
