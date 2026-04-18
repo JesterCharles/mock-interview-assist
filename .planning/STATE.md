@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: "Production Migration: Cloud Run + Supabase Hybrid"
 status: executing
-last_updated: "2026-04-18T23:41:00.000Z"
-last_activity: 2026-04-18 -- Phase 48 executed (1/4 plans fully complete [48-03], 3/4 code-complete with operator checkpoints pending)
+last_updated: "2026-04-18T23:49:00.000Z"
+last_activity: 2026-04-18 -- Phase 50 executed fully autonomously (4/4 plans complete, 8 commits, ~17min wall, 21 PASS / 0 FAIL / 3 SKIP phase-gate)
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 36
-  completed_plans: 13
-  percent: 36
+  completed_plans: 17
+  percent: 47
 ---
 
 # Project State — v1.5 Production Migration
 
 ## Current Position
 
-Phase: 48 (executed — 1/4 fully complete [48-03 TDD autonomous], 3/4 code-complete HALT on operator apply/live-run gates)
-Plan: Next → 49 (k6 Load Test + Hardening) after operator executes Phase 46 + 47 + 48 apply/activation sequences
-Status: Phase 48 workflow YAML + app logger/metrics + monitoring HCL + phase-gate script all shipped; operator must push commits + `gh variable set` + `gh api` branch protection + first merge to main + `terraform apply -target=` monitoring resources + click 2 email verification links + run `bash iac/cloudrun/scripts/verify-phase-48.sh`
-Last activity: 2026-04-18 -- Phase 48 code ship complete (12 per-task commits, ~9min wall, 18 new app-code tests [11 logger + 7 metrics all green], 5 new workflows/skeletons [wif-smoke.yml deleted], 2 new runbooks, 1 new HCL file + dashboard JSON + phase-gate script, terraform fmt+validate green). 48-03 fully complete autonomously; 48-01, 48-02, 48-04 halted on operator gates.
+Phase: 50 (Judge0 Integration Points + Flag Audit) — **COMPLETE fully autonomously, 4/4 plans, phase-gate 21 PASS / 0 FAIL / 3 SKIP**
+Plan: Next → 49 (k6 Load Test + Hardening) or 51 (Prod Cloud Run) per dependency graph
+Status: Phase 50 complete — all code guards + UI + IaC relabel shipped; operator pending action = `bash scripts/populate-coding-flag-secrets.sh` after P45 Plan 03 applies
+Last activity: 2026-04-18 -- Phase 50 shipped fully autonomously (8 per-task commits, ~17min wall, 1055 tests passing [+14 new], 14 files created, 12+ modified, 9 moved via git mv). All 4 plans complete end-to-end.
 
 ## Progress Bar
 
 ```
-v1.5: [██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░] 36% (1/9 phases, 13/36 plans)
+v1.5: [███████████████████░░░░░░░░░░░░░░░░░░░░░] 47% (2/9 phases, 17/36 plans)
 ```
 
 ## Project Reference
@@ -45,7 +45,7 @@ See: `.planning/PROJECT.md`
 | 47 | Staging Cloud Run Service + Load Balancer + Domains | INFRA-04..05, CI-04 | Code complete (4 operator checkpoints pending) |
 | 48 | GitHub Actions CI + Deploy-Staging + Observability | CI-01..02, CI-05..06, OBS-01..04 | Not started |
 | 49 | k6 Load Test + Hardening (HARD-01..03) | LOAD-01..03, HARD-01..03 | Not started |
-| 50 | Judge0 Integration Points + Flag Audit | JUDGE-INTEG-01..04 | Not started |
+| 50 | Judge0 Integration Points + Flag Audit | JUDGE-INTEG-01..04 | **Complete (autonomous, 8 commits, 21/0/3 phase-gate)** |
 | 51 | Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | CI-03, DNS-01..03 | Not started |
 | 52 | DNS Cutover + Zero-Downtime Validation + Kill Switch | DNS-04, SUNSET-01..02, SUNSET-04 | Not started |
 | 53 | Reflect + Maintain + Runbook Finalization + Decommission Plan | META-01..02, DOCS-01..04, SUNSET-03 | Not started |
@@ -77,11 +77,13 @@ See: `.planning/PROJECT.md`
 - v1.5 Phase 46 (2026-04-18): 4 plans, 11 per-task commits, ~35min wall, 30+ new tests, 1005 passing total; 1 plan autonomous, 3 halted on operator checkpoints
 - v1.5 Phase 47 (2026-04-18): 4 plans, 7 per-task commits, ~32min wall, 0 new tests (pure IaC). All 4 plans halted on operator apply + live mutation gates. Shipped: 5 new HCL files (cloudrun-staging.tf + loadbalancer-staging.tf + dns-staging.tf + wif.tf + iam.tf extensions), 1 GH workflow (wif-smoke.yml), 2 scripts (coldstart-probe + verify-phase-47 phase-gate), ~130 README runbook lines. terraform validate + plan both green (16 resources to add staging, 6 to add prod).
 - v1.5 Phase 48 (2026-04-18): 4 plans, 12 per-task commits, ~9min wall, 18 new tests (11 logger + 7 metrics; all green). 1 plan fully autonomous (48-03 TDD), 3 code-complete halted on operator apply/live-run gates (48-01 branch protection, 48-02 first deploy + rollback rehearsal, 48-04 terraform apply + email verification). Shipped: 3 new GH workflows (deploy-staging.yml + rollback-prod.yml + load-test.yml skeleton) + pr-checks.yml rewrite (4 parallel jobs) + wif-smoke.yml deletion; 2 runbooks (RUNBOOK-BRANCH-PROTECTION.md + RUNBOOK-WORKFLOW-VARS.md); new src/lib/logger.ts + src/app/api/metrics/route.ts; logger wired into middleware + 5 high-traffic routes (zero PII); new iac/cloudrun/monitoring.tf + dashboard-nlm-production.json (6 widgets) + verify-phase-48.sh phase-gate (12 checks). `terraform fmt` + `validate` green; `tsc --noEmit` + `lint` zero errors; P48 test scope 18/18.
+- v1.5 Phase 50 (2026-04-18): 4 plans, 8 per-task commits, ~17min wall, 14 new tests (7 codingFeatureFlag + 5 codingStatus endpoint + 6 judge0Client gating + 5 CodingComingSoon + 5 useCodingStatus + 3 submit gating + 1 SubmitBar FEATURE_DISABLED; 14 total across 8 describe blocks). **All 4 plans fully autonomous end-to-end — zero operator gates.** Shipped: `src/lib/codingFeatureFlag.ts` + `CodingFeatureDisabledError` class, `/api/coding/status` probe endpoint, `_disabledResponse.ts` canonical 503 helper, flag guards on all 7 /api/coding/* + /api/trainer/[slug]/coding routes (D-09: no admin bypass) + `judge0Client.ts` (3 exports) + `codingAttemptPoll.ts` (2 funcs), `CodingComingSoon.tsx` component, `useCodingStatus.ts` hook with 60s module cache, server-side isCodingEnabled() short-circuit in /coding pages, SubmitBar FEATURE_DISABLED dispatch on 503+{enabled:false}, SolveWorkspace swap to ComingSoon on FEATURE_DISABLED. IaC: `git mv infra/terraform iac/gce-judge0` (history preserved via rename), REFERENCE TEMPLATE banner, `iac/cloudrun/judge0.tf.disabled` 108-line v1.6 activation stub (VPC connector + firewall + egress patch + Activation runbook, D-11 no provider blocks), `.gitignore` additions. Scripts: `populate-coding-flag-secrets.sh` + `verify-phase-50.sh` phase gate (21 PASS / 0 FAIL / 3 SKIP — Secret Manager + staging URL expected skips). `npm run test` 1055/1059 passing; `npx tsc --noEmit` clean; `npm run lint` zero errors. Deviations: Rule 1 auto-fix — stubbed CODING_CHALLENGES_ENABLED=true in 5 pre-existing test beforeEach hooks (P48 deferred-item resolved).
 
 ## Accumulated Context
 
 ### Decisions (v1.5)
 
+- **Phase 50 (2026-04-18):** Phase 50 shipped fully autonomously. isCodingEnabled() uses strict `=== 'true'` match (rejects 'TRUE', '1', 'yes' per D-02). CODING_COMING_SOON_MESSAGE = 'Coding challenges coming soon. Check back later!' single source of truth across API 503 bodies + UI ComingSoon card. judge0Client flag guard fires BEFORE language check + env read — placeholder JUDGE0_URL never surfaces Judge0ConfigError. D-09 trainer/[slug]/coding: NO admin bypass — identical 503 reduces surface area. Client uses /api/coding/status probe (not NEXT_PUBLIC_*) so flag can flip without rebuild. git mv infra/terraform → iac/gce-judge0 with REFERENCE TEMPLATE banner; iac/cloudrun/judge0.tf.disabled is terraform-inert (.disabled excluded from *.tf glob) — v1.6 activation is rename + uncomment + 13-step runbook. scripts/populate-coding-flag-secrets.sh (operator-run) + scripts/verify-phase-50.sh (phase gate, SKIPs external dependencies).
 - **Phase 48 (2026-04-18):** Phase 48 shipped as workflow YAML + app code + monitoring HCL + runbooks under unattended rules. Plan 48-03 (logger + metrics TDD) fully autonomous; 48-01/02/04 halted on live-run gates (branch protection toggle, first deploy via WIF, terraform apply monitoring). `deploy-staging.yml` deploys by digest via WIF (no SA JSON keys) — pulls `DIRECT_URL` from Secret Manager at runtime for `prisma migrate deploy` BEFORE `gcloud run deploy`. `rollback-prod.yml` is env-parameterized (staging|prod choice) so same workflow serves both envs. `wif-smoke.yml` (P47 artifact) deleted per D-15 — WIF now proven by real deploy/rollback. Logger emits Cloud Logging canonical severities (WARNING not WARN) via `console.log` (edge-runtime safe); wired into middleware + 5 routes with zero PII in payloads. `/api/metrics` feature-flagged strict equality on `'true'` (default-off 404 per D-11/T-48-06); Prometheus text 0.0.4 with 4 zero-valued stubs (instrumentation deferred to P49). Monitoring dashboard JSON shared across staging + prod via templatefile (D-12); alert policy pulls email from ADMIN_EMAILS Secret Manager secret (D-14); 2-consecutive-60s-window failure threshold (D-13 + T-48-05).
 - **Phase 48 (2026-04-18):** Scope-boundary finding logged to `.planning/phases/48-*/deferred-items.md`: 15 pre-existing failures in `src/lib/codingAttemptPoll.test.ts` caused by concurrent commit `2e8d9e5` (P50-02) adding `isCodingEnabled()` guard without updating test harness. Out of P48 scope; P50 to resolve.
 - **Phase 47 (2026-04-18):** Phase 47 shipped as HCL + workflow + scripts + runbook under unattended rules. All 4 plans halted on operator apply — nothing mutated against live GCP or Cloudflare. `terraform fmt` + `terraform validate` + `terraform plan -var-file=staging.tfvars` all green; plan shows 16 resources to add against staging (+ 6 against prod for WIF). `cloudflare/cloudflare v4.52.7` locked in `.terraform.lock.hcl`. Project numbers captured live: staging=`168540542629`, prod=`609812564722`. Full operator runbook in `iac/cloudrun/README.md` "## Phase 47 apply sequence" + `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-EXECUTE-LOG.md` "Next Actions for Human Operator".
@@ -109,7 +111,7 @@ See: `.planning/PROJECT.md`
 - **Phase 46 operator checkpoints (3 open):** Plan 46-02 Task 3 (prod wipe A–F), Plan 46-03 Task 4 (key rotation + migrate deploy G–I), Plan 46-04 Task 5 (Auth redirect PATCH J + phase-gate). All require human-held credentials and live production mutations. Runbook is ready; `bash scripts/verify-phase-46.sh` is the single-command exit criterion.
 - **Phase 47 operator checkpoints (4 open):** Plan 47-01 Task 3 (Wave 1 — `terraform apply` Cloud Run service), Plan 47-02 Task 3 (Wave 2 — apply LB+DNS, 10-60 min SSL wait), Plan 47-03 Task 2+3 (apply WIF in both projects + `gh variable set` + `gh workflow run wif-smoke.yml`), Plan 47-04 Task 1+2+3 (populate `NEXT_PUBLIC_SITE_URL` secret + invoke coldstart-probe + phase-gate). Exit criterion: `bash iac/cloudrun/scripts/verify-phase-47.sh` exits 0 with "All Phase 47 assertions PASSED." Prerequisites: (a) first image in AR (either lazy-init supabaseAdmin then docker push, or defer to P48 CI), (b) `CLOUDFLARE_API_TOKEN` exported with Zone.DNS.Edit scope, (c) Phase 46 secrets populated.
 - **Phase 48 operator checkpoints (3 open):** Plan 48-01 Task 3 (first `gh workflow run pr-checks.yml` run + `.github/RUNBOOK-BRANCH-PROTECTION.md` gh-api PUT), Plan 48-02 Task 4 (`gh variable set` per `.github/RUNBOOK-WORKFLOW-VARS.md` + first merge to main to trigger `deploy-staging.yml` + `gh workflow run rollback-prod.yml -f env=staging` rehearsal — requires Phase 47 Cloud Run service + WIF live and first image in AR), Plan 48-04 Task 3 (`terraform apply -target=google_monitoring_*` on both staging + prod tfvars + click 2 Google Cloud Monitoring email verification links + `bash iac/cloudrun/scripts/verify-phase-48.sh`). Exit criterion: verify-phase-48.sh returns "Phase 48 gate: ALL 12 CHECKS PASS".
-- **Phase 48 deferred (P50-02 scope):** 15 failures in `src/lib/codingAttemptPoll.test.ts` from commit `2e8d9e5` — fix is to stub `isCodingEnabled()` in that test harness beforeEach. Tracked in `.planning/phases/48-github-actions-ci-deploy-staging-observability/deferred-items.md`.
+- **~~Phase 48 deferred (P50-02 scope):~~** RESOLVED in Phase 50 — 5 test files (codingAttemptPoll, challenges/route, attempts/[id]/route, bank/refresh/route, trainer/[slug]/coding/route) had `vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true')` added to beforeEach. Full regression now 1055/1059 (4 pre-existing skipped, zero failures).
 
 ### Todos
 
