@@ -25,6 +25,17 @@ Last activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate de
 Progress: [███░░░░░░░] 32% (3/9 phases complete, 9/28 plans)
 ```
 
+Phase 41 delivered:
+
+- `src/lib/gapPersistence.ts` — `DIFFICULTY_MULTIPLIERS` (easy 0.7 / medium 1.0 / hard 1.3) + `persistCodingSignalToGapScore` transaction-wrapped upsert keyed on `(associateId, skill, topic="coding:<language>")`
+- `src/lib/codingAttemptPoll.ts` — fire-and-forget GapScore write wired alongside existing CodingSkillSignal upsert, guarded + logged
+- `GET /api/trainer/[slug]/coding` — trainer-only attempts + coding-skill scores endpoint, hidden-test shield enforced via field whitelist
+- `/trainer/[slug]` CodingPanel — recharts BarChart (var(--chart-4) warm taupe) + attempts table with language/skill filters; mounted adjacent to (not merged with) interview dashboard
+- PROJECT.md readiness-math subsection + Open Items for v1.5 (backfill #1)
+- DESIGN.md Trainer coding panel visual spec + Decisions Log entry
+- Tests: +11 gapPersistence, +2 codingAttemptPoll, +7 trainer coding route = 20 new tests (net +76 including other agents' concurrent work)
+- 6 commits: d33fe7e, f330f58, 28ff159, 025c4e4, ce0f0a4, 27ba489
+
 Phase 38 delivered:
 
 - docker-compose.yml Judge0 stack (server, workers, postgres-15-alpine, redis-7-alpine) on internal judge0-net bridge, pinned to 1.13.1 (GHSA-q7vg-26pg-v5hr patch), port 2358 bound to 127.0.0.1 only
