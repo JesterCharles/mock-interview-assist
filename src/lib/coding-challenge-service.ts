@@ -2,12 +2,15 @@
  * coding-challenge-service.ts
  *
  * Server-side loader for the two-repo challenge bank (public + private).
- * Mirrors src/lib/githubManifestCache.ts for module-state caching, and
- * src/lib/github-service.ts for the `/api/github` proxy contract (public path).
+ * Mirrors src/lib/githubManifestCache.ts for module-state caching.
  *
  * SECURITY BOUNDARY (Phase 37 CONTEXT D-05):
- *   - Public content (README, meta, visible-tests, starters) routes through
- *     the existing `/api/github` proxy path — token stays server-side.
+ *   - Public content (README, meta, visible-tests, starters) is fetched via a
+ *     dedicated server-only helper that calls api.github.com directly using
+ *     GITHUB_TOKEN + GITHUB_CODING_PUBLIC_REPO. The `/api/github` proxy is
+ *     NOT used on the server path (relative URLs are invalid in Node/undici
+ *     fetch, and the proxy did not forward If-None-Match, defeating the
+ *     ETag short-circuit in D-11 / CODING-BANK-04).
  *   - Hidden tests are fetched by `loadHiddenTests()` via a DEDICATED
  *     server-only helper that calls api.github.com directly with
  *     GITHUB_CODING_PRIVATE_TOKEN. MUST NOT extend `/api/github`.
@@ -76,13 +79,29 @@ export type PrivateFetcherFn = (args: {
 // ---------------------------------------------------------------------------
 // Default fetchers
 // ---------------------------------------------------------------------------
-const defaultPublicFetcher: PublicFetcherFn = async ({ path, kind }) => {
-  // Uses the existing /api/github proxy (token server-side).
-  // Note: proxy does NOT forward If-None-Match, so public path relies on TTL.
-  const url = `/api/github?path=${encodeURIComponent(path)}&type=content`;
-  const res = await fetch(url);
+const defaultPublicFetcher: PublicFetcherFn = async ({ path, kind, etag }) => {
+  // Direct server-side GitHub call. Node/undici `fetch` rejects relative URLs,
+  // and the existing /api/github proxy does NOT forward If-None-Match —
+  // defeating the ETag short-circuit called out in CODING-BANK-04. Calling
+  // GitHub directly here lets us forward If-None-Match and honor 304s,
+  // protecting the 5000/hr quota. Token stays server-side (server-only module).
+  const repo = process.env.GITHUB_CODING_PUBLIC_REPO;
+  const token = process.env.GITHUB_TOKEN;
+  if (!repo) throw new Error('GITHUB_CODING_PUBLIC_REPO not set');
+  if (!token) throw new Error('GITHUB_TOKEN not set');
+
+  const [owner, name] = repo.split('/');
+  const url = `https://api.github.com/repos/${owner}/${name}/contents/${path}`;
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3.raw',
+    Authorization: `token ${token}`,
+  };
+  if (etag) headers['If-None-Match'] = etag;
+
+  const res = await fetch(url, { headers });
+  if (res.status === 304) return { status: 304, etag: etag ?? '' };
   if (!res.ok) {
-    throw new Error(`Public proxy fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(`Public GitHub fetch failed: ${res.status} ${res.statusText}`);
   }
   const text = await res.text();
   const payload: unknown = kind === 'json' ? JSON.parse(text) : text;

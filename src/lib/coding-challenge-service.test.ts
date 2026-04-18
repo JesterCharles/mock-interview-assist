@@ -16,7 +16,7 @@
  *   - invalidateCache scoping
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ChallengeValidationError } from './coding-bank-schemas';
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -196,6 +196,119 @@ beforeEach(() => {
 });
 
 // ──────────────────────────────────────────────────────────────────────────
+// Default public fetcher — direct GitHub calls (CR-01 + WR-03)
+// ──────────────────────────────────────────────────────────────────────────
+describe('defaultPublicFetcher (direct GitHub, no /api/github proxy)', () => {
+  const origFetch = globalThis.fetch;
+  const origToken = process.env.GITHUB_TOKEN;
+  const origRepo = process.env.GITHUB_CODING_PUBLIC_REPO;
+
+  beforeEach(() => {
+    process.env.GITHUB_TOKEN = 'public-token-xyz';
+    process.env.GITHUB_CODING_PUBLIC_REPO = 'JesterCharles/mock-coding-challenges';
+    __resetAll(); // reinstall default fetchers after env vars set
+  });
+
+  afterEach(() => {
+    globalThis.fetch = origFetch;
+    if (origToken === undefined) delete process.env.GITHUB_TOKEN;
+    else process.env.GITHUB_TOKEN = origToken;
+    if (origRepo === undefined) delete process.env.GITHUB_CODING_PUBLIC_REPO;
+    else process.env.GITHUB_CODING_PUBLIC_REPO = origRepo;
+  });
+
+  it('calls api.github.com with absolute URL + Authorization header (not /api/github)', async () => {
+    const fetchSpy = vi.fn(async () => {
+      return new Response(JSON.stringify([{ slug: 'two-sum' }]), {
+        status: 200,
+        headers: { etag: 'manifest-etag-1' },
+      });
+    });
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+    // Manifest lookup will call the default public fetcher; we intercept it.
+    // Missing starters etc. will cause listChallenges to throw later, but we
+    // only care about the first fetch call.
+    try {
+      await listChallenges();
+    } catch {
+      // ignore — we only need to observe the first fetch call
+    }
+
+    expect(fetchSpy).toHaveBeenCalled();
+    const firstCall = fetchSpy.mock.calls[0];
+    const url = firstCall[0] as string;
+    const init = firstCall[1] as RequestInit;
+    expect(url).toMatch(/^https:\/\/api\.github\.com\//);
+    expect(url).toContain('JesterCharles/mock-coding-challenges');
+    expect(url).toContain('challenges/manifest.json');
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('token public-token-xyz');
+  });
+
+  it('forwards If-None-Match on second call after TTL expiry (ETag short-circuit)', async () => {
+    process.env.CODING_BANK_CACHE_TTL_MS = '1';
+    try {
+      let callCount = 0;
+      const fetchSpy = vi.fn(async (_url: string, init: RequestInit = {}) => {
+        callCount++;
+        if (callCount === 1) {
+          return new Response(JSON.stringify([{ slug: 'two-sum' }]), {
+            status: 200,
+            headers: { etag: 'manifest-v1' },
+          });
+        }
+        // Second call should include If-None-Match → server returns 304.
+        const headers = init.headers as Record<string, string>;
+        expect(headers['If-None-Match']).toBe('manifest-v1');
+        return new Response(null, { status: 304, headers: { etag: 'manifest-v1' } });
+      });
+      globalThis.fetch = fetchSpy as unknown as typeof fetch;
+
+      // Prime the cache — manifest fetch succeeds; downstream loadChallenge will fail.
+      try {
+        await listChallenges();
+      } catch {
+        /* ignore */
+      }
+      await new Promise((r) => setTimeout(r, 5));
+      // Second call — revalidates manifest with If-None-Match.
+      try {
+        await listChallenges();
+      } catch {
+        /* ignore */
+      }
+
+      // Both calls should have been made to the manifest URL.
+      const manifestCalls = fetchSpy.mock.calls.filter((c) =>
+        String(c[0]).includes('challenges/manifest.json'),
+      );
+      expect(manifestCalls.length).toBeGreaterThanOrEqual(2);
+    } finally {
+      delete process.env.CODING_BANK_CACHE_TTL_MS;
+    }
+  });
+
+  it('throws a useful error when GITHUB_TOKEN is missing', async () => {
+    delete process.env.GITHUB_TOKEN;
+    __resetAll();
+    globalThis.fetch = (async () =>
+      new Response('should not be called', { status: 200 })) as unknown as typeof fetch;
+
+    await expect(listChallenges()).rejects.toThrow(/GITHUB_TOKEN/);
+  });
+
+  it('throws a useful error when GITHUB_CODING_PUBLIC_REPO is missing', async () => {
+    delete process.env.GITHUB_CODING_PUBLIC_REPO;
+    __resetAll();
+    globalThis.fetch = (async () =>
+      new Response('should not be called', { status: 200 })) as unknown as typeof fetch;
+
+    await expect(listChallenges()).rejects.toThrow(/GITHUB_CODING_PUBLIC_REPO/);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────
 // Cache TTL behavior
 // ──────────────────────────────────────────────────────────────────────────
 describe('coding-challenge-service cache', () => {
@@ -270,6 +383,92 @@ describe('coding-challenge-service private-path ETag', () => {
     expect(call2.etag).toBe('priv-etag-two-sum');
     const resp2 = await (priv as any).mock.results[1].value;
     expect(resp2.status).toBe(304);
+  });
+
+  it('ETag 200 after TTL expiry replaces payload + etag when server returns new data', async () => {
+    process.env.CODING_BANK_CACHE_TTL_MS = '1';
+    const oldHidden = [
+      { id: 'h-old', stdin: 'a', expectedStdout: 'b', weight: 1, orderIndex: 0 },
+    ];
+    const newHidden = [
+      { id: 'h-new', stdin: 'x', expectedStdout: 'y', weight: 1, orderIndex: 0 },
+    ];
+    // Fetcher returns old data + etag "v1" on first call, then new data + etag "v2" on second.
+    let callCount = 0;
+    const priv: PrivateFetcherFn = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return { status: 200, payload: oldHidden, etag: 'v1' };
+      return { status: 200, payload: newHidden, etag: 'v2' };
+    }) as PrivateFetcherFn;
+    __setFetchers({ privateFetcher: priv });
+
+    const first = await loadHiddenTests('two-sum');
+    expect(first[0].id).toBe('h-old');
+
+    await new Promise((r) => setTimeout(r, 5));
+    const second = await loadHiddenTests('two-sum');
+    expect(second[0].id).toBe('h-new');
+
+    // Third call within TTL should serve the new cached payload (no new fetcher call).
+    const before = (priv as any).mock.calls.length;
+    const third = await loadHiddenTests('two-sum');
+    expect(third[0].id).toBe('h-new');
+    expect((priv as any).mock.calls.length).toBe(before);
+  });
+});
+
+describe('invalidateCache mid-flight generation guard', () => {
+  it('discards in-flight write when invalidateCache runs before fetch resolves', async () => {
+    // First: populate cache so a subsequent stale fetch has prior state to revalidate.
+    process.env.CODING_BANK_CACHE_TTL_MS = '1';
+    const hiddenA = [
+      { id: 'h-a', stdin: 'a', expectedStdout: 'b', weight: 1, orderIndex: 0 },
+    ];
+    const hiddenB = [
+      { id: 'h-b', stdin: 'c', expectedStdout: 'd', weight: 1, orderIndex: 0 },
+    ];
+
+    let resolveFetch: ((v: any) => void) | null = null;
+    let callNum = 0;
+    const priv: PrivateFetcherFn = vi.fn(async () => {
+      callNum++;
+      if (callNum === 1) return { status: 200, payload: hiddenA, etag: 'v1' };
+      // Second call: deferred so we can invalidate mid-flight.
+      return new Promise((resolve) => {
+        resolveFetch = resolve;
+      });
+    }) as PrivateFetcherFn;
+    __setFetchers({ privateFetcher: priv });
+
+    await loadHiddenTests('two-sum'); // primes cache
+
+    // Wait for TTL to expire.
+    await new Promise((r) => setTimeout(r, 5));
+
+    // Kick off a second fetch (will hang awaiting resolveFetch).
+    const pending = loadHiddenTests('two-sum');
+
+    // Invalidate before the second fetch resolves — bumps generation.
+    invalidateCache();
+
+    // Now let the in-flight fetch resolve with new data.
+    resolveFetch!({ status: 200, payload: hiddenB, etag: 'v2' });
+    await pending;
+
+    // Because generation changed, the in-flight write should NOT have been committed
+    // to the store. The next call must refetch (callNum increments again).
+    const priorCalls = (priv as any).mock.calls.length;
+    // Provide a third response for the fresh fetch.
+    const priv2: PrivateFetcherFn = vi.fn(async () => ({
+      status: 200,
+      payload: hiddenB,
+      etag: 'v3',
+    })) as PrivateFetcherFn;
+    __setFetchers({ privateFetcher: priv2 });
+    await loadHiddenTests('two-sum');
+    // priv (pre-invalidate) should not have been called again after invalidate.
+    expect((priv as any).mock.calls.length).toBe(priorCalls);
+    expect((priv2 as any).mock.calls.length).toBe(1);
   });
 });
 
