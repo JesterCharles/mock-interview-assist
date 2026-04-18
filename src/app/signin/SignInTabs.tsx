@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, KeyRound } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 interface SignInAccordionProps {
   nextPath: string | null;
@@ -90,6 +91,13 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     setExpanded((prev) => (prev === type ? null : type));
   }
 
+  // Phase 33 / SIGNIN-02: Trainer first-login password gate.
+  // After a successful Supabase login, check user_metadata.password_set before redirecting.
+  // If the flag is falsy, send the trainer to /auth/set-password instead of /trainer.
+  // Uses a fresh browser Supabase client because useAuth().user is populated async via
+  // onAuthStateChange and may not have fired yet by the time this handler resumes.
+  // Fail-open: if getUser() errors, fall back to nextPath ?? '/trainer' — the middleware
+  // already blocks unauthenticated access to /trainer, so this cannot produce a bypass (D-07).
   async function handleTrainerSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (trainerSubmitting) return;
@@ -97,9 +105,30 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     setTrainerSubmitting(true);
     const ok = await login(email, password);
     if (ok) {
-      router.replace(nextPath ?? '/trainer');
-      router.refresh();
-      return;
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data?.user) {
+          // Fail-open per D-07 — middleware still blocks unauthenticated access.
+          router.replace(nextPath ?? '/trainer');
+          router.refresh();
+          return;
+        }
+        const passwordSet = data.user.user_metadata?.password_set === true;
+        if (!passwordSet) {
+          router.replace('/auth/set-password');
+          router.refresh();
+          return;
+        }
+        router.replace(nextPath ?? '/trainer');
+        router.refresh();
+        return;
+      } catch {
+        // Fail-open per D-07.
+        router.replace(nextPath ?? '/trainer');
+        router.refresh();
+        return;
+      }
     }
     setTrainerError('Invalid email or password.');
     setPassword('');
