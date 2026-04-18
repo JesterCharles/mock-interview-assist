@@ -169,16 +169,13 @@ describe('VerdictCard — terminal verdicts', () => {
 
 describe('VerdictCard — HIDDEN TEST LEAKAGE GUARDS', () => {
   it('DOM-leakage: extra props injected into hiddenTestResults do not appear in rendered HTML', () => {
-    const evilResponse = baseResponse({
-      hiddenTestResults: {
-        passed: 3,
-        total: 3,
-        // @ts-expect-error — intentional evil prop
-        stdin: 'SECRET_INPUT_12345',
-        // @ts-expect-error — intentional evil prop
-        expectedStdout: 'SECRET_EXPECTED_XYZ',
-      },
-    });
+    const evilHidden = {
+      passed: 3,
+      total: 3,
+      stdin: 'SECRET_INPUT_12345',
+      expectedStdout: 'SECRET_EXPECTED_XYZ',
+    } as unknown as { passed: number; total: number };
+    const evilResponse = baseResponse({ hiddenTestResults: evilHidden });
     const { container } = render(
       <VerdictCard response={evilResponse} phase="terminal" error={null} />,
     );
