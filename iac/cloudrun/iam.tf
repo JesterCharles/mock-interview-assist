@@ -31,3 +31,30 @@ resource "google_secret_manager_secret_iam_member" "cloudrun_accessor" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.cloudrun.email}"
 }
+
+# Phase 47 additions — D-18 least-privilege role bindings for github-actions-deployer SA.
+# T-47-03 mitigation: exactly 3 bindings; NO roles/owner or roles/editor.
+
+# Project-level: push images to Artifact Registry (D-18)
+resource "google_project_iam_member" "ghactions_artifactregistry_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.ghactions.email}"
+}
+
+# Project-level: deploy Cloud Run services (D-18)
+resource "google_project_iam_member" "ghactions_run_admin" {
+  project = var.project_id
+  role    = "roles/run.admin"
+  member  = "serviceAccount:${google_service_account.ghactions.email}"
+}
+
+# SA-level (NOT project-level — D-18 anti-pattern): iam.serviceAccountUser scoped ONLY on nlm-cloudrun-sa.
+# Without this, `gcloud run deploy --service-account=nlm-cloudrun-sa@...` fails with
+# "Permission iam.serviceAccounts.actAs denied on service account nlm-cloudrun-sa".
+# Project-level roles/iam.serviceAccountUser would grant actAs on every SA — over-privileged.
+resource "google_service_account_iam_member" "ghactions_act_as_cloudrun_sa" {
+  service_account_id = google_service_account.cloudrun.name # Phase 45 nlm-cloudrun-sa SA
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.ghactions.email}"
+}
