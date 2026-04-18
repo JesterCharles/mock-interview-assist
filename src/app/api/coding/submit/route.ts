@@ -30,7 +30,13 @@ import {
   JUDGE0_LANGUAGE_MAP,
   type Judge0Language,
 } from '@/lib/judge0Client';
-import { loadHiddenTests } from '@/lib/coding-challenge-service';
+import { loadHiddenTests, getSetupSql } from '@/lib/coding-challenge-service';
+// Phase 42 §D-06: for SQL attempts, per-test `passed` is derived by
+// `normalizeSqliteResult` (see src/lib/codingAttemptPoll.ts SQL branch).
+// We do NOT pass expected_output to Judge0 for SQL — normalization runs
+// server-side during poll, against trainer-authored expectedRows. This route
+// only builds + submits the concatenated source; the verdict compare path
+// lives in the poll helper.
 import {
   checkCodingSubmitRateLimit,
   incrementCodingSubmitCount,
@@ -143,6 +149,28 @@ export async function POST(request: Request): Promise<NextResponse> {
     ...hiddenCases.map((c) => ({ stdin: c.stdin, expectedStdout: c.expectedStdout })),
   ];
 
+  // Phase 42 §D-03: SQL pre-step. setup.sql is schema + seed authored by the
+  // trainer and MUST stay server-only — this variable NEVER appears in any
+  // Response.json(...) body below (verified by grep audit in Task 3 verify).
+  let setupSql: string | null = null;
+  if (parsedBody.language === 'sql') {
+    try {
+      setupSql = await getSetupSql(challenge.slug);
+    } catch (err) {
+      console.error('[coding/submit] getSetupSql failed for', challenge.slug, err);
+      return codingApiError(
+        'VALIDATION_ERROR',
+        'SQL challenge setup.sql unavailable',
+      );
+    }
+    if (setupSql === null) {
+      return codingApiError(
+        'VALIDATION_ERROR',
+        'SQL challenge missing setup.sql',
+      );
+    }
+  }
+
   // 9. Create CodingAttempt(pending) BEFORE Judge0 submit — so we can roll back on failure
   const attempt = await prisma.codingAttempt.create({
     data: {
@@ -156,17 +184,49 @@ export async function POST(request: Request): Promise<NextResponse> {
   });
 
   // 10. Submit to Judge0 — one submission per case. NO wait param.
+  //
+  // HIDDEN TEST SHIELD — do not echo setupSql/tc.stdin/expectedRows into response.
+  // The sourceCode built below (which may contain hidden trainer queries + setup.sql)
+  // is handed to Judge0 via HTTPS; it never crosses a response-body boundary here.
+  // For SQL language (§D-03 + D-04): concatenation order is
+  //   `.mode tabs` + `.headers off` + setup.sql + user query + test query-per-case.
+  // Expected-output stdout comparison is performed server-side via
+  // sqlResultNormalizer during poll (see codingAttemptPoll.ts SQL branch).
   let tokens: string[];
   try {
     const submissions = await Promise.all(
-      allCases.map((tc) =>
-        judge0Submit({
-          sourceCode: parsedBody.code,
+      allCases.map((tc) => {
+        let sourceCode: string;
+        let submissionStdin: string;
+        let submissionExpected: string | undefined;
+
+        if (parsedBody.language === 'sql') {
+          // setupSql is guaranteed non-null here (validated above for SQL branch)
+          sourceCode = [
+            '.mode tabs',
+            '.headers off',
+            setupSql ?? '',
+            parsedBody.code, // associate-submitted SQL (user query)
+            tc.stdin, // trainer-authored test query — NEVER surfaces to client for hidden tests
+          ].join('\n');
+          // SQLite in Judge0 runs the source; stdin pipe is unused for SQL.
+          submissionStdin = '';
+          // Do NOT pass expected_output for SQL — our normalizer handles compare
+          // (Judge0's built-in match cannot understand column/row order + coerce).
+          submissionExpected = undefined;
+        } else {
+          sourceCode = parsedBody.code;
+          submissionStdin = tc.stdin;
+          submissionExpected = tc.expectedStdout;
+        }
+
+        return judge0Submit({
+          sourceCode,
           language: parsedBody.language as Judge0Language,
-          stdin: tc.stdin,
-          expectedStdout: tc.expectedStdout,
-        }),
-      ),
+          stdin: submissionStdin,
+          expectedStdout: submissionExpected,
+        });
+      }),
     );
     tokens = submissions.map((s) => s.token);
   } catch (err) {

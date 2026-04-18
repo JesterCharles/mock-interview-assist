@@ -33,13 +33,19 @@ export type Judge0Language = 'python' | 'javascript' | 'typescript' | 'java' | '
  * Pinned Judge0 language IDs (Judge0 1.13.x defaults).
  * NOTE (D-14): Plan 38-03 spike verifies against live /languages endpoint.
  * Update values here if Judge0 1.13.x reassigned IDs.
+ *
+ * sql: verified against Judge0 1.13.1 pinned-tag reference languages list on
+ * 2026-04-18 (Phase 42 Plan 01 Task 3a). Docker daemon unavailable at
+ * execution time — verification followed CONTEXT fallback option 3 (pinned
+ * tag reference). Live /languages re-verification is still pending as part
+ * of the deferred Phase 38 SPIKE-VERIFICATION gate.
  */
 export const JUDGE0_LANGUAGE_MAP: Record<Judge0Language, number> = {
   python: 71, // Python 3.8.1
   javascript: 63, // JavaScript (Node.js 12.14.0)
   typescript: 74, // TypeScript 3.7.4
   java: 62, // Java OpenJDK 13.0.1
-  sql: 82, // SQL (SQLite 3.27.2)
+  sql: 82, // SQL (SQLite 3.27.2) — verified against Judge0 1.13.1 on 2026-04-18
   csharp: 51, // C# Mono 6.6.0.161
 };
 

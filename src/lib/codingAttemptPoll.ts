@@ -17,6 +17,9 @@ import { getSubmission } from '@/lib/judge0Client';
 import { normalizeJudge0Verdict, type CanonicalVerdict } from '@/lib/judge0Verdict';
 import { mapSignalToScore, type SignalType } from '@/lib/codingSignalService';
 import { persistCodingSignalToGapScore } from '@/lib/gapPersistence';
+import { loadHiddenTests } from '@/lib/coding-challenge-service';
+import { normalizeSqliteResult } from '@/lib/sqlResultNormalizer';
+import type { SqlTestCase } from '@/lib/coding-bank-schemas';
 
 export class AttemptNotFoundError extends Error {
   constructor(id: string) {
@@ -257,6 +260,62 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
   const agg = await aggregateJudge0Results(tokens, orderedCases);
   if (!agg.allResolved) {
     return toPollResultFromPersisted(attempt);
+  }
+
+  // Phase 42 §D-06: SQL attempts ignore Judge0's built-in stdout compare and
+  // re-derive `passed` via sqlResultNormalizer against trainer-authored
+  // expectedRows. Judge0's status.id==3 is used only for pending/error states
+  // — once the submission completes, the test outcome is whatever our
+  // normalizer says.
+  //
+  // HIDDEN TEST SHIELD — hidden test `expectedRows` stays in this helper's
+  // scope; only the derived `passed` boolean flows out (via perCase).
+  if (attempt.challenge?.language === 'sql') {
+    // Re-load visible + hidden cases with their SQL-specific fields (expectedRows,
+    // flags). Visible cases live in DB sans SQL fields; hidden cases come from
+    // the private repo via loadHiddenTests. We re-parse through SqlTestCaseSchema
+    // via the bank contract — but since DB strips the rich fields, we match by
+    // orderIndex + id. Pragmatic approach: re-fetch via loadHiddenTests for
+    // hidden (SQL-aware), and reconstruct visible from the bank loader.
+    //
+    // Note: this opens a per-poll public-repo fetch for SQL attempts; the
+    // public-fetch cache (getCachedPublic) short-circuits via ETag in the
+    // steady state, so cost is bounded.
+    try {
+      const ch = await prisma.codingChallenge.findUnique({
+        where: { id: attempt.challengeId },
+        select: { slug: true },
+      });
+      const hiddenSql = ch
+        ? ((await loadHiddenTests(ch.slug)) as SqlTestCase[])
+        : [];
+      // hiddenSql is keyed by id — zip with perCase filtered to hidden in submit order.
+      const hiddenById = new Map(hiddenSql.map((tc) => [tc.id, tc]));
+      agg.perCase = agg.perCase.map((pc) => {
+        if (!pc.isHidden) return pc;
+        const tc = hiddenById.get(pc.caseId);
+        if (!tc || tc.expectedRows === undefined) return pc;
+        const normResult = normalizeSqliteResult(pc.stdout ?? '', tc);
+        return {
+          ...pc,
+          passed: normResult.passed,
+          // Preserve underlying verdict classification (pass/fail only — compile/runtime
+          // errors should keep their Judge0-derived verdict).
+          verdict:
+            pc.verdict === 'pass' || pc.verdict === 'fail'
+              ? normResult.passed
+                ? 'pass'
+                : 'fail'
+              : pc.verdict,
+        };
+      });
+    } catch (err) {
+      console.error(
+        '[codingAttemptPoll] SQL re-normalize failed; falling back to Judge0 verdicts',
+        attemptId,
+        err,
+      );
+    }
   }
 
   // Compute final verdict + score
