@@ -590,6 +590,19 @@ describe('loadChallenge / loadHiddenTests', () => {
     expect((full as any).hiddenTests).toBeUndefined();
   });
 
+  it('loadChallenge rejects oversized README (WR-02 DoS guard)', async () => {
+    const huge = 'x'.repeat(50_001);
+    const repo = repoFor('two-sum', { readme: huge });
+    __setFetchers({
+      publicFetcher: buildPublicFetcher(repo),
+      privateFetcher: buildPrivateFetcher({ 'two-sum': goodHidden() }),
+    });
+
+    await expect(loadChallenge('two-sum')).rejects.toMatchObject({
+      path: 'readme',
+    });
+  });
+
   it('loadChallenge throws ChallengeValidationError when meta malformed', async () => {
     const repo = repoFor('two-sum', { meta: { ...goodMeta('two-sum'), difficulty: 'insane' } });
     __setFetchers({ publicFetcher: buildPublicFetcher(repo) });

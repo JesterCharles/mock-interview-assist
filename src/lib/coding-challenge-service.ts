@@ -24,6 +24,7 @@ import {
   CODING_LANGUAGES,
   LANGUAGE_EXTENSIONS,
   HiddenTestsSchema,
+  MAX_README_SIZE,
   MetaSchema,
   VisibleTestsSchema,
   ChallengeValidationError,
@@ -341,6 +342,16 @@ export async function loadChallenge(slug: string): Promise<FullChallenge> {
       'json',
     ),
   ]);
+
+  // WR-02: README size cap — reject outsized prompts to protect trainer-only
+  // refresh route from unbounded allocation.
+  if (readme.length > MAX_README_SIZE) {
+    throw new ChallengeValidationError(
+      'readme',
+      `README.md exceeds ${MAX_README_SIZE} char cap (got ${readme.length})`,
+      slug,
+    );
+  }
 
   // Parse meta early so we know which starter files to fetch.
   const metaCheck = MetaSchema.safeParse(metaRaw);

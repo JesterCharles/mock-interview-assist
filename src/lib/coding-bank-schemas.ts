@@ -60,11 +60,15 @@ export const MetaSchema = z
 
 // ──────────────────────────────────────────────────────────────────────────
 // test-case shape — shared by visible + hidden (D-04)
+// Size caps guard against malformed/malicious bank files causing unbounded
+// memory allocation on the refresh route (WR-02).
 // ──────────────────────────────────────────────────────────────────────────
+const TEST_FIELD_MAX = 64 * 1024; // 64 KB per stdin/expectedStdout
+
 export const TestCaseSchema = z.object({
-  id: z.string().min(1),
-  stdin: z.string().min(1),
-  expectedStdout: z.string().min(1),
+  id: z.string().min(1).max(200),
+  stdin: z.string().min(1).max(TEST_FIELD_MAX),
+  expectedStdout: z.string().min(1).max(TEST_FIELD_MAX),
   weight: z.number().positive().default(1),
   orderIndex: z.number().int().nonnegative(),
 });
@@ -96,27 +100,40 @@ function testArrayRefinement(arr: Array<z.infer<typeof TestCaseSchema>>, ctx: z.
   });
 }
 
+// Cap at 200 test cases per visible/hidden file — guards against DoS from
+// malformed or malicious bank files (WR-02).
+const MAX_TEST_CASES = 200;
+
 export const VisibleTestsSchema = z
   .array(TestCaseSchema)
+  .max(MAX_TEST_CASES, `visibleTests array must have at most ${MAX_TEST_CASES} entries`)
   .superRefine(testArrayRefinement);
 
 export const HiddenTestsSchema = z
   .array(TestCaseSchema)
+  .max(MAX_TEST_CASES, `hiddenTests array must have at most ${MAX_TEST_CASES} entries`)
   .superRefine(testArrayRefinement);
 
 // ──────────────────────────────────────────────────────────────────────────
 // Starters — strict map of language → source (unknown keys rejected).
+// Per-source cap at 50 KB guards against unbounded allocation (WR-02).
 // ──────────────────────────────────────────────────────────────────────────
+const MAX_STARTER_SIZE = 50_000;
+const starterField = () => z.string().max(MAX_STARTER_SIZE).optional();
+
 export const StarterSchema = z
   .object({
-    python: z.string().optional(),
-    javascript: z.string().optional(),
-    typescript: z.string().optional(),
-    java: z.string().optional(),
-    sql: z.string().optional(),
-    csharp: z.string().optional(),
+    python: starterField(),
+    javascript: starterField(),
+    typescript: starterField(),
+    java: starterField(),
+    sql: starterField(),
+    csharp: starterField(),
   })
   .strict();
+
+// Exported for loader use (README size cap matches starter cap).
+export const MAX_README_SIZE = MAX_STARTER_SIZE;
 
 // ──────────────────────────────────────────────────────────────────────────
 // ChallengeValidationError — structured {path, reason, slug?}

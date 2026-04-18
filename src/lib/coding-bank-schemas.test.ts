@@ -202,6 +202,63 @@ describe('StarterSchema', () => {
     const result = StarterSchema.safeParse({});
     expect(result.success).toBe(true);
   });
+
+  it('rejects starter source longer than 50_000 chars (DoS guard)', () => {
+    const huge = 'x'.repeat(50_001);
+    const result = StarterSchema.safeParse({ python: huge });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('TestCaseSchema size caps (WR-02)', () => {
+  it('rejects stdin longer than 64 KB', () => {
+    const huge = 'x'.repeat(64 * 1024 + 1);
+    const result = TestCaseSchema.safeParse({
+      id: 'tc-1',
+      stdin: huge,
+      expectedStdout: 'ok',
+      weight: 1,
+      orderIndex: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects expectedStdout longer than 64 KB', () => {
+    const huge = 'x'.repeat(64 * 1024 + 1);
+    const result = TestCaseSchema.safeParse({
+      id: 'tc-1',
+      stdin: 'ok',
+      expectedStdout: huge,
+      weight: 1,
+      orderIndex: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('VisibleTestsSchema / HiddenTestsSchema size caps (WR-02)', () => {
+  it('rejects array longer than 200 test cases', () => {
+    const arr = Array.from({ length: 201 }, (_, i) => ({
+      id: `tc-${i}`,
+      stdin: 'a',
+      expectedStdout: 'b',
+      weight: 1,
+      orderIndex: i,
+    }));
+    expect(VisibleTestsSchema.safeParse(arr).success).toBe(false);
+    expect(HiddenTestsSchema.safeParse(arr).success).toBe(false);
+  });
+
+  it('accepts array of exactly 200 test cases', () => {
+    const arr = Array.from({ length: 200 }, (_, i) => ({
+      id: `tc-${i}`,
+      stdin: 'a',
+      expectedStdout: 'b',
+      weight: 1,
+      orderIndex: i,
+    }));
+    expect(VisibleTestsSchema.safeParse(arr).success).toBe(true);
+  });
 });
 
 describe('ChallengeValidationError', () => {
