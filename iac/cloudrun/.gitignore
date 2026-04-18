@@ -1,0 +1,16 @@
+# Terraform local state / cache / lock bypass
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+crash.log
+
+# Local secret materials (NEVER commit)
+dummy.env
+*.tfvars.local
+*.auto.tfvars
+
+# Keep staging.tfvars + prod.tfvars — they carry public IDs only
+!staging.tfvars
+!prod.tfvars
