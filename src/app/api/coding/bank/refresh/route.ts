@@ -32,6 +32,8 @@ import {
   invalidateCache,
 } from '@/lib/coding-challenge-service';
 import { ChallengeValidationError } from '@/lib/coding-bank-schemas';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
+import { codingDisabledResponse } from '@/app/api/coding/_disabledResponse';
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]*$/;
 
@@ -54,6 +56,11 @@ function sanitizeReason(err: unknown): string {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): flag gate — fires before auth.
+  if (!isCodingEnabled()) {
+    return codingDisabledResponse();
+  }
+
   // 1. Auth gate — trainer or admin only.
   const identity = await getCallerIdentity();
   if (identity.kind === 'anonymous') {

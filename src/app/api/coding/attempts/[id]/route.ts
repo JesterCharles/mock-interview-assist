@@ -18,6 +18,8 @@ import {
   AttemptNotFoundError,
 } from '@/lib/codingAttemptPoll';
 import { codingApiError } from '@/lib/codingApiErrors';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
+import { codingDisabledResponse } from '@/app/api/coding/_disabledResponse';
 
 // Zod output schema — enforced BEFORE serialization.
 // This is the hidden-test shield: any regression surfacing hidden case detail
@@ -60,6 +62,11 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): flag gate — fires before params + DB.
+  if (!isCodingEnabled()) {
+    return codingDisabledResponse();
+  }
+
   const { id } = await params;
 
   const caller = await getCallerIdentity();

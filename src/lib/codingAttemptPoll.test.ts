@@ -6,7 +6,7 @@
  * signal writeback.
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
 // ---------- Mocks ----------
 vi.mock('@/lib/prisma', () => ({
@@ -62,7 +62,11 @@ function j0Result(status: number, overrides: Partial<{ stdout: string; stderr: s
 }
 
 describe('aggregateJudge0Results', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => vi.unstubAllEnvs());
 
   it('any token still queued → allResolved: false', async () => {
     (judge0Client.getSubmission as Mock)
@@ -194,7 +198,11 @@ describe('computeScore', () => {
 });
 
 describe('pollAndMaybeResolveAttempt', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => vi.unstubAllEnvs());
 
   it('attempt not found → throws AttemptNotFoundError', async () => {
     (prisma.codingAttempt.findUnique as Mock).mockResolvedValue(null);

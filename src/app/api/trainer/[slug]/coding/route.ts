@@ -17,6 +17,8 @@ import type {
   CodingSkillScore,
   AssociateCodingPayload,
 } from '@/lib/trainer-types';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
+import { codingDisabledResponse } from '@/app/api/coding/_disabledResponse';
 
 // Same pattern as sibling /api/trainer/[slug]/route.ts (T-06-04 defense-in-depth).
 const SLUG_RE = /^[a-z0-9-]+$/;
@@ -51,6 +53,13 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  // Phase 50 (JUDGE-INTEG-02 / D-09): flag gate — NO admin bypass. Trainers
+  // see the same 503 + coming-soon body as any caller when flag is off.
+  // Reduces surface area (no special code path = no special bugs).
+  if (!isCodingEnabled()) {
+    return codingDisabledResponse();
+  }
+
   // Auth — trainer/admin only. Associates (even matching slug) get 403.
   // Anonymous → 401 (not signed in), authenticated non-trainer → 403 (forbidden).
   // HTTP semantics per Phase 41 WR-01.
