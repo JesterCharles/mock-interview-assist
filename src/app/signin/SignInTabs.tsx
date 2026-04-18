@@ -4,7 +4,6 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, KeyRound } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 interface SignInAccordionProps {
   nextPath: string | null;
@@ -91,13 +90,14 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     setExpanded((prev) => (prev === type ? null : type));
   }
 
-  // Phase 33 / SIGNIN-02: Trainer first-login password gate.
-  // After a successful Supabase login, check user_metadata.password_set before redirecting.
-  // If the flag is falsy, send the trainer to /auth/set-password instead of /trainer.
-  // Uses a fresh browser Supabase client because useAuth().user is populated async via
-  // onAuthStateChange and may not have fired yet by the time this handler resumes.
-  // Fail-open: if getUser() errors, fall back to nextPath ?? '/trainer' — the middleware
-  // already blocks unauthenticated access to /trainer, so this cannot produce a bypass (D-07).
+  // Phase 33 / SIGNIN-02 (P1 fix): Trainer first-login password gate.
+  // After a successful Supabase login, call the Profile-first password-status
+  // endpoint (same source of truth as the exchange route's magic-link gate).
+  // If Profile.passwordSetAt is null (and metadata.password_set is falsy), or
+  // if the endpoint errors, send the trainer to /auth/set-password.
+  // FAIL-CLOSED: middleware does not enforce this gate, so we must default to
+  // /auth/set-password on any indeterminate state. Only an explicit
+  // `{ passwordSet: true }` allows redirect to /trainer.
   async function handleTrainerSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (trainerSubmitting) return;
@@ -106,26 +106,29 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     const ok = await login(email, password);
     if (ok) {
       try {
-        const supabase = createSupabaseBrowserClient();
-        const { data, error } = await supabase.auth.getUser();
-        if (error || !data?.user) {
-          // Fail-open per D-07 — middleware still blocks unauthenticated access.
-          router.replace(nextPath ?? '/trainer');
-          router.refresh();
-          return;
-        }
-        const passwordSet = data.user.user_metadata?.password_set === true;
-        if (!passwordSet) {
+        const res = await fetch('/api/auth/password-status', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) {
+          // Fail-closed: any non-200 response routes to /auth/set-password.
           router.replace('/auth/set-password');
           router.refresh();
           return;
         }
-        router.replace(nextPath ?? '/trainer');
+        const body = (await res.json()) as { passwordSet?: unknown };
+        if (body?.passwordSet === true) {
+          router.replace(nextPath ?? '/trainer');
+          router.refresh();
+          return;
+        }
+        router.replace('/auth/set-password');
         router.refresh();
         return;
       } catch {
-        // Fail-open per D-07.
-        router.replace(nextPath ?? '/trainer');
+        // Fail-closed on network/parse error.
+        router.replace('/auth/set-password');
         router.refresh();
         return;
       }
