@@ -2,8 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
-status: executing
-last_updated: "2026-04-18T09:06:49.241Z"
+status: completed
+stopped_at: Phase 42 halted — prerequisites 37-41 unshipped and Judge0 offline. Resume with /gsd-execute-phase 37. See .planning/phases/42-sql-mvp-sqlite/SQLITE-JUDGE0-VERIFICATION.md.
+last_updated: "2026-04-18T09:09:47.187Z"
 last_activity: 2026-04-18 -- Phase 36 execution complete (all 3 plans)
 progress:
   total_phases: 9
@@ -25,6 +26,7 @@ Progress: [██------------------] 11% (1/9 phases complete, 3/28 plans)
 ```
 
 Phase 36 delivered:
+
 - 4 Prisma models (CodingChallenge, CodingAttempt, CodingTestCase, CodingSkillSignal)
 - Idempotent migration 0006_coding_challenges (smoke test deferred — Docker unavailable)
 - Pure-function codingSignalService with 17 Vitest tests (D-16 weight table verbatim)
@@ -83,6 +85,6 @@ v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex co
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:06:49.241Z
-Stopped at: Phase 36 complete (execution). All 3 plans shipped, tests green, schema + migration + service committed.
+Last session: 2026-04-18T09:09:47.183Z
+Stopped at: Phase 42 halted — prerequisites 37-41 unshipped and Judge0 offline. Resume with /gsd-execute-phase 37. See .planning/phases/42-sql-mvp-sqlite/SQLITE-JUDGE0-VERIFICATION.md.
 Resume with: `/gsd-execute-phase 37` (Challenge Authoring / GitHub Loader)
