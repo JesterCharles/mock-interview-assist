@@ -141,7 +141,24 @@ export async function POST(request: Request): Promise<NextResponse> {
     select: { id: true, stdin: true, expectedStdout: true, weight: true, orderIndex: true },
   });
 
-  const hiddenCases = await loadHiddenTests(challenge.slug);
+  let hiddenCases: Array<{ stdin: string; expectedStdout: string }>;
+  try {
+    hiddenCases = await loadHiddenTests(challenge.slug);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (/GITHUB_CODING_PRIVATE_REPO not set|GITHUB_CODING_PRIVATE_TOKEN not set/.test(msg)) {
+      // Local-seed demo fallback — hidden tests already in DB, bypass GitHub.
+      console.warn('[coding/submit] private repo not configured — loading hidden tests from DB');
+      const dbHidden = await prisma.codingTestCase.findMany({
+        where: { challengeId: challenge.id, isHidden: true },
+        orderBy: { orderIndex: 'asc' },
+        select: { stdin: true, expectedStdout: true },
+      });
+      hiddenCases = dbHidden;
+    } else {
+      throw err;
+    }
+  }
 
   // Order: visible first (by orderIndex), then hidden (by orderIndex). Tokens align by index.
   const allCases: Array<{ stdin: string; expectedStdout: string }> = [
@@ -157,11 +174,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     try {
       setupSql = await getSetupSql(challenge.slug);
     } catch (err) {
-      console.error('[coding/submit] getSetupSql failed for', challenge.slug, err);
-      return codingApiError(
-        'VALIDATION_ERROR',
-        'SQL challenge setup.sql unavailable',
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/GITHUB_CODING_PUBLIC_REPO not set|GITHUB_TOKEN not set/.test(msg)) {
+        // Local demo fallback — trust stdin to carry full schema + seed.
+        console.warn('[coding/submit] GitHub not configured — using empty setup.sql for', challenge.slug);
+        setupSql = '';
+      } else {
+        console.error('[coding/submit] getSetupSql failed for', challenge.slug, err);
+        return codingApiError(
+          'VALIDATION_ERROR',
+          'SQL challenge setup.sql unavailable',
+        );
+      }
     }
     if (setupSql === null) {
       return codingApiError(

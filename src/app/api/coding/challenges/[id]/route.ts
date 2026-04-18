@@ -65,13 +65,37 @@ export async function GET(
     }
   }
 
-  // Load full content from coding-challenge-service (server-side module cache).
-  let full;
+  // Load full content from coding-challenge-service (GitHub-backed). For
+  // locally-seeded demo challenges (no GitHub repo), fall back to DB-stored
+  // description + language-default starter.
+  let full: {
+    readme: string;
+    starters: Record<string, string>;
+    meta: { languages: string[] };
+  };
   try {
     full = await loadChallenge(challenge.slug);
   } catch (err) {
-    console.error('[coding/challenges/[id]] loadChallenge failed:', err);
-    return codingApiError('INTERNAL', 'Failed to load challenge content');
+    const msg = err instanceof Error ? err.message : String(err);
+    const isMissingRepo = /GITHUB_CODING_PUBLIC_REPO not set|GITHUB_TOKEN not set/.test(msg);
+    if (!isMissingRepo) {
+      console.error('[coding/challenges/[id]] loadChallenge failed:', err);
+      return codingApiError('INTERNAL', 'Failed to load challenge content');
+    }
+    console.warn('[coding/challenges/[id]] GitHub repo not configured — using DB description');
+    const starterByLang: Record<string, string> = {
+      python: '# Write your solution below\nimport sys\ndata = sys.stdin.read()\n',
+      javascript: "// Write your solution below\nconst input = require('fs').readFileSync(0, 'utf-8');\n",
+      typescript: "// Write your solution below\nimport * as fs from 'fs';\nconst input = fs.readFileSync(0, 'utf-8');\n",
+      java: 'import java.util.Scanner;\n\npublic class Main {\n  public static void main(String[] args) {\n    Scanner in = new Scanner(System.in);\n    // Your code here\n  }\n}\n',
+      sql: "-- Write your query. Wrap the answer between sentinel markers:\nSELECT '---BEGIN-ANSWER---';\n-- your SELECT here\nSELECT '---END-ANSWER---';\n",
+      csharp: 'using System;\n\nclass Program {\n  static void Main() {\n    // Your code here\n  }\n}\n',
+    };
+    full = {
+      readme: challenge.description,
+      starters: { [challenge.language]: starterByLang[challenge.language] ?? '' },
+      meta: { languages: [challenge.language] },
+    };
   }
 
   // Also fetch visible test cases from DB (they're already synced per Phase 37).
