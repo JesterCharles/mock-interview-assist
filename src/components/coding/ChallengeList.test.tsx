@@ -65,13 +65,11 @@ beforeEach(() => {
   pushSpy.mockReset();
   currentSearch = '';
   fetchMock.mockReset();
-  // @ts-expect-error override global fetch
-  globalThis.fetch = fetchMock;
+  (globalThis as unknown as { fetch: typeof fetchMock }).fetch = fetchMock;
 });
 
 afterEach(() => {
-  // @ts-expect-error cleanup
-  delete globalThis.fetch;
+  delete (globalThis as unknown as { fetch?: unknown }).fetch;
 });
 
 describe('useChallengeList — URL sync', () => {
