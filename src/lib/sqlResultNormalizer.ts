@@ -50,6 +50,14 @@ const DEFAULT_FLAGS: NormalizationFlags = {
   rowOrderSensitive: false,
 };
 
+// WR-01 (Phase 42 review): sentinel markers the submit route wraps around the
+// trainer test query so the normalizer can slice off associate-query noise
+// (e.g. exploratory SELECTs in the user's answer emit rows BEFORE these
+// markers). If either marker is missing the normalizer falls back to parsing
+// the entire stdout (backward compat).
+const ANSWER_BEGIN_MARKER = '---BEGIN-ANSWER---';
+const ANSWER_END_MARKER = '---END-ANSWER---';
+
 type NormalizerInput = Partial<
   Pick<
     SqlTestCase,
@@ -71,6 +79,19 @@ function resolveFlags(tc: NormalizerInput): NormalizationFlags {
       tc.orderSensitiveColumns ?? DEFAULT_FLAGS.orderSensitiveColumns,
     rowOrderSensitive: tc.rowOrderSensitive ?? DEFAULT_FLAGS.rowOrderSensitive,
   };
+}
+
+// WR-01: Slice stdout between BEGIN/END answer markers when both are present.
+// Returns the original stdout if either marker is missing (backward compat).
+function sliceAnswerBlock(stdout: string): string {
+  const beginIdx = stdout.indexOf(ANSWER_BEGIN_MARKER);
+  if (beginIdx < 0) return stdout;
+  const endIdx = stdout.indexOf(ANSWER_END_MARKER, beginIdx + ANSWER_BEGIN_MARKER.length);
+  if (endIdx < 0) return stdout;
+  // Start after BEGIN marker's own newline; stop before END marker's line.
+  const afterBegin = stdout.indexOf('\n', beginIdx);
+  if (afterBegin < 0) return stdout;
+  return stdout.slice(afterBegin + 1, endIdx);
 }
 
 // Step 1 — Parse SQLite `.mode tabs` + `.headers off` output.
@@ -172,12 +193,16 @@ export function normalizeSqliteResult(
 ): NormalizationResult {
   const flags = resolveFlags(testCase);
 
+  // WR-01: If the submit pipeline wrapped the test query in sentinel markers,
+  // slice out the answer block to drop any user-query noise preceding it.
+  const slicedStdout = sliceAnswerBlock(stdout);
+
   // Step 1 — parse
-  const rawRows = parseStdout(stdout);
+  const rawRows = parseStdout(slicedStdout);
 
   // Fallback (backward compat): if expectedRows is absent, compare trimmed stdout to expectedStdout.
   if (testCase.expectedRows === undefined) {
-    const actualStr = stdout.replace(/\s+$/g, '');
+    const actualStr = slicedStdout.replace(/\s+$/g, '');
     const expectedStr = (testCase.expectedStdout ?? '').replace(/\s+$/g, '');
     const passed = actualStr === expectedStr;
     return {

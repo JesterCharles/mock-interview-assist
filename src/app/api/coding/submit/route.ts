@@ -201,13 +201,22 @@ export async function POST(request: Request): Promise<NextResponse> {
         let submissionExpected: string | undefined;
 
         if (parsedBody.language === 'sql') {
-          // setupSql is guaranteed non-null here (validated above for SQL branch)
+          // setupSql is guaranteed non-null here (validated above for SQL branch).
+          //
+          // WR-01 (Phase 42 review): wrap the trainer test query in sentinel
+          // SELECTs so sqlResultNormalizer can slice off any rows emitted by
+          // the associate's user query (exploratory SELECTs, debug prints,
+          // etc.) before comparing against expectedRows. Without these
+          // markers, `SELECT * FROM users` in the user's answer prepends to
+          // the test query's output and corrupts row-count/cell checks.
           sourceCode = [
             '.mode tabs',
             '.headers off',
             setupSql ?? '',
             parsedBody.code, // associate-submitted SQL (user query)
+            "SELECT '---BEGIN-ANSWER---';",
             tc.stdin, // trainer-authored test query — NEVER surfaces to client for hidden tests
+            "SELECT '---END-ANSWER---';",
           ].join('\n');
           // SQLite in Judge0 runs the source; stdin pipe is unused for SQL.
           submissionStdin = '';

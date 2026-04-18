@@ -173,4 +173,53 @@ describe('normalizeSqliteResult', () => {
     expect(res.passed).toBe(false);
     expect(res.reason).toMatch(/column count/i);
   });
+
+  // ────────────────────────────────────────────────────────────────────
+  // Phase 42 WR-01 — sentinel slicing (output contamination fix)
+  // ────────────────────────────────────────────────────────────────────
+
+  it('Test 9 (WR-01 sentinel): slices stdout between ---BEGIN-ANSWER---/---END-ANSWER--- markers', () => {
+    // User's query emitted noise before the test query.
+    const stdout =
+      'user-noise-row-1\tfoo\n' +
+      'user-noise-row-2\tbar\n' +
+      '---BEGIN-ANSWER---\n' +
+      '1\talice\n' +
+      '2\tbob\n' +
+      '---END-ANSWER---\n';
+    const res = normalizeSqliteResult(stdout, {
+      expectedRows: [
+        [1, 'alice'],
+        [2, 'bob'],
+      ],
+      expectedColumns: ['id', 'name'],
+    });
+    expect(res.passed).toBe(true);
+    expect(res.actualRows).toEqual([
+      [1, 'alice'],
+      [2, 'bob'],
+    ]);
+  });
+
+  it('Test 10 (WR-01 sentinel): trailing user noise AFTER end marker is ignored', () => {
+    const stdout =
+      '---BEGIN-ANSWER---\n' +
+      '42\n' +
+      '---END-ANSWER---\n' +
+      'trailing\tnoise\n';
+    const res = normalizeSqliteResult(stdout, {
+      expectedRows: [[42]],
+      expectedColumns: ['n'],
+    });
+    expect(res.passed).toBe(true);
+  });
+
+  it('Test 11 (WR-01 sentinel): no markers present → falls back to full-stdout parse (backward compat)', () => {
+    // No sentinels — legacy callers (or non-wrapped invocations) still work.
+    const res = normalizeSqliteResult('1\talice\n', {
+      expectedRows: [[1, 'alice']],
+      expectedColumns: ['id', 'name'],
+    });
+    expect(res.passed).toBe(true);
+  });
 });
