@@ -17,16 +17,25 @@
  */
 
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
 import { loadChallenge } from '@/lib/coding-challenge-service';
 import { codingApiError } from '@/lib/codingApiErrors';
 
+// IN-03: reject degenerate inputs (empty, oversized) before hitting Prisma.
+const IdSchema = z.string().min(1).max(64);
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const parsed = IdSchema.safeParse(rawId);
+  if (!parsed.success) {
+    return codingApiError('VALIDATION_ERROR', 'Invalid challenge identifier');
+  }
+  const id = parsed.data;
 
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
