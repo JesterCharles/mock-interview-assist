@@ -236,9 +236,9 @@ describe('defaultPublicFetcher (direct GitHub, no /api/github proxy)', () => {
     }
 
     expect(fetchSpy).toHaveBeenCalled();
-    const firstCall = fetchSpy.mock.calls[0];
-    const url = firstCall[0] as string;
-    const init = firstCall[1] as RequestInit;
+    const firstCall = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    const url = firstCall[0];
+    const init = firstCall[1];
     expect(url).toMatch(/^https:\/\/api\.github\.com\//);
     expect(url).toContain('JesterCharles/mock-coding-challenges');
     expect(url).toContain('challenges/manifest.json');
