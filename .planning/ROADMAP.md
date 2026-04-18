@@ -6,7 +6,7 @@
 - **v1.1 Cohort Readiness System** -- Phases 8-15, 22 plans, 14 reqs (shipped 2026-04-14) | [Archive](milestones/v1.1-ROADMAP.md)
 - **v1.2 Analytics & Auth Overhaul** -- Phases 16-25, 26 plans, 30 reqs (shipped 2026-04-16) | [Archive](milestones/v1.2-ROADMAP.md)
 - **v1.3 UX Unification & Polish** -- Phases 26-35, 18 plans, 27 reqs (shipped 2026-04-18) | [Archive](milestones/v1.3-ROADMAP.md)
-- **v1.4 Coding Challenges + Multi-Language Sandbox** -- Phases 36-44, 44 reqs (planning, initialized 2026-04-18)
+- **v1.4 Coding Challenges + Multi-Language Sandbox** -- Phases 36-44, 28 plans, 44 reqs (shipped 2026-04-18) | [Archive](milestones/v1.4-ROADMAP.md)
 
 ## Phases
 
@@ -70,146 +70,26 @@
 
 </details>
 
-### v1.4 Coding Challenges + Multi-Language Sandbox (Planning, Phases 36-44)
+<details>
+<summary>v1.4 Coding Challenges + Multi-Language Sandbox (Phases 36-44) -- SHIPPED 2026-04-18</summary>
 
-**Approach:** B — MSA-from-day-1 | **Estimate:** 8-10 weeks | **Requirements:** 44 | **Source:** `.planning/PIPELINE-DISCOVER.md`
+- [x] Phase 36: Data Model & Schema (3/3 plans) -- completed 2026-04-18
+- [x] Phase 37: Challenge Bank Contract & Loader (3/3 plans) -- completed 2026-04-18
+- [x] Phase 38: Judge0 Infrastructure — SPIKE GATE (3/3 plans) -- completed 2026-04-18
+- [x] Phase 39: Execution API (Server-Side) (3/3 plans) -- completed 2026-04-18
+- [x] Phase 40: UI MVP (4/4 plans) -- completed 2026-04-18
+- [x] Phase 41: GapScore Integration & Trainer Visibility (3/3 plans) -- completed 2026-04-18
+- [x] Phase 42: SQL MVP (SQLite Only) (2/2 plans) -- completed 2026-04-18
+- [x] Phase 43: MSA Deployment (Terraform + CI/CD) (4/4 plans) -- completed 2026-04-18
+- [x] Phase 44: Hardening + Load Test (3/3 plans) -- completed 2026-04-18
 
-Adds coding challenges as a continuous-practice rep type alongside mock interviews. Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C# Mono), GitHub-loaded challenge bank (public prompts, private hidden tests), and `CodingSkillSignal` mapping into the existing GapScore engine. MSA-from-day-1 deployment (dedicated Judge0 host + Terraform IaC + GitHub Actions CI/CD) folds in deferred DEPLOY-01/02/03 backlog as part of meaningful product work.
+Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review — require deployed stack). See [archive](milestones/v1.4-ROADMAP.md) for full phase details.
 
-#### Phase 36: Data Model & Schema
-**Goal**: Prisma models for coding challenges, attempts, test cases, and skill signals — plus idempotent migration and signal→GapScore mapping unit-tested
-**Depends on**: v1.3 shipped
-**Requirements**: CODING-MODEL-01..06
-**Success**: `prisma migrate deploy` clean on existing DB; signal-to-GapScore pure function has unit tests covering all signal types; generated client exports new models
-**Estimate**: ~1 week, 2-3 plans
+</details>
 
-**Plans:** 3/3 plans complete
+### v1.5 (Planning)
 
-Plans:
-- [x] 36-01-PLAN.md — Prisma schema: 4 coding models + back-relations (Wave 1)
-- [x] 36-02-PLAN.md — Hand-written idempotent migration + smoke test (Wave 2)
-- [x] 36-03-PLAN.md — codingSignalService + Vitest suite (Wave 2)
-
-#### Phase 37: Challenge Bank Contract & Loader
-**Goal**: Trainers author coding challenges in GitHub repos (public prompts + private hidden tests); app loader fetches, validates, caches
-**Depends on**: Phase 36
-**Requirements**: CODING-BANK-01..05
-**Success**: Challenge authored in repo appears in app within 5 min; validation rejects malformed challenges; hidden tests never appear in public API responses
-**Estimate**: ~1 week, 2-3 plans
-
-**Plans:** 3 plans in 3 waves
-
-Plans:
-- [ ] 37-01-PLAN.md — Repo schema docs + Zod schemas + loader skeleton (Wave 1)
-- [ ] 37-02-PLAN.md — Public/private fetch + ETag cache + idempotent DB sync (Wave 2)
-- [ ] 37-03-PLAN.md — Trainer-only POST /api/coding/bank/refresh (Wave 3)
-
-#### Phase 38: Judge0 Infrastructure (Local + Remote-Ready) — SPIKE GATE
-**Goal**: Judge0 stack pinned, hardened, and env-driven so local-mono and remote-MSA deploys are identical code; resource sizing committed from real GCE spike
-**Depends on**: Phase 36 (env wiring only)
-**Requirements**: JUDGE-01..06
-**Success**: 10 concurrent mixed-language submissions on actual GCE VM size complete without queue death; p50/p95 measured; resource caps committed to PROJECT.md before Phase 39
-**Estimate**: ~1.5 weeks, 3 plans (includes spike)
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 38-01-PLAN.md — docker-compose Judge0 stack + env templates + network isolation (Wave 1)
-- [x] 38-02-PLAN.md — judge0Client.ts (locked contract) + /api/health probe (Wave 1)
-- [x] 38-03-PLAN.md — JUDGE-06 spike gate: run on GCE, commit resource limits, BLOCKING Phase 39 (Wave 2)
-
-#### Phase 39: Execution API (Server-Side)
-**Goal**: Auth-gated async submit + poll endpoints with server-side hidden test injection, language allowlist, rate limits, and verdict normalization
-**Depends on**: Phase 37 + Phase 38
-**Requirements**: CODING-API-01..07
-**Success**: End-to-end submit→verdict path works for all 5 languages; hidden test inputs never appear in client responses; rate limits enforced; Judge0 never exposed to browser
-**Estimate**: ~1 week, 3 plans
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 39-01-PLAN.md — Verdict normalizer + rate-limit scope + POST /api/coding/submit (Wave 1)
-- [x] 39-02-PLAN.md — codingAttemptPoll helper + GET /api/coding/attempts/[id] with Zod shield (Wave 2)
-- [x] 39-03-PLAN.md — codingApiErrors library + GET /api/coding/challenges (Wave 3)
-
-#### Phase 40: UI MVP
-**Goal**: Associates browse challenges, solve in Monaco editor, see verdicts clearly — integrated into existing AppShell
-**Depends on**: Phase 39
-**Requirements**: CODING-UI-01..05
-**Success**: `/coding` list + `/coding/[id]` solve page functional for all 5 languages; queued/running/verdict states visible; dark mode compliant; passes design review
-**Estimate**: ~1.5 weeks, 4 plans
-
-**Plans:** 4/4 plans complete
-
-Plans:
-- [x] 40-01-PLAN.md — UI-SPEC gate + Monaco install + nav entry + route shells (Wave 1)
-- [x] 40-02-PLAN.md — /coding list page with filters + cursor pagination + empty states (Wave 2)
-- [x] 40-03-PLAN.md — /coding/[id] solve page: prompt + Monaco editor + submit/run bar (Wave 2)
-- [x] 40-04-PLAN.md — usePollAttempt + VerdictCard + attempt history sidebar + bundle regression (Wave 3)
-
-#### Phase 41: GapScore Integration & Trainer Visibility
-**Goal**: Coding attempts feed GapScore with difficulty-weighted signals; trainer dashboard shows continuous coding skill traceability across all 11 cohort weeks
-**Depends on**: Phase 40
-**Requirements**: CODING-SCORE-01..04
-**Success**: Attempt verdict triggers GapScore recompute within 5 sec; trainer dashboard shows per-associate coding panel; readiness math documented in PROJECT.md + DESIGN.md
-**Estimate**: ~1 week, 3 plans
-
-**Plans:** 3 plans in 3 waves
-
-Plans:
-- [x] 41-01-PLAN.md — gapPersistence coding extension + DIFFICULTY_MULTIPLIERS + Phase 39 poll-handler wiring (Wave 1) (completed 2026-04-18)
-- [ ] 41-02-PLAN.md — Trainer dashboard coding panel + /api/trainer/[slug]/coding route (Wave 2)
-- [ ] 41-03-PLAN.md — PROJECT.md readiness math + DESIGN.md coding panel spec + v1.5 Open Items (Wave 3)
-
-#### Phase 42: SQL MVP (SQLite Only)
-**Goal**: SQLite language wired as a Judge0 path with server-side schema + seed injection; trainer-facing dialect label explicit
-**Depends on**: Phase 39 + Phase 40
-**Requirements**: SQL-01..03
-**Success**: Trainer-authored SQL challenge runs end-to-end with normalized row output; dialect label visible on challenge cards; Postgres SQL deferral documented
-**Estimate**: ~0.5 week, 2 plans
-
-**Plans:** 2/2 plans complete
-
-Plans:
-- [x] 42-01-PLAN.md — Bank schema extension + SQL result normalizer + submit-route SQL pre-step (Wave 1)
-- [x] 42-02-PLAN.md — Dialect label constant + render on list/solve/trainer surfaces + PROJECT.md Postgres deferral (Wave 2)
-
-#### Phase 43: MSA Deployment (Terraform + CI/CD)
-**Goal**: Dedicated Judge0 GCE host provisioned via Terraform; GitHub Actions deploys app + Judge0 as separate workflows with health checks, rollback, monitoring
-**Depends on**: Phase 38 + Phase 39
-**Requirements**: IAC-01..05
-**Success**: Tag-push deploys app and Judge0 independently; failed health checks auto-revert; queue-depth + latency metrics visible in Logs Explorer; runbook published
-**Estimate**: ~1.5 weeks, 4 plans
-
-**Plans:** 4/4 plans complete
-
-Plans:
-- [x] 43-01-PLAN.md — Terraform module: 2-VM topology + GCS state + firewall (Wave 1, checkpoint)
-- [x] 43-02-PLAN.md — GitHub Actions: pr-checks + deploy-app + deploy-judge0 with rollback (Wave 2)
-- [x] 43-03-PLAN.md — Judge0 metrics pusher script (queue depth + p50/p95) → Logs Explorer (Wave 2)
-- [x] 43-04-PLAN.md — Coding stack operations runbook (6 sections per D-13) (Wave 3)
-
-#### Phase 44: Hardening + Load Test
-**Goal**: Production-ready under 50-concurrent submission load; abuse-safe; security-reviewed; documented
-**Depends on**: Phase 43
-**Requirements**: HARD-01..04
-**Success**: 50 concurrent submissions p95 ≤ 10 sec; malicious payloads contained; `/cso` + codex adversarial-review both pass; ARCHITECTURE.md + README quickstart published
-**Estimate**: ~1 week, 2-3 plans
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 44-01-PLAN.md — Load test harness (50-concurrent) + abuse test suite (6 payload classes) + reports (Wave 1)
-- [x] 44-02-PLAN.md — Security review gates: gstack /cso + codex adversarial-review, both PASS with 0 HIGH (Wave 1)
-- [x] 44-03-PLAN.md — ARCHITECTURE.md + README quickstart + trainer-authoring guide + validate-challenge CLI (Wave 2)
-
-**Total v1.4 plan estimate:** ~21-28 plans across 9 phases.
-
-#### Parked (not in v1.4 scope)
-
-- **999.1 Staging / Prod Split** — Deferred to v1.5; adjacent to IAC-01..05 but scope creep for v1.4
-- **999.2 Trainer Default Cohort** — Deferred to v1.5 / post-v1.4 polish
-- **DEPLOY-01/02/03** — Absorbed into v1.4 Phase 43 (IAC-NN) as part of MSA-from-day-1 approach
+_Next milestone initialization pending — run `/gsd-new-milestone` to start._
 
 ## Progress
 
@@ -219,7 +99,7 @@ Plans:
 | 8-15. Cohort Readiness | v1.1 | 22/22 | Complete | 2026-04-14 |
 | 16-25. Analytics & Auth | v1.2 | 26/26 | Complete | 2026-04-16 |
 | 26-35. UX Unification & Polish | v1.3 | 18/18 | Complete | 2026-04-18 |
-| 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 0/~25 | Planning | — |
+| 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 28/28 | Complete | 2026-04-18 |
 
 ## Backlog
 

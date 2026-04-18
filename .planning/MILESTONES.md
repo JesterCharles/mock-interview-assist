@@ -1,28 +1,32 @@
 # Milestones
 
-## v1.4 Coding Challenges + Multi-Language Sandbox (PLANNING — initialized 2026-04-18)
+## v1.4 Coding Challenges + Multi-Language Sandbox (Shipped: 2026-04-18)
 
-**Phases planned:** 9 (36-44)
-**Requirements:** 44 across 9 themes (CODING-MODEL, CODING-BANK, JUDGE, CODING-API, CODING-UI, CODING-SCORE, SQL, IAC, HARD)
-**Approach:** B — MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD)
-**Estimate:** 8-10 weeks
-**Status:** Planning — ready for `/gsd-plan-phase 36`
+**Phases completed:** 9 phases (36-44), 28 plans
+**Approach:** MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD)
+**PR:** #7 merged as `e14be93`
 
-**Scope summary:**
+**Key accomplishments:**
 
-- Adds coding challenges as a continuous-practice rep type alongside mock interviews
-- Judge0-based multi-language sandbox: Python, JavaScript/TypeScript, Java, SQL (SQLite), C# (Mono)
-- Public GitHub repo for prompts + starter code; private GitHub repo for hidden tests (token-scoped server fetch)
-- New Prisma models: `CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal`
-- `CodingSkillSignal` → `GapScore` mapping gives trainers continuous skill telemetry across all 11 cohort weeks (replaces current 3-point front-loaded assessment)
-- MSA-from-day-1 deploy: dedicated Judge0 GCE host + Terraform IaC + GitHub Actions CI/CD (folds in deferred DEPLOY-01/02/03)
-- v1.5 seeds captured: function-level test harness, Postgres SQL runner, in-app authoring, .NET 8+ runtime, multi-modal platform, anti-cheat
+- Coding challenges shipped as continuous-practice rep alongside mock interviews (Phase 36 schema + Phase 40 Monaco UI)
+- Multi-language sandbox via Judge0: Python, JavaScript, TypeScript, Java, C# — fully integrated auth-gated submit/poll API (Phase 39)
+- SQL challenges via SQLite runtime with server-side schema + seed injection (Phase 42)
+- Private GitHub repo for hidden tests; contract-loader enforces schema + integrity (Phase 37)
+- `CodingSkillSignal` → `GapScore` integration gives trainers continuous skill telemetry across all 11 cohort weeks (Phase 41)
+- Judge0 infrastructure scaffolded: Docker compose, spike harness (10 fixtures, 6 languages), rate limits, verdict normalization (Phase 38)
+- Terraform IaC for dedicated Judge0 GCE host + GitHub Actions deploy workflows with health checks + rollback (Phase 43)
+- Hardening pass: load-test harness (50-concurrent submission target), abuse tests, security audit, documentation (Phase 44)
+- Codex review cycles per phase; multiple blocking/P1 findings addressed pre-merge
 
-**Artifacts:**
+**Known gaps (deferred to v1.5):**
 
-- [Discovery brief](PIPELINE-DISCOVER.md)
-- [Requirements](REQUIREMENTS.md)
-- [Seeds for v1.5+](seeds/v1.4-discovery-seeds.md)
+- HARD-01/02/03: live load test, live abuse test, live security review — all require deployed stack
+- Deploy decision pivoted: GCE apply deferred, v1.5 leans PaaS (Fly/Railway + hosted Judge0) per April 2026 direction
+
+**Archives:**
+
+- [Roadmap](milestones/v1.4-ROADMAP.md)
+- [Requirements](milestones/v1.4-REQUIREMENTS.md)
 
 ---
 

@@ -10,14 +10,24 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ## Current State
 
-**v1.4 planning (initialized 2026-04-18).** v1.0 / v1.1 / v1.2 / v1.3 shipped on main. Production deploy automation folded into v1.4 Phase 43 (IAC + CI/CD) as part of MSA-from-day-1 approach for coding challenges.
+**v1.4 shipped 2026-04-18.** v1.0 through v1.4 all shipped on main. v1.5 not yet initialized.
 
 - **v1.0 (2026-04-14):** 7 phases, 15 plans, 22 requirements. Prisma + Supabase foundation, gap scoring, readiness classification, trainer dashboard, adaptive mock setup.
 - **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest.
 - **v1.2 (2026-04-16):** 10 phases (16–25), 26 plans, 30 requirements. Supabase Auth cutover (trainer password + associate magic link), RLS defense-in-depth, two-level app shell, trainer analytics, associate self-dashboard, PDF analytics, PIN removal. 205 commits, 470 tests.
-- **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests. Audit status: tech_debt (verification-hygiene only, no functional gaps).
-- **v1.4 (PLANNING — initialized 2026-04-18):** 9 phases (36-44), 44 requirements across 9 themes (CODING-MODEL-NN, CODING-BANK-NN, JUDGE-NN, CODING-API-NN, CODING-UI-NN, CODING-SCORE-NN, SQL-NN, IAC-NN, HARD-NN). Adds coding challenges as a new continuous-practice rep type: Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C#), loaded from public+private GitHub challenge banks, feeding existing GapScore via explicit `CodingSkillSignal` mapping. Approach B — MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD). 8-10 week estimate.
-- Total codebase: 35+ routes, standalone Docker output, idempotent migrations, 524 passing tests.
+- **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests.
+- **v1.4 (2026-04-18):** 9 phases (36-44), 28 plans, 44 requirements. Coding challenges shipped as continuous-practice rep alongside mock interviews. Judge0 multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C#), public+private GitHub challenge bank, Monaco editor UI, `CodingSkillSignal` → `GapScore` integration. Terraform IaC + GitHub Actions deploy workflows scaffolded. 963 passing / 4 skipped tests. Deferred to v1.5: HARD-01/02/03 (live load/abuse/security — require deployed stack).
+
+## Next Milestone (v1.5 — Planning)
+
+Direction pending `/gsd-new-milestone`:
+
+- Hybrid migration from v0.1 GCE to Cloud Run + Supabase as primary production
+- PaaS-first hosting (Fly/Railway + hosted Judge0) — dedicated Judge0 VM deferred to v1.6
+- P0: load test + staging split + CI/CD (closes HARD-01/02/03 under deployed stack)
+- Candidates: backlog 999.1 (staging/prod split), 999.2 (trainer default cohort)
+
+- Total codebase: 40+ routes, standalone Docker output, idempotent migrations, 963 passing tests.
 
 ## Database Access Architecture
 
