@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "load-test-coding": "tsx scripts/load-test-coding.ts",
     "abuse-test-coding": "tsx scripts/abuse-test-coding.ts",
-    "validate-challenge": "tsx scripts/validate-challenge.ts"
+    "validate-challenge": "tsx scripts/validate-challenge.ts",
+    "seed-staging": "tsx scripts/seed-staging.ts"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^5.1.0",
@@ -44,6 +45,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
