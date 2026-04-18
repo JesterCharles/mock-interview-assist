@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { dashboardSidebarGroups, trainerSettingsAccordion } from './sidebar-configs';
+import {
+  dashboardSidebarGroups,
+  trainerSettingsAccordion,
+  associateSidebarGroups,
+} from './sidebar-configs';
 
 describe('dashboardSidebarGroups', () => {
   it('has 2 groups', () => {
@@ -38,6 +42,16 @@ describe('dashboardSidebarGroups', () => {
     const coding = allItems.find((i) => i.href === '/coding');
     expect(coding).toBeDefined();
     expect(coding?.label).toBe('Coding');
+  });
+
+  it('associate sidebar contains a Coding entry labeled "Coding" pointing at /coding (Phase 40 truth)', () => {
+    const groups = associateSidebarGroups('alice');
+    const allItems = groups.flatMap((g) => g.items);
+    const coding = allItems.find((i) => i.href === '/coding');
+    expect(coding).toBeDefined();
+    expect(coding?.label).toBe('Coding');
+    // Shared URL (not /associate/[slug]/coding) per 40-01 D-02
+    expect(coding?.href).toBe('/coding');
   });
 
   it('all items have icon property that is a React component', () => {
