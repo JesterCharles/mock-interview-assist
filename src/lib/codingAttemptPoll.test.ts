@@ -29,6 +29,12 @@ vi.mock('@/lib/judge0Client', async () => {
   };
 });
 
+// Phase 41: mock the GapScore writeback so we can assert the fire-and-forget
+// call shape without spinning up a Prisma transaction harness.
+vi.mock('@/lib/gapPersistence', () => ({
+  persistCodingSignalToGapScore: vi.fn(async () => undefined),
+}));
+
 import {
   aggregateJudge0Results,
   computeFinalVerdict,
@@ -39,6 +45,7 @@ import {
 } from './codingAttemptPoll';
 import { prisma } from '@/lib/prisma';
 import * as judge0Client from '@/lib/judge0Client';
+import { persistCodingSignalToGapScore } from '@/lib/gapPersistence';
 
 function j0Result(status: number, overrides: Partial<{ stdout: string; stderr: string; time: string; memory: number; token: string }> = {}) {
   return {
@@ -504,5 +511,83 @@ describe('pollAndMaybeResolveAttempt', () => {
     const call = (prisma.codingAttempt.update as Mock).mock.calls[0][0];
     const visible = call.data.visibleTestResults as Array<Record<string, unknown>>;
     expect(visible[0]).toMatchObject({ caseId: 'v1', passed: true, stdout: 'hello' });
+  });
+
+  // -------------------------------------------------------------------------
+  // Phase 41: GapScore fire-and-forget wiring
+  // -------------------------------------------------------------------------
+  it('fires persistCodingSignalToGapScore with signal + challenge + associateId on resolve', async () => {
+    (prisma.codingAttempt.findUnique as Mock).mockResolvedValue({
+      id: 'a-gap',
+      associateId: 77,
+      verdict: 'pending',
+      score: null,
+      visibleTestResults: [],
+      hiddenTestResults: [],
+      judge0Token: JSON.stringify(['t']),
+      submittedAt: new Date(),
+      completedAt: null,
+      challengeId: 'ch-gap',
+      challenge: { skillSlug: 'python-fundamentals', difficulty: 'hard', language: 'python' },
+    });
+    (prisma.codingTestCase.findMany as Mock).mockResolvedValue([
+      { id: 'v1', isHidden: false, weight: 1, orderIndex: 0 },
+    ]);
+    (judge0Client.getSubmission as Mock).mockResolvedValue(j0Result(3));
+    (prisma.codingAttempt.update as Mock).mockResolvedValue({ id: 'a-gap' });
+    (prisma.codingSkillSignal.upsert as Mock).mockResolvedValue({ id: 's-gap' });
+
+    await pollAndMaybeResolveAttempt('a-gap');
+
+    // The call is fire-and-forget — flush the microtask queue so the
+    // .catch() (or resolved promise) settles before assertion.
+    await Promise.resolve();
+
+    expect(persistCodingSignalToGapScore).toHaveBeenCalledOnce();
+    const [signalArg, challengeArg, associateIdArg] =
+      (persistCodingSignalToGapScore as Mock).mock.calls[0];
+
+    expect(signalArg).toMatchObject({
+      attemptId: 'a-gap',
+      skillSlug: 'python-fundamentals',
+      signalType: 'pass',
+    });
+    expect(challengeArg).toEqual({ difficulty: 'hard', language: 'python' });
+    expect(associateIdArg).toBe(77);
+  });
+
+  it('persistCodingSignalToGapScore rejection is swallowed (poll still resolves)', async () => {
+    (prisma.codingAttempt.findUnique as Mock).mockResolvedValue({
+      id: 'a-gap-err',
+      associateId: 77,
+      verdict: 'pending',
+      score: null,
+      visibleTestResults: [],
+      hiddenTestResults: [],
+      judge0Token: JSON.stringify(['t']),
+      submittedAt: new Date(),
+      completedAt: null,
+      challengeId: 'ch',
+      challenge: { skillSlug: 'py', difficulty: 'medium', language: 'python' },
+    });
+    (prisma.codingTestCase.findMany as Mock).mockResolvedValue([
+      { id: 'v1', isHidden: false, weight: 1, orderIndex: 0 },
+    ]);
+    (judge0Client.getSubmission as Mock).mockResolvedValue(j0Result(3));
+    (prisma.codingAttempt.update as Mock).mockResolvedValue({ id: 'a-gap-err' });
+    (prisma.codingSkillSignal.upsert as Mock).mockResolvedValue({ id: 's' });
+    (persistCodingSignalToGapScore as Mock).mockRejectedValueOnce(new Error('gap boom'));
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await pollAndMaybeResolveAttempt('a-gap-err');
+    await Promise.resolve(); // let .catch run
+    await Promise.resolve();
+
+    expect(result.resolved).toBe(true);
+    expect(result.verdict).toBe('pass');
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 });

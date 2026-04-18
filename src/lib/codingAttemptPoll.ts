@@ -307,8 +307,9 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
         judge0Token: true,
         submittedAt: true,
         completedAt: true,
+        associateId: true,
         challengeId: true,
-        challenge: { select: { skillSlug: true } },
+        challenge: { select: { skillSlug: true, difficulty: true, language: true } },
       },
     })) as AttemptRow | null;
     if (refreshed) return toPollResultFromPersisted(refreshed);
@@ -344,6 +345,33 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
     .catch((err) => {
       console.error('[codingAttemptPoll] signal writeback failed for', attemptId, err);
     });
+
+  // Phase 41: feed the coding signal into GapScore with difficulty weighting.
+  // Fire-and-forget — must NOT delay the poll response (CODING-SCORE-01, 5s
+  // budget; upsert is < 100ms). Guarded by challenge presence so malformed
+  // data cannot throw synchronously.
+  if (attempt.challenge) {
+    void persistCodingSignalToGapScore(
+      {
+        attemptId,
+        skillSlug: mapped.skillSlug,
+        signalType,
+        weight: mapped.weight,
+        mappedScore: mapped.rawScore,
+      },
+      {
+        difficulty: attempt.challenge.difficulty,
+        language: attempt.challenge.language,
+      },
+      attempt.associateId,
+    ).catch((gapErr) => {
+      console.error(
+        '[codingAttemptPoll] persistCodingSignalToGapScore failed for',
+        attemptId,
+        gapErr instanceof Error ? gapErr.message : String(gapErr),
+      );
+    });
+  }
 
   const hiddenPassedCount = agg.perCase.filter((pc) => pc.isHidden && pc.passed).length;
   const hiddenTotal = agg.perCase.filter((pc) => pc.isHidden).length;
