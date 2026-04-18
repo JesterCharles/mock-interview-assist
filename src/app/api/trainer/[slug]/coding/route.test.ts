@@ -170,6 +170,32 @@ describe('GET /api/trainer/[slug]/coding', () => {
     }
   });
 
+  it('caps per-topic weight at 10 to prevent attempt-count farming (WR-02/IN-01)', async () => {
+    mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u', email: 't@t.co' });
+    mockAssoc.mockResolvedValue({ id: 42, slug: 'jane' });
+    mockAttempts.mockResolvedValue([]);
+    // One topic with a high-score low-volume signal, another topic with a
+    // low-score farm of 1000 attempts. Without the cap: (90*1 + 10*1000) /
+    // (1+1000) ≈ 10.08 — the farmed low score dominates. With the cap:
+    // (90*1 + 10*10) / (1+10) = 190/11 ≈ 17.27 — farmed topic is bounded.
+    mockGap.mockResolvedValue([
+      { skill: 'python-fundamentals', topic: 'coding:python', weightedScore: 90, sessionCount: 1 },
+      { skill: 'python-fundamentals', topic: 'coding:javascript', weightedScore: 10, sessionCount: 1000 },
+    ]);
+
+    const res = await GET(req(), makeCtx('jane'));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const py = body.codingSkillScores.find(
+      (s: { skillSlug: string }) => s.skillSlug === 'python-fundamentals',
+    );
+    expect(py).toBeDefined();
+    // Score uses capped weight (max 10 per topic) → (90*1 + 10*10)/(1+10) = 190/11
+    expect(py.score).toBeCloseTo(190 / 11, 2);
+    // attemptCount still reflects raw sum for UI volume display
+    expect(py.attemptCount).toBe(1001);
+  });
+
   it('codingSkillScores empty when no topic LIKE "coding:%" rows exist', async () => {
     mockAuth.mockResolvedValue({ kind: 'trainer', userId: 'u', email: 't@t.co' });
     mockAssoc.mockResolvedValue({ id: 42, slug: 'jane' });

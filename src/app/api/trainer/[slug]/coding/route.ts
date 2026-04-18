@@ -28,6 +28,25 @@ function validDifficulty(raw: unknown): 'easy' | 'medium' | 'hard' {
     : 'medium';
 }
 
+/**
+ * Per-topic weight cap for the skill aggregate — Phase 41 WR-02 / IN-01.
+ *
+ * `GapScore.sessionCount` has divergent semantics across source paths:
+ *   • interview path (`saveGapScores`) — distinct completed-session count
+ *   • coding path (`persistCodingSignalToGapScore`) — raw attempt count
+ *
+ * Without a cap, an associate can farm the trainer-visible skill score by
+ * submitting many easy-or-identical coding attempts against one topic (the
+ * difficulty multipliers block easy-score farming, but attempt-count farming
+ * sneaks in via the `weightedScore × sessionCount` weighting below). Capping
+ * each topic row's weight at 10 preserves signal (more reps = more confidence)
+ * while bounding any single topic's influence on the cross-topic mean.
+ *
+ * The cap is applied to the *weighting* only — `attemptCount` returned to the
+ * client is still the raw sum (useful for the trainer UI to surface volume).
+ */
+const MAX_WEIGHT_PER_TOPIC = 10;
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> },
@@ -103,18 +122,29 @@ export async function GET(
 
     // Aggregate by skill (multiple topics per skill → weighted mean across
     // rows, attemptCount sum of sessionCount).
-    const acc = new Map<string, { weightedSum: number; countSum: number }>();
+    //
+    // WR-02/IN-01: cap the per-topic weight at MAX_WEIGHT_PER_TOPIC to prevent
+    // attempt-count farming via the coding path (where sessionCount is a raw
+    // attempt tally, not a distinct-session count). `attemptCount` returned to
+    // the client remains the raw sum for UI volume display.
+    const acc = new Map<
+      string,
+      { weightedSum: number; weightSum: number; attemptSum: number }
+    >();
     for (const row of gapRows) {
-      const bucket = acc.get(row.skill) ?? { weightedSum: 0, countSum: 0 };
-      bucket.weightedSum += row.weightedScore * row.sessionCount;
-      bucket.countSum += row.sessionCount;
+      const bucket =
+        acc.get(row.skill) ?? { weightedSum: 0, weightSum: 0, attemptSum: 0 };
+      const cappedWeight = Math.min(row.sessionCount, MAX_WEIGHT_PER_TOPIC);
+      bucket.weightedSum += row.weightedScore * cappedWeight;
+      bucket.weightSum += cappedWeight;
+      bucket.attemptSum += row.sessionCount;
       acc.set(row.skill, bucket);
     }
     const codingSkillScores: CodingSkillScore[] = Array.from(acc.entries()).map(
-      ([skillSlug, { weightedSum, countSum }]) => ({
+      ([skillSlug, { weightedSum, weightSum, attemptSum }]) => ({
         skillSlug,
-        score: countSum > 0 ? weightedSum / countSum : 0,
-        attemptCount: countSum,
+        score: weightSum > 0 ? weightedSum / weightSum : 0,
+        attemptCount: attemptSum,
       }),
     );
 

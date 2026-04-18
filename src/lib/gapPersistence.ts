@@ -223,6 +223,17 @@ export async function getGapScores(associateId: number): Promise<GapScoreResult>
  * aggregate this row alongside interview signals via the shared
  * (associateId, skill, topic) key.
  *
+ * ⚠ Dual-semantic on `sessionCount` (Phase 41 WR-02):
+ *   • interview path (`saveGapScores`) writes `sessionCount` = distinct
+ *     completed-session count feeding the skill (gapService line 179).
+ *   • THIS coding path writes `sessionCount` = raw coding-attempt count for
+ *     (associate, skill, topic), incremented by 1 per attempt.
+ *   • `weightedScore` here is a single raw (per-attempt) signal, not the
+ *     recency-decayed average that the interview path stores.
+ *   Downstream consumers aggregating across both sources (e.g.
+ *   `/api/trainer/[slug]/coding`) must cap or normalise the weighting to
+ *   prevent attempt-count farming — see MAX_WEIGHT_PER_TOPIC in that route.
+ *
  * Contract:
  *  - Caller is fire-and-forget (poll route wraps with `.catch(log)`).
  *  - Throws on unknown difficulty (defense-in-depth against T-41-03).
