@@ -208,10 +208,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. `.planning/DEPLOY.md` cutover runbook exists with: pre-flight checklist, TTL=300 step (24h before), step-by-step A-record swap, verification commands (dig, curl, Supabase session check), rollback procedure
   5. `rollback-prod.yml` manual dispatch successfully reverts prod Cloud Run to the previous revision by digest
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 51-01-PLAN.md — Prod Cloud Run service + LB + managed SSL cert (apex + www) [CI-03 infrastructure dep]
+  - [ ] 51-02-PLAN.md — Cloudflare DNS records (apex imported, www, legacy) — apex stays on v0.1 [DNS-01, DNS-02]
+  - [ ] 51-03-PLAN.md — deploy-prod.yml (tag-triggered, WIF to prod, v1.5.0-rc1 first run) [CI-03]
+  - [ ] 51-04-PLAN.md — DEPLOY.md cutover runbook + rollback rehearsal + verify-phase-51.sh [DNS-03]
 
 ### Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch
 **Goal**: `nextlevelmock.com` serves the v1.5 app on Cloud Run; existing public-interview users experience no data loss or extended outage; a single Cloudflare DNS action can revert to v0.1 within the 30-day window
@@ -259,7 +259,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 | 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 0/? | Not started | - |
 | 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 0/4 | Planned | - |
 | 50. Judge0 Integration Points + Flag Audit | v1.5 | 0/4 | Planned | - |
-| 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 0/? | Not started | - |
+| 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 0/4 | Planned | - |
 | 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 0/? | Not started | - |
 | 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 0/? | Not started | - |
 
