@@ -9,8 +9,14 @@
 - Memory pointers: `memory/project_v15_direction.md` (new), `memory/project_deploy_decision_v14.md` (superseded by v15)
 - Discovery brief: `.planning/PIPELINE-DISCOVER.md` (rewritten for v1.5; v1.4 brief archived at `.planning/milestones/v1.4-PIPELINE-DISCOVER.md`)
 - Seeds: `.planning/seeds/v1.5-discovery-seeds.md` (9 seeds)
-- **All discover blockers resolved 2026-04-18:** Supabase = two free-tier projects (no branching). DNS = Cloudflare Free Tier. GCP = `nlm-prod` + `nlm-staging` (timeless naming, no version suffix — `nlm-judge0-prod` pattern for v1.6 additions). v0.1 GCE stays untouched until DNS cutover.
-- **Execute-phase actions (deferred):** User creates Supabase staging project + runs `gcloud auth login` at execute kickoff. gcloud auth DEFERRED until then — destructive capability scoped to the phase that needs it.
+- **All discover blockers resolved 2026-04-18.** Finalized IDs:
+  - GCP account: `aicogeng@gmail.com`, billing account `01A910-0C5083-DCCFED` ("My Billing Account", active)
+  - GCP projects (both exist 2026-04-18): `nlm-prod` (clean ID), `nlm-staging-493715` (suffix added — `nlm-staging` was globally taken; accepting suffix)
+  - Supabase staging project: `lzuqbpqmqlvzwebliptj` (ref from `https://lzuqbpqmqlvzwebliptj.supabase.co`)
+  - Supabase prod project: existing (unchanged — will be wiped + seeded clean for real prod per env-hygiene decision)
+  - DNS: Cloudflare Free Tier on `nextlevelmock.com`
+- **Env hygiene decision (carry into plan as Phase 1):** Stop testing in the existing Supabase "prod" project (it's really a dev DB with dirty v1.0-v1.4 test data). Wipe it, reseed staging with dummy data, reserve prod Supabase for actual production deploy + real users. Local `.env` points at staging only from here forward.
+- **Execute-phase remaining action:** `gcloud auth login` already done. User still needs to wipe + reseed DB per plan Phase 1 when it runs.
 
 ### v1.5 Context Reframe (key finding)
 nextlevelmock.com has been LIVE on v0.1 GCE serving public-interview users this whole time. v1.0-v1.4 code NEVER shipped to prod. v1.5 = migration + upgrade, not greenfield. Phase 43 terraform = reference for v1.6 Judge0, not v1.5 app infra.
