@@ -39,13 +39,13 @@
 
 ### Execution API (CODING-API-NN) — Phase 39
 
-- [ ] **CODING-API-01**: `POST /api/coding/submit` auth-gated (Supabase session + `getCallerIdentity()`); async submit pattern (submit → return attempt id → poll); NEVER uses Judge0 `wait=true`
-- [ ] **CODING-API-02**: Server-side hidden test injection from private repo — client never receives hidden test inputs or expected outputs in request/response bodies
-- [ ] **CODING-API-03**: Language allowlist enforced server-side (python, javascript, typescript, java, sql, csharp); rejection returns 400 with explicit error code
-- [ ] **CODING-API-04**: Per-user rate limits reuse `rateLimitService.ts` pattern (e.g., 30 submissions/hour, 200/day) with explicit env config
-- [ ] **CODING-API-05**: `GET /api/coding/attempts/[id]` polling endpoint returns verdict + visible test details + hidden test pass/fail count only (not hidden inputs)
-- [ ] **CODING-API-06**: `GET /api/coding/challenges` lists challenges authorized for current associate (filtered by cohort + curriculum week if assigned)
-- [ ] **CODING-API-07**: Verdict normalization layer maps Judge0 status codes to canonical enum (pass/fail/timeout/mle/runtime_error/compile_error) so UI + scoring see one contract
+- [x] **CODING-API-01**: `POST /api/coding/submit` auth-gated (Supabase session + `getCallerIdentity()`); async submit pattern (submit → return attempt id → poll); NEVER uses Judge0 `wait=true`
+- [x] **CODING-API-02**: Server-side hidden test injection from private repo — client never receives hidden test inputs or expected outputs in request/response bodies
+- [x] **CODING-API-03**: Language allowlist enforced server-side (python, javascript, typescript, java, sql, csharp); rejection returns 400 with explicit error code
+- [x] **CODING-API-04**: Per-user rate limits reuse `rateLimitService.ts` pattern (e.g., 30 submissions/hour, 200/day) with explicit env config
+- [x] **CODING-API-05**: `GET /api/coding/attempts/[id]` polling endpoint returns verdict + visible test details + hidden test pass/fail count only (not hidden inputs)
+- [x] **CODING-API-06**: `GET /api/coding/challenges` lists challenges authorized for current associate (filtered by cohort + curriculum week if assigned)
+- [x] **CODING-API-07**: Verdict normalization layer maps Judge0 status codes to canonical enum (pass/fail/timeout/mle/runtime_error/compile_error) so UI + scoring see one contract
 
 ### UI (CODING-UI-NN) — Phase 40
 

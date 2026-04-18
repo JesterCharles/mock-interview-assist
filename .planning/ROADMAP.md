@@ -125,12 +125,12 @@ Plans:
 **Success**: End-to-end submit→verdict path works for all 5 languages; hidden test inputs never appear in client responses; rate limits enforced; Judge0 never exposed to browser
 **Estimate**: ~1 week, 3 plans
 
-**Plans:** 3 plans in 3 waves
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 39-01-PLAN.md — Verdict normalizer + rate-limit scope + POST /api/coding/submit (Wave 1)
-- [ ] 39-02-PLAN.md — codingAttemptPoll helper + GET /api/coding/attempts/[id] with Zod shield (Wave 2)
-- [ ] 39-03-PLAN.md — codingApiErrors library + GET /api/coding/challenges (Wave 3)
+- [x] 39-01-PLAN.md — Verdict normalizer + rate-limit scope + POST /api/coding/submit (Wave 1)
+- [x] 39-02-PLAN.md — codingAttemptPoll helper + GET /api/coding/attempts/[id] with Zod shield (Wave 2)
+- [x] 39-03-PLAN.md — codingApiErrors library + GET /api/coding/challenges (Wave 3)
 
 #### Phase 40: UI MVP
 **Goal**: Associates browse challenges, solve in Monaco editor, see verdicts clearly — integrated into existing AppShell
@@ -157,7 +157,7 @@ Plans:
 **Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 41-01-PLAN.md — gapPersistence coding extension + DIFFICULTY_MULTIPLIERS + Phase 39 poll-handler wiring (Wave 1)
+- [x] 41-01-PLAN.md — gapPersistence coding extension + DIFFICULTY_MULTIPLIERS + Phase 39 poll-handler wiring (Wave 1) (completed 2026-04-18)
 - [ ] 41-02-PLAN.md — Trainer dashboard coding panel + /api/trainer/[slug]/coding route (Wave 2)
 - [ ] 41-03-PLAN.md — PROJECT.md readiness math + DESIGN.md coding panel spec + v1.5 Open Items (Wave 3)
 
