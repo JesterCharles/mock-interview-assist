@@ -1,0 +1,91 @@
+name: Rollback Cloud Run (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Target environment (staging | prod)'
+        required: true
+        type: choice
+        options: [staging, prod]
+        default: staging
+      revision:
+        description: 'Revision to pin to 100% traffic (e.g. nlm-staging-00042-abc). Run `gcloud run revisions list` to find the previous revision name.'
+        required: true
+        type: string
+
+concurrency:
+  group: rollback-${{ inputs.env }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  rollback:
+    name: Rollback ${{ inputs.env }} to ${{ inputs.revision }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Resolve target config
+        id: cfg
+        run: |
+          if [ "${{ inputs.env }}" = "prod" ]; then
+            echo "project_id=nlm-prod" >> "$GITHUB_OUTPUT"
+            echo "service=nlm-prod" >> "$GITHUB_OUTPUT"
+            echo "project_number=${{ vars.PROD_PROJECT_NUMBER }}" >> "$GITHUB_OUTPUT"
+            echo "sa=github-actions-deployer@nlm-prod.iam.gserviceaccount.com" >> "$GITHUB_OUTPUT"
+          else
+            echo "project_id=nlm-staging-493715" >> "$GITHUB_OUTPUT"
+            echo "service=nlm-staging" >> "$GITHUB_OUTPUT"
+            echo "project_number=${{ vars.STAGING_PROJECT_NUMBER }}" >> "$GITHUB_OUTPUT"
+            echo "sa=github-actions-deployer@nlm-staging-493715.iam.gserviceaccount.com" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ steps.cfg.outputs.project_number }}/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: ${{ steps.cfg.outputs.sa }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ steps.cfg.outputs.project_id }}
+
+      - name: Verify revision exists
+        run: |
+          gcloud run revisions describe "${{ inputs.revision }}" \
+            --project=${{ steps.cfg.outputs.project_id }} \
+            --region=us-central1 \
+            --service=${{ steps.cfg.outputs.service }} > /dev/null
+
+      - name: Pin traffic to revision
+        run: |
+          gcloud run services update-traffic "${{ steps.cfg.outputs.service }}" \
+            --project=${{ steps.cfg.outputs.project_id }} \
+            --region=us-central1 \
+            --to-revisions="${{ inputs.revision }}=100" \
+            --quiet
+
+      - name: Verify pinned revision
+        run: |
+          PINNED=$(gcloud run services describe "${{ steps.cfg.outputs.service }}" \
+            --project=${{ steps.cfg.outputs.project_id }} \
+            --region=us-central1 \
+            --format='value(status.traffic[0].revisionName)')
+          echo "Currently serving: $PINNED"
+          [ "$PINNED" = "${{ inputs.revision }}" ] \
+            || (echo "::error::Pinned revision mismatch"; exit 1)
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Rollback — ${{ job.status }}"
+            echo ""
+            echo "- Environment: \`${{ inputs.env }}\`"
+            echo "- Service: \`${{ steps.cfg.outputs.service }}\`"
+            echo "- Pinned revision: \`${{ inputs.revision }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

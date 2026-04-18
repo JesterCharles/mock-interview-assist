@@ -1,0 +1,41 @@
+name: Load Test (k6)
+
+# PHASE 48 STATUS: skeleton only. Phase 49 adds k6 scenario + artifact upload.
+# Do not delete or restructure — Phase 49 fills in the shell.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Scenario file under loadtest/ (default: baseline.js)'
+        required: false
+        default: 'baseline.js'
+        type: string
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: load-test
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run:
+    # Only run on pull_request when the `run-load-test` label is applied.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-load-test')
+    name: k6 Load Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Phase 49 placeholder
+        run: |
+          echo "::notice::Phase 48 lands this workflow as a skeleton."
+          echo "::notice::Phase 49 Plan 01 fills in: k6 setup-action, scenario run, JSON artifact upload."
+          echo "Scenario requested: ${{ inputs.scenario }}"
