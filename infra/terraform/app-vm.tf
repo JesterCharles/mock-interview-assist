@@ -40,7 +40,15 @@ resource "google_compute_instance" "app" {
     // Fields below vary slightly between gcloud CLI defaults and Terraform's
     // canonical shape. Ignoring them avoids a destroy/replace while Task 3
     // is in progress. Once the import is clean, these can be narrowed.
+    //
+    // boot_disk is in the ignore list because the literal above
+    // ("debian-cloud/debian-12") is a placeholder until Task 3 reads the
+    // real pinned image via `terraform show`. Without this, `terraform
+    // apply` would destroy-recreate the prod VM. Task 3 must remove
+    // `boot_disk` from this list once the real image is committed
+    // (WR-06, Phase 43 review).
     ignore_changes = [
+      boot_disk,
       metadata,
       metadata_startup_script,
       attached_disk,
