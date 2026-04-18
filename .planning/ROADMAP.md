@@ -118,6 +118,13 @@ Plans:
 **Success**: End-to-end submit→verdict path works for all 5 languages; hidden test inputs never appear in client responses; rate limits enforced; Judge0 never exposed to browser
 **Estimate**: ~1 week, 3 plans
 
+**Plans:** 3 plans in 3 waves
+
+Plans:
+- [ ] 39-01-PLAN.md — Verdict normalizer + rate-limit scope + POST /api/coding/submit (Wave 1)
+- [ ] 39-02-PLAN.md — codingAttemptPoll helper + GET /api/coding/attempts/[id] with Zod shield (Wave 2)
+- [ ] 39-03-PLAN.md — codingApiErrors library + GET /api/coding/challenges (Wave 3)
+
 #### Phase 40: UI MVP
 **Goal**: Associates browse challenges, solve in Monaco editor, see verdicts clearly — integrated into existing AppShell
 **Depends on**: Phase 39
