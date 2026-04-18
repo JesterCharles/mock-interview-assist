@@ -229,7 +229,7 @@ See `.planning/REQUIREMENTS.md` for the full 44-requirement list. Summary by the
 - Multi-evidence readiness engine (QC audits, trainer observations as evidence sources) — architecture should accommodate but not build yet
 - Real-time dashboard updates via Supabase Realtime — read-heavy dashboard sufficient for v1.1
 - Function-level test harness for coding challenges — stdin/stdout sufficient for v1.4 pedagogy; per-language drivers deferred to v1.5
-- Real Postgres SQL runner — SQLite only for v1.4; hardened isolated-schema runner deferred to v1.5
+- Real Postgres SQL execution — deferred to v1.5 as separate hardened service with prewarmed isolated schemas, role-locked connections, statement_timeout, no extensions, no network, full teardown per attempt. v1.4 ships SQLite dialect only.
 - Modern .NET 8+ runtime — Judge0 ships C# Mono; modern .NET needs separate sandbox, deferred to v1.5 if client demand confirmed
 - In-app challenge authoring — PR-based authoring ships faster; in-app editor deferred to v1.5
 - Judge0 WebSocket realtime updates — polling via attempt endpoint sufficient for v1.4
