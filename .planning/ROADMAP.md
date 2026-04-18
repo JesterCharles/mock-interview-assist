@@ -129,10 +129,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. `prisma migrate deploy` against staging DIRECT_URL succeeds with all migrations applied; `prisma migrate deploy` against prod DIRECT_URL succeeds identically
   5. Supabase Auth redirect allowlists are correct per env: staging accepts `staging.nextlevelmock.com/*` + `localhost:3000/*`; prod accepts `nextlevelmock.com/*` only
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 46-01-PLAN.md — Seed infrastructure (assert-staging-env helper, idempotent Faker+upsert seed-staging.ts, vitest tests, @faker-js/faker devDep)
+  - [ ] 46-02-PLAN.md — Prod backup + wipe (wipe-prod.ts dry-run default, runbook Phases A-F: pg_dump + gsutil upload gate + TRUNCATE + auth admin.deleteUser + migrate deploy + COUNT verify)
+  - [ ] 46-03-PLAN.md — Key population + migrate deploy validation (runbook Phases G-I: 7 secrets × 2 projects, migrate deploy both envs, Secret Manager separation verify) + verify-migrations.sh
+  - [ ] 46-04-PLAN.md — Env hygiene + auth allowlist (ENV-HYGIENE.md, verify-env-hygiene.ts, runbook Phase J: Management API PATCH, verify-phase-46.sh phase-gate)
 
 ### Phase 47: Staging Cloud Run Service + Load Balancer + Domains
 **Goal**: The NLM app runs on Cloud Run at `staging.nextlevelmock.com` with HTTPS; GH Actions can authenticate to GCP without long-lived service-account keys
