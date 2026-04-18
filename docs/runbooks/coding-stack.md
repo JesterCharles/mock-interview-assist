@@ -127,6 +127,10 @@ historically leak user code + host access (GHSA-q7vg-26pg-v5hr affected
 
 **Phase 38 spike re-verify (MUST complete before first production submission):**
 
+- **Owner:** trainer-dev (solo operator)
+- **Target:** before first production code submission (v1.4 go-live gate)
+- **Status:** open — blocks promoting v1.4 from staging-verified to live
+
 The Phase 38 spike was PARTIAL PASS — sandbox execution could not be verified
 on the arm64 dev host. Run the full checklist on the prod Judge0 VM before
 declaring v1.4 live:
