@@ -1,13 +1,25 @@
 # Pipeline Status
 
-## Current Run — v1.4 (EXECUTE PARTIAL — HALTED ON SPIKE GATE)
+## Current Run — v1.5 (DISCOVER done → INIT next)
 - Started: 2026-04-18
-- Current stage: EXECUTE partial — P36/37/38 code complete + reviewed + validated. P39-44 BLOCKED on JUDGE-06 spike gate (human-only: docker daemon unavailable on exec host)
-- Mode: `--resume --unattended --discuss` (autonomous)
-- Session 1 summary: 3 phases shipped, 27 commits, 680 tests passing, 1 P0 + 5 P2 review findings fixed
-- Report: `.planning/AUTONOMOUS-REPORT.md`
-- Previous: v1.3 shipped + tagged 2026-04-18 (commit 42cd703, tag v1.3)
+- Current stage: DISCOVER **done** 2026-04-18 → ready for INIT (`/gsd-new-milestone v1.5`)
+- Mode: sync HITL (office-hours forcing questions)
+- Previous: v1.4 shipped 2026-04-18 (PR #7 squash-merged). v1.4 reflect + maintain **deferred** — will run at v1.5 ship
+- **Chosen approach:** Approach C Hybrid — **Cloud Run + Supabase** migration from live v0.1 GCE (`nextlevelmock.com`). Judge0 deferred to v1.6. Staging + CI/CD + k6 load-test baseline are P0. 3-4 week estimate.
+- Memory pointers: `memory/project_v15_direction.md` (new), `memory/project_deploy_decision_v14.md` (superseded by v15)
+- Discovery brief: `.planning/PIPELINE-DISCOVER.md` (rewritten for v1.5; v1.4 brief archived at `.planning/milestones/v1.4-PIPELINE-DISCOVER.md`)
+- Seeds: `.planning/seeds/v1.5-discovery-seeds.md` (9 seeds)
+- **All discover blockers resolved 2026-04-18:** Supabase = two free-tier projects (no branching). DNS = Cloudflare Free Tier. GCP = `nlm-prod` + `nlm-staging` (timeless naming, no version suffix — `nlm-judge0-prod` pattern for v1.6 additions). v0.1 GCE stays untouched until DNS cutover.
+- **Execute-phase actions (deferred):** User creates Supabase staging project + runs `gcloud auth login` at execute kickoff. gcloud auth DEFERRED until then — destructive capability scoped to the phase that needs it.
+
+### v1.5 Context Reframe (key finding)
+nextlevelmock.com has been LIVE on v0.1 GCE serving public-interview users this whole time. v1.0-v1.4 code NEVER shipped to prod. v1.5 = migration + upgrade, not greenfield. Phase 43 terraform = reference for v1.6 Judge0, not v1.5 app infra.
+
+## Previous Run — v1.4 (SHIPPED 2026-04-18)
 - Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (9 phases 36-44, 44 reqs, Approach B MSA-from-day-1)
+- Ship: PR #7 squash-merged; commit `e14be93`; tag v1.4
+- Outcome: all 9 phases executed, reviewed, tested, merged
+- Deferred stages: reflect + maintain (run before v1.5 ship or on dedicated pass)
 
 ### Plan summary per phase (commits)
 | Phase | Plans | Commit | Notes |
@@ -34,19 +46,45 @@
 - `/gsd-plan-phase 36` — Data Model & Schema (CodingChallenge/CodingAttempt/CodingTestCase/CodingSkillSignal + idempotent migration)
 - Then sequential: 37 (Challenge Bank) → 38 (Judge0 spike GATE) → 39 (Submission API) → 40-44
 
-## Stages (v1.4 — EXECUTE PARTIAL)
+## Stages (v1.5 — current)
+| Stage | Status | Started | Completed | Notes |
+|-------|--------|---------|-----------|-------|
+| discover | **done** | 2026-04-18 | 2026-04-18 | Hybrid approach chosen (Cloud Run + Supabase). PIPELINE-DISCOVER.md + seeds + memory |
+| init | pending | | | `/gsd-new-milestone v1.5` + REQUIREMENTS.md + ROADMAP.md. Blocked on 3-Q user action (Supabase branching / DNS ownership / GCP project) |
+| design | skipped | | | DevOps milestone, no UI surfaces |
+| plan | pending | | | Per-phase `/gsd-plan-phase` after init |
+| execute | pending | | | |
+| review | pending | | | |
+| test | pending | | | Includes k6 load-test baseline (P0 deliverable) |
+| ship | pending | | | PR + merge gate at milestone end. DNS cutover from v0.1 GCE |
+| reflect | pending | | | Also covers v1.4 reflect (deferred) |
+| maintain | pending | | | Also covers v1.4 maintain (deferred). v0.1 GCE decommission runbook |
+
+## HITL Gates (v1.5)
+| Gate | Stage | Type | Status | Decision |
+|------|-------|------|--------|----------|
+| Approach (PaaS / GCE / Hybrid) | discover | sync | **resolved 2026-04-18** | **Approach C Hybrid** — Cloud Run + Supabase. Not Fly/Railway, not Cloud SQL migration |
+| Phase 43 terraform disposition | discover | sync | **resolved 2026-04-18** | Keep as reference for v1.6 Judge0; v1.5 writes new `iac/cloudrun/` |
+| Judge0 hosted vs self-hosted | discover | sync | **deferred to v1.6** | v1.5 bakes integration points; actual choice at v1.6 kickoff |
+| Supabase branching / DNS / GCP project | init | sync | **blocker** | 3-Q user action before `/gsd-new-milestone v1.5` (see PIPELINE-DISCOVER.md Assignment) |
+| Milestone scope closure | init | sync | pending | At `/gsd-new-milestone v1.5` |
+| Staging cutover to prod | ship | sync | pending | DNS swap day 15-21 per sunset plan |
+| v0.1 GCE decommission | maintain | sync | pending | Day 45 if no rollback |
+| Merge approval | ship | sync | pending | No auto-merge |
+
+## Stages (v1.4 — SHIPPED 2026-04-18)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
 | discover | done | 2026-04-18 | 2026-04-18 | Office-hours + codex consult → Approach B MSA. PIPELINE-DISCOVER.md |
 | init | done | 2026-04-18 | 2026-04-18 | Milestone initialized; REQUIREMENTS.md (44 reqs), ROADMAP expanded (P36-44), PROJECT.md updated |
-| design | pending | | | Evaluate per-phase — UI surfaces likely in P40 (UI MVP) |
+| design | skipped | | | Per-phase handled (P40 UI MVP had UI-SPEC) |
 | plan | done | 2026-04-18 | 2026-04-18 | All 9 phases planned (36-44), 28 plans across 28 waves |
-| execute | **partial** | 2026-04-18 | | P36/37/38 DONE. P39-44 BLOCKED on JUDGE-06 spike gate (human-verify, docker unavailable on exec host). AUTONOMOUS-REPORT.md |
-| review | partial | 2026-04-18 | | P36/37/38 done. P37 1xP0+3xP2 fixed. P38 2xP2 fixed. P39-44 pending execute unblock |
-| test | partial | 2026-04-18 | | P36/37/38 validate audits done. Full suite 680 passing / 4 skipped |
-| ship | pending | | | PR + merge gate at milestone end |
-| reflect | pending | | | Retro + seeds at milestone end |
-| maintain | pending | | | Health check after ship |
+| execute | done | 2026-04-18 | 2026-04-18 | All 9 phases shipped after spike gate passed. PR #7 (`e14be93`) |
+| review | done | 2026-04-18 | 2026-04-18 | Codex passes closed; P37 1xP0+3xP2, P38 2xP2 fixed |
+| test | done | 2026-04-18 | 2026-04-18 | Full suite 680 passing / 4 skipped |
+| ship | done | 2026-04-18 | 2026-04-18 | PR #7 squash-merged; tag v1.4 |
+| reflect | deferred | | | Rolls into v1.5 reflect pass |
+| maintain | deferred | | | Rolls into v1.5 maintain pass |
 
 ## Session 1 outcome (2026-04-18 autonomous run)
 
