@@ -1,9 +1,9 @@
 # Pipeline Status
 
-## Current Run — v1.5 (DISCOVER done → INIT next)
+## Current Run — v1.5 (INIT done → PLAN next)
 - Started: 2026-04-18
-- Current stage: DISCOVER **done** 2026-04-18 → ready for INIT (`/gsd-new-milestone v1.5`)
-- Mode: sync HITL (office-hours forcing questions)
+- Current stage: INIT **done** 2026-04-18 → ready for PLAN (`/gsd-plan-phase 45`)
+- Mode: sync HITL (user-present, interactive approvals)
 - Previous: v1.4 shipped 2026-04-18 (PR #7 squash-merged). v1.4 reflect + maintain **deferred** — will run at v1.5 ship
 - **Chosen approach:** Approach C Hybrid — **Cloud Run + Supabase** migration from live v0.1 GCE (`nextlevelmock.com`). Judge0 deferred to v1.6. Staging + CI/CD + k6 load-test baseline are P0. 3-4 week estimate.
 - Memory pointers: `memory/project_v15_direction.md` (new), `memory/project_deploy_decision_v14.md` (superseded by v15)
@@ -56,9 +56,9 @@ nextlevelmock.com has been LIVE on v0.1 GCE serving public-interview users this 
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
 | discover | **done** | 2026-04-18 | 2026-04-18 | Hybrid approach chosen (Cloud Run + Supabase). PIPELINE-DISCOVER.md + seeds + memory |
-| init | pending | | | `/gsd-new-milestone v1.5` + REQUIREMENTS.md + ROADMAP.md. Blocked on 3-Q user action (Supabase branching / DNS ownership / GCP project) |
+| init | **done** | 2026-04-18 | 2026-04-18 | PROJECT.md + STATE.md + REQUIREMENTS.md (47 reqs, 11 themes) + ROADMAP.md (9 phases 45-53). Commits 942007c + 3365f03 + f4bf08d |
 | design | skipped | | | DevOps milestone, no UI surfaces |
-| plan | pending | | | Per-phase `/gsd-plan-phase` after init |
+| plan | pending | | | `/gsd-plan-phase 45` first; then 46→47→48→49 + 50 (parallel after 45) →51→52→53 |
 | execute | pending | | | |
 | review | pending | | | |
 | test | pending | | | Includes k6 load-test baseline (P0 deliverable) |
@@ -72,8 +72,8 @@ nextlevelmock.com has been LIVE on v0.1 GCE serving public-interview users this 
 | Approach (PaaS / GCE / Hybrid) | discover | sync | **resolved 2026-04-18** | **Approach C Hybrid** — Cloud Run + Supabase. Not Fly/Railway, not Cloud SQL migration |
 | Phase 43 terraform disposition | discover | sync | **resolved 2026-04-18** | Keep as reference for v1.6 Judge0; v1.5 writes new `iac/cloudrun/` |
 | Judge0 hosted vs self-hosted | discover | sync | **deferred to v1.6** | v1.5 bakes integration points; actual choice at v1.6 kickoff |
-| Supabase branching / DNS / GCP project | init | sync | **blocker** | 3-Q user action before `/gsd-new-milestone v1.5` (see PIPELINE-DISCOVER.md Assignment) |
-| Milestone scope closure | init | sync | pending | At `/gsd-new-milestone v1.5` |
+| Supabase branching / DNS / GCP project | init | sync | **resolved 2026-04-18** | All three IDs finalized pre-init (GCP projects exist, Supabase staging ref recorded, Cloudflare on DNS) |
+| Milestone scope closure | init | sync | **resolved 2026-04-18** | v1.5 approach + requirements + 9-phase roadmap confirmed by user at `/gsd-new-milestone v1.5` |
 | Staging cutover to prod | ship | sync | pending | DNS swap day 15-21 per sunset plan |
 | v0.1 GCE decommission | maintain | sync | pending | Day 45 if no rollback |
 | Merge approval | ship | sync | pending | No auto-merge |
