@@ -222,4 +222,45 @@ describe('normalizeSqliteResult', () => {
     });
     expect(res.passed).toBe(true);
   });
+
+  // ────────────────────────────────────────────────────────────────────
+  // Phase 42 WR-02 — floating-point epsilon tolerance
+  // ────────────────────────────────────────────────────────────────────
+
+  it('Test 12 (WR-02 epsilon): AVG float drift within default epsilon passes', () => {
+    // 3.14 + 0 === 3.1400000000000006 in JS floats — real SQL aggregates drift similarly.
+    const stdout = '3.1400000000000006\n';
+    const res = normalizeSqliteResult(stdout, {
+      expectedRows: [[3.14]],
+      expectedColumns: ['avg_val'],
+    });
+    expect(res.passed).toBe(true);
+  });
+
+  it('Test 13 (WR-02 epsilon): large absolute error exceeds tolerance → fails', () => {
+    const res = normalizeSqliteResult('3.2\n', {
+      expectedRows: [[3.14]],
+      expectedColumns: ['avg_val'],
+    });
+    expect(res.passed).toBe(false);
+    expect(res.reason).toMatch(/cell mismatch/i);
+  });
+
+  it('Test 14 (WR-02 epsilon): exact integer comparison unaffected', () => {
+    const res = normalizeSqliteResult('42\n', {
+      expectedRows: [[42]],
+      expectedColumns: ['n'],
+    });
+    expect(res.passed).toBe(true);
+  });
+
+  it('Test 15 (WR-02 epsilon): custom epsilon override respected', () => {
+    // 3.2 vs 3.14 diff = 0.06. Default eps 1e-9 rejects; custom eps 0.1 accepts.
+    const res = normalizeSqliteResult('3.2\n', {
+      expectedRows: [[3.14]],
+      expectedColumns: ['avg_val'],
+      epsilon: 0.1,
+    });
+    expect(res.passed).toBe(true);
+  });
 });

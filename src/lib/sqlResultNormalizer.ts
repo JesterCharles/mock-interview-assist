@@ -32,6 +32,10 @@ export interface NormalizationFlags {
   numericCoerce: boolean;
   orderSensitiveColumns: boolean;
   rowOrderSensitive: boolean;
+  // WR-02 (Phase 42 review): floating-point tolerance for numeric cell compare.
+  // Applied only when BOTH cells coerce to finite numbers. Uses relative + abs
+  // combined metric so tiny-magnitude and large-magnitude diffs both work.
+  epsilon: number;
 }
 
 export type Cell = string | number | null;
@@ -48,6 +52,7 @@ const DEFAULT_FLAGS: NormalizationFlags = {
   numericCoerce: true,
   orderSensitiveColumns: true,
   rowOrderSensitive: false,
+  epsilon: 1e-9,
 };
 
 // WR-01 (Phase 42 review): sentinel markers the submit route wraps around the
@@ -68,6 +73,7 @@ type NormalizerInput = Partial<
     | 'numericCoerce'
     | 'orderSensitiveColumns'
     | 'rowOrderSensitive'
+    | 'epsilon'
   >
 >;
 
@@ -78,6 +84,7 @@ function resolveFlags(tc: NormalizerInput): NormalizationFlags {
     orderSensitiveColumns:
       tc.orderSensitiveColumns ?? DEFAULT_FLAGS.orderSensitiveColumns,
     rowOrderSensitive: tc.rowOrderSensitive ?? DEFAULT_FLAGS.rowOrderSensitive,
+    epsilon: tc.epsilon ?? DEFAULT_FLAGS.epsilon,
   };
 }
 
@@ -154,10 +161,22 @@ function normalizeActualRow(row: string[], flags: NormalizationFlags): Cell[] {
   });
 }
 
-function cellsEqual(a: Cell, b: Cell): boolean {
+function cellsEqual(a: Cell, b: Cell, epsilon: number): boolean {
   if (a === null && b === null) return true;
   if (a === null || b === null) return false;
-  // Both non-null — direct ===.
+  // WR-02 (Phase 42 review): floating-point tolerance — SQLite AVG/SUM/REAL
+  // arithmetic produces drift like 3.1400000000000006 vs authored 3.14. Use a
+  // scale-aware epsilon (combined abs + rel) so tiny values and large values
+  // both compare cleanly. Only applied when BOTH sides are finite numbers —
+  // exact string/int compares and typed mismatches stay strict.
+  if (
+    typeof a === 'number' &&
+    typeof b === 'number' &&
+    Number.isFinite(a) &&
+    Number.isFinite(b)
+  ) {
+    return Math.abs(a - b) <= epsilon * Math.max(1, Math.abs(a), Math.abs(b));
+  }
   return a === b;
 }
 
@@ -270,7 +289,7 @@ export function normalizeSqliteResult(
       };
     }
     for (let c = 0; c < expRow.length; c++) {
-      if (!cellsEqual(expRow[c], actRow[c])) {
+      if (!cellsEqual(expRow[c], actRow[c], flags.epsilon)) {
         return {
           passed: false,
           actualRows: actual,

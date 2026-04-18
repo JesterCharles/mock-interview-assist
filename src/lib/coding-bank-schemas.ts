@@ -167,6 +167,11 @@ export const SqlTestCaseSchema = TestCaseSchema.extend({
   numericCoerce: z.boolean().optional(), // default true
   orderSensitiveColumns: z.boolean().optional(), // default true (columns ARE ordered)
   rowOrderSensitive: z.boolean().optional(), // default false (rows NOT ordered)
+  // WR-02 (Phase 42 review): floating-point tolerance for numeric cell compare.
+  // Default 1e-9 handles typical AVG/SUM drift; trainers may relax for quirky
+  // aggregate ordering (e.g. 1e-6). Only applied when both cells coerce to
+  // finite numbers.
+  epsilon: z.number().nonnegative().optional(),
 });
 
 export type SqlTestCase = z.infer<typeof SqlTestCaseSchema>;
