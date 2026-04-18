@@ -181,13 +181,13 @@ Plans:
 **Success**: Tag-push deploys app and Judge0 independently; failed health checks auto-revert; queue-depth + latency metrics visible in Logs Explorer; runbook published
 **Estimate**: ~1.5 weeks, 4 plans
 
-**Plans:** 4 plans in 3 waves
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 43-01-PLAN.md — Terraform module: 2-VM topology + GCS state + firewall (Wave 1, checkpoint)
-- [ ] 43-02-PLAN.md — GitHub Actions: pr-checks + deploy-app + deploy-judge0 with rollback (Wave 2)
-- [ ] 43-03-PLAN.md — Judge0 metrics pusher script (queue depth + p50/p95) → Logs Explorer (Wave 2)
-- [ ] 43-04-PLAN.md — Coding stack operations runbook (6 sections per D-13) (Wave 3)
+- [x] 43-01-PLAN.md — Terraform module: 2-VM topology + GCS state + firewall (Wave 1, checkpoint)
+- [x] 43-02-PLAN.md — GitHub Actions: pr-checks + deploy-app + deploy-judge0 with rollback (Wave 2)
+- [x] 43-03-PLAN.md — Judge0 metrics pusher script (queue depth + p50/p95) → Logs Explorer (Wave 2)
+- [x] 43-04-PLAN.md — Coding stack operations runbook (6 sections per D-13) (Wave 3)
 
 #### Phase 44: Hardening + Load Test
 **Goal**: Production-ready under 50-concurrent submission load; abuse-safe; security-reviewed; documented

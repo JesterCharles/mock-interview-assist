@@ -70,11 +70,11 @@
 
 ### MSA Deploy (IAC-NN) — Phase 43
 
-- [ ] **IAC-01**: Terraform module provisions dedicated Judge0 GCE host (n1-standard-4 or sized per Phase 38 spike); app VM remains separate
-- [ ] **IAC-02**: GitHub Actions pipeline: build + test on PR; deploy app + Judge0 as separate workflows on tag push; Judge0 patching cadence documented in runbook
-- [ ] **IAC-03**: Health checks + rollback path automated in deploy workflow; failed health check auto-reverts to previous image
-- [ ] **IAC-04**: Monitoring: Judge0 queue-depth metric + submission latency p50/p95 pushed to GCE Logs Explorer; alert thresholds documented
-- [ ] **IAC-05**: Runbook documents Judge0 patching, scale-up procedure, abuse response, and recovery-from-queue-death playbook
+- [x] **IAC-01**: Terraform module provisions dedicated Judge0 GCE host (n1-standard-4 or sized per Phase 38 spike); app VM remains separate
+- [x] **IAC-02**: GitHub Actions pipeline: build + test on PR; deploy app + Judge0 as separate workflows on tag push; Judge0 patching cadence documented in runbook
+- [x] **IAC-03**: Health checks + rollback path automated in deploy workflow; failed health check auto-reverts to previous image
+- [x] **IAC-04**: Monitoring: Judge0 queue-depth metric + submission latency p50/p95 pushed to GCE Logs Explorer; alert thresholds documented
+- [x] **IAC-05**: Runbook documents Judge0 patching, scale-up procedure, abuse response, and recovery-from-queue-death playbook
 
 ### Hardening (HARD-NN) — Phase 44
 

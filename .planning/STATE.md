@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
 status: Phase 38 code shipped — JUDGE-06 spike gate DEFERRED (docker unavailable); Phase 39 BLOCKED
-stopped_at: Phase 38 harness/client shipped; JUDGE-06 spike DEFERRED (docker unavailable)
-last_updated: "2026-04-18T11:33:27.795Z"
+stopped_at: Phase 43 MSA deployment — all 4 plans shipped (IaC + CI/CD + metrics + runbook); Plan 43-01 Task 3 human-gated (DEPLOY-CHECKPOINT.md)
+last_updated: "2026-04-18T11:46:53.040Z"
 last_activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate deferred)
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 6
   total_plans: 28
-  completed_plans: 12
-  percent: 43
+  completed_plans: 21
+  percent: 75
 ---
 
 # v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
@@ -96,8 +96,8 @@ v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex co
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:19:24.418Z
-Stopped at: Phase 38 harness/client shipped; JUDGE-06 spike DEFERRED (docker unavailable)
+Last session: 2026-04-18T11:46:53.038Z
+Stopped at: Phase 43 MSA deployment — all 4 plans shipped (IaC + CI/CD + metrics + runbook); Plan 43-01 Task 3 human-gated (DEPLOY-CHECKPOINT.md)
 Resume with: **HUMAN ACTION REQUIRED** — run Judge0 spike manually per `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Phase 39 is BLOCKED until spike PASSES and resource limits are committed.
 
 ## Active Blockers
