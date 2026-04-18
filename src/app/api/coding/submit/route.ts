@@ -180,7 +180,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     return codingApiError('JUDGE0_UNAVAILABLE', 'Code execution service unavailable');
   }
 
-  // 11. Persist tokens — non-fatal if this fails; tokens can be re-fetched
+  // 11. Persist tokens — FATAL if this fails. WR-02 (Phase 39 review):
+  // If we leave the attempt pending with judge0Token=null, the poller
+  // short-circuits on null token and the attempt hangs in pending forever
+  // while the real Judge0 results become unrecoverable. Symmetric rollback
+  // with the Judge0-failure path: delete the attempt so the client resubmits.
   try {
     await prisma.codingAttempt.update({
       where: { id: attempt.id },
@@ -188,6 +192,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
   } catch (err) {
     console.error('[coding/submit] failed to persist tokens for attempt', attempt.id, err);
+    try {
+      await prisma.codingAttempt.delete({ where: { id: attempt.id } });
+    } catch (delErr) {
+      console.error('[coding/submit] failed to roll back orphan attempt', attempt.id, delErr);
+    }
+    return codingApiError(
+      'JUDGE0_UNAVAILABLE',
+      'Code execution service unavailable — please retry',
+    );
   }
 
   // 12. Increment rate limit counter, return attemptId

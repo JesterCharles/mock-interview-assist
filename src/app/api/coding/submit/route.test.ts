@@ -417,6 +417,32 @@ describe('POST /api/coding/submit', () => {
     expect(createCall.data.associateId).toBe(42);
   });
 
+  it('WR-02 (Phase 39 review): token persist failure → 503 + attempt rolled back (no orphan pending)', async () => {
+    happyPathSetup();
+    // Judge0 submit succeeds, but the subsequent token-persist update fails.
+    (prisma.codingAttempt.update as Mock).mockRejectedValue(new Error('db down'));
+    (prisma.codingAttempt.delete as Mock).mockResolvedValue({ id: 'attempt-1' });
+
+    const res = await POST(buildRequest({
+      challengeId: 'ch-1',
+      language: 'python',
+      code: 'print(1)',
+    }) as any);
+
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.error.code).toBe('JUDGE0_UNAVAILABLE');
+
+    // Attempt row must be deleted so the poller doesn't hang on a
+    // pending row with judge0Token=null.
+    expect(prisma.codingAttempt.delete).toHaveBeenCalledWith({
+      where: { id: 'attempt-1' },
+    });
+
+    // Rate limit NOT incremented — caller will retry.
+    expect(incrementCodingSubmitCount).not.toHaveBeenCalled();
+  });
+
   it('Test: oversized code payload rejected (WR-02 Phase 36 review — max 100_000)', async () => {
     happyPathSetup();
 
