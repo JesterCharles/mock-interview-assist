@@ -139,3 +139,34 @@ export interface BackfillPreview {
   slugOnlyZeroSessions: number
   sessionsOrphanedIfAllDeleted: number
 }
+
+// Phase 41 — Trainer coding panel (CODING-SCORE-03)
+
+/**
+ * Trainer-facing coding attempt row. Explicitly excludes all hidden-test
+ * fixture fields (stdin, expectedStdout, hiddenTestResults detail) — the
+ * Phase 39 hidden-test shield extends through to this surface.
+ */
+export interface CodingAttemptSummary {
+  id: string
+  submittedAt: string // ISO
+  challengeSlug: string
+  challengeTitle: string
+  language: string
+  difficulty: 'easy' | 'medium' | 'hard'
+  verdict: string
+  score: number | null
+}
+
+/** Aggregated coding-only gap score per skillSlug (across languages). */
+export interface CodingSkillScore {
+  skillSlug: string
+  score: number
+  attemptCount: number
+}
+
+/** Response envelope for GET /api/trainer/[slug]/coding. */
+export interface AssociateCodingPayload {
+  attempts: CodingAttemptSummary[]
+  codingSkillScores: CodingSkillScore[]
+}
