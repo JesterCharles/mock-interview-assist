@@ -1,30 +1,73 @@
 # Pipeline Status
 
-## Current Run — v1.4 (DISCOVER)
+## Current Run — v1.4 (PLAN COMPLETE)
 - Started: 2026-04-18
-- Current stage: DISCOVER (HITL — defining v1.4 milestone scope)
-- Mode: interactive
+- Current stage: PLAN complete ✓ — all 9 phases (36-44) planned, 28 plans total. Ready for EXECUTE.
+- Mode: interactive (resume)
 - Previous: v1.3 shipped + tagged 2026-04-18 (commit 42cd703, tag v1.3)
+- Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (9 phases 36-44, 44 reqs, Approach B MSA-from-day-1)
 
-### v1.4 Candidate Themes (from user, awaiting discover refinement)
-1. **PDF curriculum port** — ingest existing curriculum PDFs into CurriculumWeek model (smaller, compounds v1.1+v1.3)
-2. **More learner features** — vague, needs office-hours brainstorm
-3. **Coding challenges + multi-language** — biggest swing, needs sandbox/runtime/judge architecture
+### Plan summary per phase (commits)
+| Phase | Plans | Commit | Notes |
+|-------|-------|--------|-------|
+| 36 Data Model & Schema | 3 | 550cb10 | Checker PASSED |
+| 37 Challenge Bank | 3 | 05f5b6f | Needs `@@unique([challengeId, id])` on CodingTestCase (Phase 36 delta) |
+| 38 Judge0 Infrastructure | 3 | e748aaf | SPIKE GATE (human-verify) blocks Phase 39 |
+| 39 Execution API | 3 | e737a50 | Trainer submit = 403 in v1.4 (associateId non-null) |
+| 40 UI MVP | 4 | 6069633 | UI-SPEC gate (`/gsd-ui-phase 40`) is first task |
+| 41 GapScore Integration | 3 | 9842c4b | Depends on Phase 39 poll route |
+| 42 SQL MVP (SQLite) | 2 | f524483 | SQLite Judge0 id verification blocking |
+| 43 MSA Deployment | 4 | 0b763d4 | GCP creds + VM import checkpoint |
+| 44 Hardening + Load Test | 3 | e366296 | /cso + codex adversarial gates |
 
-### Discover stage will:
-- Office hours / Socratic ideation to clarify learner gap
-- Web research on coding challenge platforms (Judge0, Piston, eval sandboxes) if option 3
-- PDF parsing/extraction patterns if option 1
-- Output: PROJECT.md update + REQUIREMENTS.md (fresh) + ROADMAP.md v1.4 expansion
+### Discover complete (2026-04-18)
+- Office hours + codex consult → Approach B selected (MSA-from-day-1)
+- REQUIREMENTS.md: 44 reqs across 9 themes
+- ROADMAP.md: phases 36-44 added
+- PROJECT.md: updated for v1.4 active
+- Discovery brief: `.planning/PIPELINE-DISCOVER.md`
+- Seeds: `.planning/seeds/v1.4-discovery-seeds.md`
 
-## Resume Point
+### Plan stage next:
+- `/gsd-plan-phase 36` — Data Model & Schema (CodingChallenge/CodingAttempt/CodingTestCase/CodingSkillSignal + idempotent migration)
+- Then sequential: 37 (Challenge Bank) → 38 (Judge0 spike GATE) → 39 (Submission API) → 40-44
 
-3 gap-closure phases added post-audit need full discuss→plan→execute→review→test→ship cycle:
-- **Phase 33** — Trainer First-Login Password Gate (closes SIGNIN-02 gap from P28)
-- **Phase 34** — SkillRadar Quality + VIZ Scope Reconciliation
-- **Phase 35** — Shell Scope Reconciliation + Cleanup
+## Stages (v1.4 — IN PROGRESS)
+| Stage | Status | Started | Completed | Notes |
+|-------|--------|---------|-----------|-------|
+| discover | done | 2026-04-18 | 2026-04-18 | Office-hours + codex consult → Approach B MSA. PIPELINE-DISCOVER.md |
+| init | done | 2026-04-18 | 2026-04-18 | Milestone initialized; REQUIREMENTS.md (44 reqs), ROADMAP expanded (P36-44), PROJECT.md updated |
+| design | pending | | | Evaluate per-phase — UI surfaces likely in P41 (challenge UI) |
+| plan | done | 2026-04-18 | 2026-04-18 | All 9 phases planned (36-44), 28 plans across 28 waves. Next: execute 36 first (blocks 37+). |
+| execute | pending | | | Wave execution per phase after plan |
+| review | pending | | | Codex review after execute |
+| test | pending | | | Unit + Playwright after execute |
+| ship | pending | | | PR + merge gate at milestone end |
+| reflect | pending | | | Retro + seeds at milestone end |
+| maintain | pending | | | Health check after ship |
 
-Empty phase dirs — no CONTEXT.md yet. Auto-discuss flag will generate them non-interactively.
+## HITL Gates (v1.4)
+| Gate | Stage | Type | Status | Decision |
+|------|-------|------|--------|----------|
+| Phase 38 Judge0 spike gate | plan→execute | sync | pending | Required before Phase 39 per codex consult |
+| Design selection | design | sync | pending | P41 challenge UI only |
+| Taste decisions | plan | async | pending | Per-phase |
+| Review findings | review | async | pending | Per-phase |
+| Merge approval | ship | sync | pending | No auto-merge |
+| Milestone closure | ship | async | pending | |
+
+## Artifacts (v1.4)
+- .planning/PIPELINE-DISCOVER.md (2026-04-18)
+- .planning/REQUIREMENTS.md (44 reqs)
+- .planning/ROADMAP.md (phases 36-44 added)
+- .planning/PROJECT.md (v1.4 active)
+- .planning/seeds/v1.4-discovery-seeds.md
+
+---
+
+## v1.3 Gap Closure (P33-35) — shipped
+
+Empty phase dirs → auto-discussed → planned → executed → reviewed → tested → PR #6 (merge deferred).
 
 ## v1.3 Milestone Scope
 
