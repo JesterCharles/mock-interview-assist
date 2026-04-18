@@ -12,7 +12,9 @@
     "load-test-coding": "tsx scripts/load-test-coding.ts",
     "abuse-test-coding": "tsx scripts/abuse-test-coding.ts",
     "validate-challenge": "tsx scripts/validate-challenge.ts",
-    "seed-staging": "tsx scripts/seed-staging.ts"
+    "seed-staging": "tsx scripts/seed-staging.ts",
+    "verify-env-hygiene": "tsx scripts/verify-env-hygiene.ts",
+    "verify-phase-46": "bash scripts/verify-phase-46.sh"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^5.1.0",
