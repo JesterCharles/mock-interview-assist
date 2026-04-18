@@ -168,11 +168,11 @@ Plans:
 **Success**: Trainer-authored SQL challenge runs end-to-end with normalized row output; dialect label visible on challenge cards; Postgres SQL deferral documented
 **Estimate**: ~0.5 week, 2 plans
 
-**Plans:** 2 plans in 2 waves
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 42-01-PLAN.md — Bank schema extension + SQL result normalizer + submit-route SQL pre-step (Wave 1)
-- [ ] 42-02-PLAN.md — Dialect label constant + render on list/solve/trainer surfaces + PROJECT.md Postgres deferral (Wave 2)
+- [x] 42-01-PLAN.md — Bank schema extension + SQL result normalizer + submit-route SQL pre-step (Wave 1)
+- [x] 42-02-PLAN.md — Dialect label constant + render on list/solve/trainer surfaces + PROJECT.md Postgres deferral (Wave 2)
 
 #### Phase 43: MSA Deployment (Terraform + CI/CD)
 **Goal**: Dedicated Judge0 GCE host provisioned via Terraform; GitHub Actions deploys app + Judge0 as separate workflows with health checks, rollback, monitoring

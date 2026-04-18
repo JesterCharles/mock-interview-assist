@@ -64,9 +64,9 @@
 
 ### SQL (SQL-NN) — Phase 42
 
-- [ ] **SQL-01**: Judge0 SQLite language wired; server-side schema + seed data injection per challenge (trainer-authored)
-- [ ] **SQL-02**: Result normalization (column order, whitespace, type coercion) with explicit trainer-authored expected-rows format
-- [ ] **SQL-03**: Trainer reporting label: `SQL fundamentals (SQLite dialect)` — visible on challenge cards and in trainer dashboard; Postgres SQL deferred to v1.5 (documented in PROJECT.md Out of Scope)
+- [x] **SQL-01**: Judge0 SQLite language wired; server-side schema + seed data injection per challenge (trainer-authored)
+- [x] **SQL-02**: Result normalization (column order, whitespace, type coercion) with explicit trainer-authored expected-rows format
+- [x] **SQL-03**: Trainer reporting label: `SQL fundamentals (SQLite dialect)` — visible on challenge cards and in trainer dashboard; Postgres SQL deferred to v1.5 (documented in PROJECT.md Out of Scope)
 
 ### MSA Deploy (IAC-NN) — Phase 43
 
