@@ -89,7 +89,7 @@ Describe `stdout` format precisely. Call out whitespace expectations.
 
 - List input size bounds
 - Time budget (Phase 38 caps at 10s CPU)
-- Memory budget (Phase 38 caps at 250 MB)
+- Memory budget (Phase 38 caps at 256000 KB (~244 MB) — see `docker-compose.yml` `max_memory_limit`)
 
 ## Notes
 
