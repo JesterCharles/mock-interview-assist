@@ -44,17 +44,19 @@ const LanguageEnum = z.enum(CODING_LANGUAGES);
 // ──────────────────────────────────────────────────────────────────────────
 // meta.json (D-03)
 // ──────────────────────────────────────────────────────────────────────────
-export const MetaSchema = z.object({
-  slug: z.string().regex(SLUG_REGEX, 'slug must match /^[a-z0-9][a-z0-9-]*$/').max(50),
-  title: z.string().min(1).max(200),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
-  skillSlug: z
-    .string()
-    .regex(SLUG_REGEX, 'skillSlug must match /^[a-z0-9][a-z0-9-]*$/')
-    .max(50),
-  cohortId: z.number().int().nullable(),
-  languages: z.array(LanguageEnum).min(1, 'languages must be non-empty'),
-});
+export const MetaSchema = z
+  .object({
+    slug: z.string().regex(SLUG_REGEX, 'slug must match /^[a-z0-9][a-z0-9-]*$/').max(50),
+    title: z.string().min(1).max(200),
+    difficulty: z.enum(['easy', 'medium', 'hard']),
+    skillSlug: z
+      .string()
+      .regex(SLUG_REGEX, 'skillSlug must match /^[a-z0-9][a-z0-9-]*$/')
+      .max(50),
+    cohortId: z.number().int().nullable(),
+    languages: z.array(LanguageEnum).min(1, 'languages must be non-empty'),
+  })
+  .strict();
 
 // ──────────────────────────────────────────────────────────────────────────
 // test-case shape — shared by visible + hidden (D-04)

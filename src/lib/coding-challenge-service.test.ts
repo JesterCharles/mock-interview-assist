@@ -516,6 +516,24 @@ describe('listChallenges', () => {
     expect(entries.map((e) => e.slug).sort()).toEqual(['a', 'b']);
   });
 
+  it('rejects manifest entry with unknown keys (strict)', async () => {
+    // Provide a fully valid public + private repo so the ONLY reason to throw
+    // is the manifest entry having an unknown key.
+    const repo: Record<string, unknown> = {
+      'challenges/manifest.json': [{ slug: 'a', extraField: 'nope' }],
+      ...repoFor('a'),
+    };
+    __setFetchers({
+      publicFetcher: buildPublicFetcher(repo),
+      privateFetcher: buildPrivateFetcher({ a: goodHidden() }),
+    });
+
+    await expect(listChallenges()).rejects.toBeInstanceOf(ChallengeValidationError);
+    await expect(listChallenges()).rejects.toMatchObject({
+      path: expect.stringContaining('manifest'),
+    });
+  });
+
   it('throws ChallengeValidationError for duplicate slug in manifest', async () => {
     const repo: Record<string, unknown> = {
       'challenges/manifest.json': [{ slug: 'a' }, { slug: 'a' }],

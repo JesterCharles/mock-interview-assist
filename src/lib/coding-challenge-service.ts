@@ -266,7 +266,7 @@ async function getCachedPrivateHidden(slug: string): Promise<HiddenTestCase[]> {
 // Manifest schema
 // ---------------------------------------------------------------------------
 const ManifestSchema = z.array(
-  z.object({ slug: z.string().regex(/^[a-z0-9][a-z0-9-]*$/).max(50) }),
+  z.object({ slug: z.string().regex(/^[a-z0-9][a-z0-9-]*$/).max(50) }).strict(),
 );
 
 // ---------------------------------------------------------------------------

@@ -101,6 +101,17 @@ describe('MetaSchema', () => {
     const result = MetaSchema.safeParse({ ...valid, cohortId: 5 });
     expect(result.success).toBe(true);
   });
+
+  it('rejects unknown keys (strict) — typo guard', () => {
+    // "cohortID" (capital D) is a common typo; must fail, not silently pass.
+    const result = MetaSchema.safeParse({ ...valid, cohortID: 5 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects arbitrary extra fields (strict)', () => {
+    const result = MetaSchema.safeParse({ ...valid, extraField: 'nope' });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('TestCaseSchema / VisibleTestsSchema', () => {
