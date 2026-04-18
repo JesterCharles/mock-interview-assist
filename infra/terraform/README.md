@@ -25,7 +25,8 @@ log. The short version:
 ## Bootstrap (one-time, per GCP project)
 
 1. Create the GCS bucket that will hold Terraform state. The bucket name is
-   conventionally `${PROJECT_ID}-tfstate`.
+   conventionally `${PROJECT_ID}-tfstate`. Append `|| true` to make the
+   create idempotent (safe to re-run the bootstrap block):
 
    ```bash
    PROJECT_ID="your-gcp-project"
@@ -33,7 +34,7 @@ log. The short version:
 
    gcloud storage buckets create gs://${PROJECT_ID}-tfstate \
      --location=${REGION} \
-     --uniform-bucket-level-access
+     --uniform-bucket-level-access || true
 
    gcloud storage buckets update gs://${PROJECT_ID}-tfstate --versioning
    ```
@@ -46,6 +47,49 @@ log. The short version:
      --member="user:you@example.com" \
      --role="roles/storage.objectAdmin"
    ```
+
+### State bucket hardening (WR-02, Phase 43 review)
+
+The bootstrap above creates a bucket with Google-managed encryption and no
+retention policy. For production, apply the following defense-in-depth
+hardening:
+
+**a. Customer-Managed Encryption Key (CMEK) — optional but recommended.**
+
+Use a Cloud KMS key so you can rotate / revoke independently of Google:
+
+```bash
+# One-time: create a KMS keyring + key (regional, same region as the bucket)
+gcloud kms keyrings create nlm-tfstate --location=${REGION}
+gcloud kms keys create tfstate-key \
+  --location=${REGION} \
+  --keyring=nlm-tfstate \
+  --purpose=encryption
+
+# Grant the GCS service agent permission to use the key
+PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
+gcloud kms keys add-iam-policy-binding tfstate-key \
+  --location=${REGION} \
+  --keyring=nlm-tfstate \
+  --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
+  --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+# Apply CMEK to the bucket (new objects encrypted with this key)
+gcloud storage buckets update gs://${PROJECT_ID}-tfstate \
+  --default-encryption-key=projects/${PROJECT_ID}/locations/${REGION}/keyRings/nlm-tfstate/cryptoKeys/tfstate-key
+```
+
+**b. Retention policy — prevents accidental state deletion for 30 days.**
+
+```bash
+gcloud storage buckets update gs://${PROJECT_ID}-tfstate \
+  --retention-period=30d
+```
+
+Retention combined with versioning gives you a 30-day undelete window for any
+state file — covers accidental `terraform destroy` + delete-object race.
+Removing the policy requires an explicit `--clear-retention-period` and will
+print a confirmation prompt.
 
 3. Initialize Terraform with the remote backend:
 
