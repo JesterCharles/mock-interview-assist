@@ -48,20 +48,6 @@ export function associateSidebarGroups(slug: string): SidebarGroup[] {
   ];
 }
 
-/** @deprecated Use trainerSettingsAccordion */
-export const settingsSidebarGroups: SidebarGroup[] = [
-  {
-    label: 'Settings',
-    items: [
-      { href: '/trainer/settings/threshold', label: 'Threshold', icon: Sliders },
-      { href: '/trainer/settings/cohorts', label: 'Cohorts', icon: Users2 },
-      { href: '/trainer/settings/curriculum', label: 'Curriculum', icon: BookOpen },
-      { href: '/trainer/settings/users', label: 'Users', icon: UserCog },
-      { href: '/trainer/settings/associates', label: 'Associates', icon: User },
-    ],
-  },
-];
-
 export const trainerSettingsAccordion: SettingsAccordionGroup = {
   label: 'Settings',
   icon: Settings,
