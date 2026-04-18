@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: "Production Migration: Cloud Run + Supabase Hybrid"
 status: executing
-last_updated: "2026-04-18T21:58:42.268Z"
-last_activity: 2026-04-18 -- Phase 53 planning complete
+last_updated: "2026-04-18T23:15:00.000Z"
+last_activity: 2026-04-18 -- Phase 45 executed (3/4 plans clean, 1 partial-halt on docker smoke)
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 36
-  completed_plans: 0
-  percent: 0
+  completed_plans: 4
+  percent: 11
 ---
 
 # Project State — v1.5 Production Migration
 
 ## Current Position
 
-Phase: 45 (not started)
-Plan: —
-Status: Ready to execute
-Last activity: 2026-04-18 -- Phase 53 planning complete
+Phase: 45 (executed — 3/4 plans clean, 1 partial-halt on docker smoke)
+Plan: Next → 46 (Supabase Staging + Env Hygiene + Prisma Migrate Baseline)
+Status: Phase 45 complete with HALT on docker smoke assertions (deferred to Phase 47 per DOCKER-NOTES.md)
+Last activity: 2026-04-18 -- Phase 45 execute finished (15/17 verify-phase-45 assertions pass)
 
 ## Progress Bar
 
 ```
-v1.5: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (0/9 phases)
+v1.5: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 11% (1/9 phases, 4/36 plans)
 ```
 
 ## Project Reference
@@ -40,7 +40,7 @@ See: `.planning/PROJECT.md`
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 45 | Terraform Skeleton + Artifact Registry + Secret Manager | INFRA-01..03, INFRA-06..07 | Not started |
+| 45 | Terraform Skeleton + Artifact Registry + Secret Manager | INFRA-01..03, INFRA-06..07 | Complete (docker smoke deferred) |
 | 46 | Supabase Staging + Env Hygiene + Prisma Migrate Baseline | DATA-01..06 | Not started |
 | 47 | Staging Cloud Run Service + Load Balancer + Domains | INFRA-04..05, CI-04 | Not started |
 | 48 | GitHub Actions CI + Deploy-Staging + Observability | CI-01..02, CI-05..06, OBS-01..04 | Not started |
@@ -79,6 +79,9 @@ See: `.planning/PROJECT.md`
 
 ### Decisions (v1.5)
 
+- **Phase 45 (2026-04-18):** Upgraded terraform 1.5.7 → 1.14.8 via `hashicorp/tap` (default brew formula is BSL-capped at 1.5.7). Provider `hashicorp/google ~> 7.0` now pinned at v7.28.0 via committed `.terraform.lock.hcl`.
+- **Phase 45 (2026-04-18):** ADC refresh requires browser interaction — used `GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)` as a non-interactive fallback for all terraform invocations. Future phases should follow the same pattern until human reruns `gcloud auth application-default login`.
+- **Phase 45 (2026-04-18):** Docker smoke image (D-16) HALTED — `src/lib/supabase/admin.ts` eagerly instantiates `createClient(...)` at module load, crashing `npm run build` during Next.js page-data collection when `NEXT_PUBLIC_SUPABASE_URL` is absent from the build env. D-15 (no Dockerfile changes) + phase scope (no app-code changes) prevent an in-phase fix. Chose Option D (defer smoke to Phase 47 real Cloud Run deploy via CI). Full analysis in `.planning/phases/45-*/DOCKER-NOTES.md`.
 - Supabase: two separate free-tier projects (staging = `lzuqbpqmqlvzwebliptj`, prod = existing wiped project). Free tier has no branching.
 - Terraform state: GCS bucket `nlm-tfstate` (versioned). No local state files.
 - CI auth: Workload Identity Federation (OIDC). No long-lived service-account JSON keys anywhere.
@@ -91,6 +94,7 @@ See: `.planning/PROJECT.md`
 
 - HARD-01 / HARD-02 / HARD-03 — live load test, live abuse test, live security review. All require deployed stack. Scheduled for Phase 49.
 - v1.4 reflect + maintain deferred — scheduled for Phase 53.
+- **Phase 45 docker smoke (DOCKER-NOTES.md)** — Dockerfile build fails due to supabase-admin eager init. Options: (A) lazy-init supabaseAdmin in code [Phase 47 scope], (B)/(C) Dockerfile build-arg injection [violates D-15], (D) defer to Phase 47/48 CI [chosen]. Human decision can reopen A if desired before Phase 47.
 
 ### Todos
 
@@ -101,6 +105,11 @@ See: `.planning/PROJECT.md`
 
 ## Session Continuity
 
-To resume: `/gsd-plan-phase 45`
+To resume: `/gsd-discuss-phase 46` (or execute 46 directly if already planned)
 
-Dependency order: 45 → 46 → 47 → 48 → 49 (parallel: 50 can run after 45) → 51 → 52 → 53
+Dependency order: ~~45~~ → 46 → 47 → 48 → 49 (parallel: 50 can run after 45) → 51 → 52 → 53
+
+**Phase 45 artifacts live at:**
+- `iac/cloudrun/` — Terraform module root (providers, variables, apis, registry, secrets, iam, state stub, outputs, tfvars, README, lock file, scripts/)
+- `gs://nlm-tfstate` — versioned TF state bucket in nlm-prod (prefixes: cloudrun/staging, cloudrun/prod)
+- Both GCP projects provisioned: 11 APIs + 1 AR + 13 secret shells + 2 SAs + 13 per-secret bindings = 40 resources each (80 total)

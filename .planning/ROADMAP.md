@@ -90,7 +90,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 
 ### v1.5 Production Migration: Cloud Run + Supabase Hybrid (Phases 45-53)
 
-- [ ] **Phase 45: Terraform Skeleton + Artifact Registry + Secret Manager** - Provision IaC foundation (no Cloud Run services yet)
+- [x] **Phase 45: Terraform Skeleton + Artifact Registry + Secret Manager** - Provision IaC foundation (no Cloud Run services yet) (completed 2026-04-18)
 - [ ] **Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline** - Isolated staging Supabase project, prod wipe + reseed, migrate deploy wired
 - [ ] **Phase 47: Staging Cloud Run Service + Load Balancer + Domains** - Staging service live at staging.nextlevelmock.com; WIF auth for GH Actions
 - [ ] **Phase 48: GitHub Actions CI + Deploy-Staging + Observability** - PR checks, auto-deploy on merge, structured logs, dashboards, uptime alert
@@ -112,11 +112,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. Google Artifact Registry repositories exist in `nlm-staging-493715` and `nlm-prod`; a manually pushed test image is pullable by digest
   4. All runtime secrets (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, JUDGE0_*) exist in Secret Manager for both projects; no secrets baked into the Dockerfile or image
   5. `docker build` with the existing Dockerfile produces a runnable standalone Next.js image on Node 22-alpine with no host-package dependencies
-**Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+**Plans:** 4/4 plans complete
+  - [x] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [x] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [x] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [x] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline
 **Goal**: Supabase staging project is fully isolated from prod; the existing prod Supabase is wiped clean and reserved for real users; Prisma migrate deploy runs end-to-end against both envs
@@ -253,7 +253,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 | 16-25. Analytics & Auth | v1.2 | 26/26 | Complete | 2026-04-16 |
 | 26-35. UX Unification & Polish | v1.3 | 18/18 | Complete | 2026-04-18 |
 | 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 28/28 | Complete | 2026-04-18 |
-| 45. Terraform Skeleton + Artifact Registry + Secret Manager | v1.5 | 0/? | Not started | - |
+| 45. Terraform Skeleton + Artifact Registry + Secret Manager | v1.5 | 4/4 | Complete   | 2026-04-18 |
 | 46. Supabase Staging + Env Hygiene + Prisma Migrate Baseline | v1.5 | 0/? | Not started | - |
 | 47. Staging Cloud Run Service + Load Balancer + Domains | v1.5 | 0/? | Not started | - |
 | 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 0/? | Not started | - |

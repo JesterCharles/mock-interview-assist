@@ -12,13 +12,13 @@
 
 ### Infrastructure — Cloud Run + Networking (INFRA-NN) — Phase 45 / 47
 
-- [ ] **INFRA-01**: Terraform module `iac/cloudrun/` provisions two Cloud Run services: `nlm-staging` (in GCP project `nlm-staging-493715`) and `nlm-prod` (in `nlm-prod`) from the same Dockerfile image
-- [ ] **INFRA-02**: Google Artifact Registry repository per project; GH Actions pushes signed Docker images by digest; Cloud Run pulls by digest only (never `:latest`)
-- [ ] **INFRA-03**: Google Secret Manager stores all runtime env vars (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, JUDGE0_*, etc.); Cloud Run services mount secrets via env-var binding, not baked into image
+- [x] **INFRA-01**: Terraform module `iac/cloudrun/` provisions two Cloud Run services: `nlm-staging` (in GCP project `nlm-staging-493715`) and `nlm-prod` (in `nlm-prod`) from the same Dockerfile image
+- [x] **INFRA-02**: Google Artifact Registry repository per project; GH Actions pushes signed Docker images by digest; Cloud Run pulls by digest only (never `:latest`)
+- [x] **INFRA-03**: Google Secret Manager stores all runtime env vars (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, JUDGE0_*, etc.); Cloud Run services mount secrets via env-var binding, not baked into image
 - [ ] **INFRA-04**: Cloud Run service config baseline: `min-instances=0` (burn credits, accept cold starts in v1.5), `max-instances=10`, `cpu=1`, `memory=512Mi`, `timeout=300s`, HTTPS-only ingress
 - [ ] **INFRA-05**: Google Cloud Load Balancer + managed SSL cert for prod custom domain (`nextlevelmock.com` + `www.nextlevelmock.com` → prod Cloud Run); staging served via `staging.nextlevelmock.com` with its own managed cert
-- [ ] **INFRA-06**: Terraform state stored in a GCS bucket (versioned, uniform bucket-level access) under a dedicated `nlm-tfstate` project or prefix; no local state
-- [ ] **INFRA-07**: Dockerfile builds the Next.js standalone output unmodified; no runtime dependencies on host packages beyond Node 22-alpine (Cloud Run base)
+- [x] **INFRA-06**: Terraform state stored in a GCS bucket (versioned, uniform bucket-level access) under a dedicated `nlm-tfstate` project or prefix; no local state
+- [x] **INFRA-07**: Dockerfile builds the Next.js standalone output unmodified; no runtime dependencies on host packages beyond Node 22-alpine (Cloud Run base)
 
 ### Data — Supabase Env Split + Prisma Migrate (DATA-NN) — Phase 46
 
@@ -138,11 +138,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 45 | Pending |
-| INFRA-02 | Phase 45 | Pending |
-| INFRA-03 | Phase 45 | Pending |
-| INFRA-06 | Phase 45 | Pending |
-| INFRA-07 | Phase 45 | Pending |
+| INFRA-01 | Phase 45 | Complete |
+| INFRA-02 | Phase 45 | Complete |
+| INFRA-03 | Phase 45 | Complete |
+| INFRA-06 | Phase 45 | Complete |
+| INFRA-07 | Phase 45 | Complete |
 | DATA-01 | Phase 46 | Pending |
 | DATA-02 | Phase 46 | Pending |
 | DATA-03 | Phase 46 | Pending |
