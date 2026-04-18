@@ -224,7 +224,8 @@ Plans:
   2. Associates see a collapsible Settings bottom accordion matching the trainer pattern
   3. `@deprecated settingsSidebarGroups` export is removed from `sidebar-configs.ts` with no remaining imports
   4. All other existing behavior (trainer accordion, cohort header, nav groups) is unchanged
-**Plans**: 1 plan (to draft)
+**Plans**: 1 plan
+  - [ ] 35-01-PLAN.md — Wire associateSettingsAccordion + ProfileModal into AssociateShell; remove @deprecated settingsSidebarGroups; update test importers; add AssociateShell factory-wiring test
 
 ## Progress
 
