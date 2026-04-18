@@ -93,7 +93,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 - [x] **Phase 45: Terraform Skeleton + Artifact Registry + Secret Manager** - Provision IaC foundation (no Cloud Run services yet) (completed 2026-04-18)
 - [ ] **Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline** - Isolated staging Supabase project, prod wipe + reseed, migrate deploy wired
 - [ ] **Phase 47: Staging Cloud Run Service + Load Balancer + Domains** - Staging service live at staging.nextlevelmock.com; WIF auth for GH Actions
-- [ ] **Phase 48: GitHub Actions CI + Deploy-Staging + Observability** - PR checks, auto-deploy on merge, structured logs, dashboards, uptime alert
+- [ ] **Phase 48: GitHub Actions CI + Deploy-Staging + Observability** - PR checks, auto-deploy on merge, structured logs, dashboards, uptime alert (code-complete 2026-04-18; 1/4 fully done [48-03], 3/4 halted on operator apply/live-run gates)
 - [ ] **Phase 49: k6 Load Test + Hardening (HARD-01..03)** - Baseline load report committed; abuse test + STRIDE review against live staging
 - [ ] **Phase 50: Judge0 Integration Points + Flag Audit** - Env vars plumbed, flag-dark on prod, .disabled stub, gce-judge0 labeled
 - [ ] **Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Runbook** - Prod service provisioned, deploy-on-tag + rollback wired, DNS records set
@@ -160,11 +160,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. Cloud Logging shows structured request + error logs for the staging service; a sample error log is queryable by env label
   5. Cloud Monitoring `NLM Production` dashboard renders request count, p95 latency, error rate, instance count, CPU/memory widgets (populated with staging data)
   6. `/api/metrics` endpoint exists and returns a Prometheus-compatible text response (even if zero-valued); uptime check is configured and would email `jestercharles@gmail.com` on failure
-**Plans:** 4 plans
-  - [ ] 48-01-PLAN.md — PR gating (pr-checks.yml 4 parallel jobs: typecheck/lint/test/prisma-format) + branch protection runbook
-  - [ ] 48-02-PLAN.md — deploy-staging.yml (WIF + build/migrate/deploy/smoke sequential) + rollback-prod.yml + load-test.yml skeleton + delete wif-smoke.yml
-  - [ ] 48-03-PLAN.md — Structured logger + middleware/3-routes wire-up + /api/metrics feature-flagged route (default OFF)
-  - [ ] 48-04-PLAN.md — Cloud Monitoring dashboard (both projects) + uptime checks + email alert policy + verify-phase-48.sh phase gate
+**Plans:** 4 plans (3/4 code-complete awaiting operator gates, 1/4 fully done)
+  - [~] 48-01-PLAN.md — PR gating (pr-checks.yml 4 parallel jobs: typecheck/lint/test/prisma-format) + branch protection runbook (code-complete; halt on gh-api branch protection toggle)
+  - [~] 48-02-PLAN.md — deploy-staging.yml (WIF + build/migrate/deploy/smoke sequential) + rollback-prod.yml + load-test.yml skeleton + delete wif-smoke.yml (code-complete; halt on first deploy/rollback live run)
+  - [x] 48-03-PLAN.md — Structured logger + middleware/3-routes wire-up + /api/metrics feature-flagged route (default OFF) (fully complete; TDD autonomous; 18/18 tests green)
+  - [~] 48-04-PLAN.md — Cloud Monitoring dashboard (both projects) + uptime checks + email alert policy + verify-phase-48.sh phase gate (code-complete; halt on terraform apply + email verification)
 
 ### Phase 49: k6 Load Test + Hardening (HARD-01..03)
 **Goal**: A quantified load-test baseline exists for the staging deployment; every API route has been abuse-tested; the STRIDE threat model for the Cloud Run + DNS surface is reviewed and triaged

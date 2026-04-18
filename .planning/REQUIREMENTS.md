@@ -40,10 +40,10 @@
 
 ### Observability — Logs + Metrics (OBS-NN) — Phase 48
 
-- [ ] **OBS-01**: Cloud Logging captures structured app logs from Cloud Run; at minimum request logs + error logs are queryable by env
-- [ ] **OBS-02**: Cloud Monitoring dashboard `NLM Production` tracks: request count, p50/p95/p99 latency, error rate, instance count, CPU/memory utilization — same dashboard schema deployed for staging
-- [ ] **OBS-03**: App exposes a Prometheus-compatible `/api/metrics` endpoint (feature-flagged) so future scrape infrastructure is drop-in; not required to be scraped in v1.5
-- [ ] **OBS-04**: Uptime check on `nextlevelmock.com/` (and `/api/health`) posts to email `jestercharles@gmail.com` on failure; configured in Cloud Monitoring
+- [x] **OBS-01**: Cloud Logging captures structured app logs from Cloud Run; at minimum request logs + error logs are queryable by env (src/lib/logger.ts + middleware + 5 routes; live verification via `jsonPayload.env="staging"` Cloud Logging query blocked on Phase 47/48 apply)
+- [ ] **OBS-02**: Cloud Monitoring dashboard `NLM Production` tracks: request count, p50/p95/p99 latency, error rate, instance count, CPU/memory utilization — same dashboard schema deployed for staging (HCL shipped in iac/cloudrun/monitoring.tf; awaiting `terraform apply`)
+- [x] **OBS-03**: App exposes a Prometheus-compatible `/api/metrics` endpoint (feature-flagged) so future scrape infrastructure is drop-in; not required to be scraped in v1.5 (src/app/api/metrics/route.ts; 7/7 unit tests green; default-off strict-equality flag)
+- [ ] **OBS-04**: Uptime check on `nextlevelmock.com/` (and `/api/health`) posts to email `jestercharles@gmail.com` on failure; configured in Cloud Monitoring (HCL shipped in monitoring.tf; awaiting `terraform apply` + email verification click)
 
 ### Load Testing (LOAD-NN) — Phase 49
 
@@ -152,14 +152,14 @@
 | INFRA-04 | Phase 47 | Pending |
 | INFRA-05 | Phase 47 | Pending |
 | CI-04 | Phase 47 | Pending |
-| CI-01 | Phase 48 | Pending |
-| CI-02 | Phase 48 | Pending |
-| CI-05 | Phase 48 | Pending |
-| CI-06 | Phase 48 | Pending |
-| OBS-01 | Phase 48 | Pending |
-| OBS-02 | Phase 48 | Pending |
-| OBS-03 | Phase 48 | Pending |
-| OBS-04 | Phase 48 | Pending |
+| CI-01 | Phase 48 | Code-complete (pr-checks.yml shipped; awaiting first run + branch protection toggle) |
+| CI-02 | Phase 48 | Code-complete (deploy-staging.yml shipped; awaiting first merge to main + WIF live) |
+| CI-05 | Phase 48 | Code-complete (rollback-prod.yml shipped; awaiting live rehearsal) |
+| CI-06 | Phase 48 | Code-complete (Docker gha-cache + npm cache configured; awaiting live-run <=5min measurement) |
+| OBS-01 | Phase 48 | Complete (code; live verification blocked on operator apply) |
+| OBS-02 | Phase 48 | Code-complete (HCL + dashboard JSON shipped; awaiting terraform apply) |
+| OBS-03 | Phase 48 | Complete (7/7 unit tests green; default-off flag) |
+| OBS-04 | Phase 48 | Code-complete (HCL shipped; awaiting terraform apply + email verify) |
 | LOAD-01 | Phase 49 | Pending |
 | LOAD-02 | Phase 49 | Pending |
 | LOAD-03 | Phase 49 | Pending |
