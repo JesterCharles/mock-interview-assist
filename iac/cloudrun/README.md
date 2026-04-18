@@ -238,3 +238,33 @@ Re-running `gcloud secrets versions add` creates a new version but does NOT prop
 - `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-RESEARCH.md` — Phase 47 patterns + pitfalls
 - `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-VALIDATION.md` — Phase 47 test map
 - `.planning/REQUIREMENTS.md` §INFRA, §CI — milestone requirements
+
+## Phase 48 — Observability + CI/CD
+
+Apply order:
+
+1. Apply monitoring to staging:
+   ```bash
+   terraform apply -var-file=staging.tfvars \
+     -target=google_monitoring_dashboard.nlm_production \
+     -target=google_monitoring_notification_channel.email \
+     -target=google_monitoring_uptime_check_config.health \
+     -target=google_monitoring_alert_policy.uptime
+   ```
+2. Apply monitoring to prod:
+   ```bash
+   terraform apply -var-file=prod.tfvars \
+     -target=google_monitoring_dashboard.nlm_production \
+     -target=google_monitoring_notification_channel.email \
+     -target=google_monitoring_uptime_check_config.health \
+     -target=google_monitoring_alert_policy.uptime
+   ```
+3. **One-time**: verify the email notification channel by clicking the link Google Cloud Monitoring sends to `jestercharles@gmail.com`. The channel will not fire alerts until verified.
+4. Verify the gate:
+   ```bash
+   iac/cloudrun/scripts/verify-phase-48.sh
+   ```
+
+Runbooks:
+- `.github/RUNBOOK-BRANCH-PROTECTION.md` — one-time branch-protection setup after first pr-checks.yml run
+- `.github/RUNBOOK-WORKFLOW-VARS.md` — one-time STAGING_PROJECT_NUMBER / PROD_PROJECT_NUMBER repo variable setup
