@@ -1,5 +1,31 @@
 # Milestones
 
+## v1.4 Coding Challenges + Multi-Language Sandbox (PLANNING — initialized 2026-04-18)
+
+**Phases planned:** 9 (36-44)
+**Requirements:** 44 across 9 themes (CODING-MODEL, CODING-BANK, JUDGE, CODING-API, CODING-UI, CODING-SCORE, SQL, IAC, HARD)
+**Approach:** B — MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD)
+**Estimate:** 8-10 weeks
+**Status:** Planning — ready for `/gsd-plan-phase 36`
+
+**Scope summary:**
+
+- Adds coding challenges as a continuous-practice rep type alongside mock interviews
+- Judge0-based multi-language sandbox: Python, JavaScript/TypeScript, Java, SQL (SQLite), C# (Mono)
+- Public GitHub repo for prompts + starter code; private GitHub repo for hidden tests (token-scoped server fetch)
+- New Prisma models: `CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal`
+- `CodingSkillSignal` → `GapScore` mapping gives trainers continuous skill telemetry across all 11 cohort weeks (replaces current 3-point front-loaded assessment)
+- MSA-from-day-1 deploy: dedicated Judge0 GCE host + Terraform IaC + GitHub Actions CI/CD (folds in deferred DEPLOY-01/02/03)
+- v1.5 seeds captured: function-level test harness, Postgres SQL runner, in-app authoring, .NET 8+ runtime, multi-modal platform, anti-cheat
+
+**Artifacts:**
+
+- [Discovery brief](PIPELINE-DISCOVER.md)
+- [Requirements](REQUIREMENTS.md)
+- [Seeds for v1.5+](seeds/v1.4-discovery-seeds.md)
+
+---
+
 ## v1.3 UX Unification & Polish (Shipped: 2026-04-18)
 
 **Phases completed:** 11 phases (26-35, incl. decimal 28.1), 18 plans

@@ -10,12 +10,13 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ## Current State
 
-**v1.3 shipped (PR #6 `05d2546`, merged 2026-04-18).** All four milestones to date (v1.0, v1.1, v1.2, v1.3) are on main. Production deploy automation remains deferred to v1.4.
+**v1.4 planning (initialized 2026-04-18).** v1.0 / v1.1 / v1.2 / v1.3 shipped on main. Production deploy automation folded into v1.4 Phase 43 (IAC + CI/CD) as part of MSA-from-day-1 approach for coding challenges.
 
 - **v1.0 (2026-04-14):** 7 phases, 15 plans, 22 requirements. Prisma + Supabase foundation, gap scoring, readiness classification, trainer dashboard, adaptive mock setup.
 - **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest.
 - **v1.2 (2026-04-16):** 10 phases (16–25), 26 plans, 30 requirements. Supabase Auth cutover (trainer password + associate magic link), RLS defense-in-depth, two-level app shell, trainer analytics, associate self-dashboard, PDF analytics, PIN removal. 205 commits, 470 tests.
 - **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests. Audit status: tech_debt (verification-hygiene only, no functional gaps).
+- **v1.4 (PLANNING — initialized 2026-04-18):** 9 phases (36-44), 44 requirements across 9 themes (CODING-MODEL-NN, CODING-BANK-NN, JUDGE-NN, CODING-API-NN, CODING-UI-NN, CODING-SCORE-NN, SQL-NN, IAC-NN, HARD-NN). Adds coding challenges as a new continuous-practice rep type: Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C#), loaded from public+private GitHub challenge banks, feeding existing GapScore via explicit `CodingSkillSignal` mapping. Approach B — MSA-from-day-1 (dedicated Judge0 host + Terraform IaC + CI/CD). 8-10 week estimate.
 - Total codebase: 35+ routes, standalone Docker output, idempotent migrations, 524 passing tests.
 
 ## Database Access Architecture
@@ -58,17 +59,42 @@ Middleware (`src/middleware.ts`) was rewritten to Supabase-primary in Phase 18. 
 
 The PIN-based associate auth was never shipped to production. No grace window code exists — `getCallerIdentity()` reads Supabase session only.
 
-## Next Milestone: v1.4 (Planning)
+## Active Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (Planning)
 
-Milestone not yet defined. Candidates in the active backlog:
+**Phases:** 36-44 (9 phases) | **Requirements:** 44 | **Approach:** B — MSA-from-day-1 | **Estimate:** 8-10 weeks
 
-- **999.1 Staging / Prod Split** — Second Supabase project for staging, `.env.local`/`.env` split, Docker deploy routed to prod only, pre-merge CI smoke tests.
-- **999.2 Trainer Default Cohort** — Persist each trainer's default cohort (`Profile.defaultCohortId` or join table); roster boots scoped instead of "All Cohorts".
-- **DEPLOY-01 / DEPLOY-02 / DEPLOY-03** — CI/CD pipeline, production deploy automation, scheduled readiness-sweep cron. Deferred since v1.2.
+**Goal:** Add coding challenges as a new continuous-practice rep type alongside mock interviews. Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C# Mono) loaded from public GitHub challenge banks (with hidden tests in a separate private repo). Coding attempts feed `GapScore` via explicit `CodingSkillSignal` mapping — continuous skill telemetry across all 11 cohort weeks instead of the current 3 front-loaded assessment points.
 
-Kick off with `/gsd-new-milestone`.
+**Problem driver:** Client incident where a Python coding skill gap was missed — cohort failed assessment early but had zero remediation path because coding was only assessed in weeks 1-3 of an 11-week cohort.
 
-**Deferred features (see prior milestones):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, Nyquist validation backfill (VALID-01), v1.3 phase-level VERIFICATION.md normalization.
+### v1.4 Requirement Themes
+
+| Theme | Pattern | Count | Phase |
+|-------|---------|-------|-------|
+| Data Model | CODING-MODEL-NN | 6 | 36 |
+| Challenge Bank | CODING-BANK-NN | 5 | 37 |
+| Judge0 Infra | JUDGE-NN | 6 | 38 |
+| Execution API | CODING-API-NN | 7 | 39 |
+| UI MVP | CODING-UI-NN | 5 | 40 |
+| GapScore Integration | CODING-SCORE-NN | 4 | 41 |
+| SQL (SQLite) | SQL-NN | 3 | 42 |
+| MSA Deploy (IaC) | IAC-NN | 5 | 43 |
+| Hardening + Load | HARD-NN | 4 | 44 |
+
+**Full requirement list:** see `.planning/REQUIREMENTS.md`
+
+### v1.4 Architecture Headlines
+
+- **New Prisma models:** `CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal` — separate from `Session` so readiness math stays explainable
+- **Hidden tests live in a private GitHub repo** (token-scoped server-only fetch via `GITHUB_CODING_PRIVATE_TOKEN`) — the public `/api/github` proxy would leak them to DevTools
+- **Judge0 ≥ 1.13.1** (pinned — older versions had sandbox escape advisory `GHSA-q7vg-26pg-v5hr`); proxied through Next.js, never exposed to browsers; `enable_network=false`; internal-network-only binding
+- **Async submit + poll only.** Judge0 `wait=true` does not scale per upstream docs
+- **Env-driven deploy:** `JUDGE0_URL` + `JUDGE0_AUTH_TOKEN` drive the client so the architecture deploys local-mono OR remote-MSA without code changes
+- **MSA-from-day-1:** dedicated Judge0 GCE host (Terraform IaC) + separate GitHub Actions workflows for app vs Judge0 — folds in deferred DEPLOY-01/02/03 backlog as part of meaningful product work
+- **SQLite only for SQL v1.4.** Real Postgres SQL runner deferred to v1.5 (hardened service with isolated schemas, role-locked, `statement_timeout`, no extensions). Trainer-facing label: `SQL fundamentals (SQLite dialect)`
+- **C# Mono only for .NET v1.4.** Modern .NET 8+ runtime deferred to v1.5 if client demand confirmed
+
+**Deferred features (see prior milestones):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, Nyquist validation backfill (VALID-01), v1.3 phase-level VERIFICATION.md normalization. Backlog items **999.1 (Staging/Prod Split)** and **999.2 (Trainer Default Cohort)** remain parked and are not in v1.4 scope.
 
 ## Requirements
 
@@ -117,9 +143,19 @@ Kick off with `/gsd-new-milestone`.
 - ✓ DARK-01..02: No hardcoded hex; all recharts use CSS var tokens; semantic `--success-bg`/`--warning-bg`/`--danger-bg` — v1.3
 - ✓ SHELL-32-01..09: Sidebar-primary nav for all roles + utility-only TopBar + Profile modal + landing header + roster slug cleanup + password change gated by old-password or email OTP — v1.3
 
-### Active (v1.4 — populated by next requirements gathering)
+### Active (v1.4 — Coding Challenges + Multi-Language Sandbox)
 
-(REQ-IDs to be filled by `/gsd-new-milestone`)
+See `.planning/REQUIREMENTS.md` for the full 44-requirement list. Summary by theme:
+
+- **CODING-MODEL-01..06** — New Prisma models (`CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal`) + idempotent migration + signal→GapScore mapping service — Phase 36
+- **CODING-BANK-01..05** — Public + private GitHub repo schemas, loader mirroring `github-service.ts`, ETag cache, validation pipeline — Phase 37
+- **JUDGE-01..06** — Judge0 ≥ 1.13.1 pinned, docker-compose integration, sandbox hardening, env-driven URL, health probe, 10-submission spike gate — Phase 38
+- **CODING-API-01..07** — Auth-gated async submit + poll endpoints, server-side hidden test injection, language allowlist, rate limits, verdict normalization — Phase 39
+- **CODING-UI-01..05** — `/coding` + `/coding/[id]` routes, Monaco editor, attempt history, shell integration — Phase 40
+- **CODING-SCORE-01..04** — `CodingSkillSignal` → GapScore with difficulty weighting; trainer dashboard extension — Phase 41
+- **SQL-01..03** — Judge0 SQLite wired, result normalization, explicit dialect label — Phase 42
+- **IAC-01..05** — Terraform module, CI/CD workflows, health/rollback, monitoring, runbook — Phase 43
+- **HARD-01..04** — 50-concurrent load test, abuse test, STRIDE review, docs — Phase 44
 
 ### Out of Scope
 
@@ -130,6 +166,12 @@ Kick off with `/gsd-new-milestone`.
 - Billing / payments — no revenue model in MVP
 - Multi-evidence readiness engine (QC audits, trainer observations as evidence sources) — architecture should accommodate but not build yet
 - Real-time dashboard updates via Supabase Realtime — read-heavy dashboard sufficient for v1.1
+- Function-level test harness for coding challenges — stdin/stdout sufficient for v1.4 pedagogy; per-language drivers deferred to v1.5
+- Real Postgres SQL runner — SQLite only for v1.4; hardened isolated-schema runner deferred to v1.5
+- Modern .NET 8+ runtime — Judge0 ships C# Mono; modern .NET needs separate sandbox, deferred to v1.5 if client demand confirmed
+- In-app challenge authoring — PR-based authoring ships faster; in-app editor deferred to v1.5
+- Judge0 WebSocket realtime updates — polling via attempt endpoint sufficient for v1.4
+- Anti-cheat / plagiarism detection for coding attempts — trust-dependent signal; build after client asks
 
 ## Context
 
@@ -170,6 +212,15 @@ Kick off with `/gsd-new-milestone`.
 | Sidebar-primary navigation for all roles | TopBar utility-only; Settings as collapsible accordion; Profile as modal (not route). | ✓ Validated v1.3 P32 |
 | Trainer first-login gate via exchange route reorder + SignInTabs client gate | Passport Profile check runs before trainer role short-circuit; fail-open on getUser errors (middleware still enforces). | ✓ Validated v1.3 P33 |
 | Interview format only for MVP | Validate core loop before expanding | ✓ Good |
+| Coding challenges as separate data model, NOT merged into `Session` | Readiness math must stay explainable; merging would force artificial unification of interview/coding signals | v1.4 Discovery (codex consult 2026-04-18) |
+| Private GitHub repo for hidden coding tests | Public `/api/github` proxy leaks content to DevTools; associates would hardcode sample answers | v1.4 Discovery (codex consult 2026-04-18) |
+| Stdin/stdout matching for v1.4 coding pedagogy | Sufficient for algorithms/control flow/hash maps; function-level harness deferred to v1.5 | v1.4 Discovery |
+| SQLite only for v1.4 SQL | Real Postgres SQL needs hardened isolated service; mis-scope would create client trust issues from dialect mismatch | v1.4 Discovery (codex consult) |
+| Judge0 async submit + poll only (no `wait=true`) | Judge0 upstream docs explicitly say wait mode does not scale | v1.4 Discovery (codex consult) |
+| Judge0 pinned to ≥ 1.13.1 | Older versions had sandbox escape advisory `GHSA-q7vg-26pg-v5hr` | v1.4 Discovery (codex consult) |
+| MSA-from-day-1 (Approach B) over mono-service (Approach A) | User has runway before next cohort; dedicated Judge0 host avoids rework when client demand grows; folds in DEPLOY-01/02/03 backlog | v1.4 Discovery (user-selected) |
+| Env-driven Judge0 topology (`JUDGE0_URL`) | Same code deploys local-mono for dev OR remote-MSA for prod without branching | v1.4 Discovery |
+| Phase 38 Judge0 spike gate before committing to VM sizing | De-risks resource assumptions; codex required this gate | v1.4 Discovery (codex consult) |
 
 ## Evolution
 
@@ -189,4 +240,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 — v1.3 UX Unification & Polish milestone shipped*
+*Last updated: 2026-04-18 — v1.4 Coding Challenges + Multi-Language Sandbox milestone initialized (planning)*
