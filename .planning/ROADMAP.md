@@ -198,7 +198,8 @@ Plans:
   2. Trainer completing magic-link sign-in with `passwordSetAt == null` is redirected to `/auth/set-password` (not `/trainer`)
   3. Trainer with existing `passwordSetAt` continues to route normally to `/trainer`
   4. Associate flow is unchanged
-**Plans**: 1 plan (to draft)
+**Plans**: 1 plan
+- [ ] 33-01-PLAN.md — Wire trainer first-login gate into both exchange route (reorder) and SignInTabs.tsx (inline gate), plus tests
 
 ### Phase 34: SkillRadar Quality + VIZ Scope Reconciliation
 **Goal**: Cut VIZ-03 (per-skill LineChart redundant), reconcile VIZ-06 to match 2-component reality, and replace synthetic radar "Est. prior" polygon with real per-skill historical snapshots (VIZ-07)
