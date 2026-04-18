@@ -27,3 +27,15 @@ output "secret_ids" {
   description = "Map of secret-name -> fully qualified Secret Manager resource ID. Consumed by Phase 47 Cloud Run env-var mounts."
   value       = { for k, v in google_secret_manager_secret.app : k => v.id }
 }
+
+# Phase 47 outputs
+
+output "cloudrun_service_name" {
+  description = "Cloud Run service name (D-01). Staging only; prod is Phase 51."
+  value       = var.env == "staging" ? google_cloud_run_v2_service.nlm_staging[0].name : null
+}
+
+output "cloudrun_service_url" {
+  description = "Cloud Run *.run.app URL before DNS cutover. Useful for pre-DNS smoke testing."
+  value       = var.env == "staging" ? google_cloud_run_v2_service.nlm_staging[0].uri : null
+}
