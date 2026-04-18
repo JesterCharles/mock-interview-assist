@@ -15,14 +15,15 @@ resource "google_compute_disk" "judge0_data" {
   size = var.judge0_data_disk_size_gb
   zone = var.zone
 
-  // Deletion protection: persistent disk survives VM restart; we should not
-  // let `terraform destroy` silently wipe Postgres data.
-  // Terraform's resource-level prevent_destroy is a separate mechanism.
+  // Persistent disk survives VM restart and carries Judge0 Postgres data.
+  // Deletion protection is INTENTIONALLY OFF for v1.4 — Task 3 human
+  // checkpoint may need to taint + recreate this disk during initial
+  // Terraform reconciliation. Once the stack is stable (post-v1.4),
+  // flip `prevent_destroy = true` so subsequent `terraform destroy`
+  // operations cannot silently wipe Postgres state (IN-01, Phase 43 review).
+  // Until then, rely on weekly disk snapshots (runbook §6 Monthly ops).
   lifecycle {
     prevent_destroy = false
-    // NOTE: intentionally false for v1.4. Flip to `true` once the stack is
-    // stable enough that no-one should be recreating this disk. For now,
-    // Task 3 human-checkpoint owner may need to taint + recreate.
   }
 }
 
