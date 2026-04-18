@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: "Production Migration: Cloud Run + Supabase Hybrid"
 status: executing
-last_updated: "2026-04-18T18:15:00.000Z"
-last_activity: 2026-04-18 -- Phase 46 executed (1/4 plans fully complete, 3/4 code-complete with operator checkpoints pending)
+last_updated: "2026-04-18T23:30:00.000Z"
+last_activity: 2026-04-18 -- Phase 47 executed (0/4 plans fully complete, 4/4 code-complete with operator checkpoints pending)
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 36
-  completed_plans: 5
-  percent: 14
+  completed_plans: 9
+  percent: 25
 ---
 
 # Project State — v1.5 Production Migration
 
 ## Current Position
 
-Phase: 46 (executed — 1/4 complete, 3/4 code-complete HALT on operator checkpoints)
-Plan: Next → 47 (Staging Cloud Run Service + Load Balancer + Domains) after operator executes Phase 46 runbook Phases A–J
-Status: Phase 46 code + runbook + phase-gate all shipped; operator must execute the live wipe + key rotation + Auth redirect PATCH before Phase 47
-Last activity: 2026-04-18 -- Phase 46 code ship complete (11 commits, 30+ new green tests, 1005 passing / 4 skipped suite-wide)
+Phase: 47 (executed — 0/4 complete, 4/4 code-complete HALT on operator checkpoints)
+Plan: Next → 48 (GitHub Actions CI + deploy-staging + observability) after operator executes Phase 46 + Phase 47 apply sequences
+Status: Phase 47 HCL + workflow YAML + scripts all shipped; operator must populate image digest + Cloudflare zone + Phase 46 secrets + run `terraform apply` + `gh workflow run wif-smoke.yml` + `bash iac/cloudrun/scripts/verify-phase-47.sh` before Phase 48
+Last activity: 2026-04-18 -- Phase 47 code ship complete (7 per-task commits, 5 new HCL files, 1 new GH workflow, 2 new scripts, ~130 README lines, 0 new app-code tests — pure IaC phase)
 
 ## Progress Bar
 
 ```
-v1.5: [█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 14% (1/9 phases, 5/36 plans)
+v1.5: [█████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 25% (1/9 phases, 9/36 plans)
 ```
 
 ## Project Reference
@@ -42,7 +42,7 @@ See: `.planning/PROJECT.md`
 |-------|------|--------------|--------|
 | 45 | Terraform Skeleton + Artifact Registry + Secret Manager | INFRA-01..03, INFRA-06..07 | Complete (docker smoke deferred) |
 | 46 | Supabase Staging + Env Hygiene + Prisma Migrate Baseline | DATA-01..06 | Code complete (3 operator checkpoints pending) |
-| 47 | Staging Cloud Run Service + Load Balancer + Domains | INFRA-04..05, CI-04 | Not started |
+| 47 | Staging Cloud Run Service + Load Balancer + Domains | INFRA-04..05, CI-04 | Code complete (4 operator checkpoints pending) |
 | 48 | GitHub Actions CI + Deploy-Staging + Observability | CI-01..02, CI-05..06, OBS-01..04 | Not started |
 | 49 | k6 Load Test + Hardening (HARD-01..03) | LOAD-01..03, HARD-01..03 | Not started |
 | 50 | Judge0 Integration Points + Flag Audit | JUDGE-INTEG-01..04 | Not started |
@@ -75,11 +75,15 @@ See: `.planning/PROJECT.md`
 - v1.3: 11 phases (incl. decimal 28.1), 18 plans, 27 reqs, ~2 days, 524 passing tests
 - v1.4: 9 phases (36-44), 28 plans, 44 reqs, 963 passing tests
 - v1.5 Phase 46 (2026-04-18): 4 plans, 11 per-task commits, ~35min wall, 30+ new tests, 1005 passing total; 1 plan autonomous, 3 halted on operator checkpoints
+- v1.5 Phase 47 (2026-04-18): 4 plans, 7 per-task commits, ~32min wall, 0 new tests (pure IaC). All 4 plans halted on operator apply + live mutation gates. Shipped: 5 new HCL files (cloudrun-staging.tf + loadbalancer-staging.tf + dns-staging.tf + wif.tf + iam.tf extensions), 1 GH workflow (wif-smoke.yml), 2 scripts (coldstart-probe + verify-phase-47 phase-gate), ~130 README runbook lines. terraform validate + plan both green (16 resources to add staging, 6 to add prod).
 
 ## Accumulated Context
 
 ### Decisions (v1.5)
 
+- **Phase 47 (2026-04-18):** Phase 47 shipped as HCL + workflow + scripts + runbook under unattended rules. All 4 plans halted on operator apply — nothing mutated against live GCP or Cloudflare. `terraform fmt` + `terraform validate` + `terraform plan -var-file=staging.tfvars` all green; plan shows 16 resources to add against staging (+ 6 against prod for WIF). `cloudflare/cloudflare v4.52.7` locked in `.terraform.lock.hcl`. Project numbers captured live: staging=`168540542629`, prod=`609812564722`. Full operator runbook in `iac/cloudrun/README.md` "## Phase 47 apply sequence" + `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-EXECUTE-LOG.md` "Next Actions for Human Operator".
+- **Phase 47 (2026-04-18):** `initial_image_digest` + `cf_zone_id` intentionally set to placeholder strings in `staging.tfvars` so `terraform apply` cannot run accidentally. Operator overwrites with real values (from AR digest + Cloudflare zone lookup) before apply.
+- **Phase 47 (2026-04-18):** P45-02 Docker smoke halt (supabase-admin eager init vs D-15 / Dockerfile-frozen) resurfaces as a Phase 47 gate — the first real image push needs either Option A (lazy-init `supabaseAdmin`) or deferring to Phase 48 CI and bootstrapping Cloud Run with a throwaway image. Recommended: Option A at operator time since we're past the Phase 45 scope lock.
 - **Phase 46 (2026-04-18):** Phase 46 shipped as code + runbook + phase-gate under unattended rules. Plan 46-01 fully autonomous (guard + faker seeder + 24 green tests); Plans 46-02/03/04 code-complete with operator checkpoints gated behind live prod wipe, Supabase dashboard key rotation, Supabase Management API PATCH — all require human-held credentials. Operator runbook at `docs/runbooks/phase-46-supabase-wipe.md` (Phases A–J, ~700 lines). Phase-gate aggregator at `scripts/verify-phase-46.sh`.
 - **Phase 46 (2026-04-18):** `@faker-js/faker@^10.4.0` added as devDependency. `scripts/lib/assert-staging-env.ts` exports `STAGING_REF = 'lzuqbpqmqlvzwebliptj'`, `assertStagingDatabase`, `assertProdDatabase`, `maskUrl` — reusable guard for any future mutating script.
 - **Phase 46 (2026-04-18):** Seed payload locked at 3 cohorts / 30 associates / 36 curriculum weeks / 15 sessions / 1 settings singleton. CodingChallenges deferred (`TODO 46-03` in source) — bank-slug selection is downstream.
@@ -100,6 +104,7 @@ See: `.planning/PROJECT.md`
 - v1.4 reflect + maintain deferred — scheduled for Phase 53.
 - **Phase 45 docker smoke (DOCKER-NOTES.md)** — Dockerfile build fails due to supabase-admin eager init. Options: (A) lazy-init supabaseAdmin in code [Phase 47 scope], (B)/(C) Dockerfile build-arg injection [violates D-15], (D) defer to Phase 47/48 CI [chosen]. Human decision can reopen A if desired before Phase 47.
 - **Phase 46 operator checkpoints (3 open):** Plan 46-02 Task 3 (prod wipe A–F), Plan 46-03 Task 4 (key rotation + migrate deploy G–I), Plan 46-04 Task 5 (Auth redirect PATCH J + phase-gate). All require human-held credentials and live production mutations. Runbook is ready; `bash scripts/verify-phase-46.sh` is the single-command exit criterion.
+- **Phase 47 operator checkpoints (4 open):** Plan 47-01 Task 3 (Wave 1 — `terraform apply` Cloud Run service), Plan 47-02 Task 3 (Wave 2 — apply LB+DNS, 10-60 min SSL wait), Plan 47-03 Task 2+3 (apply WIF in both projects + `gh variable set` + `gh workflow run wif-smoke.yml`), Plan 47-04 Task 1+2+3 (populate `NEXT_PUBLIC_SITE_URL` secret + invoke coldstart-probe + phase-gate). Exit criterion: `bash iac/cloudrun/scripts/verify-phase-47.sh` exits 0 with "All Phase 47 assertions PASSED." Prerequisites: (a) first image in AR (either lazy-init supabaseAdmin then docker push, or defer to P48 CI), (b) `CLOUDFLARE_API_TOKEN` exported with Zone.DNS.Edit scope, (c) Phase 46 secrets populated.
 
 ### Todos
 
@@ -110,7 +115,7 @@ See: `.planning/PROJECT.md`
 
 ## Session Continuity
 
-To resume: operator executes `docs/runbooks/phase-46-supabase-wipe.md` Phases A–J + `bash scripts/verify-phase-46.sh`, then `/gsd-execute-phase 47 --unattended`.
+To resume: operator executes (1) `docs/runbooks/phase-46-supabase-wipe.md` Phases A–J + `bash scripts/verify-phase-46.sh`, (2) Phase 47 apply sequence per `iac/cloudrun/README.md` "## Phase 47 apply sequence" + `bash iac/cloudrun/scripts/verify-phase-47.sh`, then `/gsd-execute-phase 48 --unattended`.
 
 Dependency order: ~~45~~ → 46 → 47 → 48 → 49 (parallel: 50 can run after 45) → 51 → 52 → 53
 
