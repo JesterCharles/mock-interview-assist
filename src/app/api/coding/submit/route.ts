@@ -35,6 +35,7 @@ import {
   checkCodingSubmitRateLimit,
   incrementCodingSubmitCount,
 } from '@/lib/rateLimitService';
+import { codingApiError } from '@/lib/codingApiErrors';
 
 // WR-02 (Phase 36 review): cap code payload at 100KB.
 const SubmitBodySchema = z.object({
@@ -45,25 +46,11 @@ const SubmitBodySchema = z.object({
 
 const SUPPORTED_LANGUAGES = Object.keys(JUDGE0_LANGUAGE_MAP) as Judge0Language[];
 
-function errorResponse(
-  code: string,
-  message: string,
-  status: number,
-  details?: unknown,
-  extraHeaders?: Record<string, string>,
-): NextResponse {
-  const body: { error: { code: string; message: string; details?: unknown } } = {
-    error: { code, message },
-  };
-  if (details !== undefined) body.error.details = details;
-  return NextResponse.json(body, { status, headers: extraHeaders });
-}
-
 export async function POST(request: Request): Promise<NextResponse> {
   // 1. Caller identity (early short-circuit for anonymous — avoids unnecessary parsing)
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
-    return errorResponse('AUTH_REQUIRED', 'Sign-in required', 401);
+    return codingApiError('AUTH_REQUIRED', 'Sign-in required');
   }
 
   // 2. Parse + validate body
@@ -72,19 +59,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     const raw = await request.json();
     const result = SubmitBodySchema.safeParse(raw);
     if (!result.success) {
-      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400, result.error.issues);
+      return codingApiError('VALIDATION_ERROR', 'Invalid request body', result.error.issues);
     }
     parsedBody = result.data;
   } catch {
-    return errorResponse('VALIDATION_ERROR', 'Invalid JSON body', 400);
+    return codingApiError('VALIDATION_ERROR', 'Invalid JSON body');
   }
 
   // 3. Trainers cannot submit — v1.4 requires associate identity (D-01 clarification)
   if (caller.kind !== 'associate') {
-    return errorResponse(
+    return codingApiError(
       'FORBIDDEN',
       'Submit requires associate identity — trainer impersonation not supported in v1.4',
-      403,
     );
   }
 
@@ -100,7 +86,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     },
   });
   if (!challenge) {
-    return errorResponse('NOT_FOUND', 'Challenge not found', 404);
+    return codingApiError('NOT_FOUND', 'Challenge not found');
   }
 
   // 5. Authorization: associate must be in matching cohort OR challenge is global
@@ -110,23 +96,21 @@ export async function POST(request: Request): Promise<NextResponse> {
       select: { cohortId: true },
     });
     if (associate?.cohortId !== challenge.cohortId) {
-      return errorResponse('FORBIDDEN', 'Challenge is not available for your cohort', 403);
+      return codingApiError('FORBIDDEN', 'Challenge is not available for your cohort');
     }
   }
 
   // 6. Language allowlist + challenge-level match
   if (!SUPPORTED_LANGUAGES.includes(parsedBody.language as Judge0Language)) {
-    return errorResponse(
+    return codingApiError(
       'LANGUAGE_NOT_SUPPORTED',
       `Language '${parsedBody.language}' is not in the allowlist`,
-      400,
     );
   }
   if (challenge.language !== parsedBody.language) {
-    return errorResponse(
+    return codingApiError(
       'LANGUAGE_NOT_SUPPORTED',
       `Challenge does not support '${parsedBody.language}'`,
-      400,
     );
   }
 
@@ -134,13 +118,12 @@ export async function POST(request: Request): Promise<NextResponse> {
   const userKey = `associate:${caller.associateId}`;
   const rl = checkCodingSubmitRateLimit(userKey);
   if (!rl.allowed) {
-    return errorResponse(
+    return codingApiError(
       'RATE_LIMITED',
       rl.error ?? 'Submit rate limit exceeded',
-      429,
       undefined,
       rl.retryAfterSeconds !== undefined
-        ? { 'Retry-After': String(Math.ceil(rl.retryAfterSeconds)) }
+        ? { retryAfterSeconds: rl.retryAfterSeconds }
         : undefined,
     );
   }
@@ -194,7 +177,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       console.error('[coding/submit] failed to roll back attempt', attempt.id, delErr);
     }
     console.error('[coding/submit] Judge0 submit failed:', err);
-    return errorResponse('JUDGE0_UNAVAILABLE', 'Code execution service unavailable', 503);
+    return codingApiError('JUDGE0_UNAVAILABLE', 'Code execution service unavailable');
   }
 
   // 11. Persist tokens — non-fatal if this fails; tokens can be re-fetched

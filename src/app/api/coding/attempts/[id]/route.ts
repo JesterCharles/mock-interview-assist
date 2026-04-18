@@ -17,6 +17,7 @@ import {
   pollAndMaybeResolveAttempt,
   AttemptNotFoundError,
 } from '@/lib/codingAttemptPoll';
+import { codingApiError } from '@/lib/codingApiErrors';
 
 // Zod output schema — enforced BEFORE serialization.
 // This is the hidden-test shield: any regression surfacing hidden case detail
@@ -55,14 +56,6 @@ const AttemptResponseSchema = z
   })
   .strict();
 
-function errorResponse(
-  code: string,
-  message: string,
-  status: number,
-): NextResponse {
-  return NextResponse.json({ error: { code, message } }, { status });
-}
-
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -71,7 +64,7 @@ export async function GET(
 
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
-    return errorResponse('AUTH_REQUIRED', 'Sign-in required', 401);
+    return codingApiError('AUTH_REQUIRED', 'Sign-in required');
   }
 
   // Load attempt for authz + timestamps
@@ -86,12 +79,12 @@ export async function GET(
     },
   });
   if (!attempt) {
-    return errorResponse('NOT_FOUND', 'Attempt not found', 404);
+    return codingApiError('NOT_FOUND', 'Attempt not found');
   }
 
   // Authz: associate must own the attempt; trainer/admin bypass
   if (caller.kind === 'associate' && attempt.associateId !== caller.associateId) {
-    return errorResponse('FORBIDDEN', 'Attempt does not belong to caller', 403);
+    return codingApiError('FORBIDDEN', 'Attempt does not belong to caller');
   }
 
   // Delegate aggregation + persistence + signal to helper
@@ -100,10 +93,10 @@ export async function GET(
     pollResult = await pollAndMaybeResolveAttempt(id);
   } catch (err) {
     if (err instanceof AttemptNotFoundError) {
-      return errorResponse('NOT_FOUND', 'Attempt not found', 404);
+      return codingApiError('NOT_FOUND', 'Attempt not found');
     }
     console.error('[coding/attempts] poll failed:', err);
-    return errorResponse('INTERNAL', 'Poll failed', 500);
+    return codingApiError('INTERNAL', 'Poll failed');
   }
 
   // Re-read for fresh completedAt (helper may have just persisted it)
@@ -131,7 +124,7 @@ export async function GET(
       id,
       parsed.error.issues,
     );
-    return errorResponse('INTERNAL', 'Response shape error', 500);
+    return codingApiError('INTERNAL', 'Response shape error');
   }
 
   return NextResponse.json(parsed.data, { status: 200 });
