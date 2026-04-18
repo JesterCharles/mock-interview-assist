@@ -78,9 +78,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    if (role === 'trainer' || role === 'admin') {
-      return redirectWith('/trainer');
-    }
+    // Phase 33 / SIGNIN-02: Lazy backfill + first-login gate MUST run BEFORE the role branch.
+    // Previously, trainers/admins short-circuited to /trainer and bypassed the passwordSet check.
 
     // Lazy backfill: migrate user_metadata.password_set to Profile.passwordSetAt (per D-12)
     await lazyBackfillProfile(user.id, user.user_metadata as { password_set?: boolean });
@@ -94,8 +93,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const passwordSet =
       profile?.passwordSetAt != null || user.user_metadata?.password_set === true;
 
+    // Gate BEFORE role-based routing (per D-01 — closes SIGNIN-02 magic-link gap)
     if (!passwordSet) {
       return redirectWith('/auth/set-password');
+    }
+
+    // Role-based routing: trainers/admins → /trainer; associates fall through to authUserId linkage.
+    if (role === 'trainer' || role === 'admin') {
+      return redirectWith('/trainer');
     }
 
     // Associate — authUserId linkage

@@ -119,6 +119,26 @@ describe('GET /api/auth/exchange', () => {
     expect(getRedirectPath(res)).toBe('/trainer');
   });
 
+  it('redirects trainer to /auth/set-password when passwordSet is false', async () => {
+    // Trainer with no password_set metadata and no Profile.passwordSetAt — must hit the gate
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer' } } },
+    });
+    mockProfileFindUnique.mockResolvedValue(null);
+    const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
+    expect(getRedirectPath(res)).toBe('/auth/set-password');
+  });
+
+  it('redirects trainer to /trainer when Profile.passwordSetAt is set (Profile-first detection)', async () => {
+    // Trainer with Profile set but metadata flag missing — Profile-first wins, proceeds to /trainer
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u1', email: 't@test.com', user_metadata: { role: 'trainer' } } },
+    });
+    mockProfileFindUnique.mockResolvedValue({ passwordSetAt: new Date() });
+    const res = await GET(makeRequest({ access_token: 'at', refresh_token: 'rt' }));
+    expect(getRedirectPath(res)).toBe('/trainer');
+  });
+
   it('redirects admin to /trainer', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'u1', email: 'a@test.com', user_metadata: { role: 'admin' } } },
