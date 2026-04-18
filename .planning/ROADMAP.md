@@ -112,7 +112,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. Google Artifact Registry repositories exist in `nlm-staging-493715` and `nlm-prod`; a manually pushed test image is pullable by digest
   4. All runtime secrets (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, JUDGE0_*) exist in Secret Manager for both projects; no secrets baked into the Dockerfile or image
   5. `docker build` with the existing Dockerfile produces a runnable standalone Next.js image on Node 22-alpine with no host-package dependencies
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline
 **Goal**: Supabase staging project is fully isolated from prod; the existing prod Supabase is wiped clean and reserved for real users; Prisma migrate deploy runs end-to-end against both envs
@@ -124,7 +128,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. `npx ts-node scripts/seed-staging.ts` runs to completion idempotently and populates staging with demo associates, cohorts, curriculum weeks, sessions, and coding challenges
   4. `prisma migrate deploy` against staging DIRECT_URL succeeds with all migrations applied; `prisma migrate deploy` against prod DIRECT_URL succeeds identically
   5. Supabase Auth redirect allowlists are correct per env: staging accepts `staging.nextlevelmock.com/*` + `localhost:3000/*`; prod accepts `nextlevelmock.com/*` only
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 47: Staging Cloud Run Service + Load Balancer + Domains
 **Goal**: The NLM app runs on Cloud Run at `staging.nextlevelmock.com` with HTTPS; GH Actions can authenticate to GCP without long-lived service-account keys
@@ -135,7 +143,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   2. Cloud Run staging service is deployed from a signed image pulled by digest (never `:latest`); service config shows `min-instances=0, max-instances=10, cpu=1, memory=512Mi, timeout=300s`
   3. Workload Identity Federation is configured; a test GH Actions workflow run authenticates to GCP and pushes an image without any service-account JSON key in secrets
   4. A cold-start request to the staging URL (after scale-to-zero) returns a valid response within 30 seconds
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 48: GitHub Actions CI + Deploy-Staging + Observability
 **Goal**: Every PR is gated by automated checks; every merge to main automatically deploys to staging within 5 minutes; structured logs and an uptime alert are active on prod (ready to watch when prod goes live)
@@ -148,7 +160,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. Cloud Logging shows structured request + error logs for the staging service; a sample error log is queryable by env label
   5. Cloud Monitoring `NLM Production` dashboard renders request count, p95 latency, error rate, instance count, CPU/memory widgets (populated with staging data)
   6. `/api/metrics` endpoint exists and returns a Prometheus-compatible text response (even if zero-valued); uptime check is configured and would email `jestercharles@gmail.com` on failure
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 49: k6 Load Test + Hardening (HARD-01..03)
 **Goal**: A quantified load-test baseline exists for the staging deployment; every API route has been abuse-tested; the STRIDE threat model for the Cloud Run + DNS surface is reviewed and triaged
@@ -160,7 +176,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. `.planning/loadtest-baseline-v1.5.md` is committed and contains: max concurrent users before p95 > 500ms, cost/1000 requests (GCP extrapolation), CPU+memory at ceiling, Supabase query count per user session
   4. `.planning/SECURITY-v1.5.md` documents the abuse-test results: every `/api/*` route returns 401/403 on unauthenticated/unauthorized access with no information leakage
   5. STRIDE threat model covers Cloud Run deployment + DNS cutover surface; every finding is triaged with an action or explicit accept; `codex adversarial-review` sign-off recorded in the doc
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 50: Judge0 Integration Points + Flag Audit
 **Goal**: All Judge0 call sites are guarded by the `CODING_CHALLENGES_ENABLED` flag; prod defaults to flag-dark; the v1.6 Terraform stub is committed; the v1.4 GCE IaC is labeled as a reference template
@@ -171,7 +191,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   2. With `CODING_CHALLENGES_ENABLED=false`, navigating to `/coding` and calling any `/api/coding/*` route returns a user-friendly "coming soon" response; gap-score persistence hooks are also short-circuited (verified by test or manual check)
   3. `iac/cloudrun/judge0.tf.disabled` exists and documents the v1.6 VPC connector + private IP + firewall plan; it is not applied by `terraform apply`
   4. `iac/gce-judge0/README.md` explicitly states this directory is a v1.6 reference template, not active infrastructure
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Records
 **Goal**: The prod Cloud Run service exists and can receive a tagged deploy; DNS records are provisioned so the cutover in the next phase is a single record swap; the rollback workflow is validated
@@ -183,7 +207,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. Cloudflare DNS contains three records: `nextlevelmock.com` A/AAAA → prod Cloud Run LB, `staging.nextlevelmock.com` → staging Cloud Run, `legacy.nextlevelmock.com` → v0.1 GCE LB
   4. `.planning/DEPLOY.md` cutover runbook exists with: pre-flight checklist, TTL=300 step (24h before), step-by-step A-record swap, verification commands (dig, curl, Supabase session check), rollback procedure
   5. `rollback-prod.yml` manual dispatch successfully reverts prod Cloud Run to the previous revision by digest
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch
 **Goal**: `nextlevelmock.com` serves the v1.5 app on Cloud Run; existing public-interview users experience no data loss or extended outage; a single Cloudflare DNS action can revert to v0.1 within the 30-day window
@@ -194,7 +222,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   2. A public-interview session started on v0.1 before DNS propagation completes successfully (no mid-session 502); documented in cutover log
   3. `legacy.nextlevelmock.com` resolves to v0.1 GCE LB and serves the old app; trainer can revert `nextlevelmock.com` to v0.1 with a single Cloudflare DNS record change (kill switch documented in DEPLOY.md)
   4. Day 0-21 sunset window is underway: v1.5 is deployed to staging (day 0-14 gate passed), DNS cutover is complete (day 15-21 gate), v0.1 GCE remains warm for 30-day rollback
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ### Phase 53: Reflect + Maintain + Runbook Finalization + Decommission Plan
 **Goal**: The v1.4 retro is done, the codebase health check is complete, all runbooks and docs reflect the Cloud Run reality, and the v0.1 GCE teardown checklist is committed for day-45 execution
@@ -206,7 +238,11 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. `.planning/DEPLOY.md` is complete: full deploy flow, secret rotation, rollback, Supabase migration promotion, DNS cutover, v0.1 sunset + day-45 teardown checklist
   4. `CLAUDE.md` deployment section reflects Cloud Run (GCE + Docker Compose references replaced); new env vars and workflow names are listed
   5. `README.md` project-overview section says "Deployed to Cloud Run on GCP" with a link to DEPLOY.md; `.planning/SECURITY-v1.5.md` captures STRIDE findings signed off by codex
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
 ## Progress
 
