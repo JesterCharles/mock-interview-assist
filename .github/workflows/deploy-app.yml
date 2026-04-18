@@ -28,6 +28,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # `environment: production` enables GitHub's manual-approval gate.
+    # REPO SETUP REQUIRED: Settings → Environments → production →
+    # Required reviewers (trainer-dev). See runbook §1 (WR-01, Phase 43 review).
+    environment: production
     permissions:
       contents: read
       id-token: write

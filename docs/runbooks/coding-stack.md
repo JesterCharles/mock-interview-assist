@@ -46,6 +46,21 @@ Two GCE VMs, same VPC, same subnet:
 - **CI/CD** — GitHub Actions: `pr-checks.yml` gates merges; `deploy-app.yml`
   on `app-v*`; `deploy-judge0.yml` on `judge0-v*`.
 
+**Required repo setup — `production` environment (manual-approval gate):**
+
+Both deploy workflows declare `environment: production`. This is inert until
+the repo's `production` environment is created with required reviewers:
+
+1. Navigate: repo → Settings → Environments → New environment → `production`.
+2. Under "Deployment protection rules", enable **Required reviewers** and add
+   the trainer-dev user (single-reviewer is fine for solo ops).
+3. Optionally add a **Wait timer** (e.g. 5 min) for a cool-down window.
+
+With this configured, every `app-v*` / `judge0-v*` tag push pauses on a
+"Review pending" screen — deploy only proceeds after manual approval. This
+honors the "no auto-merge / no autonomous prod push" constraint until CI/CD
+matures (WR-01, Phase 43 review).
+
 **Why two VMs?** Judge0 workloads are bursty CPU-bound (sandboxed code
 execution). Co-locating on the app VM starves the Next.js server. A dedicated
 Judge0 host lets the app VM stay responsive during submission spikes. See
