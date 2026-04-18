@@ -1,17 +1,18 @@
 /**
  * ChallengePrompt — Phase 40 Plan 03 Task 1
  *
- * Renders trainer-authored challenge markdown via `marked`. Source is trusted
- * (server-loaded from the private coding bank + cached). React's auto-escape
- * would destroy the rendered markup, so we use `dangerouslySetInnerHTML`.
+ * Renders trainer-authored challenge markdown via `marked`. Source is the DB
+ * (`loadChallenge`), which is writable by any trainer — so we sanitize the
+ * rendered HTML with DOMPurify before injecting via `dangerouslySetInnerHTML`.
  *
- * SECURITY NOTE: if v1.5 ever adds user-authored challenges, WRAP THIS WITH
- * DOMPurify. Today: trusted source only — leave as-is.
+ * Phase 40 review WR-01: removed "trusted source" assumption; `marked` does
+ * not strip <script>/<iframe>/javascript: URLs on its own.
  */
 'use client';
 
 import { useMemo } from 'react';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 
 export interface ChallengePromptProps {
   markdown: string;
@@ -19,7 +20,8 @@ export interface ChallengePromptProps {
 
 export function ChallengePrompt({ markdown }: ChallengePromptProps) {
   const html = useMemo(() => {
-    return marked.parse(markdown, { gfm: true, breaks: false }) as string;
+    const raw = marked.parse(markdown, { gfm: true, breaks: false }) as string;
+    return DOMPurify.sanitize(raw);
   }, [markdown]);
 
   return (
