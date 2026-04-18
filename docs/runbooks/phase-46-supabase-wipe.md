@@ -466,3 +466,123 @@ gcloud secrets versions access latest --secret=NEXT_PUBLIC_SITE_URL \
 
 Proceed to Phase J (Plan 46-04) for the Auth redirect allowlist update + phase-gate.
 
+---
+
+## Phase J — Supabase Auth redirect allowlist (Management API PATCH)
+
+Per D-15/D-16/D-17, redirect URL allowlists are applied via the Supabase Management API (not Terraform — the Supabase provider has no resource for this config).
+
+### Preflight
+
+```bash
+# Supabase PAT with `all` scope (RESEARCH Pitfall 4). NOT a project-scoped
+# token — you need cross-project coverage for both staging and prod.
+# Create at https://supabase.com/dashboard/account/tokens
+export SUPABASE_ACCESS_TOKEN="<PAT>"
+export STAGING_REF="lzuqbpqmqlvzwebliptj"
+# PROD_SUPABASE_REF should already be exported from Preflight.
+```
+
+> **CRITICAL CALLOUT (RESEARCH Pitfall 5):** `uri_allow_list` is a **comma-separated STRING**, NOT a JSON array. Sending `["a","b"]` is silently rejected or no-ops. Always send `"a,b"` as a single string.
+
+### J1 — Staging PATCH (D-15)
+
+```bash
+curl -X PATCH "https://api.supabase.com/v1/projects/${STAGING_REF}/config/auth" \
+  -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "site_url": "https://staging.nextlevelmock.com",
+    "uri_allow_list": "https://staging.nextlevelmock.com/**,http://localhost:3000/**"
+  }'
+```
+
+### J2 — Staging verify (GET)
+
+```bash
+curl -s "https://api.supabase.com/v1/projects/${STAGING_REF}/config/auth" \
+  -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+  | jq '{ site_url, uri_allow_list }'
+
+# Expected:
+# {
+#   "site_url": "https://staging.nextlevelmock.com",
+#   "uri_allow_list": "https://staging.nextlevelmock.com/**,http://localhost:3000/**"
+# }
+```
+
+### J3 — Prod PATCH (D-16 — NO localhost, NO staging)
+
+```bash
+curl -X PATCH "https://api.supabase.com/v1/projects/${PROD_SUPABASE_REF}/config/auth" \
+  -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "site_url": "https://nextlevelmock.com",
+    "uri_allow_list": "https://nextlevelmock.com/**,https://www.nextlevelmock.com/**"
+  }'
+```
+
+### J4 — Prod verify (GET)
+
+```bash
+curl -s "https://api.supabase.com/v1/projects/${PROD_SUPABASE_REF}/config/auth" \
+  -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+  | jq '{ site_url, uri_allow_list }'
+
+# Expected:
+# {
+#   "site_url": "https://nextlevelmock.com",
+#   "uri_allow_list": "https://nextlevelmock.com/**,https://www.nextlevelmock.com/**"
+# }
+# Prod uri_allow_list MUST NOT contain 'localhost' or 'staging.'.
+```
+
+### Phase J assertions (copy-paste, each must pass)
+
+```bash
+# Staging allowlist contains staging + localhost
+curl -sH "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/${STAGING_REF}/config/auth" \
+  | jq -r '.uri_allow_list' | grep -q 'staging.nextlevelmock.com'
+
+curl -sH "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/${STAGING_REF}/config/auth" \
+  | jq -r '.uri_allow_list' | grep -q 'localhost:3000'
+
+# Prod allowlist does NOT contain localhost or staging
+curl -sH "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/${PROD_SUPABASE_REF}/config/auth" \
+  | jq -r '.uri_allow_list' | grep -qv 'localhost'
+
+curl -sH "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/${PROD_SUPABASE_REF}/config/auth" \
+  | jq -r '.uri_allow_list' | grep -qv 'staging.'
+```
+
+### Cleanup
+
+```bash
+unset SUPABASE_ACCESS_TOKEN
+```
+
+### Escalation
+
+- **401 Unauthorized** → PAT lacks `all` scope OR token belongs to wrong org (RESEARCH Pitfall 4). Regenerate with `all` scope.
+- **400 Bad Request** → body malformed, likely `uri_allow_list` as array instead of string (Pitfall 5). Resend as comma-separated string.
+
+---
+
+## End of Phase 46 runbook
+
+**Post-conditions (after Phases A-J):**
+- Both Supabase projects wiped (prod) / seeded-ready (staging).
+- 14 Secret Manager versions populated.
+- `prisma migrate status` → "Database schema is up to date" against both envs.
+- Secret Manager separation verified: staging holds staging ref; prod does NOT.
+- Auth redirect allowlists match D-15/D-16.
+
+**Phase-gate:** Run `bash scripts/verify-phase-46.sh` (see Task 4 of Plan 46-04) to exercise every automatable check in one command.
+
+**Runbook status transition:** Upon operator sign-off from the Plan 46-04 checkpoint, change frontmatter `status: draft` → `status: phase-46-complete`.
+
