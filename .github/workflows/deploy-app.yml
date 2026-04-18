@@ -59,18 +59,19 @@ jobs:
           docker push ${{ steps.tag.outputs.full_image }}
           docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.APP_VM_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+      - name: Setup SSH agent
+        # webfactory/ssh-agent pinned by full version tag; loads the private key
+        # into an in-memory ssh-agent so it never touches disk or runner logs.
+        # Prevents the key-write-via-echo leak pattern (CR-01, Phase 43 review).
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.APP_VM_SSH_KEY }}
 
       - name: Capture previous image for rollback
         id: prev
         run: |
           PREV_TAG=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
             --zone=${{ secrets.APP_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="docker inspect --format='{{index .Config.Image}}' interview-assistant 2>/dev/null || echo gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest" \
             --quiet 2>/dev/null || echo "gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest")
           echo "prev_image=$PREV_TAG" >> "$GITHUB_OUTPUT"
@@ -81,7 +82,6 @@ jobs:
         run: |
           gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
             --zone=${{ secrets.APP_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="set -e; cd ~/app && gcloud auth configure-docker --quiet && docker pull ${{ steps.tag.outputs.full_image }} && docker tag ${{ steps.tag.outputs.full_image }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest && docker compose up -d --no-deps interview-assistant"
 
       - name: Health check
@@ -91,7 +91,6 @@ jobs:
           for i in 1 2 3 4 5; do
             STATUS=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
               --zone=${{ secrets.APP_VM_ZONE }} \
-              --ssh-key-file=~/.ssh/id_ed25519 \
               --command="curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health" \
               --quiet 2>/dev/null || echo "000")
             echo "Health check attempt $i: HTTP $STATUS"
@@ -110,7 +109,6 @@ jobs:
           echo "::error::Health check failed. Rolling back to ${{ steps.prev.outputs.prev_image }}"
           gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
             --zone=${{ secrets.APP_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="set -e; cd ~/app && docker pull ${{ steps.prev.outputs.prev_image }} && docker tag ${{ steps.prev.outputs.prev_image }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest && docker compose up -d --no-deps interview-assistant"
           echo "::error::Rollback complete. Deploy FAILED — investigate before retrying."
           exit 1

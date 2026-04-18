@@ -50,18 +50,19 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.JUDGE0_VM_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+      - name: Setup SSH agent
+        # webfactory/ssh-agent pinned by full version tag; loads the private key
+        # into an in-memory ssh-agent so it never touches disk or runner logs.
+        # Prevents the key-write-via-echo leak pattern (CR-01, Phase 43 review).
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.JUDGE0_VM_SSH_KEY }}
 
       - name: Backup current Judge0 config for rollback
         id: prev
         run: |
           PREV_VERSION=$(gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
             --zone=${{ secrets.JUDGE0_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="cd ~/judge0 && cp .env .env.rollback && grep JUDGE0_IMAGE_TAG .env | cut -d= -f2" \
             --quiet 2>/dev/null || echo "1.13.1")
           echo "prev_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
@@ -72,7 +73,6 @@ jobs:
         run: |
           gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
             --zone=${{ secrets.JUDGE0_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="set -e; cd ~/judge0 && sed -i 's/^JUDGE0_IMAGE_TAG=.*/JUDGE0_IMAGE_TAG=${{ steps.tag.outputs.judge0_version }}/' .env && docker compose pull && docker compose up -d"
 
       - name: Health check /system_info
@@ -82,7 +82,6 @@ jobs:
           for i in 1 2 3 4 5; do
             STATUS=$(gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
               --zone=${{ secrets.JUDGE0_VM_ZONE }} \
-              --ssh-key-file=~/.ssh/id_ed25519 \
               --command="curl -s -o /dev/null -w '%{http_code}' -H 'X-Auth-Token: ${{ secrets.JUDGE0_AUTH_TOKEN }}' http://localhost:2358/system_info" \
               --quiet 2>/dev/null || echo "000")
             echo "Judge0 health check attempt $i: HTTP $STATUS"
@@ -101,7 +100,6 @@ jobs:
           echo "::error::Judge0 /system_info health check failed. Rolling back to version ${{ steps.prev.outputs.prev_version }}"
           gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
             --zone=${{ secrets.JUDGE0_VM_ZONE }} \
-            --ssh-key-file=~/.ssh/id_ed25519 \
             --command="set -e; cd ~/judge0 && cp .env.rollback .env && docker compose pull && docker compose up -d"
           echo "::error::Rollback complete. Judge0 deploy FAILED — investigate before retrying."
           exit 1
