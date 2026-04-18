@@ -14,21 +14,22 @@ model HealthCheck {
 }
 
 model Associate {
-  id              Int        @id @default(autoincrement())
-  slug            String     @unique
+  id              Int             @id @default(autoincrement())
+  slug            String          @unique
   displayName     String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   readinessStatus String? // 'ready' | 'improving' | 'not_ready'
   recommendedArea String? // topic or skill name — lowest gap score
   lastComputedAt  DateTime? // when readiness was last computed
-  email           String?   @unique
-  authUserId      String?   @unique
+  email           String?         @unique
+  authUserId      String?         @unique
   lastInvitedAt   DateTime?
   cohortId        Int?
-  cohort          Cohort?    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  cohort          Cohort?         @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   sessions        Session[]
   gapScores       GapScore[]
+  codingAttempts  CodingAttempt[]
 
   @@index([cohortId])
 }
@@ -88,16 +89,17 @@ model Settings {
 }
 
 model Cohort {
-  id              Int              @id @default(autoincrement())
-  name            String
-  startDate       DateTime
-  endDate         DateTime?
-  description     String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  associates      Associate[]
-  sessions        Session[]
-  curriculumWeeks CurriculumWeek[]
+  id               Int               @id @default(autoincrement())
+  name             String
+  startDate        DateTime
+  endDate          DateTime?
+  description      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  associates       Associate[]
+  sessions         Session[]
+  curriculumWeeks  CurriculumWeek[]
+  codingChallenges CodingChallenge[]
 }
 
 model CurriculumWeek {
@@ -130,7 +132,7 @@ model Profile {
 // Auth event log for rate-limit abuse tracking and admin visibility
 model AuthEvent {
   id        String   @id @default(cuid())
-  type      String   // 'magic-link' | 'reset' | 'reset-abuse-flag' | 'login-failure'
+  type      String // 'magic-link' | 'reset' | 'reset-abuse-flag' | 'login-failure'
   email     String
   ip        String
   metadata  Json? // e.g. { flagCount: N, deduplicatedUntil: ISO }
@@ -138,4 +140,84 @@ model AuthEvent {
 
   @@index([email, type])
   @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// v1.4 Coding Challenges (Phase 36)
+// ─────────────────────────────────────────────────────────────────────
+
+model CodingChallenge {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  language    String // 'python' | 'javascript' | 'typescript' | 'java' | 'sql' | 'csharp' (per D-03, Zod-validated at write)
+  difficulty  String // 'easy' | 'medium' | 'hard' (Zod-validated at write)
+  description String // markdown path in public repo (e.g. "challenges/two-sum/README.md")
+  skillSlug   String // joins to CurriculumWeek.skillSlug
+  cohortId    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cohort    Cohort?          @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  attempts  CodingAttempt[]
+  testCases CodingTestCase[]
+
+  @@index([cohortId])
+  @@index([skillSlug])
+  @@index([language])
+}
+
+model CodingAttempt {
+  id                 String    @id @default(cuid())
+  associateId        Int
+  challengeId        String
+  submittedCode      String // raw user code, could be large
+  language           String // same allowlist as challenge
+  verdict            String    @default("pending")
+  // 'pass' | 'fail' | 'timeout' | 'mle' | 'runtime_error' | 'compile_error' | 'pending'
+  visibleTestResults Json      @default("[]")
+  // array of {caseId, passed, stdin?, stdout?, expected?, durationMs}
+  hiddenTestResults  Json      @default("[]")
+  // array of verdict-only {caseId, passed, durationMs} — NEVER stdin/expected (D-06)
+  score              Float? // 0-100, server-computed, null until Judge0 callback resolves (D-07)
+  judge0Token        String? // nullable — filled in by Phase 39 when Judge0 returns
+  submittedAt        DateTime  @default(now())
+  completedAt        DateTime?
+
+  associate Associate          @relation(fields: [associateId], references: [id], onDelete: Cascade)
+  challenge CodingChallenge    @relation(fields: [challengeId], references: [id], onDelete: Restrict)
+  signal    CodingSkillSignal?
+
+  @@index([associateId])
+  @@index([challengeId])
+  @@index([verdict])
+  @@index([submittedAt])
+}
+
+model CodingTestCase {
+  id             String  @id @default(cuid())
+  challengeId    String
+  isHidden       Boolean @default(false)
+  stdin          String
+  expectedStdout String
+  weight         Float   @default(1.0) // partial-credit multiplier
+  orderIndex     Int     @default(0)
+
+  challenge CodingChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@index([challengeId])
+  @@index([isHidden])
+}
+
+model CodingSkillSignal {
+  id          String @id @default(cuid())
+  attemptId   String @unique
+  skillSlug   String
+  signalType  String // 'pass' | 'partial' | 'fail' | 'compile_error' | 'timeout' (per D-03)
+  weight      Float // 1.0 / 0.85 / 1.0 / 0.6 / 0.8 (per D-16 weight table)
+  mappedScore Float // 0-100
+
+  attempt CodingAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([skillSlug])
 }

@@ -58,6 +58,26 @@ export type Profile = $Result.DefaultSelection<Prisma.$ProfilePayload>
  * 
  */
 export type AuthEvent = $Result.DefaultSelection<Prisma.$AuthEventPayload>
+/**
+ * Model CodingChallenge
+ * 
+ */
+export type CodingChallenge = $Result.DefaultSelection<Prisma.$CodingChallengePayload>
+/**
+ * Model CodingAttempt
+ * 
+ */
+export type CodingAttempt = $Result.DefaultSelection<Prisma.$CodingAttemptPayload>
+/**
+ * Model CodingTestCase
+ * 
+ */
+export type CodingTestCase = $Result.DefaultSelection<Prisma.$CodingTestCasePayload>
+/**
+ * Model CodingSkillSignal
+ * 
+ */
+export type CodingSkillSignal = $Result.DefaultSelection<Prisma.$CodingSkillSignalPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -269,6 +289,46 @@ export class PrismaClient<
     * ```
     */
   get authEvent(): Prisma.AuthEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codingChallenge`: Exposes CRUD operations for the **CodingChallenge** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodingChallenges
+    * const codingChallenges = await prisma.codingChallenge.findMany()
+    * ```
+    */
+  get codingChallenge(): Prisma.CodingChallengeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codingAttempt`: Exposes CRUD operations for the **CodingAttempt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodingAttempts
+    * const codingAttempts = await prisma.codingAttempt.findMany()
+    * ```
+    */
+  get codingAttempt(): Prisma.CodingAttemptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codingTestCase`: Exposes CRUD operations for the **CodingTestCase** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodingTestCases
+    * const codingTestCases = await prisma.codingTestCase.findMany()
+    * ```
+    */
+  get codingTestCase(): Prisma.CodingTestCaseDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.codingSkillSignal`: Exposes CRUD operations for the **CodingSkillSignal** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CodingSkillSignals
+    * const codingSkillSignals = await prisma.codingSkillSignal.findMany()
+    * ```
+    */
+  get codingSkillSignal(): Prisma.CodingSkillSignalDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -711,7 +771,11 @@ export namespace Prisma {
     Cohort: 'Cohort',
     CurriculumWeek: 'CurriculumWeek',
     Profile: 'Profile',
-    AuthEvent: 'AuthEvent'
+    AuthEvent: 'AuthEvent',
+    CodingChallenge: 'CodingChallenge',
+    CodingAttempt: 'CodingAttempt',
+    CodingTestCase: 'CodingTestCase',
+    CodingSkillSignal: 'CodingSkillSignal'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -727,7 +791,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "healthCheck" | "associate" | "session" | "gapScore" | "settings" | "cohort" | "curriculumWeek" | "profile" | "authEvent"
+      modelProps: "healthCheck" | "associate" | "session" | "gapScore" | "settings" | "cohort" | "curriculumWeek" | "profile" | "authEvent" | "codingChallenge" | "codingAttempt" | "codingTestCase" | "codingSkillSignal"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1397,6 +1461,302 @@ export namespace Prisma {
           }
         }
       }
+      CodingChallenge: {
+        payload: Prisma.$CodingChallengePayload<ExtArgs>
+        fields: Prisma.CodingChallengeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodingChallengeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodingChallengeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          findFirst: {
+            args: Prisma.CodingChallengeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodingChallengeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          findMany: {
+            args: Prisma.CodingChallengeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>[]
+          }
+          create: {
+            args: Prisma.CodingChallengeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          createMany: {
+            args: Prisma.CodingChallengeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodingChallengeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>[]
+          }
+          delete: {
+            args: Prisma.CodingChallengeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          update: {
+            args: Prisma.CodingChallengeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          deleteMany: {
+            args: Prisma.CodingChallengeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodingChallengeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodingChallengeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>[]
+          }
+          upsert: {
+            args: Prisma.CodingChallengeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingChallengePayload>
+          }
+          aggregate: {
+            args: Prisma.CodingChallengeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodingChallenge>
+          }
+          groupBy: {
+            args: Prisma.CodingChallengeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodingChallengeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodingChallengeCountArgs<ExtArgs>
+            result: $Utils.Optional<CodingChallengeCountAggregateOutputType> | number
+          }
+        }
+      }
+      CodingAttempt: {
+        payload: Prisma.$CodingAttemptPayload<ExtArgs>
+        fields: Prisma.CodingAttemptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodingAttemptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodingAttemptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          findFirst: {
+            args: Prisma.CodingAttemptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodingAttemptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          findMany: {
+            args: Prisma.CodingAttemptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>[]
+          }
+          create: {
+            args: Prisma.CodingAttemptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          createMany: {
+            args: Prisma.CodingAttemptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodingAttemptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>[]
+          }
+          delete: {
+            args: Prisma.CodingAttemptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          update: {
+            args: Prisma.CodingAttemptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          deleteMany: {
+            args: Prisma.CodingAttemptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodingAttemptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodingAttemptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>[]
+          }
+          upsert: {
+            args: Prisma.CodingAttemptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingAttemptPayload>
+          }
+          aggregate: {
+            args: Prisma.CodingAttemptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodingAttempt>
+          }
+          groupBy: {
+            args: Prisma.CodingAttemptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodingAttemptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodingAttemptCountArgs<ExtArgs>
+            result: $Utils.Optional<CodingAttemptCountAggregateOutputType> | number
+          }
+        }
+      }
+      CodingTestCase: {
+        payload: Prisma.$CodingTestCasePayload<ExtArgs>
+        fields: Prisma.CodingTestCaseFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodingTestCaseFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodingTestCaseFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          findFirst: {
+            args: Prisma.CodingTestCaseFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodingTestCaseFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          findMany: {
+            args: Prisma.CodingTestCaseFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>[]
+          }
+          create: {
+            args: Prisma.CodingTestCaseCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          createMany: {
+            args: Prisma.CodingTestCaseCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodingTestCaseCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>[]
+          }
+          delete: {
+            args: Prisma.CodingTestCaseDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          update: {
+            args: Prisma.CodingTestCaseUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          deleteMany: {
+            args: Prisma.CodingTestCaseDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodingTestCaseUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodingTestCaseUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>[]
+          }
+          upsert: {
+            args: Prisma.CodingTestCaseUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingTestCasePayload>
+          }
+          aggregate: {
+            args: Prisma.CodingTestCaseAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodingTestCase>
+          }
+          groupBy: {
+            args: Prisma.CodingTestCaseGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodingTestCaseGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodingTestCaseCountArgs<ExtArgs>
+            result: $Utils.Optional<CodingTestCaseCountAggregateOutputType> | number
+          }
+        }
+      }
+      CodingSkillSignal: {
+        payload: Prisma.$CodingSkillSignalPayload<ExtArgs>
+        fields: Prisma.CodingSkillSignalFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CodingSkillSignalFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CodingSkillSignalFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          findFirst: {
+            args: Prisma.CodingSkillSignalFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CodingSkillSignalFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          findMany: {
+            args: Prisma.CodingSkillSignalFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>[]
+          }
+          create: {
+            args: Prisma.CodingSkillSignalCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          createMany: {
+            args: Prisma.CodingSkillSignalCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CodingSkillSignalCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>[]
+          }
+          delete: {
+            args: Prisma.CodingSkillSignalDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          update: {
+            args: Prisma.CodingSkillSignalUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          deleteMany: {
+            args: Prisma.CodingSkillSignalDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CodingSkillSignalUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CodingSkillSignalUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>[]
+          }
+          upsert: {
+            args: Prisma.CodingSkillSignalUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CodingSkillSignalPayload>
+          }
+          aggregate: {
+            args: Prisma.CodingSkillSignalAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCodingSkillSignal>
+          }
+          groupBy: {
+            args: Prisma.CodingSkillSignalGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CodingSkillSignalGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CodingSkillSignalCountArgs<ExtArgs>
+            result: $Utils.Optional<CodingSkillSignalCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1514,6 +1874,10 @@ export namespace Prisma {
     curriculumWeek?: CurriculumWeekOmit
     profile?: ProfileOmit
     authEvent?: AuthEventOmit
+    codingChallenge?: CodingChallengeOmit
+    codingAttempt?: CodingAttemptOmit
+    codingTestCase?: CodingTestCaseOmit
+    codingSkillSignal?: CodingSkillSignalOmit
   }
 
   /* Types for Logging */
@@ -1596,11 +1960,13 @@ export namespace Prisma {
   export type AssociateCountOutputType = {
     sessions: number
     gapScores: number
+    codingAttempts: number
   }
 
   export type AssociateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | AssociateCountOutputTypeCountSessionsArgs
     gapScores?: boolean | AssociateCountOutputTypeCountGapScoresArgs
+    codingAttempts?: boolean | AssociateCountOutputTypeCountCodingAttemptsArgs
   }
 
   // Custom InputTypes
@@ -1628,6 +1994,13 @@ export namespace Prisma {
     where?: GapScoreWhereInput
   }
 
+  /**
+   * AssociateCountOutputType without action
+   */
+  export type AssociateCountOutputTypeCountCodingAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingAttemptWhereInput
+  }
+
 
   /**
    * Count Type CohortCountOutputType
@@ -1637,12 +2010,14 @@ export namespace Prisma {
     associates: number
     sessions: number
     curriculumWeeks: number
+    codingChallenges: number
   }
 
   export type CohortCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     associates?: boolean | CohortCountOutputTypeCountAssociatesArgs
     sessions?: boolean | CohortCountOutputTypeCountSessionsArgs
     curriculumWeeks?: boolean | CohortCountOutputTypeCountCurriculumWeeksArgs
+    codingChallenges?: boolean | CohortCountOutputTypeCountCodingChallengesArgs
   }
 
   // Custom InputTypes
@@ -1675,6 +2050,53 @@ export namespace Prisma {
    */
   export type CohortCountOutputTypeCountCurriculumWeeksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CurriculumWeekWhereInput
+  }
+
+  /**
+   * CohortCountOutputType without action
+   */
+  export type CohortCountOutputTypeCountCodingChallengesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingChallengeWhereInput
+  }
+
+
+  /**
+   * Count Type CodingChallengeCountOutputType
+   */
+
+  export type CodingChallengeCountOutputType = {
+    attempts: number
+    testCases: number
+  }
+
+  export type CodingChallengeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attempts?: boolean | CodingChallengeCountOutputTypeCountAttemptsArgs
+    testCases?: boolean | CodingChallengeCountOutputTypeCountTestCasesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CodingChallengeCountOutputType without action
+   */
+  export type CodingChallengeCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallengeCountOutputType
+     */
+    select?: CodingChallengeCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CodingChallengeCountOutputType without action
+   */
+  export type CodingChallengeCountOutputTypeCountAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingAttemptWhereInput
+  }
+
+  /**
+   * CodingChallengeCountOutputType without action
+   */
+  export type CodingChallengeCountOutputTypeCountTestCasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingTestCaseWhereInput
   }
 
 
@@ -2938,6 +3360,7 @@ export namespace Prisma {
     cohort?: boolean | Associate$cohortArgs<ExtArgs>
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
+    codingAttempts?: boolean | Associate$codingAttemptsArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["associate"]>
 
@@ -2993,6 +3416,7 @@ export namespace Prisma {
     cohort?: boolean | Associate$cohortArgs<ExtArgs>
     sessions?: boolean | Associate$sessionsArgs<ExtArgs>
     gapScores?: boolean | Associate$gapScoresArgs<ExtArgs>
+    codingAttempts?: boolean | Associate$codingAttemptsArgs<ExtArgs>
     _count?: boolean | AssociateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AssociateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3008,6 +3432,7 @@ export namespace Prisma {
       cohort: Prisma.$CohortPayload<ExtArgs> | null
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       gapScores: Prisma.$GapScorePayload<ExtArgs>[]
+      codingAttempts: Prisma.$CodingAttemptPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3419,6 +3844,7 @@ export namespace Prisma {
     cohort<T extends Associate$cohortArgs<ExtArgs> = {}>(args?: Subset<T, Associate$cohortArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     sessions<T extends Associate$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Associate$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     gapScores<T extends Associate$gapScoresArgs<ExtArgs> = {}>(args?: Subset<T, Associate$gapScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GapScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    codingAttempts<T extends Associate$codingAttemptsArgs<ExtArgs> = {}>(args?: Subset<T, Associate$codingAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3925,6 +4351,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: GapScoreScalarFieldEnum | GapScoreScalarFieldEnum[]
+  }
+
+  /**
+   * Associate.codingAttempts
+   */
+  export type Associate$codingAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    where?: CodingAttemptWhereInput
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    cursor?: CodingAttemptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CodingAttemptScalarFieldEnum | CodingAttemptScalarFieldEnum[]
   }
 
   /**
@@ -7687,6 +8137,7 @@ export namespace Prisma {
     associates?: boolean | Cohort$associatesArgs<ExtArgs>
     sessions?: boolean | Cohort$sessionsArgs<ExtArgs>
     curriculumWeeks?: boolean | Cohort$curriculumWeeksArgs<ExtArgs>
+    codingChallenges?: boolean | Cohort$codingChallengesArgs<ExtArgs>
     _count?: boolean | CohortCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cohort"]>
 
@@ -7725,6 +8176,7 @@ export namespace Prisma {
     associates?: boolean | Cohort$associatesArgs<ExtArgs>
     sessions?: boolean | Cohort$sessionsArgs<ExtArgs>
     curriculumWeeks?: boolean | Cohort$curriculumWeeksArgs<ExtArgs>
+    codingChallenges?: boolean | Cohort$codingChallengesArgs<ExtArgs>
     _count?: boolean | CohortCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CohortIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -7736,6 +8188,7 @@ export namespace Prisma {
       associates: Prisma.$AssociatePayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       curriculumWeeks: Prisma.$CurriculumWeekPayload<ExtArgs>[]
+      codingChallenges: Prisma.$CodingChallengePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8142,6 +8595,7 @@ export namespace Prisma {
     associates<T extends Cohort$associatesArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$associatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssociatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends Cohort$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     curriculumWeeks<T extends Cohort$curriculumWeeksArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$curriculumWeeksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CurriculumWeekPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    codingChallenges<T extends Cohort$codingChallengesArgs<ExtArgs> = {}>(args?: Subset<T, Cohort$codingChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8640,6 +9094,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CurriculumWeekScalarFieldEnum | CurriculumWeekScalarFieldEnum[]
+  }
+
+  /**
+   * Cohort.codingChallenges
+   */
+  export type Cohort$codingChallengesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    where?: CodingChallengeWhereInput
+    orderBy?: CodingChallengeOrderByWithRelationInput | CodingChallengeOrderByWithRelationInput[]
+    cursor?: CodingChallengeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CodingChallengeScalarFieldEnum | CodingChallengeScalarFieldEnum[]
   }
 
   /**
@@ -11884,6 +12362,4701 @@ export namespace Prisma {
 
 
   /**
+   * Model CodingChallenge
+   */
+
+  export type AggregateCodingChallenge = {
+    _count: CodingChallengeCountAggregateOutputType | null
+    _avg: CodingChallengeAvgAggregateOutputType | null
+    _sum: CodingChallengeSumAggregateOutputType | null
+    _min: CodingChallengeMinAggregateOutputType | null
+    _max: CodingChallengeMaxAggregateOutputType | null
+  }
+
+  export type CodingChallengeAvgAggregateOutputType = {
+    cohortId: number | null
+  }
+
+  export type CodingChallengeSumAggregateOutputType = {
+    cohortId: number | null
+  }
+
+  export type CodingChallengeMinAggregateOutputType = {
+    id: string | null
+    slug: string | null
+    title: string | null
+    language: string | null
+    difficulty: string | null
+    description: string | null
+    skillSlug: string | null
+    cohortId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CodingChallengeMaxAggregateOutputType = {
+    id: string | null
+    slug: string | null
+    title: string | null
+    language: string | null
+    difficulty: string | null
+    description: string | null
+    skillSlug: string | null
+    cohortId: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CodingChallengeCountAggregateOutputType = {
+    id: number
+    slug: number
+    title: number
+    language: number
+    difficulty: number
+    description: number
+    skillSlug: number
+    cohortId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CodingChallengeAvgAggregateInputType = {
+    cohortId?: true
+  }
+
+  export type CodingChallengeSumAggregateInputType = {
+    cohortId?: true
+  }
+
+  export type CodingChallengeMinAggregateInputType = {
+    id?: true
+    slug?: true
+    title?: true
+    language?: true
+    difficulty?: true
+    description?: true
+    skillSlug?: true
+    cohortId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CodingChallengeMaxAggregateInputType = {
+    id?: true
+    slug?: true
+    title?: true
+    language?: true
+    difficulty?: true
+    description?: true
+    skillSlug?: true
+    cohortId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CodingChallengeCountAggregateInputType = {
+    id?: true
+    slug?: true
+    title?: true
+    language?: true
+    difficulty?: true
+    description?: true
+    skillSlug?: true
+    cohortId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CodingChallengeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingChallenge to aggregate.
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingChallenges to fetch.
+     */
+    orderBy?: CodingChallengeOrderByWithRelationInput | CodingChallengeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodingChallengeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingChallenges from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingChallenges.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodingChallenges
+    **/
+    _count?: true | CodingChallengeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodingChallengeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodingChallengeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodingChallengeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodingChallengeMaxAggregateInputType
+  }
+
+  export type GetCodingChallengeAggregateType<T extends CodingChallengeAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodingChallenge]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodingChallenge[P]>
+      : GetScalarType<T[P], AggregateCodingChallenge[P]>
+  }
+
+
+
+
+  export type CodingChallengeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingChallengeWhereInput
+    orderBy?: CodingChallengeOrderByWithAggregationInput | CodingChallengeOrderByWithAggregationInput[]
+    by: CodingChallengeScalarFieldEnum[] | CodingChallengeScalarFieldEnum
+    having?: CodingChallengeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodingChallengeCountAggregateInputType | true
+    _avg?: CodingChallengeAvgAggregateInputType
+    _sum?: CodingChallengeSumAggregateInputType
+    _min?: CodingChallengeMinAggregateInputType
+    _max?: CodingChallengeMaxAggregateInputType
+  }
+
+  export type CodingChallengeGroupByOutputType = {
+    id: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    cohortId: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CodingChallengeCountAggregateOutputType | null
+    _avg: CodingChallengeAvgAggregateOutputType | null
+    _sum: CodingChallengeSumAggregateOutputType | null
+    _min: CodingChallengeMinAggregateOutputType | null
+    _max: CodingChallengeMaxAggregateOutputType | null
+  }
+
+  type GetCodingChallengeGroupByPayload<T extends CodingChallengeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodingChallengeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodingChallengeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodingChallengeGroupByOutputType[P]>
+            : GetScalarType<T[P], CodingChallengeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodingChallengeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    slug?: boolean
+    title?: boolean
+    language?: boolean
+    difficulty?: boolean
+    description?: boolean
+    skillSlug?: boolean
+    cohortId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+    attempts?: boolean | CodingChallenge$attemptsArgs<ExtArgs>
+    testCases?: boolean | CodingChallenge$testCasesArgs<ExtArgs>
+    _count?: boolean | CodingChallengeCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingChallenge"]>
+
+  export type CodingChallengeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    slug?: boolean
+    title?: boolean
+    language?: boolean
+    difficulty?: boolean
+    description?: boolean
+    skillSlug?: boolean
+    cohortId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+  }, ExtArgs["result"]["codingChallenge"]>
+
+  export type CodingChallengeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    slug?: boolean
+    title?: boolean
+    language?: boolean
+    difficulty?: boolean
+    description?: boolean
+    skillSlug?: boolean
+    cohortId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+  }, ExtArgs["result"]["codingChallenge"]>
+
+  export type CodingChallengeSelectScalar = {
+    id?: boolean
+    slug?: boolean
+    title?: boolean
+    language?: boolean
+    difficulty?: boolean
+    description?: boolean
+    skillSlug?: boolean
+    cohortId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CodingChallengeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "slug" | "title" | "language" | "difficulty" | "description" | "skillSlug" | "cohortId" | "createdAt" | "updatedAt", ExtArgs["result"]["codingChallenge"]>
+  export type CodingChallengeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+    attempts?: boolean | CodingChallenge$attemptsArgs<ExtArgs>
+    testCases?: boolean | CodingChallenge$testCasesArgs<ExtArgs>
+    _count?: boolean | CodingChallengeCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CodingChallengeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+  }
+  export type CodingChallengeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cohort?: boolean | CodingChallenge$cohortArgs<ExtArgs>
+  }
+
+  export type $CodingChallengePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodingChallenge"
+    objects: {
+      cohort: Prisma.$CohortPayload<ExtArgs> | null
+      attempts: Prisma.$CodingAttemptPayload<ExtArgs>[]
+      testCases: Prisma.$CodingTestCasePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      slug: string
+      title: string
+      language: string
+      difficulty: string
+      description: string
+      skillSlug: string
+      cohortId: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["codingChallenge"]>
+    composites: {}
+  }
+
+  type CodingChallengeGetPayload<S extends boolean | null | undefined | CodingChallengeDefaultArgs> = $Result.GetResult<Prisma.$CodingChallengePayload, S>
+
+  type CodingChallengeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodingChallengeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodingChallengeCountAggregateInputType | true
+    }
+
+  export interface CodingChallengeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodingChallenge'], meta: { name: 'CodingChallenge' } }
+    /**
+     * Find zero or one CodingChallenge that matches the filter.
+     * @param {CodingChallengeFindUniqueArgs} args - Arguments to find a CodingChallenge
+     * @example
+     * // Get one CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodingChallengeFindUniqueArgs>(args: SelectSubset<T, CodingChallengeFindUniqueArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodingChallenge that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodingChallengeFindUniqueOrThrowArgs} args - Arguments to find a CodingChallenge
+     * @example
+     * // Get one CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodingChallengeFindUniqueOrThrowArgs>(args: SelectSubset<T, CodingChallengeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingChallenge that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeFindFirstArgs} args - Arguments to find a CodingChallenge
+     * @example
+     * // Get one CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodingChallengeFindFirstArgs>(args?: SelectSubset<T, CodingChallengeFindFirstArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingChallenge that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeFindFirstOrThrowArgs} args - Arguments to find a CodingChallenge
+     * @example
+     * // Get one CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodingChallengeFindFirstOrThrowArgs>(args?: SelectSubset<T, CodingChallengeFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodingChallenges that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodingChallenges
+     * const codingChallenges = await prisma.codingChallenge.findMany()
+     * 
+     * // Get first 10 CodingChallenges
+     * const codingChallenges = await prisma.codingChallenge.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codingChallengeWithIdOnly = await prisma.codingChallenge.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodingChallengeFindManyArgs>(args?: SelectSubset<T, CodingChallengeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodingChallenge.
+     * @param {CodingChallengeCreateArgs} args - Arguments to create a CodingChallenge.
+     * @example
+     * // Create one CodingChallenge
+     * const CodingChallenge = await prisma.codingChallenge.create({
+     *   data: {
+     *     // ... data to create a CodingChallenge
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodingChallengeCreateArgs>(args: SelectSubset<T, CodingChallengeCreateArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodingChallenges.
+     * @param {CodingChallengeCreateManyArgs} args - Arguments to create many CodingChallenges.
+     * @example
+     * // Create many CodingChallenges
+     * const codingChallenge = await prisma.codingChallenge.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodingChallengeCreateManyArgs>(args?: SelectSubset<T, CodingChallengeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodingChallenges and returns the data saved in the database.
+     * @param {CodingChallengeCreateManyAndReturnArgs} args - Arguments to create many CodingChallenges.
+     * @example
+     * // Create many CodingChallenges
+     * const codingChallenge = await prisma.codingChallenge.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodingChallenges and only return the `id`
+     * const codingChallengeWithIdOnly = await prisma.codingChallenge.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodingChallengeCreateManyAndReturnArgs>(args?: SelectSubset<T, CodingChallengeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodingChallenge.
+     * @param {CodingChallengeDeleteArgs} args - Arguments to delete one CodingChallenge.
+     * @example
+     * // Delete one CodingChallenge
+     * const CodingChallenge = await prisma.codingChallenge.delete({
+     *   where: {
+     *     // ... filter to delete one CodingChallenge
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodingChallengeDeleteArgs>(args: SelectSubset<T, CodingChallengeDeleteArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodingChallenge.
+     * @param {CodingChallengeUpdateArgs} args - Arguments to update one CodingChallenge.
+     * @example
+     * // Update one CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodingChallengeUpdateArgs>(args: SelectSubset<T, CodingChallengeUpdateArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodingChallenges.
+     * @param {CodingChallengeDeleteManyArgs} args - Arguments to filter CodingChallenges to delete.
+     * @example
+     * // Delete a few CodingChallenges
+     * const { count } = await prisma.codingChallenge.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodingChallengeDeleteManyArgs>(args?: SelectSubset<T, CodingChallengeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingChallenges.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodingChallenges
+     * const codingChallenge = await prisma.codingChallenge.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodingChallengeUpdateManyArgs>(args: SelectSubset<T, CodingChallengeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingChallenges and returns the data updated in the database.
+     * @param {CodingChallengeUpdateManyAndReturnArgs} args - Arguments to update many CodingChallenges.
+     * @example
+     * // Update many CodingChallenges
+     * const codingChallenge = await prisma.codingChallenge.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodingChallenges and only return the `id`
+     * const codingChallengeWithIdOnly = await prisma.codingChallenge.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodingChallengeUpdateManyAndReturnArgs>(args: SelectSubset<T, CodingChallengeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodingChallenge.
+     * @param {CodingChallengeUpsertArgs} args - Arguments to update or create a CodingChallenge.
+     * @example
+     * // Update or create a CodingChallenge
+     * const codingChallenge = await prisma.codingChallenge.upsert({
+     *   create: {
+     *     // ... data to create a CodingChallenge
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodingChallenge we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodingChallengeUpsertArgs>(args: SelectSubset<T, CodingChallengeUpsertArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodingChallenges.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeCountArgs} args - Arguments to filter CodingChallenges to count.
+     * @example
+     * // Count the number of CodingChallenges
+     * const count = await prisma.codingChallenge.count({
+     *   where: {
+     *     // ... the filter for the CodingChallenges we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodingChallengeCountArgs>(
+      args?: Subset<T, CodingChallengeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodingChallengeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodingChallenge.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodingChallengeAggregateArgs>(args: Subset<T, CodingChallengeAggregateArgs>): Prisma.PrismaPromise<GetCodingChallengeAggregateType<T>>
+
+    /**
+     * Group by CodingChallenge.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingChallengeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodingChallengeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodingChallengeGroupByArgs['orderBy'] }
+        : { orderBy?: CodingChallengeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodingChallengeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodingChallengeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodingChallenge model
+   */
+  readonly fields: CodingChallengeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodingChallenge.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodingChallengeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cohort<T extends CodingChallenge$cohortArgs<ExtArgs> = {}>(args?: Subset<T, CodingChallenge$cohortArgs<ExtArgs>>): Prisma__CohortClient<$Result.GetResult<Prisma.$CohortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    attempts<T extends CodingChallenge$attemptsArgs<ExtArgs> = {}>(args?: Subset<T, CodingChallenge$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    testCases<T extends CodingChallenge$testCasesArgs<ExtArgs> = {}>(args?: Subset<T, CodingChallenge$testCasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodingChallenge model
+   */
+  interface CodingChallengeFieldRefs {
+    readonly id: FieldRef<"CodingChallenge", 'String'>
+    readonly slug: FieldRef<"CodingChallenge", 'String'>
+    readonly title: FieldRef<"CodingChallenge", 'String'>
+    readonly language: FieldRef<"CodingChallenge", 'String'>
+    readonly difficulty: FieldRef<"CodingChallenge", 'String'>
+    readonly description: FieldRef<"CodingChallenge", 'String'>
+    readonly skillSlug: FieldRef<"CodingChallenge", 'String'>
+    readonly cohortId: FieldRef<"CodingChallenge", 'Int'>
+    readonly createdAt: FieldRef<"CodingChallenge", 'DateTime'>
+    readonly updatedAt: FieldRef<"CodingChallenge", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodingChallenge findUnique
+   */
+  export type CodingChallengeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingChallenge to fetch.
+     */
+    where: CodingChallengeWhereUniqueInput
+  }
+
+  /**
+   * CodingChallenge findUniqueOrThrow
+   */
+  export type CodingChallengeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingChallenge to fetch.
+     */
+    where: CodingChallengeWhereUniqueInput
+  }
+
+  /**
+   * CodingChallenge findFirst
+   */
+  export type CodingChallengeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingChallenge to fetch.
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingChallenges to fetch.
+     */
+    orderBy?: CodingChallengeOrderByWithRelationInput | CodingChallengeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingChallenges.
+     */
+    cursor?: CodingChallengeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingChallenges from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingChallenges.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingChallenges.
+     */
+    distinct?: CodingChallengeScalarFieldEnum | CodingChallengeScalarFieldEnum[]
+  }
+
+  /**
+   * CodingChallenge findFirstOrThrow
+   */
+  export type CodingChallengeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingChallenge to fetch.
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingChallenges to fetch.
+     */
+    orderBy?: CodingChallengeOrderByWithRelationInput | CodingChallengeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingChallenges.
+     */
+    cursor?: CodingChallengeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingChallenges from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingChallenges.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingChallenges.
+     */
+    distinct?: CodingChallengeScalarFieldEnum | CodingChallengeScalarFieldEnum[]
+  }
+
+  /**
+   * CodingChallenge findMany
+   */
+  export type CodingChallengeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingChallenges to fetch.
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingChallenges to fetch.
+     */
+    orderBy?: CodingChallengeOrderByWithRelationInput | CodingChallengeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodingChallenges.
+     */
+    cursor?: CodingChallengeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingChallenges from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingChallenges.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingChallenges.
+     */
+    distinct?: CodingChallengeScalarFieldEnum | CodingChallengeScalarFieldEnum[]
+  }
+
+  /**
+   * CodingChallenge create
+   */
+  export type CodingChallengeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodingChallenge.
+     */
+    data: XOR<CodingChallengeCreateInput, CodingChallengeUncheckedCreateInput>
+  }
+
+  /**
+   * CodingChallenge createMany
+   */
+  export type CodingChallengeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodingChallenges.
+     */
+    data: CodingChallengeCreateManyInput | CodingChallengeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CodingChallenge createManyAndReturn
+   */
+  export type CodingChallengeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodingChallenges.
+     */
+    data: CodingChallengeCreateManyInput | CodingChallengeCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingChallenge update
+   */
+  export type CodingChallengeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodingChallenge.
+     */
+    data: XOR<CodingChallengeUpdateInput, CodingChallengeUncheckedUpdateInput>
+    /**
+     * Choose, which CodingChallenge to update.
+     */
+    where: CodingChallengeWhereUniqueInput
+  }
+
+  /**
+   * CodingChallenge updateMany
+   */
+  export type CodingChallengeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodingChallenges.
+     */
+    data: XOR<CodingChallengeUpdateManyMutationInput, CodingChallengeUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingChallenges to update
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * Limit how many CodingChallenges to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingChallenge updateManyAndReturn
+   */
+  export type CodingChallengeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * The data used to update CodingChallenges.
+     */
+    data: XOR<CodingChallengeUpdateManyMutationInput, CodingChallengeUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingChallenges to update
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * Limit how many CodingChallenges to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingChallenge upsert
+   */
+  export type CodingChallengeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodingChallenge to update in case it exists.
+     */
+    where: CodingChallengeWhereUniqueInput
+    /**
+     * In case the CodingChallenge found by the `where` argument doesn't exist, create a new CodingChallenge with this data.
+     */
+    create: XOR<CodingChallengeCreateInput, CodingChallengeUncheckedCreateInput>
+    /**
+     * In case the CodingChallenge was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodingChallengeUpdateInput, CodingChallengeUncheckedUpdateInput>
+  }
+
+  /**
+   * CodingChallenge delete
+   */
+  export type CodingChallengeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+    /**
+     * Filter which CodingChallenge to delete.
+     */
+    where: CodingChallengeWhereUniqueInput
+  }
+
+  /**
+   * CodingChallenge deleteMany
+   */
+  export type CodingChallengeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingChallenges to delete
+     */
+    where?: CodingChallengeWhereInput
+    /**
+     * Limit how many CodingChallenges to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingChallenge.cohort
+   */
+  export type CodingChallenge$cohortArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cohort
+     */
+    select?: CohortSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cohort
+     */
+    omit?: CohortOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CohortInclude<ExtArgs> | null
+    where?: CohortWhereInput
+  }
+
+  /**
+   * CodingChallenge.attempts
+   */
+  export type CodingChallenge$attemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    where?: CodingAttemptWhereInput
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    cursor?: CodingAttemptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CodingAttemptScalarFieldEnum | CodingAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * CodingChallenge.testCases
+   */
+  export type CodingChallenge$testCasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    where?: CodingTestCaseWhereInput
+    orderBy?: CodingTestCaseOrderByWithRelationInput | CodingTestCaseOrderByWithRelationInput[]
+    cursor?: CodingTestCaseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CodingTestCaseScalarFieldEnum | CodingTestCaseScalarFieldEnum[]
+  }
+
+  /**
+   * CodingChallenge without action
+   */
+  export type CodingChallengeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingChallenge
+     */
+    select?: CodingChallengeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingChallenge
+     */
+    omit?: CodingChallengeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingChallengeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CodingAttempt
+   */
+
+  export type AggregateCodingAttempt = {
+    _count: CodingAttemptCountAggregateOutputType | null
+    _avg: CodingAttemptAvgAggregateOutputType | null
+    _sum: CodingAttemptSumAggregateOutputType | null
+    _min: CodingAttemptMinAggregateOutputType | null
+    _max: CodingAttemptMaxAggregateOutputType | null
+  }
+
+  export type CodingAttemptAvgAggregateOutputType = {
+    associateId: number | null
+    score: number | null
+  }
+
+  export type CodingAttemptSumAggregateOutputType = {
+    associateId: number | null
+    score: number | null
+  }
+
+  export type CodingAttemptMinAggregateOutputType = {
+    id: string | null
+    associateId: number | null
+    challengeId: string | null
+    submittedCode: string | null
+    language: string | null
+    verdict: string | null
+    score: number | null
+    judge0Token: string | null
+    submittedAt: Date | null
+    completedAt: Date | null
+  }
+
+  export type CodingAttemptMaxAggregateOutputType = {
+    id: string | null
+    associateId: number | null
+    challengeId: string | null
+    submittedCode: string | null
+    language: string | null
+    verdict: string | null
+    score: number | null
+    judge0Token: string | null
+    submittedAt: Date | null
+    completedAt: Date | null
+  }
+
+  export type CodingAttemptCountAggregateOutputType = {
+    id: number
+    associateId: number
+    challengeId: number
+    submittedCode: number
+    language: number
+    verdict: number
+    visibleTestResults: number
+    hiddenTestResults: number
+    score: number
+    judge0Token: number
+    submittedAt: number
+    completedAt: number
+    _all: number
+  }
+
+
+  export type CodingAttemptAvgAggregateInputType = {
+    associateId?: true
+    score?: true
+  }
+
+  export type CodingAttemptSumAggregateInputType = {
+    associateId?: true
+    score?: true
+  }
+
+  export type CodingAttemptMinAggregateInputType = {
+    id?: true
+    associateId?: true
+    challengeId?: true
+    submittedCode?: true
+    language?: true
+    verdict?: true
+    score?: true
+    judge0Token?: true
+    submittedAt?: true
+    completedAt?: true
+  }
+
+  export type CodingAttemptMaxAggregateInputType = {
+    id?: true
+    associateId?: true
+    challengeId?: true
+    submittedCode?: true
+    language?: true
+    verdict?: true
+    score?: true
+    judge0Token?: true
+    submittedAt?: true
+    completedAt?: true
+  }
+
+  export type CodingAttemptCountAggregateInputType = {
+    id?: true
+    associateId?: true
+    challengeId?: true
+    submittedCode?: true
+    language?: true
+    verdict?: true
+    visibleTestResults?: true
+    hiddenTestResults?: true
+    score?: true
+    judge0Token?: true
+    submittedAt?: true
+    completedAt?: true
+    _all?: true
+  }
+
+  export type CodingAttemptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingAttempt to aggregate.
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingAttempts to fetch.
+     */
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodingAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodingAttempts
+    **/
+    _count?: true | CodingAttemptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodingAttemptAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodingAttemptSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodingAttemptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodingAttemptMaxAggregateInputType
+  }
+
+  export type GetCodingAttemptAggregateType<T extends CodingAttemptAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodingAttempt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodingAttempt[P]>
+      : GetScalarType<T[P], AggregateCodingAttempt[P]>
+  }
+
+
+
+
+  export type CodingAttemptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingAttemptWhereInput
+    orderBy?: CodingAttemptOrderByWithAggregationInput | CodingAttemptOrderByWithAggregationInput[]
+    by: CodingAttemptScalarFieldEnum[] | CodingAttemptScalarFieldEnum
+    having?: CodingAttemptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodingAttemptCountAggregateInputType | true
+    _avg?: CodingAttemptAvgAggregateInputType
+    _sum?: CodingAttemptSumAggregateInputType
+    _min?: CodingAttemptMinAggregateInputType
+    _max?: CodingAttemptMaxAggregateInputType
+  }
+
+  export type CodingAttemptGroupByOutputType = {
+    id: string
+    associateId: number
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict: string
+    visibleTestResults: JsonValue
+    hiddenTestResults: JsonValue
+    score: number | null
+    judge0Token: string | null
+    submittedAt: Date
+    completedAt: Date | null
+    _count: CodingAttemptCountAggregateOutputType | null
+    _avg: CodingAttemptAvgAggregateOutputType | null
+    _sum: CodingAttemptSumAggregateOutputType | null
+    _min: CodingAttemptMinAggregateOutputType | null
+    _max: CodingAttemptMaxAggregateOutputType | null
+  }
+
+  type GetCodingAttemptGroupByPayload<T extends CodingAttemptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodingAttemptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodingAttemptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodingAttemptGroupByOutputType[P]>
+            : GetScalarType<T[P], CodingAttemptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodingAttemptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    challengeId?: boolean
+    submittedCode?: boolean
+    language?: boolean
+    verdict?: boolean
+    visibleTestResults?: boolean
+    hiddenTestResults?: boolean
+    score?: boolean
+    judge0Token?: boolean
+    submittedAt?: boolean
+    completedAt?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+    signal?: boolean | CodingAttempt$signalArgs<ExtArgs>
+  }, ExtArgs["result"]["codingAttempt"]>
+
+  export type CodingAttemptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    challengeId?: boolean
+    submittedCode?: boolean
+    language?: boolean
+    verdict?: boolean
+    visibleTestResults?: boolean
+    hiddenTestResults?: boolean
+    score?: boolean
+    judge0Token?: boolean
+    submittedAt?: boolean
+    completedAt?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingAttempt"]>
+
+  export type CodingAttemptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    associateId?: boolean
+    challengeId?: boolean
+    submittedCode?: boolean
+    language?: boolean
+    verdict?: boolean
+    visibleTestResults?: boolean
+    hiddenTestResults?: boolean
+    score?: boolean
+    judge0Token?: boolean
+    submittedAt?: boolean
+    completedAt?: boolean
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingAttempt"]>
+
+  export type CodingAttemptSelectScalar = {
+    id?: boolean
+    associateId?: boolean
+    challengeId?: boolean
+    submittedCode?: boolean
+    language?: boolean
+    verdict?: boolean
+    visibleTestResults?: boolean
+    hiddenTestResults?: boolean
+    score?: boolean
+    judge0Token?: boolean
+    submittedAt?: boolean
+    completedAt?: boolean
+  }
+
+  export type CodingAttemptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "associateId" | "challengeId" | "submittedCode" | "language" | "verdict" | "visibleTestResults" | "hiddenTestResults" | "score" | "judge0Token" | "submittedAt" | "completedAt", ExtArgs["result"]["codingAttempt"]>
+  export type CodingAttemptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+    signal?: boolean | CodingAttempt$signalArgs<ExtArgs>
+  }
+  export type CodingAttemptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }
+  export type CodingAttemptIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    associate?: boolean | AssociateDefaultArgs<ExtArgs>
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }
+
+  export type $CodingAttemptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodingAttempt"
+    objects: {
+      associate: Prisma.$AssociatePayload<ExtArgs>
+      challenge: Prisma.$CodingChallengePayload<ExtArgs>
+      signal: Prisma.$CodingSkillSignalPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      associateId: number
+      challengeId: string
+      submittedCode: string
+      language: string
+      verdict: string
+      visibleTestResults: Prisma.JsonValue
+      hiddenTestResults: Prisma.JsonValue
+      score: number | null
+      judge0Token: string | null
+      submittedAt: Date
+      completedAt: Date | null
+    }, ExtArgs["result"]["codingAttempt"]>
+    composites: {}
+  }
+
+  type CodingAttemptGetPayload<S extends boolean | null | undefined | CodingAttemptDefaultArgs> = $Result.GetResult<Prisma.$CodingAttemptPayload, S>
+
+  type CodingAttemptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodingAttemptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodingAttemptCountAggregateInputType | true
+    }
+
+  export interface CodingAttemptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodingAttempt'], meta: { name: 'CodingAttempt' } }
+    /**
+     * Find zero or one CodingAttempt that matches the filter.
+     * @param {CodingAttemptFindUniqueArgs} args - Arguments to find a CodingAttempt
+     * @example
+     * // Get one CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodingAttemptFindUniqueArgs>(args: SelectSubset<T, CodingAttemptFindUniqueArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodingAttempt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodingAttemptFindUniqueOrThrowArgs} args - Arguments to find a CodingAttempt
+     * @example
+     * // Get one CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodingAttemptFindUniqueOrThrowArgs>(args: SelectSubset<T, CodingAttemptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingAttempt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptFindFirstArgs} args - Arguments to find a CodingAttempt
+     * @example
+     * // Get one CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodingAttemptFindFirstArgs>(args?: SelectSubset<T, CodingAttemptFindFirstArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingAttempt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptFindFirstOrThrowArgs} args - Arguments to find a CodingAttempt
+     * @example
+     * // Get one CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodingAttemptFindFirstOrThrowArgs>(args?: SelectSubset<T, CodingAttemptFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodingAttempts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodingAttempts
+     * const codingAttempts = await prisma.codingAttempt.findMany()
+     * 
+     * // Get first 10 CodingAttempts
+     * const codingAttempts = await prisma.codingAttempt.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codingAttemptWithIdOnly = await prisma.codingAttempt.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodingAttemptFindManyArgs>(args?: SelectSubset<T, CodingAttemptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodingAttempt.
+     * @param {CodingAttemptCreateArgs} args - Arguments to create a CodingAttempt.
+     * @example
+     * // Create one CodingAttempt
+     * const CodingAttempt = await prisma.codingAttempt.create({
+     *   data: {
+     *     // ... data to create a CodingAttempt
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodingAttemptCreateArgs>(args: SelectSubset<T, CodingAttemptCreateArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodingAttempts.
+     * @param {CodingAttemptCreateManyArgs} args - Arguments to create many CodingAttempts.
+     * @example
+     * // Create many CodingAttempts
+     * const codingAttempt = await prisma.codingAttempt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodingAttemptCreateManyArgs>(args?: SelectSubset<T, CodingAttemptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodingAttempts and returns the data saved in the database.
+     * @param {CodingAttemptCreateManyAndReturnArgs} args - Arguments to create many CodingAttempts.
+     * @example
+     * // Create many CodingAttempts
+     * const codingAttempt = await prisma.codingAttempt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodingAttempts and only return the `id`
+     * const codingAttemptWithIdOnly = await prisma.codingAttempt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodingAttemptCreateManyAndReturnArgs>(args?: SelectSubset<T, CodingAttemptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodingAttempt.
+     * @param {CodingAttemptDeleteArgs} args - Arguments to delete one CodingAttempt.
+     * @example
+     * // Delete one CodingAttempt
+     * const CodingAttempt = await prisma.codingAttempt.delete({
+     *   where: {
+     *     // ... filter to delete one CodingAttempt
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodingAttemptDeleteArgs>(args: SelectSubset<T, CodingAttemptDeleteArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodingAttempt.
+     * @param {CodingAttemptUpdateArgs} args - Arguments to update one CodingAttempt.
+     * @example
+     * // Update one CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodingAttemptUpdateArgs>(args: SelectSubset<T, CodingAttemptUpdateArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodingAttempts.
+     * @param {CodingAttemptDeleteManyArgs} args - Arguments to filter CodingAttempts to delete.
+     * @example
+     * // Delete a few CodingAttempts
+     * const { count } = await prisma.codingAttempt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodingAttemptDeleteManyArgs>(args?: SelectSubset<T, CodingAttemptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingAttempts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodingAttempts
+     * const codingAttempt = await prisma.codingAttempt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodingAttemptUpdateManyArgs>(args: SelectSubset<T, CodingAttemptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingAttempts and returns the data updated in the database.
+     * @param {CodingAttemptUpdateManyAndReturnArgs} args - Arguments to update many CodingAttempts.
+     * @example
+     * // Update many CodingAttempts
+     * const codingAttempt = await prisma.codingAttempt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodingAttempts and only return the `id`
+     * const codingAttemptWithIdOnly = await prisma.codingAttempt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodingAttemptUpdateManyAndReturnArgs>(args: SelectSubset<T, CodingAttemptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodingAttempt.
+     * @param {CodingAttemptUpsertArgs} args - Arguments to update or create a CodingAttempt.
+     * @example
+     * // Update or create a CodingAttempt
+     * const codingAttempt = await prisma.codingAttempt.upsert({
+     *   create: {
+     *     // ... data to create a CodingAttempt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodingAttempt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodingAttemptUpsertArgs>(args: SelectSubset<T, CodingAttemptUpsertArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodingAttempts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptCountArgs} args - Arguments to filter CodingAttempts to count.
+     * @example
+     * // Count the number of CodingAttempts
+     * const count = await prisma.codingAttempt.count({
+     *   where: {
+     *     // ... the filter for the CodingAttempts we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodingAttemptCountArgs>(
+      args?: Subset<T, CodingAttemptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodingAttemptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodingAttempt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodingAttemptAggregateArgs>(args: Subset<T, CodingAttemptAggregateArgs>): Prisma.PrismaPromise<GetCodingAttemptAggregateType<T>>
+
+    /**
+     * Group by CodingAttempt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingAttemptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodingAttemptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodingAttemptGroupByArgs['orderBy'] }
+        : { orderBy?: CodingAttemptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodingAttemptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodingAttemptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodingAttempt model
+   */
+  readonly fields: CodingAttemptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodingAttempt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodingAttemptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    associate<T extends AssociateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AssociateDefaultArgs<ExtArgs>>): Prisma__AssociateClient<$Result.GetResult<Prisma.$AssociatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    challenge<T extends CodingChallengeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CodingChallengeDefaultArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    signal<T extends CodingAttempt$signalArgs<ExtArgs> = {}>(args?: Subset<T, CodingAttempt$signalArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodingAttempt model
+   */
+  interface CodingAttemptFieldRefs {
+    readonly id: FieldRef<"CodingAttempt", 'String'>
+    readonly associateId: FieldRef<"CodingAttempt", 'Int'>
+    readonly challengeId: FieldRef<"CodingAttempt", 'String'>
+    readonly submittedCode: FieldRef<"CodingAttempt", 'String'>
+    readonly language: FieldRef<"CodingAttempt", 'String'>
+    readonly verdict: FieldRef<"CodingAttempt", 'String'>
+    readonly visibleTestResults: FieldRef<"CodingAttempt", 'Json'>
+    readonly hiddenTestResults: FieldRef<"CodingAttempt", 'Json'>
+    readonly score: FieldRef<"CodingAttempt", 'Float'>
+    readonly judge0Token: FieldRef<"CodingAttempt", 'String'>
+    readonly submittedAt: FieldRef<"CodingAttempt", 'DateTime'>
+    readonly completedAt: FieldRef<"CodingAttempt", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodingAttempt findUnique
+   */
+  export type CodingAttemptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingAttempt to fetch.
+     */
+    where: CodingAttemptWhereUniqueInput
+  }
+
+  /**
+   * CodingAttempt findUniqueOrThrow
+   */
+  export type CodingAttemptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingAttempt to fetch.
+     */
+    where: CodingAttemptWhereUniqueInput
+  }
+
+  /**
+   * CodingAttempt findFirst
+   */
+  export type CodingAttemptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingAttempt to fetch.
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingAttempts to fetch.
+     */
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingAttempts.
+     */
+    cursor?: CodingAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingAttempts.
+     */
+    distinct?: CodingAttemptScalarFieldEnum | CodingAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * CodingAttempt findFirstOrThrow
+   */
+  export type CodingAttemptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingAttempt to fetch.
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingAttempts to fetch.
+     */
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingAttempts.
+     */
+    cursor?: CodingAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingAttempts.
+     */
+    distinct?: CodingAttemptScalarFieldEnum | CodingAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * CodingAttempt findMany
+   */
+  export type CodingAttemptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingAttempts to fetch.
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingAttempts to fetch.
+     */
+    orderBy?: CodingAttemptOrderByWithRelationInput | CodingAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodingAttempts.
+     */
+    cursor?: CodingAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingAttempts.
+     */
+    distinct?: CodingAttemptScalarFieldEnum | CodingAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * CodingAttempt create
+   */
+  export type CodingAttemptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodingAttempt.
+     */
+    data: XOR<CodingAttemptCreateInput, CodingAttemptUncheckedCreateInput>
+  }
+
+  /**
+   * CodingAttempt createMany
+   */
+  export type CodingAttemptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodingAttempts.
+     */
+    data: CodingAttemptCreateManyInput | CodingAttemptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CodingAttempt createManyAndReturn
+   */
+  export type CodingAttemptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodingAttempts.
+     */
+    data: CodingAttemptCreateManyInput | CodingAttemptCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingAttempt update
+   */
+  export type CodingAttemptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodingAttempt.
+     */
+    data: XOR<CodingAttemptUpdateInput, CodingAttemptUncheckedUpdateInput>
+    /**
+     * Choose, which CodingAttempt to update.
+     */
+    where: CodingAttemptWhereUniqueInput
+  }
+
+  /**
+   * CodingAttempt updateMany
+   */
+  export type CodingAttemptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodingAttempts.
+     */
+    data: XOR<CodingAttemptUpdateManyMutationInput, CodingAttemptUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingAttempts to update
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * Limit how many CodingAttempts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingAttempt updateManyAndReturn
+   */
+  export type CodingAttemptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * The data used to update CodingAttempts.
+     */
+    data: XOR<CodingAttemptUpdateManyMutationInput, CodingAttemptUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingAttempts to update
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * Limit how many CodingAttempts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingAttempt upsert
+   */
+  export type CodingAttemptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodingAttempt to update in case it exists.
+     */
+    where: CodingAttemptWhereUniqueInput
+    /**
+     * In case the CodingAttempt found by the `where` argument doesn't exist, create a new CodingAttempt with this data.
+     */
+    create: XOR<CodingAttemptCreateInput, CodingAttemptUncheckedCreateInput>
+    /**
+     * In case the CodingAttempt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodingAttemptUpdateInput, CodingAttemptUncheckedUpdateInput>
+  }
+
+  /**
+   * CodingAttempt delete
+   */
+  export type CodingAttemptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+    /**
+     * Filter which CodingAttempt to delete.
+     */
+    where: CodingAttemptWhereUniqueInput
+  }
+
+  /**
+   * CodingAttempt deleteMany
+   */
+  export type CodingAttemptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingAttempts to delete
+     */
+    where?: CodingAttemptWhereInput
+    /**
+     * Limit how many CodingAttempts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingAttempt.signal
+   */
+  export type CodingAttempt$signalArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    where?: CodingSkillSignalWhereInput
+  }
+
+  /**
+   * CodingAttempt without action
+   */
+  export type CodingAttemptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingAttempt
+     */
+    select?: CodingAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingAttempt
+     */
+    omit?: CodingAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingAttemptInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CodingTestCase
+   */
+
+  export type AggregateCodingTestCase = {
+    _count: CodingTestCaseCountAggregateOutputType | null
+    _avg: CodingTestCaseAvgAggregateOutputType | null
+    _sum: CodingTestCaseSumAggregateOutputType | null
+    _min: CodingTestCaseMinAggregateOutputType | null
+    _max: CodingTestCaseMaxAggregateOutputType | null
+  }
+
+  export type CodingTestCaseAvgAggregateOutputType = {
+    weight: number | null
+    orderIndex: number | null
+  }
+
+  export type CodingTestCaseSumAggregateOutputType = {
+    weight: number | null
+    orderIndex: number | null
+  }
+
+  export type CodingTestCaseMinAggregateOutputType = {
+    id: string | null
+    challengeId: string | null
+    isHidden: boolean | null
+    stdin: string | null
+    expectedStdout: string | null
+    weight: number | null
+    orderIndex: number | null
+  }
+
+  export type CodingTestCaseMaxAggregateOutputType = {
+    id: string | null
+    challengeId: string | null
+    isHidden: boolean | null
+    stdin: string | null
+    expectedStdout: string | null
+    weight: number | null
+    orderIndex: number | null
+  }
+
+  export type CodingTestCaseCountAggregateOutputType = {
+    id: number
+    challengeId: number
+    isHidden: number
+    stdin: number
+    expectedStdout: number
+    weight: number
+    orderIndex: number
+    _all: number
+  }
+
+
+  export type CodingTestCaseAvgAggregateInputType = {
+    weight?: true
+    orderIndex?: true
+  }
+
+  export type CodingTestCaseSumAggregateInputType = {
+    weight?: true
+    orderIndex?: true
+  }
+
+  export type CodingTestCaseMinAggregateInputType = {
+    id?: true
+    challengeId?: true
+    isHidden?: true
+    stdin?: true
+    expectedStdout?: true
+    weight?: true
+    orderIndex?: true
+  }
+
+  export type CodingTestCaseMaxAggregateInputType = {
+    id?: true
+    challengeId?: true
+    isHidden?: true
+    stdin?: true
+    expectedStdout?: true
+    weight?: true
+    orderIndex?: true
+  }
+
+  export type CodingTestCaseCountAggregateInputType = {
+    id?: true
+    challengeId?: true
+    isHidden?: true
+    stdin?: true
+    expectedStdout?: true
+    weight?: true
+    orderIndex?: true
+    _all?: true
+  }
+
+  export type CodingTestCaseAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingTestCase to aggregate.
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingTestCases to fetch.
+     */
+    orderBy?: CodingTestCaseOrderByWithRelationInput | CodingTestCaseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodingTestCaseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingTestCases from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingTestCases.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodingTestCases
+    **/
+    _count?: true | CodingTestCaseCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodingTestCaseAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodingTestCaseSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodingTestCaseMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodingTestCaseMaxAggregateInputType
+  }
+
+  export type GetCodingTestCaseAggregateType<T extends CodingTestCaseAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodingTestCase]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodingTestCase[P]>
+      : GetScalarType<T[P], AggregateCodingTestCase[P]>
+  }
+
+
+
+
+  export type CodingTestCaseGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingTestCaseWhereInput
+    orderBy?: CodingTestCaseOrderByWithAggregationInput | CodingTestCaseOrderByWithAggregationInput[]
+    by: CodingTestCaseScalarFieldEnum[] | CodingTestCaseScalarFieldEnum
+    having?: CodingTestCaseScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodingTestCaseCountAggregateInputType | true
+    _avg?: CodingTestCaseAvgAggregateInputType
+    _sum?: CodingTestCaseSumAggregateInputType
+    _min?: CodingTestCaseMinAggregateInputType
+    _max?: CodingTestCaseMaxAggregateInputType
+  }
+
+  export type CodingTestCaseGroupByOutputType = {
+    id: string
+    challengeId: string
+    isHidden: boolean
+    stdin: string
+    expectedStdout: string
+    weight: number
+    orderIndex: number
+    _count: CodingTestCaseCountAggregateOutputType | null
+    _avg: CodingTestCaseAvgAggregateOutputType | null
+    _sum: CodingTestCaseSumAggregateOutputType | null
+    _min: CodingTestCaseMinAggregateOutputType | null
+    _max: CodingTestCaseMaxAggregateOutputType | null
+  }
+
+  type GetCodingTestCaseGroupByPayload<T extends CodingTestCaseGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodingTestCaseGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodingTestCaseGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodingTestCaseGroupByOutputType[P]>
+            : GetScalarType<T[P], CodingTestCaseGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodingTestCaseSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    challengeId?: boolean
+    isHidden?: boolean
+    stdin?: boolean
+    expectedStdout?: boolean
+    weight?: boolean
+    orderIndex?: boolean
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingTestCase"]>
+
+  export type CodingTestCaseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    challengeId?: boolean
+    isHidden?: boolean
+    stdin?: boolean
+    expectedStdout?: boolean
+    weight?: boolean
+    orderIndex?: boolean
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingTestCase"]>
+
+  export type CodingTestCaseSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    challengeId?: boolean
+    isHidden?: boolean
+    stdin?: boolean
+    expectedStdout?: boolean
+    weight?: boolean
+    orderIndex?: boolean
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingTestCase"]>
+
+  export type CodingTestCaseSelectScalar = {
+    id?: boolean
+    challengeId?: boolean
+    isHidden?: boolean
+    stdin?: boolean
+    expectedStdout?: boolean
+    weight?: boolean
+    orderIndex?: boolean
+  }
+
+  export type CodingTestCaseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "challengeId" | "isHidden" | "stdin" | "expectedStdout" | "weight" | "orderIndex", ExtArgs["result"]["codingTestCase"]>
+  export type CodingTestCaseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }
+  export type CodingTestCaseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }
+  export type CodingTestCaseIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    challenge?: boolean | CodingChallengeDefaultArgs<ExtArgs>
+  }
+
+  export type $CodingTestCasePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodingTestCase"
+    objects: {
+      challenge: Prisma.$CodingChallengePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      challengeId: string
+      isHidden: boolean
+      stdin: string
+      expectedStdout: string
+      weight: number
+      orderIndex: number
+    }, ExtArgs["result"]["codingTestCase"]>
+    composites: {}
+  }
+
+  type CodingTestCaseGetPayload<S extends boolean | null | undefined | CodingTestCaseDefaultArgs> = $Result.GetResult<Prisma.$CodingTestCasePayload, S>
+
+  type CodingTestCaseCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodingTestCaseFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodingTestCaseCountAggregateInputType | true
+    }
+
+  export interface CodingTestCaseDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodingTestCase'], meta: { name: 'CodingTestCase' } }
+    /**
+     * Find zero or one CodingTestCase that matches the filter.
+     * @param {CodingTestCaseFindUniqueArgs} args - Arguments to find a CodingTestCase
+     * @example
+     * // Get one CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodingTestCaseFindUniqueArgs>(args: SelectSubset<T, CodingTestCaseFindUniqueArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodingTestCase that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodingTestCaseFindUniqueOrThrowArgs} args - Arguments to find a CodingTestCase
+     * @example
+     * // Get one CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodingTestCaseFindUniqueOrThrowArgs>(args: SelectSubset<T, CodingTestCaseFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingTestCase that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseFindFirstArgs} args - Arguments to find a CodingTestCase
+     * @example
+     * // Get one CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodingTestCaseFindFirstArgs>(args?: SelectSubset<T, CodingTestCaseFindFirstArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingTestCase that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseFindFirstOrThrowArgs} args - Arguments to find a CodingTestCase
+     * @example
+     * // Get one CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodingTestCaseFindFirstOrThrowArgs>(args?: SelectSubset<T, CodingTestCaseFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodingTestCases that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodingTestCases
+     * const codingTestCases = await prisma.codingTestCase.findMany()
+     * 
+     * // Get first 10 CodingTestCases
+     * const codingTestCases = await prisma.codingTestCase.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codingTestCaseWithIdOnly = await prisma.codingTestCase.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodingTestCaseFindManyArgs>(args?: SelectSubset<T, CodingTestCaseFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodingTestCase.
+     * @param {CodingTestCaseCreateArgs} args - Arguments to create a CodingTestCase.
+     * @example
+     * // Create one CodingTestCase
+     * const CodingTestCase = await prisma.codingTestCase.create({
+     *   data: {
+     *     // ... data to create a CodingTestCase
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodingTestCaseCreateArgs>(args: SelectSubset<T, CodingTestCaseCreateArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodingTestCases.
+     * @param {CodingTestCaseCreateManyArgs} args - Arguments to create many CodingTestCases.
+     * @example
+     * // Create many CodingTestCases
+     * const codingTestCase = await prisma.codingTestCase.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodingTestCaseCreateManyArgs>(args?: SelectSubset<T, CodingTestCaseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodingTestCases and returns the data saved in the database.
+     * @param {CodingTestCaseCreateManyAndReturnArgs} args - Arguments to create many CodingTestCases.
+     * @example
+     * // Create many CodingTestCases
+     * const codingTestCase = await prisma.codingTestCase.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodingTestCases and only return the `id`
+     * const codingTestCaseWithIdOnly = await prisma.codingTestCase.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodingTestCaseCreateManyAndReturnArgs>(args?: SelectSubset<T, CodingTestCaseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodingTestCase.
+     * @param {CodingTestCaseDeleteArgs} args - Arguments to delete one CodingTestCase.
+     * @example
+     * // Delete one CodingTestCase
+     * const CodingTestCase = await prisma.codingTestCase.delete({
+     *   where: {
+     *     // ... filter to delete one CodingTestCase
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodingTestCaseDeleteArgs>(args: SelectSubset<T, CodingTestCaseDeleteArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodingTestCase.
+     * @param {CodingTestCaseUpdateArgs} args - Arguments to update one CodingTestCase.
+     * @example
+     * // Update one CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodingTestCaseUpdateArgs>(args: SelectSubset<T, CodingTestCaseUpdateArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodingTestCases.
+     * @param {CodingTestCaseDeleteManyArgs} args - Arguments to filter CodingTestCases to delete.
+     * @example
+     * // Delete a few CodingTestCases
+     * const { count } = await prisma.codingTestCase.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodingTestCaseDeleteManyArgs>(args?: SelectSubset<T, CodingTestCaseDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingTestCases.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodingTestCases
+     * const codingTestCase = await prisma.codingTestCase.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodingTestCaseUpdateManyArgs>(args: SelectSubset<T, CodingTestCaseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingTestCases and returns the data updated in the database.
+     * @param {CodingTestCaseUpdateManyAndReturnArgs} args - Arguments to update many CodingTestCases.
+     * @example
+     * // Update many CodingTestCases
+     * const codingTestCase = await prisma.codingTestCase.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodingTestCases and only return the `id`
+     * const codingTestCaseWithIdOnly = await prisma.codingTestCase.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodingTestCaseUpdateManyAndReturnArgs>(args: SelectSubset<T, CodingTestCaseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodingTestCase.
+     * @param {CodingTestCaseUpsertArgs} args - Arguments to update or create a CodingTestCase.
+     * @example
+     * // Update or create a CodingTestCase
+     * const codingTestCase = await prisma.codingTestCase.upsert({
+     *   create: {
+     *     // ... data to create a CodingTestCase
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodingTestCase we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodingTestCaseUpsertArgs>(args: SelectSubset<T, CodingTestCaseUpsertArgs<ExtArgs>>): Prisma__CodingTestCaseClient<$Result.GetResult<Prisma.$CodingTestCasePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodingTestCases.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseCountArgs} args - Arguments to filter CodingTestCases to count.
+     * @example
+     * // Count the number of CodingTestCases
+     * const count = await prisma.codingTestCase.count({
+     *   where: {
+     *     // ... the filter for the CodingTestCases we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodingTestCaseCountArgs>(
+      args?: Subset<T, CodingTestCaseCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodingTestCaseCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodingTestCase.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodingTestCaseAggregateArgs>(args: Subset<T, CodingTestCaseAggregateArgs>): Prisma.PrismaPromise<GetCodingTestCaseAggregateType<T>>
+
+    /**
+     * Group by CodingTestCase.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingTestCaseGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodingTestCaseGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodingTestCaseGroupByArgs['orderBy'] }
+        : { orderBy?: CodingTestCaseGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodingTestCaseGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodingTestCaseGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodingTestCase model
+   */
+  readonly fields: CodingTestCaseFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodingTestCase.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodingTestCaseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    challenge<T extends CodingChallengeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CodingChallengeDefaultArgs<ExtArgs>>): Prisma__CodingChallengeClient<$Result.GetResult<Prisma.$CodingChallengePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodingTestCase model
+   */
+  interface CodingTestCaseFieldRefs {
+    readonly id: FieldRef<"CodingTestCase", 'String'>
+    readonly challengeId: FieldRef<"CodingTestCase", 'String'>
+    readonly isHidden: FieldRef<"CodingTestCase", 'Boolean'>
+    readonly stdin: FieldRef<"CodingTestCase", 'String'>
+    readonly expectedStdout: FieldRef<"CodingTestCase", 'String'>
+    readonly weight: FieldRef<"CodingTestCase", 'Float'>
+    readonly orderIndex: FieldRef<"CodingTestCase", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodingTestCase findUnique
+   */
+  export type CodingTestCaseFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingTestCase to fetch.
+     */
+    where: CodingTestCaseWhereUniqueInput
+  }
+
+  /**
+   * CodingTestCase findUniqueOrThrow
+   */
+  export type CodingTestCaseFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingTestCase to fetch.
+     */
+    where: CodingTestCaseWhereUniqueInput
+  }
+
+  /**
+   * CodingTestCase findFirst
+   */
+  export type CodingTestCaseFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingTestCase to fetch.
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingTestCases to fetch.
+     */
+    orderBy?: CodingTestCaseOrderByWithRelationInput | CodingTestCaseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingTestCases.
+     */
+    cursor?: CodingTestCaseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingTestCases from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingTestCases.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingTestCases.
+     */
+    distinct?: CodingTestCaseScalarFieldEnum | CodingTestCaseScalarFieldEnum[]
+  }
+
+  /**
+   * CodingTestCase findFirstOrThrow
+   */
+  export type CodingTestCaseFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingTestCase to fetch.
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingTestCases to fetch.
+     */
+    orderBy?: CodingTestCaseOrderByWithRelationInput | CodingTestCaseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingTestCases.
+     */
+    cursor?: CodingTestCaseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingTestCases from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingTestCases.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingTestCases.
+     */
+    distinct?: CodingTestCaseScalarFieldEnum | CodingTestCaseScalarFieldEnum[]
+  }
+
+  /**
+   * CodingTestCase findMany
+   */
+  export type CodingTestCaseFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingTestCases to fetch.
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingTestCases to fetch.
+     */
+    orderBy?: CodingTestCaseOrderByWithRelationInput | CodingTestCaseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodingTestCases.
+     */
+    cursor?: CodingTestCaseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingTestCases from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingTestCases.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingTestCases.
+     */
+    distinct?: CodingTestCaseScalarFieldEnum | CodingTestCaseScalarFieldEnum[]
+  }
+
+  /**
+   * CodingTestCase create
+   */
+  export type CodingTestCaseCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodingTestCase.
+     */
+    data: XOR<CodingTestCaseCreateInput, CodingTestCaseUncheckedCreateInput>
+  }
+
+  /**
+   * CodingTestCase createMany
+   */
+  export type CodingTestCaseCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodingTestCases.
+     */
+    data: CodingTestCaseCreateManyInput | CodingTestCaseCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CodingTestCase createManyAndReturn
+   */
+  export type CodingTestCaseCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodingTestCases.
+     */
+    data: CodingTestCaseCreateManyInput | CodingTestCaseCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingTestCase update
+   */
+  export type CodingTestCaseUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodingTestCase.
+     */
+    data: XOR<CodingTestCaseUpdateInput, CodingTestCaseUncheckedUpdateInput>
+    /**
+     * Choose, which CodingTestCase to update.
+     */
+    where: CodingTestCaseWhereUniqueInput
+  }
+
+  /**
+   * CodingTestCase updateMany
+   */
+  export type CodingTestCaseUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodingTestCases.
+     */
+    data: XOR<CodingTestCaseUpdateManyMutationInput, CodingTestCaseUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingTestCases to update
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * Limit how many CodingTestCases to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingTestCase updateManyAndReturn
+   */
+  export type CodingTestCaseUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * The data used to update CodingTestCases.
+     */
+    data: XOR<CodingTestCaseUpdateManyMutationInput, CodingTestCaseUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingTestCases to update
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * Limit how many CodingTestCases to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingTestCase upsert
+   */
+  export type CodingTestCaseUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodingTestCase to update in case it exists.
+     */
+    where: CodingTestCaseWhereUniqueInput
+    /**
+     * In case the CodingTestCase found by the `where` argument doesn't exist, create a new CodingTestCase with this data.
+     */
+    create: XOR<CodingTestCaseCreateInput, CodingTestCaseUncheckedCreateInput>
+    /**
+     * In case the CodingTestCase was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodingTestCaseUpdateInput, CodingTestCaseUncheckedUpdateInput>
+  }
+
+  /**
+   * CodingTestCase delete
+   */
+  export type CodingTestCaseDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+    /**
+     * Filter which CodingTestCase to delete.
+     */
+    where: CodingTestCaseWhereUniqueInput
+  }
+
+  /**
+   * CodingTestCase deleteMany
+   */
+  export type CodingTestCaseDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingTestCases to delete
+     */
+    where?: CodingTestCaseWhereInput
+    /**
+     * Limit how many CodingTestCases to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingTestCase without action
+   */
+  export type CodingTestCaseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingTestCase
+     */
+    select?: CodingTestCaseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingTestCase
+     */
+    omit?: CodingTestCaseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingTestCaseInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CodingSkillSignal
+   */
+
+  export type AggregateCodingSkillSignal = {
+    _count: CodingSkillSignalCountAggregateOutputType | null
+    _avg: CodingSkillSignalAvgAggregateOutputType | null
+    _sum: CodingSkillSignalSumAggregateOutputType | null
+    _min: CodingSkillSignalMinAggregateOutputType | null
+    _max: CodingSkillSignalMaxAggregateOutputType | null
+  }
+
+  export type CodingSkillSignalAvgAggregateOutputType = {
+    weight: number | null
+    mappedScore: number | null
+  }
+
+  export type CodingSkillSignalSumAggregateOutputType = {
+    weight: number | null
+    mappedScore: number | null
+  }
+
+  export type CodingSkillSignalMinAggregateOutputType = {
+    id: string | null
+    attemptId: string | null
+    skillSlug: string | null
+    signalType: string | null
+    weight: number | null
+    mappedScore: number | null
+  }
+
+  export type CodingSkillSignalMaxAggregateOutputType = {
+    id: string | null
+    attemptId: string | null
+    skillSlug: string | null
+    signalType: string | null
+    weight: number | null
+    mappedScore: number | null
+  }
+
+  export type CodingSkillSignalCountAggregateOutputType = {
+    id: number
+    attemptId: number
+    skillSlug: number
+    signalType: number
+    weight: number
+    mappedScore: number
+    _all: number
+  }
+
+
+  export type CodingSkillSignalAvgAggregateInputType = {
+    weight?: true
+    mappedScore?: true
+  }
+
+  export type CodingSkillSignalSumAggregateInputType = {
+    weight?: true
+    mappedScore?: true
+  }
+
+  export type CodingSkillSignalMinAggregateInputType = {
+    id?: true
+    attemptId?: true
+    skillSlug?: true
+    signalType?: true
+    weight?: true
+    mappedScore?: true
+  }
+
+  export type CodingSkillSignalMaxAggregateInputType = {
+    id?: true
+    attemptId?: true
+    skillSlug?: true
+    signalType?: true
+    weight?: true
+    mappedScore?: true
+  }
+
+  export type CodingSkillSignalCountAggregateInputType = {
+    id?: true
+    attemptId?: true
+    skillSlug?: true
+    signalType?: true
+    weight?: true
+    mappedScore?: true
+    _all?: true
+  }
+
+  export type CodingSkillSignalAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingSkillSignal to aggregate.
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingSkillSignals to fetch.
+     */
+    orderBy?: CodingSkillSignalOrderByWithRelationInput | CodingSkillSignalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CodingSkillSignalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingSkillSignals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingSkillSignals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CodingSkillSignals
+    **/
+    _count?: true | CodingSkillSignalCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CodingSkillSignalAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CodingSkillSignalSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CodingSkillSignalMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CodingSkillSignalMaxAggregateInputType
+  }
+
+  export type GetCodingSkillSignalAggregateType<T extends CodingSkillSignalAggregateArgs> = {
+        [P in keyof T & keyof AggregateCodingSkillSignal]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCodingSkillSignal[P]>
+      : GetScalarType<T[P], AggregateCodingSkillSignal[P]>
+  }
+
+
+
+
+  export type CodingSkillSignalGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CodingSkillSignalWhereInput
+    orderBy?: CodingSkillSignalOrderByWithAggregationInput | CodingSkillSignalOrderByWithAggregationInput[]
+    by: CodingSkillSignalScalarFieldEnum[] | CodingSkillSignalScalarFieldEnum
+    having?: CodingSkillSignalScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CodingSkillSignalCountAggregateInputType | true
+    _avg?: CodingSkillSignalAvgAggregateInputType
+    _sum?: CodingSkillSignalSumAggregateInputType
+    _min?: CodingSkillSignalMinAggregateInputType
+    _max?: CodingSkillSignalMaxAggregateInputType
+  }
+
+  export type CodingSkillSignalGroupByOutputType = {
+    id: string
+    attemptId: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+    _count: CodingSkillSignalCountAggregateOutputType | null
+    _avg: CodingSkillSignalAvgAggregateOutputType | null
+    _sum: CodingSkillSignalSumAggregateOutputType | null
+    _min: CodingSkillSignalMinAggregateOutputType | null
+    _max: CodingSkillSignalMaxAggregateOutputType | null
+  }
+
+  type GetCodingSkillSignalGroupByPayload<T extends CodingSkillSignalGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CodingSkillSignalGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CodingSkillSignalGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CodingSkillSignalGroupByOutputType[P]>
+            : GetScalarType<T[P], CodingSkillSignalGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CodingSkillSignalSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attemptId?: boolean
+    skillSlug?: boolean
+    signalType?: boolean
+    weight?: boolean
+    mappedScore?: boolean
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingSkillSignal"]>
+
+  export type CodingSkillSignalSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attemptId?: boolean
+    skillSlug?: boolean
+    signalType?: boolean
+    weight?: boolean
+    mappedScore?: boolean
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingSkillSignal"]>
+
+  export type CodingSkillSignalSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attemptId?: boolean
+    skillSlug?: boolean
+    signalType?: boolean
+    weight?: boolean
+    mappedScore?: boolean
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["codingSkillSignal"]>
+
+  export type CodingSkillSignalSelectScalar = {
+    id?: boolean
+    attemptId?: boolean
+    skillSlug?: boolean
+    signalType?: boolean
+    weight?: boolean
+    mappedScore?: boolean
+  }
+
+  export type CodingSkillSignalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "attemptId" | "skillSlug" | "signalType" | "weight" | "mappedScore", ExtArgs["result"]["codingSkillSignal"]>
+  export type CodingSkillSignalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }
+  export type CodingSkillSignalIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }
+  export type CodingSkillSignalIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attempt?: boolean | CodingAttemptDefaultArgs<ExtArgs>
+  }
+
+  export type $CodingSkillSignalPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CodingSkillSignal"
+    objects: {
+      attempt: Prisma.$CodingAttemptPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      attemptId: string
+      skillSlug: string
+      signalType: string
+      weight: number
+      mappedScore: number
+    }, ExtArgs["result"]["codingSkillSignal"]>
+    composites: {}
+  }
+
+  type CodingSkillSignalGetPayload<S extends boolean | null | undefined | CodingSkillSignalDefaultArgs> = $Result.GetResult<Prisma.$CodingSkillSignalPayload, S>
+
+  type CodingSkillSignalCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CodingSkillSignalFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CodingSkillSignalCountAggregateInputType | true
+    }
+
+  export interface CodingSkillSignalDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CodingSkillSignal'], meta: { name: 'CodingSkillSignal' } }
+    /**
+     * Find zero or one CodingSkillSignal that matches the filter.
+     * @param {CodingSkillSignalFindUniqueArgs} args - Arguments to find a CodingSkillSignal
+     * @example
+     * // Get one CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CodingSkillSignalFindUniqueArgs>(args: SelectSubset<T, CodingSkillSignalFindUniqueArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CodingSkillSignal that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CodingSkillSignalFindUniqueOrThrowArgs} args - Arguments to find a CodingSkillSignal
+     * @example
+     * // Get one CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CodingSkillSignalFindUniqueOrThrowArgs>(args: SelectSubset<T, CodingSkillSignalFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingSkillSignal that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalFindFirstArgs} args - Arguments to find a CodingSkillSignal
+     * @example
+     * // Get one CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CodingSkillSignalFindFirstArgs>(args?: SelectSubset<T, CodingSkillSignalFindFirstArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CodingSkillSignal that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalFindFirstOrThrowArgs} args - Arguments to find a CodingSkillSignal
+     * @example
+     * // Get one CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CodingSkillSignalFindFirstOrThrowArgs>(args?: SelectSubset<T, CodingSkillSignalFindFirstOrThrowArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CodingSkillSignals that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CodingSkillSignals
+     * const codingSkillSignals = await prisma.codingSkillSignal.findMany()
+     * 
+     * // Get first 10 CodingSkillSignals
+     * const codingSkillSignals = await prisma.codingSkillSignal.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const codingSkillSignalWithIdOnly = await prisma.codingSkillSignal.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CodingSkillSignalFindManyArgs>(args?: SelectSubset<T, CodingSkillSignalFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CodingSkillSignal.
+     * @param {CodingSkillSignalCreateArgs} args - Arguments to create a CodingSkillSignal.
+     * @example
+     * // Create one CodingSkillSignal
+     * const CodingSkillSignal = await prisma.codingSkillSignal.create({
+     *   data: {
+     *     // ... data to create a CodingSkillSignal
+     *   }
+     * })
+     * 
+     */
+    create<T extends CodingSkillSignalCreateArgs>(args: SelectSubset<T, CodingSkillSignalCreateArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CodingSkillSignals.
+     * @param {CodingSkillSignalCreateManyArgs} args - Arguments to create many CodingSkillSignals.
+     * @example
+     * // Create many CodingSkillSignals
+     * const codingSkillSignal = await prisma.codingSkillSignal.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CodingSkillSignalCreateManyArgs>(args?: SelectSubset<T, CodingSkillSignalCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CodingSkillSignals and returns the data saved in the database.
+     * @param {CodingSkillSignalCreateManyAndReturnArgs} args - Arguments to create many CodingSkillSignals.
+     * @example
+     * // Create many CodingSkillSignals
+     * const codingSkillSignal = await prisma.codingSkillSignal.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CodingSkillSignals and only return the `id`
+     * const codingSkillSignalWithIdOnly = await prisma.codingSkillSignal.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CodingSkillSignalCreateManyAndReturnArgs>(args?: SelectSubset<T, CodingSkillSignalCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CodingSkillSignal.
+     * @param {CodingSkillSignalDeleteArgs} args - Arguments to delete one CodingSkillSignal.
+     * @example
+     * // Delete one CodingSkillSignal
+     * const CodingSkillSignal = await prisma.codingSkillSignal.delete({
+     *   where: {
+     *     // ... filter to delete one CodingSkillSignal
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CodingSkillSignalDeleteArgs>(args: SelectSubset<T, CodingSkillSignalDeleteArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CodingSkillSignal.
+     * @param {CodingSkillSignalUpdateArgs} args - Arguments to update one CodingSkillSignal.
+     * @example
+     * // Update one CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CodingSkillSignalUpdateArgs>(args: SelectSubset<T, CodingSkillSignalUpdateArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CodingSkillSignals.
+     * @param {CodingSkillSignalDeleteManyArgs} args - Arguments to filter CodingSkillSignals to delete.
+     * @example
+     * // Delete a few CodingSkillSignals
+     * const { count } = await prisma.codingSkillSignal.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CodingSkillSignalDeleteManyArgs>(args?: SelectSubset<T, CodingSkillSignalDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingSkillSignals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CodingSkillSignals
+     * const codingSkillSignal = await prisma.codingSkillSignal.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CodingSkillSignalUpdateManyArgs>(args: SelectSubset<T, CodingSkillSignalUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CodingSkillSignals and returns the data updated in the database.
+     * @param {CodingSkillSignalUpdateManyAndReturnArgs} args - Arguments to update many CodingSkillSignals.
+     * @example
+     * // Update many CodingSkillSignals
+     * const codingSkillSignal = await prisma.codingSkillSignal.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CodingSkillSignals and only return the `id`
+     * const codingSkillSignalWithIdOnly = await prisma.codingSkillSignal.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CodingSkillSignalUpdateManyAndReturnArgs>(args: SelectSubset<T, CodingSkillSignalUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CodingSkillSignal.
+     * @param {CodingSkillSignalUpsertArgs} args - Arguments to update or create a CodingSkillSignal.
+     * @example
+     * // Update or create a CodingSkillSignal
+     * const codingSkillSignal = await prisma.codingSkillSignal.upsert({
+     *   create: {
+     *     // ... data to create a CodingSkillSignal
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CodingSkillSignal we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CodingSkillSignalUpsertArgs>(args: SelectSubset<T, CodingSkillSignalUpsertArgs<ExtArgs>>): Prisma__CodingSkillSignalClient<$Result.GetResult<Prisma.$CodingSkillSignalPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CodingSkillSignals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalCountArgs} args - Arguments to filter CodingSkillSignals to count.
+     * @example
+     * // Count the number of CodingSkillSignals
+     * const count = await prisma.codingSkillSignal.count({
+     *   where: {
+     *     // ... the filter for the CodingSkillSignals we want to count
+     *   }
+     * })
+    **/
+    count<T extends CodingSkillSignalCountArgs>(
+      args?: Subset<T, CodingSkillSignalCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CodingSkillSignalCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CodingSkillSignal.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CodingSkillSignalAggregateArgs>(args: Subset<T, CodingSkillSignalAggregateArgs>): Prisma.PrismaPromise<GetCodingSkillSignalAggregateType<T>>
+
+    /**
+     * Group by CodingSkillSignal.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CodingSkillSignalGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CodingSkillSignalGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CodingSkillSignalGroupByArgs['orderBy'] }
+        : { orderBy?: CodingSkillSignalGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CodingSkillSignalGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCodingSkillSignalGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CodingSkillSignal model
+   */
+  readonly fields: CodingSkillSignalFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CodingSkillSignal.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CodingSkillSignalClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    attempt<T extends CodingAttemptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CodingAttemptDefaultArgs<ExtArgs>>): Prisma__CodingAttemptClient<$Result.GetResult<Prisma.$CodingAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CodingSkillSignal model
+   */
+  interface CodingSkillSignalFieldRefs {
+    readonly id: FieldRef<"CodingSkillSignal", 'String'>
+    readonly attemptId: FieldRef<"CodingSkillSignal", 'String'>
+    readonly skillSlug: FieldRef<"CodingSkillSignal", 'String'>
+    readonly signalType: FieldRef<"CodingSkillSignal", 'String'>
+    readonly weight: FieldRef<"CodingSkillSignal", 'Float'>
+    readonly mappedScore: FieldRef<"CodingSkillSignal", 'Float'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CodingSkillSignal findUnique
+   */
+  export type CodingSkillSignalFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingSkillSignal to fetch.
+     */
+    where: CodingSkillSignalWhereUniqueInput
+  }
+
+  /**
+   * CodingSkillSignal findUniqueOrThrow
+   */
+  export type CodingSkillSignalFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingSkillSignal to fetch.
+     */
+    where: CodingSkillSignalWhereUniqueInput
+  }
+
+  /**
+   * CodingSkillSignal findFirst
+   */
+  export type CodingSkillSignalFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingSkillSignal to fetch.
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingSkillSignals to fetch.
+     */
+    orderBy?: CodingSkillSignalOrderByWithRelationInput | CodingSkillSignalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingSkillSignals.
+     */
+    cursor?: CodingSkillSignalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingSkillSignals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingSkillSignals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingSkillSignals.
+     */
+    distinct?: CodingSkillSignalScalarFieldEnum | CodingSkillSignalScalarFieldEnum[]
+  }
+
+  /**
+   * CodingSkillSignal findFirstOrThrow
+   */
+  export type CodingSkillSignalFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingSkillSignal to fetch.
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingSkillSignals to fetch.
+     */
+    orderBy?: CodingSkillSignalOrderByWithRelationInput | CodingSkillSignalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CodingSkillSignals.
+     */
+    cursor?: CodingSkillSignalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingSkillSignals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingSkillSignals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingSkillSignals.
+     */
+    distinct?: CodingSkillSignalScalarFieldEnum | CodingSkillSignalScalarFieldEnum[]
+  }
+
+  /**
+   * CodingSkillSignal findMany
+   */
+  export type CodingSkillSignalFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter, which CodingSkillSignals to fetch.
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CodingSkillSignals to fetch.
+     */
+    orderBy?: CodingSkillSignalOrderByWithRelationInput | CodingSkillSignalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CodingSkillSignals.
+     */
+    cursor?: CodingSkillSignalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CodingSkillSignals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CodingSkillSignals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CodingSkillSignals.
+     */
+    distinct?: CodingSkillSignalScalarFieldEnum | CodingSkillSignalScalarFieldEnum[]
+  }
+
+  /**
+   * CodingSkillSignal create
+   */
+  export type CodingSkillSignalCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CodingSkillSignal.
+     */
+    data: XOR<CodingSkillSignalCreateInput, CodingSkillSignalUncheckedCreateInput>
+  }
+
+  /**
+   * CodingSkillSignal createMany
+   */
+  export type CodingSkillSignalCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CodingSkillSignals.
+     */
+    data: CodingSkillSignalCreateManyInput | CodingSkillSignalCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CodingSkillSignal createManyAndReturn
+   */
+  export type CodingSkillSignalCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * The data used to create many CodingSkillSignals.
+     */
+    data: CodingSkillSignalCreateManyInput | CodingSkillSignalCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingSkillSignal update
+   */
+  export type CodingSkillSignalUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CodingSkillSignal.
+     */
+    data: XOR<CodingSkillSignalUpdateInput, CodingSkillSignalUncheckedUpdateInput>
+    /**
+     * Choose, which CodingSkillSignal to update.
+     */
+    where: CodingSkillSignalWhereUniqueInput
+  }
+
+  /**
+   * CodingSkillSignal updateMany
+   */
+  export type CodingSkillSignalUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CodingSkillSignals.
+     */
+    data: XOR<CodingSkillSignalUpdateManyMutationInput, CodingSkillSignalUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingSkillSignals to update
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * Limit how many CodingSkillSignals to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingSkillSignal updateManyAndReturn
+   */
+  export type CodingSkillSignalUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * The data used to update CodingSkillSignals.
+     */
+    data: XOR<CodingSkillSignalUpdateManyMutationInput, CodingSkillSignalUncheckedUpdateManyInput>
+    /**
+     * Filter which CodingSkillSignals to update
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * Limit how many CodingSkillSignals to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CodingSkillSignal upsert
+   */
+  export type CodingSkillSignalUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CodingSkillSignal to update in case it exists.
+     */
+    where: CodingSkillSignalWhereUniqueInput
+    /**
+     * In case the CodingSkillSignal found by the `where` argument doesn't exist, create a new CodingSkillSignal with this data.
+     */
+    create: XOR<CodingSkillSignalCreateInput, CodingSkillSignalUncheckedCreateInput>
+    /**
+     * In case the CodingSkillSignal was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CodingSkillSignalUpdateInput, CodingSkillSignalUncheckedUpdateInput>
+  }
+
+  /**
+   * CodingSkillSignal delete
+   */
+  export type CodingSkillSignalDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+    /**
+     * Filter which CodingSkillSignal to delete.
+     */
+    where: CodingSkillSignalWhereUniqueInput
+  }
+
+  /**
+   * CodingSkillSignal deleteMany
+   */
+  export type CodingSkillSignalDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CodingSkillSignals to delete
+     */
+    where?: CodingSkillSignalWhereInput
+    /**
+     * Limit how many CodingSkillSignals to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CodingSkillSignal without action
+   */
+  export type CodingSkillSignalDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CodingSkillSignal
+     */
+    select?: CodingSkillSignalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CodingSkillSignal
+     */
+    omit?: CodingSkillSignalOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CodingSkillSignalInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -12027,6 +17200,65 @@ export namespace Prisma {
   export type AuthEventScalarFieldEnum = (typeof AuthEventScalarFieldEnum)[keyof typeof AuthEventScalarFieldEnum]
 
 
+  export const CodingChallengeScalarFieldEnum: {
+    id: 'id',
+    slug: 'slug',
+    title: 'title',
+    language: 'language',
+    difficulty: 'difficulty',
+    description: 'description',
+    skillSlug: 'skillSlug',
+    cohortId: 'cohortId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CodingChallengeScalarFieldEnum = (typeof CodingChallengeScalarFieldEnum)[keyof typeof CodingChallengeScalarFieldEnum]
+
+
+  export const CodingAttemptScalarFieldEnum: {
+    id: 'id',
+    associateId: 'associateId',
+    challengeId: 'challengeId',
+    submittedCode: 'submittedCode',
+    language: 'language',
+    verdict: 'verdict',
+    visibleTestResults: 'visibleTestResults',
+    hiddenTestResults: 'hiddenTestResults',
+    score: 'score',
+    judge0Token: 'judge0Token',
+    submittedAt: 'submittedAt',
+    completedAt: 'completedAt'
+  };
+
+  export type CodingAttemptScalarFieldEnum = (typeof CodingAttemptScalarFieldEnum)[keyof typeof CodingAttemptScalarFieldEnum]
+
+
+  export const CodingTestCaseScalarFieldEnum: {
+    id: 'id',
+    challengeId: 'challengeId',
+    isHidden: 'isHidden',
+    stdin: 'stdin',
+    expectedStdout: 'expectedStdout',
+    weight: 'weight',
+    orderIndex: 'orderIndex'
+  };
+
+  export type CodingTestCaseScalarFieldEnum = (typeof CodingTestCaseScalarFieldEnum)[keyof typeof CodingTestCaseScalarFieldEnum]
+
+
+  export const CodingSkillSignalScalarFieldEnum: {
+    id: 'id',
+    attemptId: 'attemptId',
+    skillSlug: 'skillSlug',
+    signalType: 'signalType',
+    weight: 'weight',
+    mappedScore: 'mappedScore'
+  };
+
+  export type CodingSkillSignalScalarFieldEnum = (typeof CodingSkillSignalScalarFieldEnum)[keyof typeof CodingSkillSignalScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -12148,6 +17380,13 @@ export namespace Prisma {
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
   /**
    * Deep Input Types
    */
@@ -12211,6 +17450,7 @@ export namespace Prisma {
     cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
+    codingAttempts?: CodingAttemptListRelationFilter
   }
 
   export type AssociateOrderByWithRelationInput = {
@@ -12229,6 +17469,7 @@ export namespace Prisma {
     cohort?: CohortOrderByWithRelationInput
     sessions?: SessionOrderByRelationAggregateInput
     gapScores?: GapScoreOrderByRelationAggregateInput
+    codingAttempts?: CodingAttemptOrderByRelationAggregateInput
   }
 
   export type AssociateWhereUniqueInput = Prisma.AtLeast<{
@@ -12250,6 +17491,7 @@ export namespace Prisma {
     cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     sessions?: SessionListRelationFilter
     gapScores?: GapScoreListRelationFilter
+    codingAttempts?: CodingAttemptListRelationFilter
   }, "id" | "slug" | "email" | "authUserId">
 
   export type AssociateOrderByWithAggregationInput = {
@@ -12566,6 +17808,7 @@ export namespace Prisma {
     associates?: AssociateListRelationFilter
     sessions?: SessionListRelationFilter
     curriculumWeeks?: CurriculumWeekListRelationFilter
+    codingChallenges?: CodingChallengeListRelationFilter
   }
 
   export type CohortOrderByWithRelationInput = {
@@ -12579,6 +17822,7 @@ export namespace Prisma {
     associates?: AssociateOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     curriculumWeeks?: CurriculumWeekOrderByRelationAggregateInput
+    codingChallenges?: CodingChallengeOrderByRelationAggregateInput
   }
 
   export type CohortWhereUniqueInput = Prisma.AtLeast<{
@@ -12595,6 +17839,7 @@ export namespace Prisma {
     associates?: AssociateListRelationFilter
     sessions?: SessionListRelationFilter
     curriculumWeeks?: CurriculumWeekListRelationFilter
+    codingChallenges?: CodingChallengeListRelationFilter
   }, "id">
 
   export type CohortOrderByWithAggregationInput = {
@@ -12824,6 +18069,321 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AuthEvent"> | Date | string
   }
 
+  export type CodingChallengeWhereInput = {
+    AND?: CodingChallengeWhereInput | CodingChallengeWhereInput[]
+    OR?: CodingChallengeWhereInput[]
+    NOT?: CodingChallengeWhereInput | CodingChallengeWhereInput[]
+    id?: StringFilter<"CodingChallenge"> | string
+    slug?: StringFilter<"CodingChallenge"> | string
+    title?: StringFilter<"CodingChallenge"> | string
+    language?: StringFilter<"CodingChallenge"> | string
+    difficulty?: StringFilter<"CodingChallenge"> | string
+    description?: StringFilter<"CodingChallenge"> | string
+    skillSlug?: StringFilter<"CodingChallenge"> | string
+    cohortId?: IntNullableFilter<"CodingChallenge"> | number | null
+    createdAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+    updatedAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
+    attempts?: CodingAttemptListRelationFilter
+    testCases?: CodingTestCaseListRelationFilter
+  }
+
+  export type CodingChallengeOrderByWithRelationInput = {
+    id?: SortOrder
+    slug?: SortOrder
+    title?: SortOrder
+    language?: SortOrder
+    difficulty?: SortOrder
+    description?: SortOrder
+    skillSlug?: SortOrder
+    cohortId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    cohort?: CohortOrderByWithRelationInput
+    attempts?: CodingAttemptOrderByRelationAggregateInput
+    testCases?: CodingTestCaseOrderByRelationAggregateInput
+  }
+
+  export type CodingChallengeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    slug?: string
+    AND?: CodingChallengeWhereInput | CodingChallengeWhereInput[]
+    OR?: CodingChallengeWhereInput[]
+    NOT?: CodingChallengeWhereInput | CodingChallengeWhereInput[]
+    title?: StringFilter<"CodingChallenge"> | string
+    language?: StringFilter<"CodingChallenge"> | string
+    difficulty?: StringFilter<"CodingChallenge"> | string
+    description?: StringFilter<"CodingChallenge"> | string
+    skillSlug?: StringFilter<"CodingChallenge"> | string
+    cohortId?: IntNullableFilter<"CodingChallenge"> | number | null
+    createdAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+    updatedAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+    cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
+    attempts?: CodingAttemptListRelationFilter
+    testCases?: CodingTestCaseListRelationFilter
+  }, "id" | "slug">
+
+  export type CodingChallengeOrderByWithAggregationInput = {
+    id?: SortOrder
+    slug?: SortOrder
+    title?: SortOrder
+    language?: SortOrder
+    difficulty?: SortOrder
+    description?: SortOrder
+    skillSlug?: SortOrder
+    cohortId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CodingChallengeCountOrderByAggregateInput
+    _avg?: CodingChallengeAvgOrderByAggregateInput
+    _max?: CodingChallengeMaxOrderByAggregateInput
+    _min?: CodingChallengeMinOrderByAggregateInput
+    _sum?: CodingChallengeSumOrderByAggregateInput
+  }
+
+  export type CodingChallengeScalarWhereWithAggregatesInput = {
+    AND?: CodingChallengeScalarWhereWithAggregatesInput | CodingChallengeScalarWhereWithAggregatesInput[]
+    OR?: CodingChallengeScalarWhereWithAggregatesInput[]
+    NOT?: CodingChallengeScalarWhereWithAggregatesInput | CodingChallengeScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    slug?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    title?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    language?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    difficulty?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    description?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    skillSlug?: StringWithAggregatesFilter<"CodingChallenge"> | string
+    cohortId?: IntNullableWithAggregatesFilter<"CodingChallenge"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"CodingChallenge"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CodingChallenge"> | Date | string
+  }
+
+  export type CodingAttemptWhereInput = {
+    AND?: CodingAttemptWhereInput | CodingAttemptWhereInput[]
+    OR?: CodingAttemptWhereInput[]
+    NOT?: CodingAttemptWhereInput | CodingAttemptWhereInput[]
+    id?: StringFilter<"CodingAttempt"> | string
+    associateId?: IntFilter<"CodingAttempt"> | number
+    challengeId?: StringFilter<"CodingAttempt"> | string
+    submittedCode?: StringFilter<"CodingAttempt"> | string
+    language?: StringFilter<"CodingAttempt"> | string
+    verdict?: StringFilter<"CodingAttempt"> | string
+    visibleTestResults?: JsonFilter<"CodingAttempt">
+    hiddenTestResults?: JsonFilter<"CodingAttempt">
+    score?: FloatNullableFilter<"CodingAttempt"> | number | null
+    judge0Token?: StringNullableFilter<"CodingAttempt"> | string | null
+    submittedAt?: DateTimeFilter<"CodingAttempt"> | Date | string
+    completedAt?: DateTimeNullableFilter<"CodingAttempt"> | Date | string | null
+    associate?: XOR<AssociateScalarRelationFilter, AssociateWhereInput>
+    challenge?: XOR<CodingChallengeScalarRelationFilter, CodingChallengeWhereInput>
+    signal?: XOR<CodingSkillSignalNullableScalarRelationFilter, CodingSkillSignalWhereInput> | null
+  }
+
+  export type CodingAttemptOrderByWithRelationInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    challengeId?: SortOrder
+    submittedCode?: SortOrder
+    language?: SortOrder
+    verdict?: SortOrder
+    visibleTestResults?: SortOrder
+    hiddenTestResults?: SortOrder
+    score?: SortOrderInput | SortOrder
+    judge0Token?: SortOrderInput | SortOrder
+    submittedAt?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    associate?: AssociateOrderByWithRelationInput
+    challenge?: CodingChallengeOrderByWithRelationInput
+    signal?: CodingSkillSignalOrderByWithRelationInput
+  }
+
+  export type CodingAttemptWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CodingAttemptWhereInput | CodingAttemptWhereInput[]
+    OR?: CodingAttemptWhereInput[]
+    NOT?: CodingAttemptWhereInput | CodingAttemptWhereInput[]
+    associateId?: IntFilter<"CodingAttempt"> | number
+    challengeId?: StringFilter<"CodingAttempt"> | string
+    submittedCode?: StringFilter<"CodingAttempt"> | string
+    language?: StringFilter<"CodingAttempt"> | string
+    verdict?: StringFilter<"CodingAttempt"> | string
+    visibleTestResults?: JsonFilter<"CodingAttempt">
+    hiddenTestResults?: JsonFilter<"CodingAttempt">
+    score?: FloatNullableFilter<"CodingAttempt"> | number | null
+    judge0Token?: StringNullableFilter<"CodingAttempt"> | string | null
+    submittedAt?: DateTimeFilter<"CodingAttempt"> | Date | string
+    completedAt?: DateTimeNullableFilter<"CodingAttempt"> | Date | string | null
+    associate?: XOR<AssociateScalarRelationFilter, AssociateWhereInput>
+    challenge?: XOR<CodingChallengeScalarRelationFilter, CodingChallengeWhereInput>
+    signal?: XOR<CodingSkillSignalNullableScalarRelationFilter, CodingSkillSignalWhereInput> | null
+  }, "id">
+
+  export type CodingAttemptOrderByWithAggregationInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    challengeId?: SortOrder
+    submittedCode?: SortOrder
+    language?: SortOrder
+    verdict?: SortOrder
+    visibleTestResults?: SortOrder
+    hiddenTestResults?: SortOrder
+    score?: SortOrderInput | SortOrder
+    judge0Token?: SortOrderInput | SortOrder
+    submittedAt?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    _count?: CodingAttemptCountOrderByAggregateInput
+    _avg?: CodingAttemptAvgOrderByAggregateInput
+    _max?: CodingAttemptMaxOrderByAggregateInput
+    _min?: CodingAttemptMinOrderByAggregateInput
+    _sum?: CodingAttemptSumOrderByAggregateInput
+  }
+
+  export type CodingAttemptScalarWhereWithAggregatesInput = {
+    AND?: CodingAttemptScalarWhereWithAggregatesInput | CodingAttemptScalarWhereWithAggregatesInput[]
+    OR?: CodingAttemptScalarWhereWithAggregatesInput[]
+    NOT?: CodingAttemptScalarWhereWithAggregatesInput | CodingAttemptScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CodingAttempt"> | string
+    associateId?: IntWithAggregatesFilter<"CodingAttempt"> | number
+    challengeId?: StringWithAggregatesFilter<"CodingAttempt"> | string
+    submittedCode?: StringWithAggregatesFilter<"CodingAttempt"> | string
+    language?: StringWithAggregatesFilter<"CodingAttempt"> | string
+    verdict?: StringWithAggregatesFilter<"CodingAttempt"> | string
+    visibleTestResults?: JsonWithAggregatesFilter<"CodingAttempt">
+    hiddenTestResults?: JsonWithAggregatesFilter<"CodingAttempt">
+    score?: FloatNullableWithAggregatesFilter<"CodingAttempt"> | number | null
+    judge0Token?: StringNullableWithAggregatesFilter<"CodingAttempt"> | string | null
+    submittedAt?: DateTimeWithAggregatesFilter<"CodingAttempt"> | Date | string
+    completedAt?: DateTimeNullableWithAggregatesFilter<"CodingAttempt"> | Date | string | null
+  }
+
+  export type CodingTestCaseWhereInput = {
+    AND?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
+    OR?: CodingTestCaseWhereInput[]
+    NOT?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
+    id?: StringFilter<"CodingTestCase"> | string
+    challengeId?: StringFilter<"CodingTestCase"> | string
+    isHidden?: BoolFilter<"CodingTestCase"> | boolean
+    stdin?: StringFilter<"CodingTestCase"> | string
+    expectedStdout?: StringFilter<"CodingTestCase"> | string
+    weight?: FloatFilter<"CodingTestCase"> | number
+    orderIndex?: IntFilter<"CodingTestCase"> | number
+    challenge?: XOR<CodingChallengeScalarRelationFilter, CodingChallengeWhereInput>
+  }
+
+  export type CodingTestCaseOrderByWithRelationInput = {
+    id?: SortOrder
+    challengeId?: SortOrder
+    isHidden?: SortOrder
+    stdin?: SortOrder
+    expectedStdout?: SortOrder
+    weight?: SortOrder
+    orderIndex?: SortOrder
+    challenge?: CodingChallengeOrderByWithRelationInput
+  }
+
+  export type CodingTestCaseWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
+    OR?: CodingTestCaseWhereInput[]
+    NOT?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
+    challengeId?: StringFilter<"CodingTestCase"> | string
+    isHidden?: BoolFilter<"CodingTestCase"> | boolean
+    stdin?: StringFilter<"CodingTestCase"> | string
+    expectedStdout?: StringFilter<"CodingTestCase"> | string
+    weight?: FloatFilter<"CodingTestCase"> | number
+    orderIndex?: IntFilter<"CodingTestCase"> | number
+    challenge?: XOR<CodingChallengeScalarRelationFilter, CodingChallengeWhereInput>
+  }, "id">
+
+  export type CodingTestCaseOrderByWithAggregationInput = {
+    id?: SortOrder
+    challengeId?: SortOrder
+    isHidden?: SortOrder
+    stdin?: SortOrder
+    expectedStdout?: SortOrder
+    weight?: SortOrder
+    orderIndex?: SortOrder
+    _count?: CodingTestCaseCountOrderByAggregateInput
+    _avg?: CodingTestCaseAvgOrderByAggregateInput
+    _max?: CodingTestCaseMaxOrderByAggregateInput
+    _min?: CodingTestCaseMinOrderByAggregateInput
+    _sum?: CodingTestCaseSumOrderByAggregateInput
+  }
+
+  export type CodingTestCaseScalarWhereWithAggregatesInput = {
+    AND?: CodingTestCaseScalarWhereWithAggregatesInput | CodingTestCaseScalarWhereWithAggregatesInput[]
+    OR?: CodingTestCaseScalarWhereWithAggregatesInput[]
+    NOT?: CodingTestCaseScalarWhereWithAggregatesInput | CodingTestCaseScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CodingTestCase"> | string
+    challengeId?: StringWithAggregatesFilter<"CodingTestCase"> | string
+    isHidden?: BoolWithAggregatesFilter<"CodingTestCase"> | boolean
+    stdin?: StringWithAggregatesFilter<"CodingTestCase"> | string
+    expectedStdout?: StringWithAggregatesFilter<"CodingTestCase"> | string
+    weight?: FloatWithAggregatesFilter<"CodingTestCase"> | number
+    orderIndex?: IntWithAggregatesFilter<"CodingTestCase"> | number
+  }
+
+  export type CodingSkillSignalWhereInput = {
+    AND?: CodingSkillSignalWhereInput | CodingSkillSignalWhereInput[]
+    OR?: CodingSkillSignalWhereInput[]
+    NOT?: CodingSkillSignalWhereInput | CodingSkillSignalWhereInput[]
+    id?: StringFilter<"CodingSkillSignal"> | string
+    attemptId?: StringFilter<"CodingSkillSignal"> | string
+    skillSlug?: StringFilter<"CodingSkillSignal"> | string
+    signalType?: StringFilter<"CodingSkillSignal"> | string
+    weight?: FloatFilter<"CodingSkillSignal"> | number
+    mappedScore?: FloatFilter<"CodingSkillSignal"> | number
+    attempt?: XOR<CodingAttemptScalarRelationFilter, CodingAttemptWhereInput>
+  }
+
+  export type CodingSkillSignalOrderByWithRelationInput = {
+    id?: SortOrder
+    attemptId?: SortOrder
+    skillSlug?: SortOrder
+    signalType?: SortOrder
+    weight?: SortOrder
+    mappedScore?: SortOrder
+    attempt?: CodingAttemptOrderByWithRelationInput
+  }
+
+  export type CodingSkillSignalWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    attemptId?: string
+    AND?: CodingSkillSignalWhereInput | CodingSkillSignalWhereInput[]
+    OR?: CodingSkillSignalWhereInput[]
+    NOT?: CodingSkillSignalWhereInput | CodingSkillSignalWhereInput[]
+    skillSlug?: StringFilter<"CodingSkillSignal"> | string
+    signalType?: StringFilter<"CodingSkillSignal"> | string
+    weight?: FloatFilter<"CodingSkillSignal"> | number
+    mappedScore?: FloatFilter<"CodingSkillSignal"> | number
+    attempt?: XOR<CodingAttemptScalarRelationFilter, CodingAttemptWhereInput>
+  }, "id" | "attemptId">
+
+  export type CodingSkillSignalOrderByWithAggregationInput = {
+    id?: SortOrder
+    attemptId?: SortOrder
+    skillSlug?: SortOrder
+    signalType?: SortOrder
+    weight?: SortOrder
+    mappedScore?: SortOrder
+    _count?: CodingSkillSignalCountOrderByAggregateInput
+    _avg?: CodingSkillSignalAvgOrderByAggregateInput
+    _max?: CodingSkillSignalMaxOrderByAggregateInput
+    _min?: CodingSkillSignalMinOrderByAggregateInput
+    _sum?: CodingSkillSignalSumOrderByAggregateInput
+  }
+
+  export type CodingSkillSignalScalarWhereWithAggregatesInput = {
+    AND?: CodingSkillSignalScalarWhereWithAggregatesInput | CodingSkillSignalScalarWhereWithAggregatesInput[]
+    OR?: CodingSkillSignalScalarWhereWithAggregatesInput[]
+    NOT?: CodingSkillSignalScalarWhereWithAggregatesInput | CodingSkillSignalScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CodingSkillSignal"> | string
+    attemptId?: StringWithAggregatesFilter<"CodingSkillSignal"> | string
+    skillSlug?: StringWithAggregatesFilter<"CodingSkillSignal"> | string
+    signalType?: StringWithAggregatesFilter<"CodingSkillSignal"> | string
+    weight?: FloatWithAggregatesFilter<"CodingSkillSignal"> | number
+    mappedScore?: FloatWithAggregatesFilter<"CodingSkillSignal"> | number
+  }
+
   export type HealthCheckCreateInput = {
     createdAt?: Date | string
   }
@@ -12870,6 +18430,7 @@ export namespace Prisma {
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
     sessions?: SessionCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateInput = {
@@ -12887,6 +18448,7 @@ export namespace Prisma {
     cohortId?: number | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUpdateInput = {
@@ -12903,6 +18465,7 @@ export namespace Prisma {
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateInput = {
@@ -12920,6 +18483,7 @@ export namespace Prisma {
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateCreateManyInput = {
@@ -13266,6 +18830,7 @@ export namespace Prisma {
     associates?: AssociateCreateNestedManyWithoutCohortInput
     sessions?: SessionCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeCreateNestedManyWithoutCohortInput
   }
 
   export type CohortUncheckedCreateInput = {
@@ -13279,6 +18844,7 @@ export namespace Prisma {
     associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
     sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeUncheckedCreateNestedManyWithoutCohortInput
   }
 
   export type CohortUpdateInput = {
@@ -13291,6 +18857,7 @@ export namespace Prisma {
     associates?: AssociateUpdateManyWithoutCohortNestedInput
     sessions?: SessionUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUpdateManyWithoutCohortNestedInput
   }
 
   export type CohortUncheckedUpdateInput = {
@@ -13304,6 +18871,7 @@ export namespace Prisma {
     associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUncheckedUpdateManyWithoutCohortNestedInput
   }
 
   export type CohortCreateManyInput = {
@@ -13545,6 +19113,342 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CodingChallengeCreateInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cohort?: CohortCreateNestedOneWithoutCodingChallengesInput
+    attempts?: CodingAttemptCreateNestedManyWithoutChallengeInput
+    testCases?: CodingTestCaseCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeUncheckedCreateInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    cohortId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: CodingAttemptUncheckedCreateNestedManyWithoutChallengeInput
+    testCases?: CodingTestCaseUncheckedCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cohort?: CohortUpdateOneWithoutCodingChallengesNestedInput
+    attempts?: CodingAttemptUpdateManyWithoutChallengeNestedInput
+    testCases?: CodingTestCaseUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: CodingAttemptUncheckedUpdateManyWithoutChallengeNestedInput
+    testCases?: CodingTestCaseUncheckedUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeCreateManyInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    cohortId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CodingChallengeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CodingChallengeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CodingAttemptCreateInput = {
+    id?: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    associate: AssociateCreateNestedOneWithoutCodingAttemptsInput
+    challenge: CodingChallengeCreateNestedOneWithoutAttemptsInput
+    signal?: CodingSkillSignalCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptUncheckedCreateInput = {
+    id?: string
+    associateId: number
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    signal?: CodingSkillSignalUncheckedCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    associate?: AssociateUpdateOneRequiredWithoutCodingAttemptsNestedInput
+    challenge?: CodingChallengeUpdateOneRequiredWithoutAttemptsNestedInput
+    signal?: CodingSkillSignalUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    challengeId?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    signal?: CodingSkillSignalUncheckedUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptCreateManyInput = {
+    id?: string
+    associateId: number
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+  }
+
+  export type CodingAttemptUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodingAttemptUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    challengeId?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodingTestCaseCreateInput = {
+    id?: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+    challenge: CodingChallengeCreateNestedOneWithoutTestCasesInput
+  }
+
+  export type CodingTestCaseUncheckedCreateInput = {
+    id?: string
+    challengeId: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+  }
+
+  export type CodingTestCaseUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+    challenge?: CodingChallengeUpdateOneRequiredWithoutTestCasesNestedInput
+  }
+
+  export type CodingTestCaseUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    challengeId?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type CodingTestCaseCreateManyInput = {
+    id?: string
+    challengeId: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+  }
+
+  export type CodingTestCaseUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type CodingTestCaseUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    challengeId?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type CodingSkillSignalCreateInput = {
+    id?: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+    attempt: CodingAttemptCreateNestedOneWithoutSignalInput
+  }
+
+  export type CodingSkillSignalUncheckedCreateInput = {
+    id?: string
+    attemptId: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+  }
+
+  export type CodingSkillSignalUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+    attempt?: CodingAttemptUpdateOneRequiredWithoutSignalNestedInput
+  }
+
+  export type CodingSkillSignalUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptId?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type CodingSkillSignalCreateManyInput = {
+    id?: string
+    attemptId: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+  }
+
+  export type CodingSkillSignalUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type CodingSkillSignalUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptId?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -13689,6 +19593,12 @@ export namespace Prisma {
     none?: GapScoreWhereInput
   }
 
+  export type CodingAttemptListRelationFilter = {
+    every?: CodingAttemptWhereInput
+    some?: CodingAttemptWhereInput
+    none?: CodingAttemptWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -13699,6 +19609,10 @@ export namespace Prisma {
   }
 
   export type GapScoreOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CodingAttemptOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14161,11 +20075,21 @@ export namespace Prisma {
     none?: CurriculumWeekWhereInput
   }
 
+  export type CodingChallengeListRelationFilter = {
+    every?: CodingChallengeWhereInput
+    some?: CodingChallengeWhereInput
+    none?: CodingChallengeWhereInput
+  }
+
   export type AssociateOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type CurriculumWeekOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CodingChallengeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14334,6 +20258,219 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type CodingTestCaseListRelationFilter = {
+    every?: CodingTestCaseWhereInput
+    some?: CodingTestCaseWhereInput
+    none?: CodingTestCaseWhereInput
+  }
+
+  export type CodingTestCaseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CodingChallengeCountOrderByAggregateInput = {
+    id?: SortOrder
+    slug?: SortOrder
+    title?: SortOrder
+    language?: SortOrder
+    difficulty?: SortOrder
+    description?: SortOrder
+    skillSlug?: SortOrder
+    cohortId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CodingChallengeAvgOrderByAggregateInput = {
+    cohortId?: SortOrder
+  }
+
+  export type CodingChallengeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    slug?: SortOrder
+    title?: SortOrder
+    language?: SortOrder
+    difficulty?: SortOrder
+    description?: SortOrder
+    skillSlug?: SortOrder
+    cohortId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CodingChallengeMinOrderByAggregateInput = {
+    id?: SortOrder
+    slug?: SortOrder
+    title?: SortOrder
+    language?: SortOrder
+    difficulty?: SortOrder
+    description?: SortOrder
+    skillSlug?: SortOrder
+    cohortId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CodingChallengeSumOrderByAggregateInput = {
+    cohortId?: SortOrder
+  }
+
+  export type CodingChallengeScalarRelationFilter = {
+    is?: CodingChallengeWhereInput
+    isNot?: CodingChallengeWhereInput
+  }
+
+  export type CodingSkillSignalNullableScalarRelationFilter = {
+    is?: CodingSkillSignalWhereInput | null
+    isNot?: CodingSkillSignalWhereInput | null
+  }
+
+  export type CodingAttemptCountOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    challengeId?: SortOrder
+    submittedCode?: SortOrder
+    language?: SortOrder
+    verdict?: SortOrder
+    visibleTestResults?: SortOrder
+    hiddenTestResults?: SortOrder
+    score?: SortOrder
+    judge0Token?: SortOrder
+    submittedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type CodingAttemptAvgOrderByAggregateInput = {
+    associateId?: SortOrder
+    score?: SortOrder
+  }
+
+  export type CodingAttemptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    challengeId?: SortOrder
+    submittedCode?: SortOrder
+    language?: SortOrder
+    verdict?: SortOrder
+    score?: SortOrder
+    judge0Token?: SortOrder
+    submittedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type CodingAttemptMinOrderByAggregateInput = {
+    id?: SortOrder
+    associateId?: SortOrder
+    challengeId?: SortOrder
+    submittedCode?: SortOrder
+    language?: SortOrder
+    verdict?: SortOrder
+    score?: SortOrder
+    judge0Token?: SortOrder
+    submittedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type CodingAttemptSumOrderByAggregateInput = {
+    associateId?: SortOrder
+    score?: SortOrder
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type CodingTestCaseCountOrderByAggregateInput = {
+    id?: SortOrder
+    challengeId?: SortOrder
+    isHidden?: SortOrder
+    stdin?: SortOrder
+    expectedStdout?: SortOrder
+    weight?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type CodingTestCaseAvgOrderByAggregateInput = {
+    weight?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type CodingTestCaseMaxOrderByAggregateInput = {
+    id?: SortOrder
+    challengeId?: SortOrder
+    isHidden?: SortOrder
+    stdin?: SortOrder
+    expectedStdout?: SortOrder
+    weight?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type CodingTestCaseMinOrderByAggregateInput = {
+    id?: SortOrder
+    challengeId?: SortOrder
+    isHidden?: SortOrder
+    stdin?: SortOrder
+    expectedStdout?: SortOrder
+    weight?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type CodingTestCaseSumOrderByAggregateInput = {
+    weight?: SortOrder
+    orderIndex?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type CodingAttemptScalarRelationFilter = {
+    is?: CodingAttemptWhereInput
+    isNot?: CodingAttemptWhereInput
+  }
+
+  export type CodingSkillSignalCountOrderByAggregateInput = {
+    id?: SortOrder
+    attemptId?: SortOrder
+    skillSlug?: SortOrder
+    signalType?: SortOrder
+    weight?: SortOrder
+    mappedScore?: SortOrder
+  }
+
+  export type CodingSkillSignalAvgOrderByAggregateInput = {
+    weight?: SortOrder
+    mappedScore?: SortOrder
+  }
+
+  export type CodingSkillSignalMaxOrderByAggregateInput = {
+    id?: SortOrder
+    attemptId?: SortOrder
+    skillSlug?: SortOrder
+    signalType?: SortOrder
+    weight?: SortOrder
+    mappedScore?: SortOrder
+  }
+
+  export type CodingSkillSignalMinOrderByAggregateInput = {
+    id?: SortOrder
+    attemptId?: SortOrder
+    skillSlug?: SortOrder
+    signalType?: SortOrder
+    weight?: SortOrder
+    mappedScore?: SortOrder
+  }
+
+  export type CodingSkillSignalSumOrderByAggregateInput = {
+    weight?: SortOrder
+    mappedScore?: SortOrder
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -14366,6 +20503,13 @@ export namespace Prisma {
     connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
   }
 
+  export type CodingAttemptCreateNestedManyWithoutAssociateInput = {
+    create?: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput> | CodingAttemptCreateWithoutAssociateInput[] | CodingAttemptUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutAssociateInput | CodingAttemptCreateOrConnectWithoutAssociateInput[]
+    createMany?: CodingAttemptCreateManyAssociateInputEnvelope
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutAssociateInput = {
     create?: XOR<SessionCreateWithoutAssociateInput, SessionUncheckedCreateWithoutAssociateInput> | SessionCreateWithoutAssociateInput[] | SessionUncheckedCreateWithoutAssociateInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutAssociateInput | SessionCreateOrConnectWithoutAssociateInput[]
@@ -14378,6 +20522,13 @@ export namespace Prisma {
     connectOrCreate?: GapScoreCreateOrConnectWithoutAssociateInput | GapScoreCreateOrConnectWithoutAssociateInput[]
     createMany?: GapScoreCreateManyAssociateInputEnvelope
     connect?: GapScoreWhereUniqueInput | GapScoreWhereUniqueInput[]
+  }
+
+  export type CodingAttemptUncheckedCreateNestedManyWithoutAssociateInput = {
+    create?: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput> | CodingAttemptCreateWithoutAssociateInput[] | CodingAttemptUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutAssociateInput | CodingAttemptCreateOrConnectWithoutAssociateInput[]
+    createMany?: CodingAttemptCreateManyAssociateInputEnvelope
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -14430,6 +20581,20 @@ export namespace Prisma {
     deleteMany?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
   }
 
+  export type CodingAttemptUpdateManyWithoutAssociateNestedInput = {
+    create?: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput> | CodingAttemptCreateWithoutAssociateInput[] | CodingAttemptUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutAssociateInput | CodingAttemptCreateOrConnectWithoutAssociateInput[]
+    upsert?: CodingAttemptUpsertWithWhereUniqueWithoutAssociateInput | CodingAttemptUpsertWithWhereUniqueWithoutAssociateInput[]
+    createMany?: CodingAttemptCreateManyAssociateInputEnvelope
+    set?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    disconnect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    delete?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    update?: CodingAttemptUpdateWithWhereUniqueWithoutAssociateInput | CodingAttemptUpdateWithWhereUniqueWithoutAssociateInput[]
+    updateMany?: CodingAttemptUpdateManyWithWhereWithoutAssociateInput | CodingAttemptUpdateManyWithWhereWithoutAssociateInput[]
+    deleteMany?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -14464,6 +20629,20 @@ export namespace Prisma {
     update?: GapScoreUpdateWithWhereUniqueWithoutAssociateInput | GapScoreUpdateWithWhereUniqueWithoutAssociateInput[]
     updateMany?: GapScoreUpdateManyWithWhereWithoutAssociateInput | GapScoreUpdateManyWithWhereWithoutAssociateInput[]
     deleteMany?: GapScoreScalarWhereInput | GapScoreScalarWhereInput[]
+  }
+
+  export type CodingAttemptUncheckedUpdateManyWithoutAssociateNestedInput = {
+    create?: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput> | CodingAttemptCreateWithoutAssociateInput[] | CodingAttemptUncheckedCreateWithoutAssociateInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutAssociateInput | CodingAttemptCreateOrConnectWithoutAssociateInput[]
+    upsert?: CodingAttemptUpsertWithWhereUniqueWithoutAssociateInput | CodingAttemptUpsertWithWhereUniqueWithoutAssociateInput[]
+    createMany?: CodingAttemptCreateManyAssociateInputEnvelope
+    set?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    disconnect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    delete?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    update?: CodingAttemptUpdateWithWhereUniqueWithoutAssociateInput | CodingAttemptUpdateWithWhereUniqueWithoutAssociateInput[]
+    updateMany?: CodingAttemptUpdateManyWithWhereWithoutAssociateInput | CodingAttemptUpdateManyWithWhereWithoutAssociateInput[]
+    deleteMany?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
   }
 
   export type AssociateCreateNestedOneWithoutSessionsInput = {
@@ -14549,6 +20728,13 @@ export namespace Prisma {
     connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
   }
 
+  export type CodingChallengeCreateNestedManyWithoutCohortInput = {
+    create?: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput> | CodingChallengeCreateWithoutCohortInput[] | CodingChallengeUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutCohortInput | CodingChallengeCreateOrConnectWithoutCohortInput[]
+    createMany?: CodingChallengeCreateManyCohortInputEnvelope
+    connect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+  }
+
   export type AssociateUncheckedCreateNestedManyWithoutCohortInput = {
     create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
     connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
@@ -14568,6 +20754,13 @@ export namespace Prisma {
     connectOrCreate?: CurriculumWeekCreateOrConnectWithoutCohortInput | CurriculumWeekCreateOrConnectWithoutCohortInput[]
     createMany?: CurriculumWeekCreateManyCohortInputEnvelope
     connect?: CurriculumWeekWhereUniqueInput | CurriculumWeekWhereUniqueInput[]
+  }
+
+  export type CodingChallengeUncheckedCreateNestedManyWithoutCohortInput = {
+    create?: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput> | CodingChallengeCreateWithoutCohortInput[] | CodingChallengeUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutCohortInput | CodingChallengeCreateOrConnectWithoutCohortInput[]
+    createMany?: CodingChallengeCreateManyCohortInputEnvelope
+    connect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
   }
 
   export type AssociateUpdateManyWithoutCohortNestedInput = {
@@ -14612,6 +20805,20 @@ export namespace Prisma {
     deleteMany?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
   }
 
+  export type CodingChallengeUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput> | CodingChallengeCreateWithoutCohortInput[] | CodingChallengeUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutCohortInput | CodingChallengeCreateOrConnectWithoutCohortInput[]
+    upsert?: CodingChallengeUpsertWithWhereUniqueWithoutCohortInput | CodingChallengeUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: CodingChallengeCreateManyCohortInputEnvelope
+    set?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    disconnect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    delete?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    connect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    update?: CodingChallengeUpdateWithWhereUniqueWithoutCohortInput | CodingChallengeUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: CodingChallengeUpdateManyWithWhereWithoutCohortInput | CodingChallengeUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: CodingChallengeScalarWhereInput | CodingChallengeScalarWhereInput[]
+  }
+
   export type AssociateUncheckedUpdateManyWithoutCohortNestedInput = {
     create?: XOR<AssociateCreateWithoutCohortInput, AssociateUncheckedCreateWithoutCohortInput> | AssociateCreateWithoutCohortInput[] | AssociateUncheckedCreateWithoutCohortInput[]
     connectOrCreate?: AssociateCreateOrConnectWithoutCohortInput | AssociateCreateOrConnectWithoutCohortInput[]
@@ -14654,6 +20861,20 @@ export namespace Prisma {
     deleteMany?: CurriculumWeekScalarWhereInput | CurriculumWeekScalarWhereInput[]
   }
 
+  export type CodingChallengeUncheckedUpdateManyWithoutCohortNestedInput = {
+    create?: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput> | CodingChallengeCreateWithoutCohortInput[] | CodingChallengeUncheckedCreateWithoutCohortInput[]
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutCohortInput | CodingChallengeCreateOrConnectWithoutCohortInput[]
+    upsert?: CodingChallengeUpsertWithWhereUniqueWithoutCohortInput | CodingChallengeUpsertWithWhereUniqueWithoutCohortInput[]
+    createMany?: CodingChallengeCreateManyCohortInputEnvelope
+    set?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    disconnect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    delete?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    connect?: CodingChallengeWhereUniqueInput | CodingChallengeWhereUniqueInput[]
+    update?: CodingChallengeUpdateWithWhereUniqueWithoutCohortInput | CodingChallengeUpdateWithWhereUniqueWithoutCohortInput[]
+    updateMany?: CodingChallengeUpdateManyWithWhereWithoutCohortInput | CodingChallengeUpdateManyWithWhereWithoutCohortInput[]
+    deleteMany?: CodingChallengeScalarWhereInput | CodingChallengeScalarWhereInput[]
+  }
+
   export type CurriculumWeekCreatetopicTagsInput = {
     set: string[]
   }
@@ -14675,6 +20896,198 @@ export namespace Prisma {
     upsert?: CohortUpsertWithoutCurriculumWeeksInput
     connect?: CohortWhereUniqueInput
     update?: XOR<XOR<CohortUpdateToOneWithWhereWithoutCurriculumWeeksInput, CohortUpdateWithoutCurriculumWeeksInput>, CohortUncheckedUpdateWithoutCurriculumWeeksInput>
+  }
+
+  export type CohortCreateNestedOneWithoutCodingChallengesInput = {
+    create?: XOR<CohortCreateWithoutCodingChallengesInput, CohortUncheckedCreateWithoutCodingChallengesInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutCodingChallengesInput
+    connect?: CohortWhereUniqueInput
+  }
+
+  export type CodingAttemptCreateNestedManyWithoutChallengeInput = {
+    create?: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput> | CodingAttemptCreateWithoutChallengeInput[] | CodingAttemptUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutChallengeInput | CodingAttemptCreateOrConnectWithoutChallengeInput[]
+    createMany?: CodingAttemptCreateManyChallengeInputEnvelope
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+  }
+
+  export type CodingTestCaseCreateNestedManyWithoutChallengeInput = {
+    create?: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput> | CodingTestCaseCreateWithoutChallengeInput[] | CodingTestCaseUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingTestCaseCreateOrConnectWithoutChallengeInput | CodingTestCaseCreateOrConnectWithoutChallengeInput[]
+    createMany?: CodingTestCaseCreateManyChallengeInputEnvelope
+    connect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+  }
+
+  export type CodingAttemptUncheckedCreateNestedManyWithoutChallengeInput = {
+    create?: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput> | CodingAttemptCreateWithoutChallengeInput[] | CodingAttemptUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutChallengeInput | CodingAttemptCreateOrConnectWithoutChallengeInput[]
+    createMany?: CodingAttemptCreateManyChallengeInputEnvelope
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+  }
+
+  export type CodingTestCaseUncheckedCreateNestedManyWithoutChallengeInput = {
+    create?: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput> | CodingTestCaseCreateWithoutChallengeInput[] | CodingTestCaseUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingTestCaseCreateOrConnectWithoutChallengeInput | CodingTestCaseCreateOrConnectWithoutChallengeInput[]
+    createMany?: CodingTestCaseCreateManyChallengeInputEnvelope
+    connect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+  }
+
+  export type CohortUpdateOneWithoutCodingChallengesNestedInput = {
+    create?: XOR<CohortCreateWithoutCodingChallengesInput, CohortUncheckedCreateWithoutCodingChallengesInput>
+    connectOrCreate?: CohortCreateOrConnectWithoutCodingChallengesInput
+    upsert?: CohortUpsertWithoutCodingChallengesInput
+    disconnect?: CohortWhereInput | boolean
+    delete?: CohortWhereInput | boolean
+    connect?: CohortWhereUniqueInput
+    update?: XOR<XOR<CohortUpdateToOneWithWhereWithoutCodingChallengesInput, CohortUpdateWithoutCodingChallengesInput>, CohortUncheckedUpdateWithoutCodingChallengesInput>
+  }
+
+  export type CodingAttemptUpdateManyWithoutChallengeNestedInput = {
+    create?: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput> | CodingAttemptCreateWithoutChallengeInput[] | CodingAttemptUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutChallengeInput | CodingAttemptCreateOrConnectWithoutChallengeInput[]
+    upsert?: CodingAttemptUpsertWithWhereUniqueWithoutChallengeInput | CodingAttemptUpsertWithWhereUniqueWithoutChallengeInput[]
+    createMany?: CodingAttemptCreateManyChallengeInputEnvelope
+    set?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    disconnect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    delete?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    update?: CodingAttemptUpdateWithWhereUniqueWithoutChallengeInput | CodingAttemptUpdateWithWhereUniqueWithoutChallengeInput[]
+    updateMany?: CodingAttemptUpdateManyWithWhereWithoutChallengeInput | CodingAttemptUpdateManyWithWhereWithoutChallengeInput[]
+    deleteMany?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
+  }
+
+  export type CodingTestCaseUpdateManyWithoutChallengeNestedInput = {
+    create?: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput> | CodingTestCaseCreateWithoutChallengeInput[] | CodingTestCaseUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingTestCaseCreateOrConnectWithoutChallengeInput | CodingTestCaseCreateOrConnectWithoutChallengeInput[]
+    upsert?: CodingTestCaseUpsertWithWhereUniqueWithoutChallengeInput | CodingTestCaseUpsertWithWhereUniqueWithoutChallengeInput[]
+    createMany?: CodingTestCaseCreateManyChallengeInputEnvelope
+    set?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    disconnect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    delete?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    connect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    update?: CodingTestCaseUpdateWithWhereUniqueWithoutChallengeInput | CodingTestCaseUpdateWithWhereUniqueWithoutChallengeInput[]
+    updateMany?: CodingTestCaseUpdateManyWithWhereWithoutChallengeInput | CodingTestCaseUpdateManyWithWhereWithoutChallengeInput[]
+    deleteMany?: CodingTestCaseScalarWhereInput | CodingTestCaseScalarWhereInput[]
+  }
+
+  export type CodingAttemptUncheckedUpdateManyWithoutChallengeNestedInput = {
+    create?: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput> | CodingAttemptCreateWithoutChallengeInput[] | CodingAttemptUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutChallengeInput | CodingAttemptCreateOrConnectWithoutChallengeInput[]
+    upsert?: CodingAttemptUpsertWithWhereUniqueWithoutChallengeInput | CodingAttemptUpsertWithWhereUniqueWithoutChallengeInput[]
+    createMany?: CodingAttemptCreateManyChallengeInputEnvelope
+    set?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    disconnect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    delete?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    connect?: CodingAttemptWhereUniqueInput | CodingAttemptWhereUniqueInput[]
+    update?: CodingAttemptUpdateWithWhereUniqueWithoutChallengeInput | CodingAttemptUpdateWithWhereUniqueWithoutChallengeInput[]
+    updateMany?: CodingAttemptUpdateManyWithWhereWithoutChallengeInput | CodingAttemptUpdateManyWithWhereWithoutChallengeInput[]
+    deleteMany?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
+  }
+
+  export type CodingTestCaseUncheckedUpdateManyWithoutChallengeNestedInput = {
+    create?: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput> | CodingTestCaseCreateWithoutChallengeInput[] | CodingTestCaseUncheckedCreateWithoutChallengeInput[]
+    connectOrCreate?: CodingTestCaseCreateOrConnectWithoutChallengeInput | CodingTestCaseCreateOrConnectWithoutChallengeInput[]
+    upsert?: CodingTestCaseUpsertWithWhereUniqueWithoutChallengeInput | CodingTestCaseUpsertWithWhereUniqueWithoutChallengeInput[]
+    createMany?: CodingTestCaseCreateManyChallengeInputEnvelope
+    set?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    disconnect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    delete?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    connect?: CodingTestCaseWhereUniqueInput | CodingTestCaseWhereUniqueInput[]
+    update?: CodingTestCaseUpdateWithWhereUniqueWithoutChallengeInput | CodingTestCaseUpdateWithWhereUniqueWithoutChallengeInput[]
+    updateMany?: CodingTestCaseUpdateManyWithWhereWithoutChallengeInput | CodingTestCaseUpdateManyWithWhereWithoutChallengeInput[]
+    deleteMany?: CodingTestCaseScalarWhereInput | CodingTestCaseScalarWhereInput[]
+  }
+
+  export type AssociateCreateNestedOneWithoutCodingAttemptsInput = {
+    create?: XOR<AssociateCreateWithoutCodingAttemptsInput, AssociateUncheckedCreateWithoutCodingAttemptsInput>
+    connectOrCreate?: AssociateCreateOrConnectWithoutCodingAttemptsInput
+    connect?: AssociateWhereUniqueInput
+  }
+
+  export type CodingChallengeCreateNestedOneWithoutAttemptsInput = {
+    create?: XOR<CodingChallengeCreateWithoutAttemptsInput, CodingChallengeUncheckedCreateWithoutAttemptsInput>
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutAttemptsInput
+    connect?: CodingChallengeWhereUniqueInput
+  }
+
+  export type CodingSkillSignalCreateNestedOneWithoutAttemptInput = {
+    create?: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+    connectOrCreate?: CodingSkillSignalCreateOrConnectWithoutAttemptInput
+    connect?: CodingSkillSignalWhereUniqueInput
+  }
+
+  export type CodingSkillSignalUncheckedCreateNestedOneWithoutAttemptInput = {
+    create?: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+    connectOrCreate?: CodingSkillSignalCreateOrConnectWithoutAttemptInput
+    connect?: CodingSkillSignalWhereUniqueInput
+  }
+
+  export type AssociateUpdateOneRequiredWithoutCodingAttemptsNestedInput = {
+    create?: XOR<AssociateCreateWithoutCodingAttemptsInput, AssociateUncheckedCreateWithoutCodingAttemptsInput>
+    connectOrCreate?: AssociateCreateOrConnectWithoutCodingAttemptsInput
+    upsert?: AssociateUpsertWithoutCodingAttemptsInput
+    connect?: AssociateWhereUniqueInput
+    update?: XOR<XOR<AssociateUpdateToOneWithWhereWithoutCodingAttemptsInput, AssociateUpdateWithoutCodingAttemptsInput>, AssociateUncheckedUpdateWithoutCodingAttemptsInput>
+  }
+
+  export type CodingChallengeUpdateOneRequiredWithoutAttemptsNestedInput = {
+    create?: XOR<CodingChallengeCreateWithoutAttemptsInput, CodingChallengeUncheckedCreateWithoutAttemptsInput>
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutAttemptsInput
+    upsert?: CodingChallengeUpsertWithoutAttemptsInput
+    connect?: CodingChallengeWhereUniqueInput
+    update?: XOR<XOR<CodingChallengeUpdateToOneWithWhereWithoutAttemptsInput, CodingChallengeUpdateWithoutAttemptsInput>, CodingChallengeUncheckedUpdateWithoutAttemptsInput>
+  }
+
+  export type CodingSkillSignalUpdateOneWithoutAttemptNestedInput = {
+    create?: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+    connectOrCreate?: CodingSkillSignalCreateOrConnectWithoutAttemptInput
+    upsert?: CodingSkillSignalUpsertWithoutAttemptInput
+    disconnect?: CodingSkillSignalWhereInput | boolean
+    delete?: CodingSkillSignalWhereInput | boolean
+    connect?: CodingSkillSignalWhereUniqueInput
+    update?: XOR<XOR<CodingSkillSignalUpdateToOneWithWhereWithoutAttemptInput, CodingSkillSignalUpdateWithoutAttemptInput>, CodingSkillSignalUncheckedUpdateWithoutAttemptInput>
+  }
+
+  export type CodingSkillSignalUncheckedUpdateOneWithoutAttemptNestedInput = {
+    create?: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+    connectOrCreate?: CodingSkillSignalCreateOrConnectWithoutAttemptInput
+    upsert?: CodingSkillSignalUpsertWithoutAttemptInput
+    disconnect?: CodingSkillSignalWhereInput | boolean
+    delete?: CodingSkillSignalWhereInput | boolean
+    connect?: CodingSkillSignalWhereUniqueInput
+    update?: XOR<XOR<CodingSkillSignalUpdateToOneWithWhereWithoutAttemptInput, CodingSkillSignalUpdateWithoutAttemptInput>, CodingSkillSignalUncheckedUpdateWithoutAttemptInput>
+  }
+
+  export type CodingChallengeCreateNestedOneWithoutTestCasesInput = {
+    create?: XOR<CodingChallengeCreateWithoutTestCasesInput, CodingChallengeUncheckedCreateWithoutTestCasesInput>
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutTestCasesInput
+    connect?: CodingChallengeWhereUniqueInput
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type CodingChallengeUpdateOneRequiredWithoutTestCasesNestedInput = {
+    create?: XOR<CodingChallengeCreateWithoutTestCasesInput, CodingChallengeUncheckedCreateWithoutTestCasesInput>
+    connectOrCreate?: CodingChallengeCreateOrConnectWithoutTestCasesInput
+    upsert?: CodingChallengeUpsertWithoutTestCasesInput
+    connect?: CodingChallengeWhereUniqueInput
+    update?: XOR<XOR<CodingChallengeUpdateToOneWithWhereWithoutTestCasesInput, CodingChallengeUpdateWithoutTestCasesInput>, CodingChallengeUncheckedUpdateWithoutTestCasesInput>
+  }
+
+  export type CodingAttemptCreateNestedOneWithoutSignalInput = {
+    create?: XOR<CodingAttemptCreateWithoutSignalInput, CodingAttemptUncheckedCreateWithoutSignalInput>
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutSignalInput
+    connect?: CodingAttemptWhereUniqueInput
+  }
+
+  export type CodingAttemptUpdateOneRequiredWithoutSignalNestedInput = {
+    create?: XOR<CodingAttemptCreateWithoutSignalInput, CodingAttemptUncheckedCreateWithoutSignalInput>
+    connectOrCreate?: CodingAttemptCreateOrConnectWithoutSignalInput
+    upsert?: CodingAttemptUpsertWithoutSignalInput
+    connect?: CodingAttemptWhereUniqueInput
+    update?: XOR<XOR<CodingAttemptUpdateToOneWithWhereWithoutSignalInput, CodingAttemptUpdateWithoutSignalInput>, CodingAttemptUncheckedUpdateWithoutSignalInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -14943,6 +21356,19 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type CohortCreateWithoutAssociatesInput = {
     name: string
     startDate: Date | string
@@ -14952,6 +21378,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeCreateNestedManyWithoutCohortInput
   }
 
   export type CohortUncheckedCreateWithoutAssociatesInput = {
@@ -14964,6 +21391,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeUncheckedCreateNestedManyWithoutCohortInput
   }
 
   export type CohortCreateOrConnectWithoutAssociatesInput = {
@@ -15059,6 +21487,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CodingAttemptCreateWithoutAssociateInput = {
+    id?: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    challenge: CodingChallengeCreateNestedOneWithoutAttemptsInput
+    signal?: CodingSkillSignalCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptUncheckedCreateWithoutAssociateInput = {
+    id?: string
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    signal?: CodingSkillSignalUncheckedCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptCreateOrConnectWithoutAssociateInput = {
+    where: CodingAttemptWhereUniqueInput
+    create: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput>
+  }
+
+  export type CodingAttemptCreateManyAssociateInputEnvelope = {
+    data: CodingAttemptCreateManyAssociateInput | CodingAttemptCreateManyAssociateInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CohortUpsertWithoutAssociatesInput = {
     update: XOR<CohortUpdateWithoutAssociatesInput, CohortUncheckedUpdateWithoutAssociatesInput>
     create: XOR<CohortCreateWithoutAssociatesInput, CohortUncheckedCreateWithoutAssociatesInput>
@@ -15079,6 +21547,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUpdateManyWithoutCohortNestedInput
   }
 
   export type CohortUncheckedUpdateWithoutAssociatesInput = {
@@ -15091,6 +21560,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUncheckedUpdateManyWithoutCohortNestedInput
   }
 
   export type SessionUpsertWithWhereUniqueWithoutAssociateInput = {
@@ -15167,6 +21637,40 @@ export namespace Prisma {
     lastUpdated?: DateTimeFilter<"GapScore"> | Date | string
   }
 
+  export type CodingAttemptUpsertWithWhereUniqueWithoutAssociateInput = {
+    where: CodingAttemptWhereUniqueInput
+    update: XOR<CodingAttemptUpdateWithoutAssociateInput, CodingAttemptUncheckedUpdateWithoutAssociateInput>
+    create: XOR<CodingAttemptCreateWithoutAssociateInput, CodingAttemptUncheckedCreateWithoutAssociateInput>
+  }
+
+  export type CodingAttemptUpdateWithWhereUniqueWithoutAssociateInput = {
+    where: CodingAttemptWhereUniqueInput
+    data: XOR<CodingAttemptUpdateWithoutAssociateInput, CodingAttemptUncheckedUpdateWithoutAssociateInput>
+  }
+
+  export type CodingAttemptUpdateManyWithWhereWithoutAssociateInput = {
+    where: CodingAttemptScalarWhereInput
+    data: XOR<CodingAttemptUpdateManyMutationInput, CodingAttemptUncheckedUpdateManyWithoutAssociateInput>
+  }
+
+  export type CodingAttemptScalarWhereInput = {
+    AND?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
+    OR?: CodingAttemptScalarWhereInput[]
+    NOT?: CodingAttemptScalarWhereInput | CodingAttemptScalarWhereInput[]
+    id?: StringFilter<"CodingAttempt"> | string
+    associateId?: IntFilter<"CodingAttempt"> | number
+    challengeId?: StringFilter<"CodingAttempt"> | string
+    submittedCode?: StringFilter<"CodingAttempt"> | string
+    language?: StringFilter<"CodingAttempt"> | string
+    verdict?: StringFilter<"CodingAttempt"> | string
+    visibleTestResults?: JsonFilter<"CodingAttempt">
+    hiddenTestResults?: JsonFilter<"CodingAttempt">
+    score?: FloatNullableFilter<"CodingAttempt"> | number | null
+    judge0Token?: StringNullableFilter<"CodingAttempt"> | string | null
+    submittedAt?: DateTimeFilter<"CodingAttempt"> | Date | string
+    completedAt?: DateTimeNullableFilter<"CodingAttempt"> | Date | string | null
+  }
+
   export type AssociateCreateWithoutSessionsInput = {
     slug: string
     displayName?: string | null
@@ -15180,6 +21684,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateWithoutSessionsInput = {
@@ -15196,6 +21701,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     cohortId?: number | null
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateCreateOrConnectWithoutSessionsInput = {
@@ -15212,6 +21718,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     associates?: AssociateCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeCreateNestedManyWithoutCohortInput
   }
 
   export type CohortUncheckedCreateWithoutSessionsInput = {
@@ -15224,6 +21731,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
     curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeUncheckedCreateNestedManyWithoutCohortInput
   }
 
   export type CohortCreateOrConnectWithoutSessionsInput = {
@@ -15255,6 +21763,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateWithoutSessionsInput = {
@@ -15271,6 +21780,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type CohortUpsertWithoutSessionsInput = {
@@ -15293,6 +21803,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associates?: AssociateUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUpdateManyWithoutCohortNestedInput
   }
 
   export type CohortUncheckedUpdateWithoutSessionsInput = {
@@ -15305,6 +21816,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
     curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUncheckedUpdateManyWithoutCohortNestedInput
   }
 
   export type AssociateCreateWithoutGapScoresInput = {
@@ -15320,6 +21832,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     cohort?: CohortCreateNestedOneWithoutAssociatesInput
     sessions?: SessionCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateWithoutGapScoresInput = {
@@ -15336,6 +21849,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     cohortId?: number | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateCreateOrConnectWithoutGapScoresInput = {
@@ -15367,6 +21881,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohort?: CohortUpdateOneWithoutAssociatesNestedInput
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateWithoutGapScoresInput = {
@@ -15383,6 +21898,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cohortId?: NullableIntFieldUpdateOperationsInput | number | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateCreateWithoutCohortInput = {
@@ -15398,6 +21914,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     sessions?: SessionCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateUncheckedCreateWithoutCohortInput = {
@@ -15414,6 +21931,7 @@ export namespace Prisma {
     lastInvitedAt?: Date | string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
     gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
+    codingAttempts?: CodingAttemptUncheckedCreateNestedManyWithoutAssociateInput
   }
 
   export type AssociateCreateOrConnectWithoutCohortInput = {
@@ -15511,6 +22029,44 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CodingChallengeCreateWithoutCohortInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: CodingAttemptCreateNestedManyWithoutChallengeInput
+    testCases?: CodingTestCaseCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeUncheckedCreateWithoutCohortInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: CodingAttemptUncheckedCreateNestedManyWithoutChallengeInput
+    testCases?: CodingTestCaseUncheckedCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeCreateOrConnectWithoutCohortInput = {
+    where: CodingChallengeWhereUniqueInput
+    create: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput>
+  }
+
+  export type CodingChallengeCreateManyCohortInputEnvelope = {
+    data: CodingChallengeCreateManyCohortInput | CodingChallengeCreateManyCohortInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AssociateUpsertWithWhereUniqueWithoutCohortInput = {
     where: AssociateWhereUniqueInput
     update: XOR<AssociateUpdateWithoutCohortInput, AssociateUncheckedUpdateWithoutCohortInput>
@@ -15590,6 +22146,38 @@ export namespace Prisma {
     startDate?: DateTimeFilter<"CurriculumWeek"> | Date | string
   }
 
+  export type CodingChallengeUpsertWithWhereUniqueWithoutCohortInput = {
+    where: CodingChallengeWhereUniqueInput
+    update: XOR<CodingChallengeUpdateWithoutCohortInput, CodingChallengeUncheckedUpdateWithoutCohortInput>
+    create: XOR<CodingChallengeCreateWithoutCohortInput, CodingChallengeUncheckedCreateWithoutCohortInput>
+  }
+
+  export type CodingChallengeUpdateWithWhereUniqueWithoutCohortInput = {
+    where: CodingChallengeWhereUniqueInput
+    data: XOR<CodingChallengeUpdateWithoutCohortInput, CodingChallengeUncheckedUpdateWithoutCohortInput>
+  }
+
+  export type CodingChallengeUpdateManyWithWhereWithoutCohortInput = {
+    where: CodingChallengeScalarWhereInput
+    data: XOR<CodingChallengeUpdateManyMutationInput, CodingChallengeUncheckedUpdateManyWithoutCohortInput>
+  }
+
+  export type CodingChallengeScalarWhereInput = {
+    AND?: CodingChallengeScalarWhereInput | CodingChallengeScalarWhereInput[]
+    OR?: CodingChallengeScalarWhereInput[]
+    NOT?: CodingChallengeScalarWhereInput | CodingChallengeScalarWhereInput[]
+    id?: StringFilter<"CodingChallenge"> | string
+    slug?: StringFilter<"CodingChallenge"> | string
+    title?: StringFilter<"CodingChallenge"> | string
+    language?: StringFilter<"CodingChallenge"> | string
+    difficulty?: StringFilter<"CodingChallenge"> | string
+    description?: StringFilter<"CodingChallenge"> | string
+    skillSlug?: StringFilter<"CodingChallenge"> | string
+    cohortId?: IntNullableFilter<"CodingChallenge"> | number | null
+    createdAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+    updatedAt?: DateTimeFilter<"CodingChallenge"> | Date | string
+  }
+
   export type CohortCreateWithoutCurriculumWeeksInput = {
     name: string
     startDate: Date | string
@@ -15599,6 +22187,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     associates?: AssociateCreateNestedManyWithoutCohortInput
     sessions?: SessionCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeCreateNestedManyWithoutCohortInput
   }
 
   export type CohortUncheckedCreateWithoutCurriculumWeeksInput = {
@@ -15611,6 +22200,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
     sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
+    codingChallenges?: CodingChallengeUncheckedCreateNestedManyWithoutCohortInput
   }
 
   export type CohortCreateOrConnectWithoutCurriculumWeeksInput = {
@@ -15638,6 +22228,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associates?: AssociateUpdateManyWithoutCohortNestedInput
     sessions?: SessionUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUpdateManyWithoutCohortNestedInput
   }
 
   export type CohortUncheckedUpdateWithoutCurriculumWeeksInput = {
@@ -15650,6 +22241,536 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
+    codingChallenges?: CodingChallengeUncheckedUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortCreateWithoutCodingChallengesInput = {
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateCreateNestedManyWithoutCohortInput
+    sessions?: SessionCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortUncheckedCreateWithoutCodingChallengesInput = {
+    id?: number
+    name: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    description?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    associates?: AssociateUncheckedCreateNestedManyWithoutCohortInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutCohortInput
+    curriculumWeeks?: CurriculumWeekUncheckedCreateNestedManyWithoutCohortInput
+  }
+
+  export type CohortCreateOrConnectWithoutCodingChallengesInput = {
+    where: CohortWhereUniqueInput
+    create: XOR<CohortCreateWithoutCodingChallengesInput, CohortUncheckedCreateWithoutCodingChallengesInput>
+  }
+
+  export type CodingAttemptCreateWithoutChallengeInput = {
+    id?: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    associate: AssociateCreateNestedOneWithoutCodingAttemptsInput
+    signal?: CodingSkillSignalCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptUncheckedCreateWithoutChallengeInput = {
+    id?: string
+    associateId: number
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    signal?: CodingSkillSignalUncheckedCreateNestedOneWithoutAttemptInput
+  }
+
+  export type CodingAttemptCreateOrConnectWithoutChallengeInput = {
+    where: CodingAttemptWhereUniqueInput
+    create: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput>
+  }
+
+  export type CodingAttemptCreateManyChallengeInputEnvelope = {
+    data: CodingAttemptCreateManyChallengeInput | CodingAttemptCreateManyChallengeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CodingTestCaseCreateWithoutChallengeInput = {
+    id?: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+  }
+
+  export type CodingTestCaseUncheckedCreateWithoutChallengeInput = {
+    id?: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+  }
+
+  export type CodingTestCaseCreateOrConnectWithoutChallengeInput = {
+    where: CodingTestCaseWhereUniqueInput
+    create: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput>
+  }
+
+  export type CodingTestCaseCreateManyChallengeInputEnvelope = {
+    data: CodingTestCaseCreateManyChallengeInput | CodingTestCaseCreateManyChallengeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CohortUpsertWithoutCodingChallengesInput = {
+    update: XOR<CohortUpdateWithoutCodingChallengesInput, CohortUncheckedUpdateWithoutCodingChallengesInput>
+    create: XOR<CohortCreateWithoutCodingChallengesInput, CohortUncheckedCreateWithoutCodingChallengesInput>
+    where?: CohortWhereInput
+  }
+
+  export type CohortUpdateToOneWithWhereWithoutCodingChallengesInput = {
+    where?: CohortWhereInput
+    data: XOR<CohortUpdateWithoutCodingChallengesInput, CohortUncheckedUpdateWithoutCodingChallengesInput>
+  }
+
+  export type CohortUpdateWithoutCodingChallengesInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CohortUncheckedUpdateWithoutCodingChallengesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    associates?: AssociateUncheckedUpdateManyWithoutCohortNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutCohortNestedInput
+    curriculumWeeks?: CurriculumWeekUncheckedUpdateManyWithoutCohortNestedInput
+  }
+
+  export type CodingAttemptUpsertWithWhereUniqueWithoutChallengeInput = {
+    where: CodingAttemptWhereUniqueInput
+    update: XOR<CodingAttemptUpdateWithoutChallengeInput, CodingAttemptUncheckedUpdateWithoutChallengeInput>
+    create: XOR<CodingAttemptCreateWithoutChallengeInput, CodingAttemptUncheckedCreateWithoutChallengeInput>
+  }
+
+  export type CodingAttemptUpdateWithWhereUniqueWithoutChallengeInput = {
+    where: CodingAttemptWhereUniqueInput
+    data: XOR<CodingAttemptUpdateWithoutChallengeInput, CodingAttemptUncheckedUpdateWithoutChallengeInput>
+  }
+
+  export type CodingAttemptUpdateManyWithWhereWithoutChallengeInput = {
+    where: CodingAttemptScalarWhereInput
+    data: XOR<CodingAttemptUpdateManyMutationInput, CodingAttemptUncheckedUpdateManyWithoutChallengeInput>
+  }
+
+  export type CodingTestCaseUpsertWithWhereUniqueWithoutChallengeInput = {
+    where: CodingTestCaseWhereUniqueInput
+    update: XOR<CodingTestCaseUpdateWithoutChallengeInput, CodingTestCaseUncheckedUpdateWithoutChallengeInput>
+    create: XOR<CodingTestCaseCreateWithoutChallengeInput, CodingTestCaseUncheckedCreateWithoutChallengeInput>
+  }
+
+  export type CodingTestCaseUpdateWithWhereUniqueWithoutChallengeInput = {
+    where: CodingTestCaseWhereUniqueInput
+    data: XOR<CodingTestCaseUpdateWithoutChallengeInput, CodingTestCaseUncheckedUpdateWithoutChallengeInput>
+  }
+
+  export type CodingTestCaseUpdateManyWithWhereWithoutChallengeInput = {
+    where: CodingTestCaseScalarWhereInput
+    data: XOR<CodingTestCaseUpdateManyMutationInput, CodingTestCaseUncheckedUpdateManyWithoutChallengeInput>
+  }
+
+  export type CodingTestCaseScalarWhereInput = {
+    AND?: CodingTestCaseScalarWhereInput | CodingTestCaseScalarWhereInput[]
+    OR?: CodingTestCaseScalarWhereInput[]
+    NOT?: CodingTestCaseScalarWhereInput | CodingTestCaseScalarWhereInput[]
+    id?: StringFilter<"CodingTestCase"> | string
+    challengeId?: StringFilter<"CodingTestCase"> | string
+    isHidden?: BoolFilter<"CodingTestCase"> | boolean
+    stdin?: StringFilter<"CodingTestCase"> | string
+    expectedStdout?: StringFilter<"CodingTestCase"> | string
+    weight?: FloatFilter<"CodingTestCase"> | number
+    orderIndex?: IntFilter<"CodingTestCase"> | number
+  }
+
+  export type AssociateCreateWithoutCodingAttemptsInput = {
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
+    cohort?: CohortCreateNestedOneWithoutAssociatesInput
+    sessions?: SessionCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateUncheckedCreateWithoutCodingAttemptsInput = {
+    id?: number
+    slug: string
+    displayName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readinessStatus?: string | null
+    recommendedArea?: string | null
+    lastComputedAt?: Date | string | null
+    email?: string | null
+    authUserId?: string | null
+    lastInvitedAt?: Date | string | null
+    cohortId?: number | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutAssociateInput
+    gapScores?: GapScoreUncheckedCreateNestedManyWithoutAssociateInput
+  }
+
+  export type AssociateCreateOrConnectWithoutCodingAttemptsInput = {
+    where: AssociateWhereUniqueInput
+    create: XOR<AssociateCreateWithoutCodingAttemptsInput, AssociateUncheckedCreateWithoutCodingAttemptsInput>
+  }
+
+  export type CodingChallengeCreateWithoutAttemptsInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cohort?: CohortCreateNestedOneWithoutCodingChallengesInput
+    testCases?: CodingTestCaseCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeUncheckedCreateWithoutAttemptsInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    cohortId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    testCases?: CodingTestCaseUncheckedCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeCreateOrConnectWithoutAttemptsInput = {
+    where: CodingChallengeWhereUniqueInput
+    create: XOR<CodingChallengeCreateWithoutAttemptsInput, CodingChallengeUncheckedCreateWithoutAttemptsInput>
+  }
+
+  export type CodingSkillSignalCreateWithoutAttemptInput = {
+    id?: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+  }
+
+  export type CodingSkillSignalUncheckedCreateWithoutAttemptInput = {
+    id?: string
+    skillSlug: string
+    signalType: string
+    weight: number
+    mappedScore: number
+  }
+
+  export type CodingSkillSignalCreateOrConnectWithoutAttemptInput = {
+    where: CodingSkillSignalWhereUniqueInput
+    create: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+  }
+
+  export type AssociateUpsertWithoutCodingAttemptsInput = {
+    update: XOR<AssociateUpdateWithoutCodingAttemptsInput, AssociateUncheckedUpdateWithoutCodingAttemptsInput>
+    create: XOR<AssociateCreateWithoutCodingAttemptsInput, AssociateUncheckedCreateWithoutCodingAttemptsInput>
+    where?: AssociateWhereInput
+  }
+
+  export type AssociateUpdateToOneWithWhereWithoutCodingAttemptsInput = {
+    where?: AssociateWhereInput
+    data: XOR<AssociateUpdateWithoutCodingAttemptsInput, AssociateUncheckedUpdateWithoutCodingAttemptsInput>
+  }
+
+  export type AssociateUpdateWithoutCodingAttemptsInput = {
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohort?: CohortUpdateOneWithoutAssociatesNestedInput
+    sessions?: SessionUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type AssociateUncheckedUpdateWithoutCodingAttemptsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    slug?: StringFieldUpdateOperationsInput | string
+    displayName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readinessStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    recommendedArea?: NullableStringFieldUpdateOperationsInput | string | null
+    lastComputedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    authUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
+    gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+  }
+
+  export type CodingChallengeUpsertWithoutAttemptsInput = {
+    update: XOR<CodingChallengeUpdateWithoutAttemptsInput, CodingChallengeUncheckedUpdateWithoutAttemptsInput>
+    create: XOR<CodingChallengeCreateWithoutAttemptsInput, CodingChallengeUncheckedCreateWithoutAttemptsInput>
+    where?: CodingChallengeWhereInput
+  }
+
+  export type CodingChallengeUpdateToOneWithWhereWithoutAttemptsInput = {
+    where?: CodingChallengeWhereInput
+    data: XOR<CodingChallengeUpdateWithoutAttemptsInput, CodingChallengeUncheckedUpdateWithoutAttemptsInput>
+  }
+
+  export type CodingChallengeUpdateWithoutAttemptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cohort?: CohortUpdateOneWithoutCodingChallengesNestedInput
+    testCases?: CodingTestCaseUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeUncheckedUpdateWithoutAttemptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    testCases?: CodingTestCaseUncheckedUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingSkillSignalUpsertWithoutAttemptInput = {
+    update: XOR<CodingSkillSignalUpdateWithoutAttemptInput, CodingSkillSignalUncheckedUpdateWithoutAttemptInput>
+    create: XOR<CodingSkillSignalCreateWithoutAttemptInput, CodingSkillSignalUncheckedCreateWithoutAttemptInput>
+    where?: CodingSkillSignalWhereInput
+  }
+
+  export type CodingSkillSignalUpdateToOneWithWhereWithoutAttemptInput = {
+    where?: CodingSkillSignalWhereInput
+    data: XOR<CodingSkillSignalUpdateWithoutAttemptInput, CodingSkillSignalUncheckedUpdateWithoutAttemptInput>
+  }
+
+  export type CodingSkillSignalUpdateWithoutAttemptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type CodingSkillSignalUncheckedUpdateWithoutAttemptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    signalType?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    mappedScore?: FloatFieldUpdateOperationsInput | number
+  }
+
+  export type CodingChallengeCreateWithoutTestCasesInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    cohort?: CohortCreateNestedOneWithoutCodingChallengesInput
+    attempts?: CodingAttemptCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeUncheckedCreateWithoutTestCasesInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    cohortId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: CodingAttemptUncheckedCreateNestedManyWithoutChallengeInput
+  }
+
+  export type CodingChallengeCreateOrConnectWithoutTestCasesInput = {
+    where: CodingChallengeWhereUniqueInput
+    create: XOR<CodingChallengeCreateWithoutTestCasesInput, CodingChallengeUncheckedCreateWithoutTestCasesInput>
+  }
+
+  export type CodingChallengeUpsertWithoutTestCasesInput = {
+    update: XOR<CodingChallengeUpdateWithoutTestCasesInput, CodingChallengeUncheckedUpdateWithoutTestCasesInput>
+    create: XOR<CodingChallengeCreateWithoutTestCasesInput, CodingChallengeUncheckedCreateWithoutTestCasesInput>
+    where?: CodingChallengeWhereInput
+  }
+
+  export type CodingChallengeUpdateToOneWithWhereWithoutTestCasesInput = {
+    where?: CodingChallengeWhereInput
+    data: XOR<CodingChallengeUpdateWithoutTestCasesInput, CodingChallengeUncheckedUpdateWithoutTestCasesInput>
+  }
+
+  export type CodingChallengeUpdateWithoutTestCasesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cohort?: CohortUpdateOneWithoutCodingChallengesNestedInput
+    attempts?: CodingAttemptUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeUncheckedUpdateWithoutTestCasesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    cohortId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: CodingAttemptUncheckedUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingAttemptCreateWithoutSignalInput = {
+    id?: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+    associate: AssociateCreateNestedOneWithoutCodingAttemptsInput
+    challenge: CodingChallengeCreateNestedOneWithoutAttemptsInput
+  }
+
+  export type CodingAttemptUncheckedCreateWithoutSignalInput = {
+    id?: string
+    associateId: number
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+  }
+
+  export type CodingAttemptCreateOrConnectWithoutSignalInput = {
+    where: CodingAttemptWhereUniqueInput
+    create: XOR<CodingAttemptCreateWithoutSignalInput, CodingAttemptUncheckedCreateWithoutSignalInput>
+  }
+
+  export type CodingAttemptUpsertWithoutSignalInput = {
+    update: XOR<CodingAttemptUpdateWithoutSignalInput, CodingAttemptUncheckedUpdateWithoutSignalInput>
+    create: XOR<CodingAttemptCreateWithoutSignalInput, CodingAttemptUncheckedCreateWithoutSignalInput>
+    where?: CodingAttemptWhereInput
+  }
+
+  export type CodingAttemptUpdateToOneWithWhereWithoutSignalInput = {
+    where?: CodingAttemptWhereInput
+    data: XOR<CodingAttemptUpdateWithoutSignalInput, CodingAttemptUncheckedUpdateWithoutSignalInput>
+  }
+
+  export type CodingAttemptUpdateWithoutSignalInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    associate?: AssociateUpdateOneRequiredWithoutCodingAttemptsNestedInput
+    challenge?: CodingChallengeUpdateOneRequiredWithoutAttemptsNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateWithoutSignalInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    challengeId?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionCreateManyAssociateInput = {
@@ -15684,6 +22805,20 @@ export namespace Prisma {
     prevWeightedScore?: number | null
     sessionCount: number
     lastUpdated?: Date | string
+  }
+
+  export type CodingAttemptCreateManyAssociateInput = {
+    id?: string
+    challengeId: string
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
   }
 
   export type SessionUpdateWithoutAssociateInput = {
@@ -15788,6 +22923,50 @@ export namespace Prisma {
     lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CodingAttemptUpdateWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    challenge?: CodingChallengeUpdateOneRequiredWithoutAttemptsNestedInput
+    signal?: CodingSkillSignalUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    challengeId?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    signal?: CodingSkillSignalUncheckedUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateManyWithoutAssociateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    challengeId?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type AssociateCreateManyCohortInput = {
     id?: number
     slug: string
@@ -15835,6 +23014,18 @@ export namespace Prisma {
     startDate: Date | string
   }
 
+  export type CodingChallengeCreateManyCohortInput = {
+    id?: string
+    slug: string
+    title: string
+    language: string
+    difficulty: string
+    description: string
+    skillSlug: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AssociateUpdateWithoutCohortInput = {
     slug?: StringFieldUpdateOperationsInput | string
     displayName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15848,6 +23039,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateWithoutCohortInput = {
@@ -15864,6 +23056,7 @@ export namespace Prisma {
     lastInvitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUncheckedUpdateManyWithoutAssociateNestedInput
     gapScores?: GapScoreUncheckedUpdateManyWithoutAssociateNestedInput
+    codingAttempts?: CodingAttemptUncheckedUpdateManyWithoutAssociateNestedInput
   }
 
   export type AssociateUncheckedUpdateManyWithoutCohortInput = {
@@ -15976,6 +23169,140 @@ export namespace Prisma {
     skillSlug?: StringFieldUpdateOperationsInput | string
     topicTags?: CurriculumWeekUpdatetopicTagsInput | string[]
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CodingChallengeUpdateWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: CodingAttemptUpdateManyWithoutChallengeNestedInput
+    testCases?: CodingTestCaseUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeUncheckedUpdateWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: CodingAttemptUncheckedUpdateManyWithoutChallengeNestedInput
+    testCases?: CodingTestCaseUncheckedUpdateManyWithoutChallengeNestedInput
+  }
+
+  export type CodingChallengeUncheckedUpdateManyWithoutCohortInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    difficulty?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    skillSlug?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CodingAttemptCreateManyChallengeInput = {
+    id?: string
+    associateId: number
+    submittedCode: string
+    language: string
+    verdict?: string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: number | null
+    judge0Token?: string | null
+    submittedAt?: Date | string
+    completedAt?: Date | string | null
+  }
+
+  export type CodingTestCaseCreateManyChallengeInput = {
+    id?: string
+    isHidden?: boolean
+    stdin: string
+    expectedStdout: string
+    weight?: number
+    orderIndex?: number
+  }
+
+  export type CodingAttemptUpdateWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    associate?: AssociateUpdateOneRequiredWithoutCodingAttemptsNestedInput
+    signal?: CodingSkillSignalUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    signal?: CodingSkillSignalUncheckedUpdateOneWithoutAttemptNestedInput
+  }
+
+  export type CodingAttemptUncheckedUpdateManyWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    associateId?: IntFieldUpdateOperationsInput | number
+    submittedCode?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    verdict?: StringFieldUpdateOperationsInput | string
+    visibleTestResults?: JsonNullValueInput | InputJsonValue
+    hiddenTestResults?: JsonNullValueInput | InputJsonValue
+    score?: NullableFloatFieldUpdateOperationsInput | number | null
+    judge0Token?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CodingTestCaseUpdateWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type CodingTestCaseUncheckedUpdateWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type CodingTestCaseUncheckedUpdateManyWithoutChallengeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    stdin?: StringFieldUpdateOperationsInput | string
+    expectedStdout?: StringFieldUpdateOperationsInput | string
+    weight?: FloatFieldUpdateOperationsInput | number
+    orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
 

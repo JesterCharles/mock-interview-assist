@@ -223,6 +223,53 @@ exports.Prisma.AuthEventScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CodingChallengeScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  language: 'language',
+  difficulty: 'difficulty',
+  description: 'description',
+  skillSlug: 'skillSlug',
+  cohortId: 'cohortId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CodingAttemptScalarFieldEnum = {
+  id: 'id',
+  associateId: 'associateId',
+  challengeId: 'challengeId',
+  submittedCode: 'submittedCode',
+  language: 'language',
+  verdict: 'verdict',
+  visibleTestResults: 'visibleTestResults',
+  hiddenTestResults: 'hiddenTestResults',
+  score: 'score',
+  judge0Token: 'judge0Token',
+  submittedAt: 'submittedAt',
+  completedAt: 'completedAt'
+};
+
+exports.Prisma.CodingTestCaseScalarFieldEnum = {
+  id: 'id',
+  challengeId: 'challengeId',
+  isHidden: 'isHidden',
+  stdin: 'stdin',
+  expectedStdout: 'expectedStdout',
+  weight: 'weight',
+  orderIndex: 'orderIndex'
+};
+
+exports.Prisma.CodingSkillSignalScalarFieldEnum = {
+  id: 'id',
+  attemptId: 'attemptId',
+  skillSlug: 'skillSlug',
+  signalType: 'signalType',
+  weight: 'weight',
+  mappedScore: 'mappedScore'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -263,7 +310,11 @@ exports.Prisma.ModelName = {
   Cohort: 'Cohort',
   CurriculumWeek: 'CurriculumWeek',
   Profile: 'Profile',
-  AuthEvent: 'AuthEvent'
+  AuthEvent: 'AuthEvent',
+  CodingChallenge: 'CodingChallenge',
+  CodingAttempt: 'CodingAttempt',
+  CodingTestCase: 'CodingTestCase',
+  CodingSkillSignal: 'CodingSkillSignal'
 };
 
 /**
