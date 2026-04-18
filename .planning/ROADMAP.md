@@ -161,10 +161,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   5. Cloud Monitoring `NLM Production` dashboard renders request count, p95 latency, error rate, instance count, CPU/memory widgets (populated with staging data)
   6. `/api/metrics` endpoint exists and returns a Prometheus-compatible text response (even if zero-valued); uptime check is configured and would email `jestercharles@gmail.com` on failure
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 48-01-PLAN.md — PR gating (pr-checks.yml 4 parallel jobs: typecheck/lint/test/prisma-format) + branch protection runbook
+  - [ ] 48-02-PLAN.md — deploy-staging.yml (WIF + build/migrate/deploy/smoke sequential) + rollback-prod.yml + load-test.yml skeleton + delete wif-smoke.yml
+  - [ ] 48-03-PLAN.md — Structured logger + middleware/3-routes wire-up + /api/metrics feature-flagged route (default OFF)
+  - [ ] 48-04-PLAN.md — Cloud Monitoring dashboard (both projects) + uptime checks + email alert policy + verify-phase-48.sh phase gate
 
 ### Phase 49: k6 Load Test + Hardening (HARD-01..03)
 **Goal**: A quantified load-test baseline exists for the staging deployment; every API route has been abuse-tested; the STRIDE threat model for the Cloud Run + DNS surface is reviewed and triaged
@@ -177,10 +177,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. `.planning/SECURITY-v1.5.md` documents the abuse-test results: every `/api/*` route returns 401/403 on unauthenticated/unauthorized access with no information leakage
   5. STRIDE threat model covers Cloud Run deployment + DNS cutover surface; every finding is triaged with an action or explicit accept; `codex adversarial-review` sign-off recorded in the doc
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 49-01-PLAN.md — k6 scenario + JSON-to-markdown report + Cloud Run cost extrapolator (LOAD-01)
+  - [ ] 49-02-PLAN.md — Fill load-test.yml body, run first live baseline, commit loadtest-baseline-v1.5.md (LOAD-02, LOAD-03, HARD-01)
+  - [ ] 49-03-PLAN.md — Generalize abuse test: route-discovery + abuse-test-all.ts against every /api/* route (HARD-02)
+  - [ ] 49-04-PLAN.md — STRIDE + /cso + codex review + adversarial-review sign-off + verify-phase-49.sh (HARD-03)
 
 ### Phase 50: Judge0 Integration Points + Flag Audit
 **Goal**: All Judge0 call sites are guarded by the `CODING_CHALLENGES_ENABLED` flag; prod defaults to flag-dark; the v1.6 Terraform stub is committed; the v1.4 GCE IaC is labeled as a reference template
@@ -192,10 +192,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. `iac/cloudrun/judge0.tf.disabled` exists and documents the v1.6 VPC connector + private IP + firewall plan; it is not applied by `terraform apply`
   4. `iac/gce-judge0/README.md` explicitly states this directory is a v1.6 reference template, not active infrastructure
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 50-01-PLAN.md — Flag helper (isCodingEnabled) + CodingFeatureDisabledError + gcloud secret population script (JUDGE-INTEG-01)
+  - [ ] 50-02-PLAN.md — /api/coding/status probe + guard all 7 coding API routes + judge0Client/codingAttemptPoll library guards (JUDGE-INTEG-02 server)
+  - [ ] 50-03-PLAN.md — CodingComingSoon component + useCodingStatus hook + /coding page + SolveWorkspace swap (JUDGE-INTEG-02 client)
+  - [ ] 50-04-PLAN.md — git mv infra/terraform/ → iac/gce-judge0/ + iac/cloudrun/judge0.tf.disabled stub + verify-phase-50.sh phase gate (JUDGE-INTEG-03, 04)
 
 ### Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Records
 **Goal**: The prod Cloud Run service exists and can receive a tagged deploy; DNS records are provisioned so the cutover in the next phase is a single record swap; the rollback workflow is validated
@@ -257,8 +257,8 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 | 46. Supabase Staging + Env Hygiene + Prisma Migrate Baseline | v1.5 | 0/? | Not started | - |
 | 47. Staging Cloud Run Service + Load Balancer + Domains | v1.5 | 0/? | Not started | - |
 | 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 0/? | Not started | - |
-| 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 0/? | Not started | - |
-| 50. Judge0 Integration Points + Flag Audit | v1.5 | 0/? | Not started | - |
+| 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 0/4 | Planned | - |
+| 50. Judge0 Integration Points + Flag Audit | v1.5 | 0/4 | Planned | - |
 | 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 0/? | Not started | - |
 | 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 0/? | Not started | - |
 | 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 0/? | Not started | - |
