@@ -25,3 +25,6 @@ cf_zone_id = "PLACEHOLDER_32_HEX_FROM_CLOUDFLARE_ZONE_LOOKUP"
 # D-16 / D-22 — explicit for clarity even though defaults match.
 github_repo_slug = "JesterCharles/mock-interview-assist"
 domain_name      = "staging.nextlevelmock.com"
+
+# Phase 48 — uptime check target (defaults already correct)
+uptime_host_staging = "staging.nextlevelmock.com"

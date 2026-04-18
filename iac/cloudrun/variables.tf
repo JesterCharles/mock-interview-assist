@@ -96,3 +96,23 @@ variable "cf_zone_id" {
   type        = string
   # No default — zone ID is account-specific; staging.tfvars supplies it.
 }
+
+# Phase 48 additions — observability (monitoring.tf)
+
+variable "uptime_host_staging" {
+  type        = string
+  description = "Hostname (without scheme) for staging uptime check"
+  default     = "staging.nextlevelmock.com"
+}
+
+variable "uptime_host_prod" {
+  type        = string
+  description = "Hostname (without scheme) for prod uptime check"
+  default     = "nextlevelmock.com"
+}
+
+variable "alert_notification_email_secret" {
+  type        = string
+  description = "Secret Manager secret name holding the notification email (ADMIN_EMAILS). First entry used if comma-separated."
+  default     = "ADMIN_EMAILS"
+}
