@@ -71,15 +71,27 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.APP_VM_SSH_KEY }}
 
-      - name: Capture previous image for rollback
+      - name: Capture previous image digest for rollback
         id: prev
+        # Capture the immutable sha256 digest of the currently running
+        # container (`docker inspect --format '{{index .Image}}'` returns
+        # `sha256:…`). Rollback then uses `gcr.io/PROJECT/app@sha256:…` so we
+        # restore the exact image bits instead of whatever `:latest` points
+        # at after the new deploy retagged it (WR-05, Phase 43 review).
+        # On first deploy (no container running) the fallback is the `:latest`
+        # tag — there is nothing to roll back to.
         run: |
-          PREV_TAG=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
+          PREV_DIGEST=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
             --zone=${{ secrets.APP_VM_ZONE }} \
-            --command="docker inspect --format='{{index .Config.Image}}' interview-assistant 2>/dev/null || echo gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest" \
-            --quiet 2>/dev/null || echo "gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest")
-          echo "prev_image=$PREV_TAG" >> "$GITHUB_OUTPUT"
-          echo "Previous image recorded for rollback: $PREV_TAG"
+            --command="docker inspect --format='{{index .Image}}' interview-assistant 2>/dev/null" \
+            --quiet 2>/dev/null || echo "")
+          if [ -n "$PREV_DIGEST" ] && [[ "$PREV_DIGEST" == sha256:* ]]; then
+            PREV_IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/app@${PREV_DIGEST}"
+          else
+            PREV_IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest"
+          fi
+          echo "prev_image=$PREV_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "Previous image recorded for rollback: $PREV_IMAGE"
 
       - name: Deploy new image to app VM
         id: deploy
@@ -109,6 +121,9 @@ jobs:
 
       - name: Rollback on health failure
         if: failure() && steps.health.outputs.health == 'fail'
+        # prev_image is `gcr.io/PROJECT/app@sha256:…` — pulling by digest
+        # restores the exact image bits even though `:latest` was just
+        # retagged to the new (broken) image (WR-05, Phase 43 review).
         run: |
           echo "::error::Health check failed. Rolling back to ${{ steps.prev.outputs.prev_image }}"
           gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
