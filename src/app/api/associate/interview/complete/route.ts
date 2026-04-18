@@ -4,8 +4,7 @@ import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { getCallerIdentity } from '@/lib/identity';
 import { runReadinessPipeline } from '@/lib/readinessPipeline';
 import { InterviewSession } from '@/lib/types';
-
-const LOG_PREFIX = '[associate-interview-complete]';
+import { log } from '@/lib/logger';
 
 /**
  * Authenticated automated-interview completion endpoint.
@@ -70,16 +69,27 @@ export async function POST(request: Request) {
 
     const success = await persistSessionToDb(identified, { mode: 'automated' });
     if (!success) {
-      console.error(`${LOG_PREFIX} persistSessionToDb returned false for session`, session.id);
+      log.error('associate.interview.complete.persist_failed', {
+        route: '/api/associate/interview/complete',
+        sessionId: session.id,
+      });
       return NextResponse.json({ error: 'Failed to persist session' }, { status: 500 });
     }
 
     // Fire-and-forget: readiness fan-out owns its own error handling + DB marker.
     void runReadinessPipeline(caller.associateId, session.id);
 
+    log.info('associate.interview.complete', {
+      route: '/api/associate/interview/complete',
+      sessionId: session.id,
+      mode: 'automated',
+    });
     return NextResponse.json({ success: true, persisted: 'db' });
   } catch (error) {
-    console.error(`${LOG_PREFIX} Error:`, error);
+    log.error('associate.interview.complete.error', {
+      route: '/api/associate/interview/complete',
+      err: String(error),
+    });
     return NextResponse.json(
       { error: 'Failed to save interview session' },
       { status: 500 }

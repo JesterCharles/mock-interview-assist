@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { systemInfo } from '@/lib/judge0Client';
+import { log } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ async function checkJudge0(): Promise<{ status: Judge0Status; version?: string }
 }
 
 export async function GET() {
+  const startedAt = Date.now();
   const [db, judge0] = await Promise.all([checkDb(), checkJudge0()]);
   const allOk = db === 'connected' && judge0.status === 'ok';
   const body = {
@@ -36,5 +38,13 @@ export async function GET() {
     checks: { db, judge0: judge0.status },
     ...(judge0.version ? { judge0Version: judge0.version } : {}),
   };
-  return NextResponse.json(body, { status: allOk ? 200 : 503 });
+  const status = allOk ? 200 : 503;
+  log[allOk ? 'info' : 'warn']('health check', {
+    route: '/api/health',
+    status,
+    db,
+    judge0: judge0.status,
+    latency_ms: Date.now() - startedAt,
+  });
+  return NextResponse.json(body, { status });
 }

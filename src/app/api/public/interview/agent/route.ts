@@ -3,6 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph";
+import { log } from '@/lib/logger';
 
 export async function POST(request: Request) {
     try {
@@ -16,6 +17,14 @@ export async function POST(request: Request) {
             full_response_so_far,
             char_count
         } = body;
+
+        log.info('public.interview.agent.request', {
+            route: '/api/public/interview/agent',
+            interview_id: interview_id || null,
+            current_question_index: current_question_index ?? null,
+            topic: typeof topic === 'string' ? topic : null,
+            char_count: typeof char_count === 'number' ? char_count : null,
+        });
 
         if (!fingerprint || !topic || !full_response_so_far) {
             return NextResponse.json(
@@ -174,7 +183,10 @@ When you do write a follow_up_question:
         return NextResponse.json(parsedData);
 
     } catch (error) {
-        console.error('Error in public interview follow-up API:', error);
+        log.error('public.interview.agent.error', {
+            route: '/api/public/interview/agent',
+            err: String(error),
+        });
         return NextResponse.json(
             { error: 'Internal server error while evaluating follow-up' },
             { status: 500 }

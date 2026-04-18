@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit, incrementInterviewCount } from '@/lib/rateLimitService';
+import { log } from '@/lib/logger';
 
 export async function POST(request: Request) {
     try {
@@ -17,6 +18,10 @@ export async function POST(request: Request) {
 
         if (action === 'start') {
             if (!rateLimit.allowed) {
+                log.warn('public.interview.start.rate_limited', {
+                    route: '/api/public/interview/start',
+                    action,
+                });
                 return NextResponse.json(
                     {
                         error: rateLimit.error || 'Rate limit exceeded. You have reached the maximum number of interviews for this period.',
@@ -29,6 +34,11 @@ export async function POST(request: Request) {
             // We explicitly increment here to consume one interview slot
             incrementInterviewCount(fingerprint);
 
+            log.info('public.interview.start', {
+                route: '/api/public/interview/start',
+                action,
+                remaining: rateLimit.remaining - 1,
+            });
             return NextResponse.json({
                 success: true,
                 remaining: rateLimit.remaining - 1,
@@ -37,6 +47,11 @@ export async function POST(request: Request) {
         }
 
         // Default action: just check status
+        log.info('public.interview.start.status', {
+            route: '/api/public/interview/start',
+            allowed: rateLimit.allowed,
+            remaining: rateLimit.remaining,
+        });
         return NextResponse.json({
             allowed: rateLimit.allowed,
             remaining: rateLimit.remaining,
@@ -44,7 +59,10 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error('Error in public interview start API:', error);
+        log.error('public.interview.start.error', {
+            route: '/api/public/interview/start',
+            err: String(error),
+        });
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
