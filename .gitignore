@@ -44,3 +44,6 @@ next-env.d.ts
 # interview history data
 /data
 .playwright-cli/
+
+# judge0 spike harness output (ephemeral; only SPIKE-REPORT.md committed)
+scripts/judge0-spike-output.json

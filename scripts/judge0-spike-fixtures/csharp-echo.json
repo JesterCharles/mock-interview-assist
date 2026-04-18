@@ -1,0 +1,9 @@
+{
+  "name": "csharp-echo",
+  "language": "csharp",
+  "sourceCode": "using System;\nclass P {\n  static void Main() {\n    Console.WriteLine(\"hi\");\n  }\n}\n",
+  "stdin": "",
+  "expectedStdout": "hi\n",
+  "maxWallTimeSec": 15,
+  "notes": "Mono C# boot cost baseline"
+}

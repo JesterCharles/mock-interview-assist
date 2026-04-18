@@ -1,0 +1,9 @@
+{
+  "name": "ts-sort",
+  "language": "typescript",
+  "sourceCode": "import * as fs from 'fs';\nconst line: string = fs.readFileSync(0, 'utf-8').trim();\nconst nums: number[] = line.split(/\\s+/).map(Number);\nnums.sort((a, b) => a - b);\nconsole.log(nums.join(' '));\n",
+  "stdin": "5 3 1 4 2\n",
+  "expectedStdout": "1 2 3 4 5\n",
+  "maxWallTimeSec": 15,
+  "notes": "TS typed array sort"
+}

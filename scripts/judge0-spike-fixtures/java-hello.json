@@ -1,0 +1,9 @@
+{
+  "name": "java-hello",
+  "language": "java",
+  "sourceCode": "public class Main {\n  public static void main(String[] args) {\n    System.out.println(\"Hello, Judge0!\");\n  }\n}\n",
+  "stdin": "",
+  "expectedStdout": "Hello, Judge0!\n",
+  "maxWallTimeSec": 15,
+  "notes": "Java boot cost baseline"
+}

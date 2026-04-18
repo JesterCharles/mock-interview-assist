@@ -1,0 +1,9 @@
+{
+  "name": "sql-select",
+  "language": "sql",
+  "sourceCode": "CREATE TABLE t (x INT);\nINSERT INTO t VALUES (1),(2),(3);\nSELECT SUM(x) FROM t;\n",
+  "stdin": "",
+  "expectedStdout": "6\n",
+  "maxWallTimeSec": 15,
+  "notes": "SQLite DDL + DML + aggregation"
+}
