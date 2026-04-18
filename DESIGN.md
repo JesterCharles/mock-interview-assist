@@ -196,6 +196,37 @@ contentStyle={{
 
 Dark mode shadow: `0 2px 8px rgba(0,0,0,0.3)`. CSS custom properties handle the color switch automatically; the shadow is the only value that does not auto-switch (acceptable — the difference is subtle).
 
+### Trainer dashboard: coding panel
+
+**Context.** Phase 41 added coding-attempt telemetry to `/trainer/[slug]`. The coding panel lives **adjacent to**, not merged with, the existing interview dashboard. Rationale: trainers diagnosing a readiness gap need to triage whether the deficit is coming from coding practice or interview performance before assigning remediation. Merging the views would collapse that distinction.
+
+**Placement.** Below `<AssociateDashboardClient />`, same max-width (1120px), separated by 48px vertical margin. Same `var(--surface)` card treatment as other dashboard panels.
+
+**Visual hierarchy (top to bottom):**
+
+1. Section heading "Coding practice" — Clash Display 28px, 600 weight, `var(--ink)`
+2. Single-line subhead in DM Sans 13px `var(--muted)` explaining difficulty weighting
+3. Filter row (Language dropdown, Skill dropdown) — DM Sans 13px, matches existing trainer dropdown treatment
+4. Per-skill coding bar chart (`CodingSkillBars`)
+5. Latest 20 attempts table (`CodingAttemptsTable`)
+6. "Load more" pagination action when > 20 attempts exist (deferred to v1.5 if demand surfaces)
+
+**Chart color — distinct from interview.** Interview trend uses `var(--accent)` (burnt orange). Coding bars use `var(--chart-4)` (warm taupe). Both are earth-tone, on-brand per §Chart Palette, and adjacent enough to not clash when stacked vertically — but different enough that a trainer scanning the page immediately separates the two signal sources. Never use hardcoded hex; consume `var(--chart-4)` directly in recharts `fill`.
+
+**Verdict badges (coding attempt rows):**
+
+- `pass` → foreground `var(--success)`, background `var(--success-bg)`
+- `fail` / `timeout` / `mle` / `runtime_error` / `compile_error` → foreground `var(--danger)`, background `var(--danger-bg)`
+- `pending` → `var(--muted)` foreground, transparent background
+
+**Difficulty pill.** Neutral gray background (`var(--border)`), 11px DM Sans 500, uppercase tracking. No color coding on difficulty itself — the color signal is already in the verdict badge.
+
+**Empty state.** "No coding attempts yet." — DM Sans 14px, `var(--muted)`. Shown when `attempts.length === 0`. A parallel "No coding skill data yet." sits beneath an empty bar chart.
+
+**Dark mode.** All tokens dual-mapped in `globals.css` (see Chart Palette table). No extra work.
+
+**Why not a tab.** Tab navigation was evaluated (Phase 41 CONTEXT D-06 left the choice open). The trainer page is a vertical stack — adding tab chrome would fragment the scroll and require page-level state for panel selection. A stacked panel preserves the existing UX pattern and keeps interview + coding context visible simultaneously.
+
 ### Trajectory Language
 
 Extends the athletic stat-line pattern from Readiness Signal Pattern.
@@ -251,3 +282,4 @@ Extends the athletic stat-line pattern from Readiness Signal Pattern.
 | 2026-04-16 | Data visualization tokens + conventions added | Phase 26: chart palette (6 series colors), axis/grid/tooltip conventions, trajectory language vocabulary. Tokens in globals.css, documentation in this section. |
 | 2026-04-17 | Two-rectangle App Shell with full-height sidebar | v1.3 UX pass: sidebar spans the full left edge of the viewport with the NLM wordmark in its top corner and no divider; TopBar starts to the right and owns the collapse toggle (top-left chip). Main is the sole scroll container — prevents the sidebar-bleeds-into-TopBar bug. Collapse state lifted to AppShell so TopBar + sidebar stay in sync, persisted via `localStorage.nlm_sidebar_collapsed`. |
 | 2026-04-17 | Radar is the canonical trajectory visual | Phase 34: VIZ-03 cut — per-skill LineChart redundant given Before/Now radar overlay. SkillRadar Before polygon now sourced from real `GapScore.prevWeightedScore` snapshots, no approximation caption. |
+| 2026-04-18 | Trainer coding panel section added | Phase 41: visual spec for coding practice panel on `/trainer/[slug]`, `var(--chart-4)` warm-taupe rationale (distinct from `--accent` interview), verdict + difficulty badge treatments, placement below interview dashboard (not tab). |

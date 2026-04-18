@@ -83,6 +83,68 @@ The PIN-based associate auth was never shipped to production. No grace window co
 
 **Full requirement list:** see `.planning/REQUIREMENTS.md`
 
+### Readiness Math with Coding Signals
+
+v1.4 extends the existing 0.8-decay recency-weighted gap engine (unchanged since v1.0) to consume coding-attempt signals alongside interview signals. The pipeline stacks three locked coefficients:
+
+**Pipeline (per coding attempt):**
+
+```
+perAttemptWeightedScore
+  = mappedScore                           // Phase 36 D-16 (by signalType)
+    × signalType.weight                   // Phase 36 D-16 (by signalType)
+    × DIFFICULTY_MULTIPLIERS[difficulty]  // Phase 41 D-02
+```
+
+Then the existing `gapService.recencyWeightedAverage()` applies 0.8^index decay across per-attempt rows keyed on `(associateId, skill, topic)` where `topic = "coding:<language>"`.
+
+**Signal-type weight table (Phase 36 D-16, unchanged by Phase 41):**
+
+| signalType    | mappedScore       | weight | Rationale                             |
+|---------------|-------------------|--------|---------------------------------------|
+| pass          | 100               | 1.0    | Full credit                           |
+| partial       | fraction × 100    | 0.85   | Discount partial vs clean pass        |
+| fail          | 0                 | 1.0    | Clear signal                          |
+| compile_error | 10                | 0.6    | Weaker than wrong-answer              |
+| timeout       | 20                | 0.8    | Algorithm chosen but inefficient      |
+
+**Difficulty multiplier (Phase 41 D-02, prevents easy-attempt farming):**
+
+| difficulty | multiplier |
+|------------|------------|
+| easy       | 0.7        |
+| medium     | 1.0        |
+| hard       | 1.3        |
+
+**Worked example — associate "ada" mixed history on `python-fundamentals`:**
+
+| # | Rep type  | Event                              | Raw score | After signal weight | After difficulty multiplier | Decay factor (newest→oldest) |
+|---|-----------|------------------------------------|-----------|---------------------|-----------------------------|------------------------------|
+| 1 | Interview | Session (mean of Python questions) | 72        | 72                  | 72 (decay-only path)        | 0.8⁰ = 1.00                  |
+| 2 | Coding    | Hard challenge, pass               | 100       | 100 × 1.0 = 100     | 100 × 1.3 = **130**         | 0.8¹ = 0.80                  |
+| 3 | Coding    | Medium challenge, compile_error    | 10        | 10 × 0.6 = 6        | 6 × 1.0 = **6**             | 0.8² = 0.64                  |
+| 4 | Interview | Session (Python avg)               | 65        | 65                  | 65 (decay-only path)        | 0.8³ = 0.512                 |
+| 5 | Coding    | Easy challenge, pass               | 100       | 100 × 1.0 = 100     | 100 × 0.7 = **70**          | 0.8⁴ = 0.4096                |
+
+*Note:* interview-signal rows skip the difficulty multiplier because interviews have no Judge0-authored difficulty. They feed gapService through the existing `saveGapScores()` path unchanged.
+
+`recencyWeightedAverage` over the five rows (newest first):
+
+```
+weightedSum  = 72×1.00 + 130×0.80 + 6×0.64 + 65×0.512 + 70×0.4096
+             = 72.00 + 104.00 + 3.84 + 33.28 + 28.672
+             = 241.79
+weightTotal  = 1.00 + 0.80 + 0.64 + 0.512 + 0.4096
+             = 3.3616
+GapScore     = 241.79 / 3.3616 ≈ 71.93
+```
+
+Readiness classification (`readinessService.ts`, unchanged) then uses this 71.93 against the configured threshold (default 75) alongside trend + session-count gates.
+
+**Farming resistance.** Any number of easy passes cannot drag `weightedScore` as high as the same number of hard passes — easy contributes 70 per attempt, hard 130. A trainer auditing a suspicious ready-signal can check the attempt table's difficulty column in the Phase 41 `/trainer/[slug]` coding panel to confirm the source mix.
+
+**Phase invariant.** `src/lib/gapService.ts` is **not** modified by v1.4. The 0.8 decay, the recency math, and the `(associateId, skill, topic)` uniqueness key are all Phase 4 / v1.0 contracts. v1.4 Phase 41 only extends `gapPersistence.ts` with a new entrypoint (`persistCodingSignalToGapScore` + `DIFFICULTY_MULTIPLIERS`) and hooks it from the Phase 39 poll helper fire-and-forget.
+
 ### v1.4 Architecture Headlines
 
 - **New Prisma models:** `CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal` — separate from `Session` so readiness math stays explainable
@@ -240,4 +302,13 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 — v1.4 Coding Challenges + Multi-Language Sandbox milestone initialized (planning)*
+
+## Open Items for v1.5
+
+1. **Coding-attempt backfill** (Phase 41 D-10) — No retroactive backfill of pre-v1.4 per-cohort coding data shipped in v1.4. Legacy data was manually administered without Judge0 and lacks a reliable verdict mapping. Decide in v1.5 whether to ship an opt-in importer with trainer manual sign-off, or leave pre-v1.4 history untracked.
+2. **Coding signal decay cap** — Consider clamping max movement per single attempt (e.g., single attempt can move `GapScore` by ≤ N points) to reduce noise from one-off bad days. Tuning decision — needs live data.
+3. **Per-language readiness breakdown on associate UI** — Currently associate-facing views aggregate across languages. Trainer view already shows per-language via `topic="coding:<lang>"` — mirror to associate dashboard if trainers request it.
+4. **Trainer alerts on coding gap threshold** — Push notification when an associate's coding-only `weightedScore` crosses a warning boundary. Out of v1.4 scope; revisit after first cohort runs with v1.4.
+
+---
+*Last updated: 2026-04-18 — Phase 41 readiness-math documentation*
