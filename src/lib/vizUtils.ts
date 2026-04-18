@@ -1,7 +1,7 @@
 /**
  * vizUtils.ts — Shared visualization utility functions for associate dashboard.
  * All functions are pure (no React, no DB). Used by SkillCardList, FocusHero,
- * SkillRadar, SkillTrendChart components.
+ * and SkillRadar components.
  *
  * Score coloring per DESIGN.md D-15:
  *   Red (--danger)    0-40%

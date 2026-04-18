@@ -9,7 +9,7 @@ Requirements for UX Unification & Polish milestone.
 
 ### App Shell
 
-- [ ] **SHELL-01**: Associate pages use unified topbar+sidebar shell with restricted nav (Dashboard, Interviews)
+- [ ] **SHELL-01**: Associate pages use unified topbar+sidebar shell with restricted nav (Dashboard, Interviews, Curriculum)
 - [ ] **SHELL-02**: Associate sidebar displays cohort name label in header
 - [ ] **SHELL-03**: Associate can start an interview from the shell; if no cohort/curriculum assigned, functions like public mock (select tech and run)
 - [ ] **SHELL-04**: Old PublicShell + AssociateNav removed after migration
@@ -27,10 +27,11 @@ Requirements for UX Unification & Polish milestone.
 
 - [ ] **VIZ-01**: Ranked skill list with score bars and trend arrows (up/down/flat) on associate dashboard
 - [ ] **VIZ-02**: Focus area hero card — single prominent recommendation above the fold with context
-- [ ] **VIZ-03**: Per-skill trend chart (LineChart/AreaChart) with skill filter dropdown
+- ~~**VIZ-03**~~: Per-skill trend chart — **CUT** in Phase 34. Radar plot is the primary trajectory visual; per-skill LineChart is redundant given the Before/Now radar overlay.
 - [ ] **VIZ-04**: Trajectory language throughout ("Improving +8pts over 3 sessions") instead of raw scores
 - [ ] **VIZ-05**: Spider/radar plot showing all skills in a cohort; labels highlight only when skill is assessment-ready
-- [ ] **VIZ-06**: Dashboard-wide skill filter — selecting a skill smoothly transitions all dashboard elements to focus on that skill
+- [ ] **VIZ-06**: Dashboard-wide skill filter — selecting a skill transitions SkillCardList and SkillRadar to focus on that skill
+- [ ] **VIZ-07**: SkillRadar Before/Now overlay uses real per-skill historical snapshots (no synthetic "Est. prior" calculation)
 
 ### Curriculum
 
@@ -99,19 +100,20 @@ Deferred to subsequent milestones.
 | SHELL-03 | Phase 27 | Pending |
 | SHELL-04 | Phase 27 | Pending |
 | SIGNIN-01 | Phase 28 | Pending |
-| SIGNIN-02 | Phase 28 | Pending |
+| SIGNIN-02 | Phase 33 | Pending (reassigned — Phase 28 did not close trainer path) |
 | PROFILE-01 | Phase 28.1 | Pending |
 | VIZ-01 | Phase 29 | Pending |
 | VIZ-02 | Phase 29 | Pending |
-| VIZ-03 | Phase 29 | Pending |
+| VIZ-03 | Phase 34 | CUT (radar-primary) |
 | VIZ-04 | Phase 29 | Pending |
 | VIZ-05 | Phase 29 | Pending |
-| VIZ-06 | Phase 29 | Pending |
+| VIZ-06 | Phase 34 | Pending (reconciled to 2-component reality) |
+| VIZ-07 | Phase 34 | Pending (new — real historical snapshots) |
 | CURRIC-01 | Phase 30 | Pending |
 | CURRIC-02 | Phase 30 | Pending |
 | DARK-01 | Phase 31 | Pending |
 | DARK-02 | Phase 31 | Pending |
-| SHELL-32-01 | Phase 32 | Pending |
+| SHELL-32-01 | Phase 35 | Pending (trainer side complete in Phase 32; Phase 35 wires associate) |
 | SHELL-32-02 | Phase 32 | Pending |
 | SHELL-32-03 | Phase 32 | Pending |
 | SHELL-32-04 | Phase 32 | Pending |
@@ -122,10 +124,11 @@ Deferred to subsequent milestones.
 | SHELL-32-09 | Phase 32 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 28 total
+- v1.3 requirements: 28 total (VIZ-03 cut, VIZ-07 added — net unchanged)
 - Mapped to phases: 28
 - Unmapped: 0
+- Gap closure phases: 33 (SIGNIN-02), 34 (VIZ-03-cut/VIZ-06/VIZ-07), 35 (SHELL-01/SHELL-32-01)
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-17 — Phase 32 requirements added*
+*Last updated: 2026-04-17 — Phase 33-35 gap closure added; VIZ-03 cut, VIZ-07 introduced*

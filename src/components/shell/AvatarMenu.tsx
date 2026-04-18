@@ -8,7 +8,22 @@ import { ProfileModal } from './ProfileModal';
 
 type ProfileTab = 'profile' | 'security' | 'learning';
 
-export function AvatarMenu() {
+export interface AvatarMenuProps {
+  /**
+   * P2 fix (shell double-modal): when provided, AvatarMenu delegates
+   * profile-modal ownership to the shell. Clicks on Profile / Settings
+   * (associate path) call this callback instead of opening an internal
+   * modal, AND AvatarMenu skips rendering its own `<ProfileModal>` so the
+   * shell's single root modal is the only instance mounted.
+   *
+   * When undefined (existing trainer callers that do not centralize),
+   * AvatarMenu keeps its original self-contained behavior — backwards
+   * compatible.
+   */
+  onOpenProfile?: (initialTab?: ProfileTab) => void;
+}
+
+export function AvatarMenu({ onOpenProfile }: AvatarMenuProps = {}) {
   const { user, logout } = useAuth();
   const router = useRouter();
 
@@ -19,12 +34,18 @@ export function AvatarMenu() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileInitialTab, setProfileInitialTab] = useState<ProfileTab>('profile');
 
+  const controlled = typeof onOpenProfile === 'function';
+
   const handleSignOut = async () => {
     await logout();
     window.location.href = '/signin';
   };
 
   const openProfileTab = (tab: ProfileTab) => {
+    if (controlled) {
+      onOpenProfile!(tab);
+      return;
+    }
     setProfileInitialTab(tab);
     setProfileOpen(true);
   };
@@ -173,11 +194,13 @@ export function AvatarMenu() {
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
 
-      <ProfileModal
-        open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        initialTab={profileInitialTab}
-      />
+      {!controlled && (
+        <ProfileModal
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          initialTab={profileInitialTab}
+        />
+      )}
     </>
   );
 }

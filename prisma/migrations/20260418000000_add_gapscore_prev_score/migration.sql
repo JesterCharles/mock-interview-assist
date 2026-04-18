@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "GapScore" ADD COLUMN IF NOT EXISTS "prevWeightedScore" DOUBLE PRECISION;

@@ -5,7 +5,7 @@
 - **v1.0 Readiness Loop MVP** -- Phases 1-7 (shipped 2026-04-14) | [Archive](milestones/v1.0-ROADMAP.md)
 - **v1.1 Cohort Readiness System** -- Phases 8-15, 22 plans, 14 reqs (shipped 2026-04-14) | [Archive](milestones/v1.1-ROADMAP.md)
 - **v1.2 Analytics & Auth Overhaul** -- Phases 16-25, 26 plans, 30 reqs (shipped 2026-04-16) | [Archive](milestones/v1.2-ROADMAP.md)
-- **v1.3 UX Unification & Polish** -- Phases 26-32 (in progress)
+- **v1.3 UX Unification & Polish** -- Phases 26-35 (in progress — gap closure Phases 33-35 added 2026-04-17 post-audit)
 
 ## Phases
 
@@ -64,6 +64,9 @@
 - [x] **Phase 30: Associate Curriculum View** - Read-only cohort curriculum schedule with current-week highlight and empty state (completed 2026-04-17)
 - [x] **Phase 31: Dark Mode QA Sweep** - Fix all hardcoded hex and light-only Tailwind classes across every surface (completed 2026-04-17)
 - [x] **Phase 32: Shell Architecture Overhaul** - Sidebar-primary nav, TopBar utility-only, profile modal, landing header, roster cleanup, password security (completed 2026-04-17)
+- [ ] **Phase 33: Trainer First-Login Password Gate** - Close SIGNIN-02: trainers redirected to /auth/set-password on first login (both password and magic-link paths)
+- [ ] **Phase 34: SkillRadar Quality + VIZ Scope Reconciliation** - Cut VIZ-03, reword VIZ-06, introduce VIZ-07 (real historical snapshots replacing synthetic "Est. prior")
+- [ ] **Phase 35: Shell Scope Reconciliation + Cleanup** - Associate Settings accordion wired; REQ SHELL-01 reconciled; deprecated code deleted
 
 ## Phase Details
 
@@ -185,24 +188,67 @@ Plans:
 - [x] 32-03-PLAN.md — Roster slug column removal + trainer detail reuses AssociateDashboardClient
 - [x] 32-04-PLAN.md — Password change requires old password or email OTP verification
 
+### Phase 33: Trainer First-Login Password Gate
+**Goal**: Trainers signing in for the first time (via password or magic link) are redirected to `/auth/set-password` before reaching `/trainer`, matching the associate flow
+**Depends on**: Phase 28, Phase 28.1
+**Requirements**: SIGNIN-02
+**Gap Closure**: Closes v1.3 audit gap — trainer first-login gate never wired
+**Success Criteria** (what must be TRUE):
+  1. Trainer completing password sign-in with `Profile.passwordSetAt == null` is redirected to `/auth/set-password` (not `/trainer`)
+  2. Trainer completing magic-link sign-in with `passwordSetAt == null` is redirected to `/auth/set-password` (not `/trainer`)
+  3. Trainer with existing `passwordSetAt` continues to route normally to `/trainer`
+  4. Associate flow is unchanged
+**Plans**: 1 plan
+- [ ] 33-01-PLAN.md — Wire trainer first-login gate into both exchange route (reorder) and SignInTabs.tsx (inline gate), plus tests
+
+### Phase 34: SkillRadar Quality + VIZ Scope Reconciliation
+**Goal**: Cut VIZ-03 (per-skill LineChart redundant), reconcile VIZ-06 to match 2-component reality, and replace synthetic radar "Est. prior" polygon with real per-skill historical snapshots (VIZ-07)
+**Depends on**: Phase 29
+**Requirements**: VIZ-03 (cut), VIZ-06 (reconcile), VIZ-07 (new)
+**Gap Closure**: Closes v1.3 audit gap — VIZ-03 regressed during Phase 29 remediation; VIZ-06 cascaded partial
+**Success Criteria** (what must be TRUE):
+  1. VIZ-03 scope cut is reflected in REQUIREMENTS.md and in DESIGN.md trajectory section (radar is canonical)
+  2. Stale `SkillTrendChart` reference comment in `AssociateDashboardClient.tsx:99` is removed
+  3. Per-skill historical gap scores are persisted at session completion (either `GapScore.prevWeightedScore` column or `GapScoreHistory` table)
+  4. `SkillRadar` "Before" polygon is rendered from real persisted snapshots, not `0.85 * current` synthetic calculation
+  5. The "Est. prior is approximated..." disclosure caption is removed
+  6. Existing 2-component filter sync (SkillCardList + SkillRadar) continues to pass integration tests
+**Plans**: 2 plans (to draft — schema+persistence, then radar integration)
+
+### Phase 35: Shell Scope Reconciliation + Cleanup
+**Goal**: Associate Settings accordion wired into `AssociateShell` via `associateSettingsAccordion` factory; deprecated code removed; stale nav artifacts deleted
+**Depends on**: Phase 32
+**Requirements**: SHELL-01 (reconciled — 3 items matches UI-SPEC D-04), SHELL-32-01 (associate side)
+**Gap Closure**: Closes v1.3 audit gaps — orphaned `associateSettingsAccordion`; scope drift on SHELL-01 already reconciled in REQUIREMENTS.md
+**Success Criteria** (what must be TRUE):
+  1. `AssociateShell.tsx` passes `associateSettingsAccordion` to `SectionSidebar` with `onOpenProfile` / `onOpenSecurity` callbacks that open the `ProfileModal` on the correct tab
+  2. Associates see a collapsible Settings bottom accordion matching the trainer pattern
+  3. `@deprecated settingsSidebarGroups` export is removed from `sidebar-configs.ts` with no remaining imports
+  4. All other existing behavior (trainer accordion, cohort header, nav groups) is unchanged
+**Plans**: 1 plan
+  - [ ] 35-01-PLAN.md — Wire associateSettingsAccordion + ProfileModal into AssociateShell; remove @deprecated settingsSidebarGroups; update test importers; add AssociateShell factory-wiring test
+
 ## Progress
 
-**Execution Order:** 26 → 27 → 28 → 28.1 → 29 → 30 → 31 → 32
+**Execution Order:** 26 → 27 → 28 → 28.1 → 29 → 30 → 31 → 32 → 33 → 34 → 35
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 26. Design Tokens (Data-Viz) | v1.3 | 1/1 | Complete    | 2026-04-17 |
-| 27. Unified App Shell | v1.3 | 0/2 | Not started | - |
-| 28. Sign-in Redesign | v1.3 | 0/1 | Not started | - |
+| 27. Unified App Shell | v1.3 | 2/2 | Complete    | 2026-04-17 |
+| 28. Sign-in Redesign | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 28.1. User Profile | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 29. Associate Data Visualization | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 30. Associate Curriculum View | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 31. Dark Mode QA Sweep | v1.3 | 1/1 | Complete    | 2026-04-17 |
 | 32. Shell Architecture Overhaul | v1.3 | 4/4 | Complete    | 2026-04-17 |
+| 33. Trainer First-Login Password Gate | v1.3 | 0/1 | Not started | - |
+| 34. SkillRadar Quality + VIZ Reconciliation | v1.3 | 0/2 | Not started | - |
+| 35. Shell Scope Reconciliation + Cleanup | v1.3 | 0/1 | Not started | - |
 
 ## Backlog
 
 - **999.1 Staging / Prod Split** — Provision second Supabase project for staging, split `.env.local` (staging) from `.env` (prod), route Docker deploy to prod only, add staging deploy target. Drivers: avoid seeding demo data into prod DB; enable safe schema/migration previews; unblock pre-merge CI smoke tests. Estimate: 1 phase, ~4-6h.
 - **999.2 Trainer Default Cohort** — Persist each trainer's assigned/default cohort so roster boots scoped to their cohort instead of "All Cohorts". Options: add `Profile.defaultCohortId` (reuse existing Profile model) or a new `TrainerCohortAssignment` join. UX: dropdown still lets user view others; default sticks. Drivers: trainers typically own one cohort; "All Cohorts" noise hides the roster that matters. Estimate: 1 small phase, ~3h.
-- **999.3 Per-Skill Historical Snapshots** — Replace SkillRadar's synthetic "Est. prior" polygon with real historical gap scores. Options: add `GapScore.prevWeightedScore` (simple, 1 column) or snapshot on every session completion into a `GapScoreHistory` table (richer, enables timeline scrubbing). Removes the "Est. prior is approximated…" caption and lets trainers trust the Before/Now comparison as fact. Drivers: codex flagged synthetic delta as misleading analytics; current UX admits the approximation but real data is the right answer. Estimate: 1 phase, ~4-6h.
+- ~~**999.3 Per-Skill Historical Snapshots**~~ — Promoted to Phase 34 (v1.3 gap closure) as VIZ-07.
 - ~~**999.4 Shell Edge Cases**~~ — Landed in PR #5. TopBar wordmark now only hides on desktop when `onToggleSidebar` is passed (AppShell/AssociateShell); bare-TopBar layouts keep it. `SectionSidebar` accepts `homeHref` (default `/trainer`, AssociateShell passes associate dashboard URL). Collapsed Settings icon calls `onExpandSidebar` before opening the accordion so it's visible.

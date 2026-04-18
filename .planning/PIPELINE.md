@@ -1,14 +1,19 @@
 # Pipeline Status
 
-## Current Run — v1.3
-- Started: 2026-04-16
-- Current stage: SHIP (PR-open, merge deferred)
-- Mode: interactive
-- Previous: v1.2 completed 2026-04-16
+## Current Run — v1.3 Gap Closure (Phases 33-35)
+- Started: 2026-04-17
+- Current stage: PLAN (auto-discuss → plan → execute for P33-35)
+- Mode: unattended + auto-discuss (--resume --unattended --discuss)
+- Previous: v1.3 main run shipped 2026-04-17 (PR #5 c444f9e)
 
 ## Resume Point
 
-PR #5 opened on branch `v1.3-ux-polish`. Merge deferred pending CI/CD (999.3 backlog candidate). Reflect + maintain blocked on merge.
+3 gap-closure phases added post-audit need full discuss→plan→execute→review→test→ship cycle:
+- **Phase 33** — Trainer First-Login Password Gate (closes SIGNIN-02 gap from P28)
+- **Phase 34** — SkillRadar Quality + VIZ Scope Reconciliation
+- **Phase 35** — Shell Scope Reconciliation + Cleanup
+
+Empty phase dirs — no CONTEXT.md yet. Auto-discuss flag will generate them non-interactively.
 
 ## v1.3 Milestone Scope
 
@@ -22,7 +27,21 @@ PR #5 opened on branch `v1.3-ux-polish`. Merge deferred pending CI/CD (999.3 bac
 - Phase 30: Associate Curriculum View — read-only schedule, current-week highlight, empty state
 - Phase 31: Dark Mode QA Sweep — fix hardcoded hex/light-only classes across all surfaces
 
-## Stages (v1.3)
+## Stages (v1.3 Gap Closure — P33-35)
+| Stage | Status | Started | Completed | Notes |
+|-------|--------|---------|-----------|-------|
+| discover | skipped | | | Gap closure scoped from v1.3 milestone audit (`v1.3-MILESTONE-AUDIT.md`) |
+| init | skipped | | | Existing codebase intel current |
+| design | skipped | | | No new surfaces; reuses existing components |
+| plan | done | 2026-04-17 | 2026-04-17 | 3/3 phases auto-discussed, 4 plans (P33×1, P34×2, P35×1). Artifact: PIPELINE-PLAN.md |
+| execute | done | 2026-04-17 | 2026-04-17 | 19 commits across P33-35, +45 tests, all passing |
+| review | done | 2026-04-17 | 2026-04-17 | Codex: 1 P1 + 2 P2 → all closed (PIPELINE-REVIEW.md + PIPELINE-REVIEW-FIX.md, 73415c3) |
+| test | done | 2026-04-17 | 2026-04-17 | 524 passing / 4 skipped, build clean (PIPELINE-TEST.md) |
+| ship | partial | 2026-04-17 | 2026-04-17 | PR #6 created, **merge deferred** per no-auto-merge policy |
+| reflect | done | 2026-04-17 | 2026-04-17 | Retro + session notes + 3 seeds. Artifact: `.planning/PIPELINE-REFLECT-GAP.md`. 2 notes in `~/second-brain/projects/nlm/notes/` |
+| maintain | done | 2026-04-17 | 2026-04-17 | Health 8.0/10 (flat). PIPELINE-MAINTAIN-GAP.md |
+
+## Stages (v1.3 main run — SHIPPED)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
 | discover | done | 2026-04-16 | 2026-04-16 | Research + requirements + roadmap committed (ec44ea2) |
@@ -34,9 +53,9 @@ PR #5 opened on branch `v1.3-ux-polish`. Merge deferred pending CI/CD (999.3 bac
 | test | done | 2026-04-17 | 2026-04-17 | 479 unit, 7 e2e passing, build clean |
 | debug | skipped | | | No blocking failures |
 | optimize | skipped | | | No numeric metric target this run |
-| ship | partial | 2026-04-17 | 2026-04-17 | PR #5 open w/ 17 commits on v1.3-ux-polish; user-approved locally; merge deferred until CI/CD |
-| reflect | pending | | | Blocked on merge |
-| maintain | pending | | | Blocked on merge |
+| ship | done | 2026-04-17 | 2026-04-17 | PR #5 merged (c444f9e) on 2026-04-17. 17 commits on v1.3-ux-polish. |
+| reflect | done | 2026-04-17 | 2026-04-17 | Retro + stats + session + 6 seeds archived. Artifact: `.planning/PIPELINE-REFLECT.md`. 5 notes in `~/second-brain/projects/nlm/notes/` |
+| maintain | done | 2026-04-17 | 2026-04-17 | See PIPELINE-MAINTAIN.md — health 8/10, tests 479 pass, lint noise traced to vendored/generated paths, 6 stale test-results cleaned |
 
 ## HITL Gates (v1.3)
 | Gate | Stage | Type | Status | Decision |

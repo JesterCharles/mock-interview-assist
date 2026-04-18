@@ -96,7 +96,7 @@ export function AssociateDashboardClient({
 
       {/* 2-column responsive grid (D-19, D-20) */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.85fr_1fr] gap-6">
-        {/* Left column: FocusHero → SkillCardList → SkillTrendChart */}
+        {/* Left column: FocusHero → SkillCardList */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <FocusHero
             skillName={recommendedArea}

@@ -64,13 +64,14 @@ model Session {
 }
 
 model GapScore {
-  id            String   @id @default(cuid())
-  associateId   Int
-  skill         String
-  topic         String   @default("")
-  weightedScore Float
-  sessionCount  Int
-  lastUpdated   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  associateId       Int
+  skill             String
+  topic             String   @default("")
+  weightedScore     Float
+  prevWeightedScore Float?
+  sessionCount      Int
+  lastUpdated       DateTime @updatedAt
 
   associate Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
 

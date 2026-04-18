@@ -30,8 +30,9 @@ const REQUIRED_SESSIONS = 3;
  * 1. Query all completed sessions for this associate (newest first)
  * 2. Convert Prisma Session records to InterviewSession-compatible objects
  * 3. Call computeGapScores from gapService.ts
- * 4. Upsert each result into the GapScore table
- * 5. Clean up stale GapScore records no longer in computed results
+ * 4. Pre-fetch existing rows once (prior weightedScore lookup + cleanup ids)
+ * 5. Upsert each result into the GapScore table (captures prevWeightedScore)
+ * 6. Clean up stale GapScore records no longer in computed results
  */
 export async function saveGapScores(associateId: number): Promise<void> {
   // 1. Query completed sessions for this associate, newest first (Codex #5: filter status, #6: sort by date)
@@ -67,10 +68,37 @@ export async function saveGapScores(associateId: number): Promise<void> {
 
   if (gapScores.length === 0) return;
 
-  // 4. Upsert each gap score
-  await Promise.all(
-    gapScores.map((input) =>
-      prisma.gapScore.upsert({
+  // 4-6. Read priors, upsert, and cleanup inside a single transaction per associate.
+  // P2 fix: without a transaction, two concurrent saveGapScores for the same
+  // associate can both read the same prior weightedScore and both write that
+  // stale value into prevWeightedScore (lost-update / TOCTOU). Wrapping the
+  // read + writes in one Prisma transaction (default READ COMMITTED) plus the
+  // atomicity of each individual upsert closes the window: the prior snapshot
+  // is captured inside the same transaction that performs the writes, and
+  // concurrent transactions serialize on per-row upsert conflicts so the
+  // later transaction observes the earlier transaction's new weightedScore.
+  const currentKeys = new Set(
+    gapScores.map((g) => `${g.skill}::${g.topic}`),
+  );
+
+  await prisma.$transaction(async (tx) => {
+    // 4. Read existing rows INSIDE the transaction — prior-value map + cleanup ids.
+    const existingScores = await tx.gapScore.findMany({
+      where: { associateId },
+      select: { id: true, skill: true, topic: true, weightedScore: true },
+    });
+
+    const priorByKey = new Map<string, number>();
+    for (const row of existingScores) {
+      priorByKey.set(`${row.skill}::${row.topic}`, row.weightedScore);
+    }
+
+    // 5. Upsert each gap score — capture prior weightedScore into prevWeightedScore.
+    // D-08: "before = score as of the previous session". D-09: null on first-ever upsert.
+    for (const input of gapScores) {
+      const key = `${input.skill}::${input.topic}`;
+      const prior = priorByKey.has(key) ? priorByKey.get(key)! : null;
+      await tx.gapScore.upsert({
         where: {
           associateId_skill_topic: {
             associateId,
@@ -80,6 +108,7 @@ export async function saveGapScores(associateId: number): Promise<void> {
         },
         update: {
           weightedScore: input.weightedScore,
+          prevWeightedScore: prior,
           sessionCount: input.sessionCount,
         },
         create: {
@@ -87,31 +116,23 @@ export async function saveGapScores(associateId: number): Promise<void> {
           skill: input.skill,
           topic: input.topic,
           weightedScore: input.weightedScore,
+          prevWeightedScore: null,
           sessionCount: input.sessionCount,
         },
-      }),
-    ),
-  );
+      });
+    }
 
-  // 5. Delete stale GapScore records not in current computation
-  const currentKeys = new Set(
-    gapScores.map((g) => `${g.skill}::${g.topic}`),
-  );
+    // 6. Delete stale GapScore records not in current computation (reuses existingScores).
+    const staleIds = existingScores
+      .filter((s) => !currentKeys.has(`${s.skill}::${s.topic}`))
+      .map((s) => s.id);
 
-  const existingScores = await prisma.gapScore.findMany({
-    where: { associateId },
-    select: { id: true, skill: true, topic: true },
+    if (staleIds.length > 0) {
+      await tx.gapScore.deleteMany({
+        where: { id: { in: staleIds } },
+      });
+    }
   });
-
-  const staleIds = existingScores
-    .filter((s) => !currentKeys.has(`${s.skill}::${s.topic}`))
-    .map((s) => s.id);
-
-  if (staleIds.length > 0) {
-    await prisma.gapScore.deleteMany({
-      where: { id: { in: staleIds } },
-    });
-  }
 }
 
 /**

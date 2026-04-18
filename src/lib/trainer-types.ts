@@ -36,6 +36,8 @@ export interface GapScoreEntry {
   skill: string
   topic: string | null
   weightedScore: number
+  /** Phase 34: real snapshot of the prior weightedScore (null = no history yet). */
+  prevWeightedScore?: number | null
   sessionCount: number
 }
 

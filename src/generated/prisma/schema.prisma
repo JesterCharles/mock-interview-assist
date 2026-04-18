@@ -64,13 +64,14 @@ model Session {
 }
 
 model GapScore {
-  id            String   @id @default(cuid())
-  associateId   Int
-  skill         String
-  topic         String   @default("")
-  weightedScore Float
-  sessionCount  Int
-  lastUpdated   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  associateId       Int
+  skill             String
+  topic             String   @default("")
+  weightedScore     Float
+  prevWeightedScore Float?
+  sessionCount      Int
+  lastUpdated       DateTime @updatedAt
 
   associate Associate @relation(fields: [associateId], references: [id], onDelete: Cascade)
 
@@ -112,6 +113,18 @@ model CurriculumWeek {
 
   @@unique([cohortId, weekNumber])
   @@index([cohortId])
+}
+
+model Profile {
+  id             Int       @id @default(autoincrement())
+  authUserId     String    @unique // Supabase auth.users.id — one profile per user
+  displayName    String?
+  githubUsername String?
+  bio            String?
+  learningGoals  String?
+  passwordSetAt  DateTime? // Replaces user_metadata.password_set detection
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 // Auth event log for rate-limit abuse tracking and admin visibility

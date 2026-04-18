@@ -24,6 +24,7 @@ interface RadarDataPoint {
   before: number
   assessmentReady: boolean
   sessionCount: number
+  hasPrev: boolean
 }
 
 const tooltipStyle: React.CSSProperties = {
@@ -48,16 +49,17 @@ function CustomTooltip({
   if (!active || !payload || payload.length === 0) return null
   const d = payload[0].payload
   const delta = d.now - d.before
+  const showPrior = hasHistory && d.hasPrev
   return (
     <div style={tooltipStyle}>
       <p style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--ink)' }}>{d.axis}</p>
       <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
         Now: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.now}%</span>
       </p>
-      {hasHistory && (
+      {showPrior && (
         <>
           <p style={{ margin: '0 0 2px 0', color: 'var(--muted)' }}>
-            Est. prior: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
+            Prior: <span style={{ color: 'var(--ink)', fontWeight: 500 }}>{d.before}%</span>
           </p>
           <p
             style={{
@@ -112,61 +114,9 @@ function CustomTick({
   )
 }
 
-function clamp01(n: number) {
-  return Math.max(0, Math.min(1, n))
-}
-
-function hashStr(s: string) {
-  let h = 5381
-  for (let i = 0; i < s.length; i++) h = (h * 33) ^ s.charCodeAt(i)
-  return Math.abs(h)
-}
-
-// Deterministic per-axis delta that mixes associate signature + axis name, so
-// each associate shows a different "Before" pattern instead of everyone sharing
-// the same decline/improvement map. Range: baseDelta ± ~0.18. Replace with real
-// historical gap scores when per-session per-skill snapshots land in the DB.
-function axisDelta(axis: string, baseDelta: number, associateSig: string) {
-  const noise = ((hashStr(`${associateSig}|${axis}`) % 37) - 18) / 100 // -0.18 … +0.18
-  return baseDelta + noise
-}
-
-export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarProps) {
-  const scoredSessionCount = useMemo(
-    () => sessions.filter((s) => s.overallTechnicalScore != null).length,
-    [sessions],
-  )
-  // Before polygon requires at least 2 scored sessions to have any meaningful
-  // prior-vs-recent comparison; below that we only render Now to avoid faking
-  // a history that doesn't exist.
-  const hasHistory = scoredSessionCount >= 2
-
-  // Smoothed trajectory: compare avg of recent half to avg of prior half, so
-  // single-session noise stops dominating. Positive baseDelta = "now > before".
-  const baseDelta = useMemo(() => {
-    const scored = sessions
-      .filter((s) => s.overallTechnicalScore != null)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    if (scored.length < 2) return 0
-    const half = Math.max(1, Math.floor(scored.length / 2))
-    const recent = scored.slice(0, half)
-    const prior = scored.slice(half)
-    const avg = (arr: typeof scored) =>
-      arr.reduce((a, s) => a + (s.overallTechnicalScore ?? 0), 0) / arr.length
-    const delta = (avg(recent) - avg(prior)) / 100
-    return Math.max(-0.25, Math.min(0.25, delta))
-  }, [sessions])
-
-  // Per-associate fingerprint so deltas differ across roster.
-  const associateSig = useMemo(
-    () =>
-      gapScores
-        .map((g) => `${g.skill}:${g.topic ?? ''}:${g.weightedScore.toFixed(3)}`)
-        .join('|'),
-    [gapScores],
-  )
-
+export function SkillRadar({ gapScores, sessions: _sessions, selectedSkill }: SkillRadarProps) {
   const isTopicMode = selectedSkill !== null
+
   const topicEntries = useMemo(
     () =>
       isTopicMode
@@ -180,22 +130,21 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
     [gapScores, selectedSkill, isTopicMode],
   )
 
+  // Phase 34: "Before" is sourced from real prevWeightedScore snapshots stored on GapScore.
+  // Null prevWeightedScore = no history yet for that axis — fall back to `now` for the
+  // data point (so Recharts has a value to render) but flag `hasPrev: false`. The Before
+  // polygon is only rendered when at least one axis has a real prior (D-16, D-17).
   const radarData = useMemo<RadarDataPoint[]>(() => {
     if (isTopicMode) {
       return topicEntries.map((g) => {
         const now = Math.round(g.weightedScore * 100)
-        const before = hasHistory
-          ? Math.round(
-              clamp01(
-                g.weightedScore -
-                  axisDelta(`${selectedSkill}/${g.topic}`, baseDelta, associateSig),
-              ) * 100,
-            )
-          : now
+        const hasPrev = g.prevWeightedScore != null
+        const before = hasPrev ? Math.round((g.prevWeightedScore as number) * 100) : now
         return {
           axis: g.topic,
           now,
           before,
+          hasPrev,
           assessmentReady: g.sessionCount >= 3,
           sessionCount: g.sessionCount,
         }
@@ -205,19 +154,22 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
       .filter((g) => g.topic === null || g.topic === '')
       .map((g) => {
         const now = Math.round(g.weightedScore * 100)
-        const before = hasHistory
-          ? Math.round(clamp01(g.weightedScore - axisDelta(g.skill, baseDelta, associateSig)) * 100)
-          : now
+        const hasPrev = g.prevWeightedScore != null
+        const before = hasPrev ? Math.round((g.prevWeightedScore as number) * 100) : now
         return {
           axis: g.skill,
           now,
           before,
+          hasPrev,
           assessmentReady: g.sessionCount >= 3,
           sessionCount: g.sessionCount,
         }
       })
       .sort((a, b) => a.axis.localeCompare(b.axis))
-  }, [gapScores, topicEntries, isTopicMode, baseDelta, selectedSkill, associateSig, hasHistory])
+  }, [gapScores, topicEntries, isTopicMode])
+
+  // hasHistory derives from data presence — D-17: any axis with a real snapshot lights up the overlay.
+  const hasHistory = radarData.some((d) => d.hasPrev)
 
   const title = isTopicMode ? `${selectedSkill} · Topics` : 'Skill Overview'
   const minVertices = isTopicMode ? 2 : 3
@@ -313,7 +265,7 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
           />
           {hasHistory && (
             <Radar
-              name="Est. prior"
+              name="Prior"
               dataKey="before"
               stroke="var(--muted)"
               strokeWidth={1.5}
@@ -343,20 +295,6 @@ export function SkillRadar({ gapScores, sessions, selectedSkill }: SkillRadarPro
           )}
         </RadarChart>
       </ResponsiveContainer>
-      {hasHistory && (
-        <p
-          style={{
-            fontSize: '11px',
-            fontFamily: 'DM Sans, sans-serif',
-            color: 'var(--muted)',
-            margin: '8px 0 0 0',
-            fontStyle: 'italic',
-          }}
-        >
-          Est. prior is approximated from overall session trend — real per-skill
-          history lands once snapshots are stored.
-        </p>
-      )}
     </div>
   )
 }

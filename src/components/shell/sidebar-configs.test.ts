@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dashboardSidebarGroups, settingsSidebarGroups } from './sidebar-configs';
+import { dashboardSidebarGroups, trainerSettingsAccordion } from './sidebar-configs';
 
 describe('dashboardSidebarGroups', () => {
   it('has 2 groups', () => {
@@ -43,19 +43,17 @@ describe('dashboardSidebarGroups', () => {
   });
 });
 
-describe('settingsSidebarGroups', () => {
-  it('has 1 group', () => {
-    expect(settingsSidebarGroups).toHaveLength(1);
+describe('trainerSettingsAccordion', () => {
+  it('is labeled "Settings"', () => {
+    expect(trainerSettingsAccordion.label).toBe('Settings');
   });
 
-  it('group is Settings with 5 items', () => {
-    const settings = settingsSidebarGroups[0];
-    expect(settings.label).toBe('Settings');
-    expect(settings.items).toHaveLength(5);
+  it('has 5 items', () => {
+    expect(trainerSettingsAccordion.items).toHaveLength(5);
   });
 
   it('has correct hrefs for Settings items', () => {
-    const items = settingsSidebarGroups[0].items;
+    const items = trainerSettingsAccordion.items;
     expect(items[0].href).toBe('/trainer/settings/threshold');
     expect(items[1].href).toBe('/trainer/settings/cohorts');
     expect(items[2].href).toBe('/trainer/settings/curriculum');
@@ -63,13 +61,19 @@ describe('settingsSidebarGroups', () => {
     expect(items[4].href).toBe('/trainer/settings/associates');
   });
 
+  it('group icon is a React component', () => {
+    expect(trainerSettingsAccordion.icon).toBeTruthy();
+    expect(
+      typeof trainerSettingsAccordion.icon === 'function' ||
+        (typeof trainerSettingsAccordion.icon === 'object' && trainerSettingsAccordion.icon !== null),
+    ).toBe(true);
+  });
+
   it('all items have icon property that is a React component', () => {
-    for (const group of settingsSidebarGroups) {
-      for (const item of group.items) {
-        // lucide-react exports forwardRef components (typeof 'object'), not plain functions
-        expect(item.icon).toBeTruthy();
-        expect(typeof item.icon === 'function' || (typeof item.icon === 'object' && item.icon !== null)).toBe(true);
-      }
+    for (const item of trainerSettingsAccordion.items) {
+      // lucide-react exports forwardRef components (typeof 'object'), not plain functions
+      expect(item.icon).toBeTruthy();
+      expect(typeof item.icon === 'function' || (typeof item.icon === 'object' && item.icon !== null)).toBe(true);
     }
   });
 });

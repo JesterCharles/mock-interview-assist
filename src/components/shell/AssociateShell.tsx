@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import { TopBar } from './TopBar';
 import { SectionSidebar } from './SectionSidebar';
-import { associateSidebarGroups } from './sidebar-configs';
+import { ProfileModal } from './ProfileModal';
+import { associateSettingsAccordion, associateSidebarGroups } from './sidebar-configs';
 import type { ReactNode } from 'react';
+
+type ProfileTab = 'profile' | 'security' | 'learning';
 
 interface AssociateShellProps {
   slug: string;
@@ -17,6 +20,8 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
 
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileInitialTab, setProfileInitialTab] = useState<ProfileTab>('profile');
 
   useEffect(() => {
     const stored = window.localStorage.getItem('nlm_sidebar_collapsed');
@@ -38,28 +43,47 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
     window.localStorage.setItem('nlm_sidebar_collapsed', 'false');
   };
 
+  const openProfileTab = (tab: ProfileTab = 'profile') => {
+    setProfileInitialTab(tab);
+    setProfileOpen(true);
+  };
+
   const homeHref = `/associate/${slug}/dashboard`;
 
+  const settingsGroup = associateSettingsAccordion(
+    () => openProfileTab('profile'),
+    () => openProfileTab('security'),
+  );
+
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
-      <SectionSidebar
-        groups={groups}
-        sidebarHeader={cohortName}
-        collapsed={collapsed}
-        mounted={mounted}
-        homeHref={homeHref}
-        onExpandSidebar={expandSidebar}
-      />
-      <div className="flex flex-col flex-1 min-w-0 min-h-0">
-        <TopBar
-          role="associate"
-          associateSlug={slug}
-          sidebarGroups={groups}
-          onToggleSidebar={toggleCollapsed}
-          sidebarCollapsed={collapsed}
+    <>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
+        <SectionSidebar
+          groups={groups}
+          settingsGroup={settingsGroup}
+          sidebarHeader={cohortName}
+          collapsed={collapsed}
+          mounted={mounted}
+          homeHref={homeHref}
+          onExpandSidebar={expandSidebar}
         />
-        <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+        <div className="flex flex-col flex-1 min-w-0 min-h-0">
+          <TopBar
+            role="associate"
+            associateSlug={slug}
+            sidebarGroups={groups}
+            onToggleSidebar={toggleCollapsed}
+            sidebarCollapsed={collapsed}
+            onOpenProfile={openProfileTab}
+          />
+          <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+        </div>
       </div>
-    </div>
+      <ProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        initialTab={profileInitialTab}
+      />
+    </>
   );
 }

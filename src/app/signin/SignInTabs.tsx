@@ -90,6 +90,14 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     setExpanded((prev) => (prev === type ? null : type));
   }
 
+  // Phase 33 / SIGNIN-02 (P1 fix): Trainer first-login password gate.
+  // After a successful Supabase login, call the Profile-first password-status
+  // endpoint (same source of truth as the exchange route's magic-link gate).
+  // If Profile.passwordSetAt is null (and metadata.password_set is falsy), or
+  // if the endpoint errors, send the trainer to /auth/set-password.
+  // FAIL-CLOSED: middleware does not enforce this gate, so we must default to
+  // /auth/set-password on any indeterminate state. Only an explicit
+  // `{ passwordSet: true }` allows redirect to /trainer.
   async function handleTrainerSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (trainerSubmitting) return;
@@ -97,9 +105,33 @@ export function SignInTabs({ nextPath }: SignInAccordionProps) {
     setTrainerSubmitting(true);
     const ok = await login(email, password);
     if (ok) {
-      router.replace(nextPath ?? '/trainer');
-      router.refresh();
-      return;
+      try {
+        const res = await fetch('/api/auth/password-status', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) {
+          // Fail-closed: any non-200 response routes to /auth/set-password.
+          router.replace('/auth/set-password');
+          router.refresh();
+          return;
+        }
+        const body = (await res.json()) as { passwordSet?: unknown };
+        if (body?.passwordSet === true) {
+          router.replace(nextPath ?? '/trainer');
+          router.refresh();
+          return;
+        }
+        router.replace('/auth/set-password');
+        router.refresh();
+        return;
+      } catch {
+        // Fail-closed on network/parse error.
+        router.replace('/auth/set-password');
+        router.refresh();
+        return;
+      }
     }
     setTrainerError('Invalid email or password.');
     setPassword('');

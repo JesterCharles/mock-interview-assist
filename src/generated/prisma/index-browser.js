@@ -171,6 +171,7 @@ exports.Prisma.GapScoreScalarFieldEnum = {
   skill: 'skill',
   topic: 'topic',
   weightedScore: 'weightedScore',
+  prevWeightedScore: 'prevWeightedScore',
   sessionCount: 'sessionCount',
   lastUpdated: 'lastUpdated'
 };
@@ -199,6 +200,18 @@ exports.Prisma.CurriculumWeekScalarFieldEnum = {
   skillSlug: 'skillSlug',
   topicTags: 'topicTags',
   startDate: 'startDate'
+};
+
+exports.Prisma.ProfileScalarFieldEnum = {
+  id: 'id',
+  authUserId: 'authUserId',
+  displayName: 'displayName',
+  githubUsername: 'githubUsername',
+  bio: 'bio',
+  learningGoals: 'learningGoals',
+  passwordSetAt: 'passwordSetAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AuthEventScalarFieldEnum = {
@@ -249,6 +262,7 @@ exports.Prisma.ModelName = {
   Settings: 'Settings',
   Cohort: 'Cohort',
   CurriculumWeek: 'CurriculumWeek',
+  Profile: 'Profile',
   AuthEvent: 'AuthEvent'
 };
 
