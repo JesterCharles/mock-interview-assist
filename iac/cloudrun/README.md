@@ -196,6 +196,39 @@ If status stays `PROVISIONING` past 60 min, or flips to `FAILED_NOT_VISIBLE`:
 ### Post-apply — NEXT_PUBLIC_SITE_URL secret (D-07)
 Plan 04 runbook step populates the `NEXT_PUBLIC_SITE_URL` secret value (added out-of-band, not via TF per D-10).
 
+### Plan 04 — NEXT_PUBLIC_SITE_URL secret + cold-start probe
+
+After Plans 01/02/03 are applied and SSL cert is ACTIVE, run Plan 04 steps:
+
+#### 1. Populate NEXT_PUBLIC_SITE_URL (D-07)
+```bash
+echo -n 'https://staging.nextlevelmock.com' | gcloud secrets versions add NEXT_PUBLIC_SITE_URL \
+  --project=nlm-staging-493715 --data-file=-
+
+# Force Cloud Run to re-read the secret (mounted secrets DO NOT auto-refresh between revisions).
+gcloud run services update nlm-staging \
+  --region=us-central1 --project=nlm-staging-493715 \
+  --update-secrets=NEXT_PUBLIC_SITE_URL=NEXT_PUBLIC_SITE_URL:latest \
+  --quiet
+```
+
+#### 2. Run cold-start probe (INFRA-04 success criterion 4)
+```bash
+# Takes ~5-10 min due to sleep-to-zero.
+bash iac/cloudrun/scripts/coldstart-probe-staging.sh
+# Expected: PASS cold start <TIME>s < 30.0s ceiling.
+# If output begins with "ADVISORY: SSL cert status is PROVISIONING", re-run after SSL flips to ACTIVE (Pitfall 7).
+```
+
+#### 3. Run the phase gate
+```bash
+bash iac/cloudrun/scripts/verify-phase-47.sh
+# Expected final line: All Phase 47 assertions PASSED.
+```
+
+### Rotation notes (T-47-10)
+Re-running `gcloud secrets versions add` creates a new version but does NOT propagate to Cloud Run automatically. After any secret rotation, re-run `gcloud run services update --update-secrets=<SECRET>=<SECRET>:latest` to force a new revision that re-reads the secret.
+
 ## References
 
 - `.planning/phases/45-terraform-skeleton-artifact-registry-secret-manager/45-CONTEXT.md` — locked decisions
