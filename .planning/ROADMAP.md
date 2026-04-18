@@ -188,6 +188,13 @@ Plans:
 **Success**: 50 concurrent submissions p95 ≤ 10 sec; malicious payloads contained; `/cso` + codex adversarial-review both pass; ARCHITECTURE.md + README quickstart published
 **Estimate**: ~1 week, 2-3 plans
 
+**Plans:** 3 plans in 2 waves
+
+Plans:
+- [ ] 44-01-PLAN.md — Load test harness (50-concurrent) + abuse test suite (6 payload classes) + reports (Wave 1)
+- [ ] 44-02-PLAN.md — Security review gates: gstack /cso + codex adversarial-review, both PASS with 0 HIGH (Wave 1)
+- [ ] 44-03-PLAN.md — ARCHITECTURE.md + README quickstart + trainer-authoring guide + validate-challenge CLI (Wave 2)
+
 **Total v1.4 plan estimate:** ~21-28 plans across 9 phases.
 
 #### Parked (not in v1.4 scope)
