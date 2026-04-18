@@ -137,7 +137,15 @@ Plans:
 **Depends on**: Phase 39
 **Requirements**: CODING-UI-01..05
 **Success**: `/coding` list + `/coding/[id]` solve page functional for all 5 languages; queued/running/verdict states visible; dark mode compliant; passes design review
-**Estimate**: ~1.5 weeks, 3-4 plans
+**Estimate**: ~1.5 weeks, 4 plans
+
+**Plans:** 4 plans in 3 waves
+
+Plans:
+- [ ] 40-01-PLAN.md — UI-SPEC gate + Monaco install + nav entry + route shells (Wave 1)
+- [ ] 40-02-PLAN.md — /coding list page with filters + cursor pagination + empty states (Wave 2)
+- [ ] 40-03-PLAN.md — /coding/[id] solve page: prompt + Monaco editor + submit/run bar (Wave 2)
+- [ ] 40-04-PLAN.md — usePollAttempt + VerdictCard + attempt history sidebar + bundle regression (Wave 3)
 
 #### Phase 41: GapScore Integration & Trainer Visibility
 **Goal**: Coding attempts feed GapScore with difficulty-weighted signals; trainer dashboard shows continuous coding skill traceability across all 11 cohort weeks
