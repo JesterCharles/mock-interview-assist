@@ -116,3 +116,11 @@ variable "alert_notification_email_secret" {
   description = "Secret Manager secret name holding the notification email (ADMIN_EMAILS). First entry used if comma-separated."
   default     = "ADMIN_EMAILS"
 }
+
+# Phase 51 additions — prod DNS records (Plan 02)
+
+variable "v01_gce_ip" {
+  description = "Static public IPv4 of the existing v0.1 GCE LB — unchanged across v1.5 until SUNSET-03 teardown in Phase 53. Apex and legacy records both point here during Phase 51 (apex stays on v0.1 until Phase 52 cutover). Populated in prod.tfvars via `dig +short nextlevelmock.com @1.1.1.1` OR via Cloudflare API direct query of the apex record `content` field (if orange-clouded the dig returns a CF edge IP)."
+  type        = string
+  default     = ""
+}

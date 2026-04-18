@@ -39,3 +39,26 @@ output "cloudrun_service_url" {
   description = "Cloud Run *.run.app URL before DNS cutover. Useful for pre-DNS smoke testing."
   value       = var.env == "staging" ? google_cloud_run_v2_service.nlm_staging[0].uri : null
 }
+
+# Phase 47 outputs — staging LB IP (consumed by Phase 51 dns-prod verify script)
+output "staging_lb_ip" {
+  description = "Global static IPv4 for staging HTTPS LB → nlm-staging Cloud Run (Phase 47)."
+  value       = var.env == "staging" ? google_compute_global_address.nlm_staging_lb_ip[0].address : null
+}
+
+# Phase 51 outputs — prod Cloud Run + LB
+
+output "prod_cloudrun_url" {
+  description = "Default *.run.app URL for prod Cloud Run (pre-DNS smoke target). Null when applied with staging.tfvars."
+  value       = var.env == "prod" ? google_cloud_run_v2_service.nlm_prod[0].uri : null
+}
+
+output "prod_lb_ip" {
+  description = "Global static IP for prod LB. Consumed by dns-prod.tf www record (Plan 02) and by Phase 52 apex-flip. Null when applied with staging.tfvars."
+  value       = var.env == "prod" ? google_compute_global_address.nlm_prod_lb_ip[0].address : null
+}
+
+output "prod_ssl_cert_name" {
+  description = "Managed SSL cert resource name for status polling (nlm-prod-ssl-cert)."
+  value       = var.env == "prod" ? google_compute_managed_ssl_certificate.nlm_prod_cert[0].name : null
+}
