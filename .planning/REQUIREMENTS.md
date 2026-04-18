@@ -81,7 +81,7 @@
 - [ ] **HARD-01**: Load test at 50 concurrent submissions across all 5 languages; p95 latency ≤ 10 sec; no queue death; no app degradation
 - [ ] **HARD-02**: Abuse test: fork bombs, infinite loops, network egress attempts, large output floods — all contained by sandbox (`enable_network=false`, cgroups CPU/mem limits) with no host impact
 - [ ] **HARD-03**: STRIDE security review covering Phases 38 + 39 + 43 — zero outstanding findings before merge; `/cso` + codex adversarial-review both pass
-- [ ] **HARD-04**: ARCHITECTURE.md updated with coding-challenge stack diagram (Next.js ↔ Judge0 ↔ private repo); README quickstart for local coding feature; trainer-authoring guide
+- [x] **HARD-04**: ARCHITECTURE.md updated with coding-challenge stack diagram (Next.js ↔ Judge0 ↔ private repo); README quickstart for local coding feature; trainer-authoring guide
 
 ---
 

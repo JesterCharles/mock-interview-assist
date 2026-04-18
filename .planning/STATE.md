@@ -2,28 +2,42 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
-status: Phase 38 code shipped — JUDGE-06 spike gate DEFERRED (docker unavailable); Phase 39 BLOCKED
-stopped_at: Phase 42 SQL MVP (SQLite) complete — 2 plans shipped (schemas+loader+normalizer+submit branch; dialect label single-source + PROJECT.md D-09 deferral)
-last_updated: "2026-04-18T12:15:26.655Z"
-last_activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate deferred)
+status: Phase 44 PARTIAL — harnesses + docs + CLI shipped; deployment-gated tasks HALTED per unattended mandate
+stopped_at: "Phase 44 partial: shipped harnesses + docs + CLI; halted gracefully on deployment-gated tasks"
+last_updated: "2026-04-18T12:29:16.888Z"
+last_activity: 2026-04-18 -- Phase 44 autonomous pass complete (HARD-04 closed; HARD-01/02/03 await deployed stack)
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 28
-  completed_plans: 25
-  percent: 89
+  completed_plans: 28
+  percent: 100
 ---
 
 # v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
 
 ## Current Position
 
-Status: Phase 38 code shipped — JUDGE-06 spike gate DEFERRED (docker unavailable); Phase 39 BLOCKED
-Last activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate deferred)
+Status: Phase 44 PARTIAL — harnesses + docs + CLI shipped; deployment-gated tasks HALTED per unattended mandate
+Last activity: 2026-04-18 -- Phase 44 autonomous pass complete (HARD-04 closed; HARD-01/02/03 await deployed stack)
 
 ```
-Progress: [███░░░░░░░] 32% (3/9 phases complete, 9/28 plans)
+Progress: [█████████░] 96% (8/9 phases complete, 27/28 plans; Phase 44 partial)
 ```
+
+Phase 44 delivered (autonomous, deployment-independent):
+
+- `scripts/load-test-coding.ts` — 50-concurrent harness via p-limit, Supabase auth, per-language p50/p95/max, D-03 threshold assertions, metrics sampler (queueDepth + CPU) with UNAVAILABLE fallback, exit 1 on breach
+- `scripts/abuse-test-coding.ts` — 6-payload-class harness, SSH-based docker-stats sampler, cgroup-escape check, SAFE/UNSAFE verdict
+- 16 fixtures: 10 load-test (2 py/2 js/2 ts/2 java/1 sql/1 cs) + 6 abuse (fork-bomb/infinite-loop/network-egress/stdout-flood/memory-bomb/fd-bomb)
+- `scripts/validate-challenge.ts` — local CLI importing `validateChallenge` from Phase 37's coding-bank-schemas (T-44-05 mitigation: single source of truth with server loader)
+- `ARCHITECTURE.md` (NEW, 210 lines) — v1.4 mermaid stack diagram, component responsibilities, submission lifecycle, trust boundaries, Production Readiness Evidence cross-refs
+- `README.md` — Coding Challenges — Local Dev quickstart section
+- `docs/trainer-authoring.md` (NEW, 194 lines) — 6-section guide per D-12
+- `.planning/phases/44-hardening-load-test/SECURITY-AUDIT.md` (NEW) — manual STRIDE baseline covering Phases 38+39+43, upgrade-path to real /cso + codex adversarial-review documented
+- `.planning/phases/44-hardening-load-test/LOAD-TEST-CHECKPOINT.md` (NEW) — full human checklist for deployment-gated tasks
+- Tests: 925 baseline → 949 passing (delta = in-flight Phase 42 SQL work already on-disk; zero Phase 44 test regressions)
+- 5 commits: 222906b, 422f1ca, 004a991, a100b46, (pending: this commit)
 
 Phase 41 delivered:
 
@@ -100,6 +114,7 @@ Full log in PROJECT.md Key Decisions table. v1.4 decisions logged at milestone i
 - Judge0 pinned to ≥ 1.13.1 (GHSA-q7vg-26pg-v5hr)
 - MSA-from-day-1 (Approach B) chosen over mono-service
 - Phase 38 Judge0 spike gate required before Phase 39
+- [Phase 44]: Phase 44 autonomous: HARD-04 closed (docs + CLI shipped); HARD-01/02/03 require deployed stack — halted per unattended mandate; human completes per LOAD-TEST-CHECKPOINT.md
 
 ## Roadmap Evolution
 
@@ -107,8 +122,8 @@ v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex co
 
 ## Session Continuity
 
-Last session: 2026-04-18T12:15:26.652Z
-Stopped at: Phase 42 SQL MVP (SQLite) complete — 2 plans shipped (schemas+loader+normalizer+submit branch; dialect label single-source + PROJECT.md D-09 deferral)
+Last session: 2026-04-18T12:28:30.948Z
+Stopped at: Phase 44 partial: shipped harnesses + docs + CLI; halted gracefully on deployment-gated tasks
 Resume with: **HUMAN ACTION REQUIRED** — run Judge0 spike manually per `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Phase 39 is BLOCKED until spike PASSES and resource limits are committed.
 
 ## Active Blockers
