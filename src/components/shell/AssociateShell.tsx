@@ -43,7 +43,7 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
     window.localStorage.setItem('nlm_sidebar_collapsed', 'false');
   };
 
-  const openProfileTab = (tab: ProfileTab) => {
+  const openProfileTab = (tab: ProfileTab = 'profile') => {
     setProfileInitialTab(tab);
     setProfileOpen(true);
   };
@@ -74,6 +74,7 @@ export function AssociateShell({ slug, cohortName, children }: AssociateShellPro
             sidebarGroups={groups}
             onToggleSidebar={toggleCollapsed}
             sidebarCollapsed={collapsed}
+            onOpenProfile={openProfileTab}
           />
           <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
         </div>

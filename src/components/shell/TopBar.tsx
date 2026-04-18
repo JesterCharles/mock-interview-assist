@@ -9,6 +9,8 @@ import { CohortSwitcher } from './CohortSwitcher';
 import { MobileSidebar } from './MobileSidebar';
 import type { SidebarGroup, SettingsAccordionGroup } from './types';
 
+type ProfileTab = 'profile' | 'security' | 'learning';
+
 interface TopBarProps {
   sidebarGroups?: SidebarGroup[];
   settingsGroup?: SettingsAccordionGroup;
@@ -16,6 +18,11 @@ interface TopBarProps {
   associateSlug?: string;
   onToggleSidebar?: () => void;
   sidebarCollapsed?: boolean;
+  /**
+   * Forwarded to AvatarMenu so the enclosing shell can own a single
+   * ProfileModal instance (P2 fix: prevents double-mount in AssociateShell).
+   */
+  onOpenProfile?: (initialTab?: ProfileTab) => void;
 }
 
 export function TopBar({
@@ -25,6 +32,7 @@ export function TopBar({
   associateSlug,
   onToggleSidebar,
   sidebarCollapsed = false,
+  onOpenProfile,
 }: TopBarProps) {
   const wordmarkHref =
     role === 'associate' && associateSlug
@@ -112,7 +120,7 @@ export function TopBar({
           </Suspense>
         )}
         <ThemeToggle />
-        <AvatarMenu />
+        <AvatarMenu onOpenProfile={onOpenProfile} />
       </div>
     </header>
   );
