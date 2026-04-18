@@ -126,7 +126,7 @@ export function SubmitBar({
         aria-busy={pending ? 'true' : 'false'}
         style={{
           background: 'var(--accent)',
-          color: '#FFFFFF',
+          color: 'var(--text-on-accent)',
           border: 'none',
           borderRadius: '8px',
           padding: '10px 20px',

@@ -16,6 +16,7 @@
   --muted: #7A7267;
   --accent: #C85A2E;
   --accent-hover: #B04E27;
+  --text-on-accent: #FFFFFF;
   --success: #2D6A4F;
   --warning: #B7791F;
   --danger: #B83B2E;
@@ -52,6 +53,7 @@
   --muted: #9C9488;
   --accent: #D4743F;
   --accent-hover: #E0854F;
+  --text-on-accent: #FFFFFF;
   --success: #3D8B6A;
   --warning: #D4952A;
   --danger: #D45040;

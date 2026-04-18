@@ -75,7 +75,7 @@ export function ChallengeEmptyState({
           style={{
             marginTop: '8px',
             background: 'var(--accent)',
-            color: '#FFFFFF',
+            color: 'var(--text-on-accent)',
             border: 'none',
             borderRadius: '8px',
             padding: '10px 20px',
