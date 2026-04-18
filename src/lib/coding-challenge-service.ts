@@ -29,6 +29,8 @@ import {
   VisibleTestsSchema,
   ChallengeValidationError,
   validateChallenge,
+  SetupSqlSchema,
+  SETUP_SQL_MAX_BYTES,
   type CodingLanguage,
 } from './coding-bank-schemas';
 
@@ -50,6 +52,13 @@ export interface FullChallenge {
   readme: string;
   starters: Partial<Record<CodingLanguage, string>>;
   visibleTests: z.infer<typeof VisibleTestsSchema>;
+  /**
+   * SQL challenges (meta.languages includes 'sql') carry the trainer-authored
+   * schema + seed SQL per Phase 42 §D-01. Server-only — this field MUST NEVER
+   * be returned in any client-reachable API response body (see submit-route
+   * HIDDEN TEST SHIELD in Phase 42 Plan 01 Task 3).
+   */
+  setupSql?: string;
 }
 
 export type HiddenTestCase = z.infer<typeof HiddenTestsSchema>[number];
@@ -406,6 +415,21 @@ export async function loadChallenge(slug: string): Promise<FullChallenge> {
     starters,
   });
 
+  // Phase 42 §D-01: SQL challenges attach setup.sql. Missing setup.sql for a
+  // SQL-declared challenge is a validation failure — refresh route surfaces it.
+  let setupSql: string | undefined;
+  if (validated.meta.languages.includes('sql')) {
+    const sql = await getSetupSql(slug);
+    if (sql === null) {
+      throw new ChallengeValidationError(
+        'setup.sql',
+        'required for SQL challenges (meta.languages includes "sql")',
+        slug,
+      );
+    }
+    setupSql = sql;
+  }
+
   return {
     slug: validated.meta.slug,
     meta: validated.meta,
@@ -413,11 +437,61 @@ export async function loadChallenge(slug: string): Promise<FullChallenge> {
     starters: validated.starters,
     visibleTests: validated.visibleTests,
     // hiddenTests intentionally absent — D-05 type boundary.
+    ...(setupSql !== undefined ? { setupSql } : {}),
   };
 }
 
 export async function loadHiddenTests(slug: string): Promise<HiddenTestCase[]> {
   return getCachedPrivateHidden(slug);
+}
+
+// ---------------------------------------------------------------------------
+// getSetupSql — SQL-challenge schema/seed loader (Phase 42 §D-01, D-03)
+//
+// Reads challenges/<slug>/setup.sql from the PUBLIC repo. Trainer-authored,
+// cached with key `public:<slug>:setup-sql`.
+//
+// SECURITY BOUNDARY: the string returned here MUST NEVER appear in any client-
+// reachable API response body. It is injected server-side at submit time only
+// (see /api/coding/submit/route.ts SQL branch). The loader does not store
+// setup.sql in the DB — it lives in the in-memory cache + GitHub only.
+//
+// Returns null for 404 (non-SQL challenges have no setup.sql — caller decides
+// whether missing is a validation failure). Throws ChallengeValidationError
+// on size-cap breach so refresh routes surface a readable error.
+// ---------------------------------------------------------------------------
+export async function getSetupSql(slug: string): Promise<string | null> {
+  const key = `public:${slug}:setup-sql`;
+
+  // Use the same cached-public plumbing so we get ETag short-circuiting.
+  // Wrap fetch errors: a 404 here is valid (non-SQL challenge) and returns null.
+  let payload: string | null;
+  try {
+    payload = await getCachedPublic<string>(
+      key,
+      `challenges/${slug}/setup.sql`,
+      'text',
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    // defaultPublicFetcher throws "Public GitHub fetch failed: 404 ..." on missing files.
+    if (/\b404\b/.test(msg)) return null;
+    throw err;
+  }
+
+  if (payload === null || payload === undefined) return null;
+
+  // 64 KB soft-cap guard per D-01.
+  const parsed = SetupSqlSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new ChallengeValidationError(
+      'setup.sql',
+      parsed.error.issues[0]?.message ??
+        `setup.sql exceeds ${SETUP_SQL_MAX_BYTES} byte cap`,
+      slug,
+    );
+  }
+  return parsed.data;
 }
 
 // ---------------------------------------------------------------------------

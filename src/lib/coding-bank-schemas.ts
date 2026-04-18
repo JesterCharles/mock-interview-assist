@@ -136,6 +136,63 @@ export const StarterSchema = z
 export const MAX_README_SIZE = MAX_STARTER_SIZE;
 
 // ──────────────────────────────────────────────────────────────────────────
+// SQL-specific schemas (Phase 42 §D-01, D-02, D-05)
+//
+// D-01: SQL challenges carry an additional `setup.sql` file (schema + seed).
+//       Soft-capped at 64 KB to guard the loader's unbounded-allocation surface.
+// D-02: SQL test cases extend the base shape with expectedRows/expectedColumns
+//       so row-set comparison can run server-side via sqlResultNormalizer.
+// D-05: Normalization flags live on the test case so trainers can opt-out of
+//       row/column-order matching per challenge. Defaults are applied by the
+//       normalizer itself (conservative: columns ordered, rows unordered).
+// ──────────────────────────────────────────────────────────────────────────
+
+// 64 KB soft cap per D-01 — matches TEST_FIELD_MAX for parity with stdin/stdout
+// cells. Enforced at the loader boundary (getSetupSql).
+export const SETUP_SQL_MAX_BYTES = 64 * 1024;
+export const SetupSqlSchema = z
+  .string()
+  .max(SETUP_SQL_MAX_BYTES, `setup.sql exceeds ${SETUP_SQL_MAX_BYTES} byte cap`);
+
+// SQL-specific test case (extends base shape per D-02).
+// expectedRows/expectedColumns optional — normalizer falls back to
+// expectedStdout string compare when absent (backward compat with base shape).
+export const SqlTestCaseSchema = TestCaseSchema.extend({
+  expectedRows: z
+    .array(z.array(z.union([z.string(), z.number(), z.null()])))
+    .optional(),
+  expectedColumns: z.array(z.string()).optional(),
+  // D-05 normalization flags (all optional; normalizer applies conservative defaults):
+  trimMode: z.enum(['strict', 'normalize']).optional(), // default 'normalize'
+  numericCoerce: z.boolean().optional(), // default true
+  orderSensitiveColumns: z.boolean().optional(), // default true (columns ARE ordered)
+  rowOrderSensitive: z.boolean().optional(), // default false (rows NOT ordered)
+});
+
+export type SqlTestCase = z.infer<typeof SqlTestCaseSchema>;
+
+// Validator helper: promote test cases to SqlTestCaseSchema when the challenge
+// is SQL (meta.languages includes 'sql'). Non-SQL challenges continue to use
+// the base VisibleTestsSchema — no behavior change for them.
+//
+// Returns the parsed array as an appropriate subtype. Callers can narrow via
+// the meta language check; here we return the union type for back-compat.
+export function parseVisibleTestsForChallenge(
+  meta: z.infer<typeof MetaSchema>,
+  raw: unknown,
+): z.infer<typeof VisibleTestsSchema> | SqlTestCase[] {
+  const isSql = meta.languages.includes('sql');
+  if (isSql) {
+    const schema = z
+      .array(SqlTestCaseSchema)
+      .max(MAX_TEST_CASES, `visibleTests array must have at most ${MAX_TEST_CASES} entries`)
+      .superRefine(testArrayRefinement);
+    return schema.parse(raw);
+  }
+  return VisibleTestsSchema.parse(raw);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // ChallengeValidationError — structured {path, reason, slug?}
 // ──────────────────────────────────────────────────────────────────────────
 export class ChallengeValidationError extends Error {
