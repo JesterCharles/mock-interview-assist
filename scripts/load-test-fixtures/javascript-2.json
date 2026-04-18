@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-fizzbuzz-js",
+  "language": "javascript",
+  "code": "const n = parseInt(require('fs').readFileSync(0, 'utf8').trim(), 10);\nfor (let i = 1; i <= n; i++) {\n  if (i % 15 === 0) console.log('FizzBuzz');\n  else if (i % 3 === 0) console.log('Fizz');\n  else if (i % 5 === 0) console.log('Buzz');\n  else console.log(i);\n}\n",
+  "expectedVerdict": "pass"
+}

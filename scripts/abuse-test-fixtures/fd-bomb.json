@@ -1,0 +1,12 @@
+{
+  "name": "fd-bomb",
+  "challengeId": "test-abuse-fd-bomb",
+  "languages": {
+    "python": "handles = []\nwhile True:\n    handles.append(open('/tmp/fd-bomb-' + str(len(handles)), 'w'))\n",
+    "javascript": "const fs = require('fs');\nconst handles = [];\nwhile (true) handles.push(fs.openSync('/tmp/fd-bomb-' + handles.length, 'w'));\n",
+    "typescript": "const fs = require('fs');\nconst handles: number[] = [];\nwhile (true) handles.push(fs.openSync('/tmp/fd-bomb-' + handles.length, 'w'));\n",
+    "java": "import java.io.*; import java.util.*;\npublic class Main {\n  public static void main(String[] a) throws Exception {\n    List<FileWriter> h = new ArrayList<>();\n    int i = 0;\n    while (true) h.add(new FileWriter(\"/tmp/fd-bomb-\" + (i++)));\n  }\n}\n",
+    "csharp": "using System; using System.Collections.Generic; using System.IO;\nclass Program { static void Main() { var h = new List<StreamWriter>(); int i = 0; while (true) h.Add(new StreamWriter(\"/tmp/fd-bomb-\" + (i++))); } }\n"
+  },
+  "expectedContainment": ["runtime_error", "fail", "timeout"]
+}

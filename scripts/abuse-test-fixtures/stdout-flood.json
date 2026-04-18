@@ -1,0 +1,12 @@
+{
+  "name": "stdout-flood",
+  "challengeId": "test-abuse-stdout-flood",
+  "languages": {
+    "python": "import sys\nchunk = 'A' * 1024\nfor _ in range(2 * 1024 * 1024):\n    sys.stdout.write(chunk)\n",
+    "javascript": "const chunk = 'A'.repeat(1024);\nfor (let i = 0; i < 2 * 1024 * 1024; i++) { process.stdout.write(chunk); }\n",
+    "typescript": "const chunk = 'A'.repeat(1024);\nfor (let i = 0; i < 2 * 1024 * 1024; i++) { process.stdout.write(chunk); }\n",
+    "java": "public class Main {\n  public static void main(String[] a) {\n    char[] chunk = new char[1024]; java.util.Arrays.fill(chunk, 'A');\n    for (int i = 0; i < 2 * 1024 * 1024; i++) System.out.print(new String(chunk));\n  }\n}\n",
+    "csharp": "using System;\nclass Program { static void Main() { string c = new string('A', 1024); for (int i = 0; i < 2*1024*1024; i++) Console.Write(c); } }\n"
+  },
+  "expectedContainment": ["runtime_error", "fail", "timeout", "mle"]
+}

@@ -1,0 +1,6 @@
+{
+  "challengeId": "test-load-top-users-sql",
+  "language": "sql",
+  "code": "SELECT id, name FROM users ORDER BY score DESC LIMIT 3;\n",
+  "expectedVerdict": "pass"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "infinite-loop",
+  "challengeId": "test-abuse-infinite-loop",
+  "languages": {
+    "python": "while True:\n    pass\n",
+    "javascript": "while (true) {}\n",
+    "typescript": "while (true) {}\n",
+    "java": "public class Main {\n  public static void main(String[] a) {\n    while (true) {}\n  }\n}\n",
+    "csharp": "class Program { static void Main() { while (true) {} } }\n",
+    "sql": "WITH RECURSIVE loop AS (SELECT 1 n UNION ALL SELECT n+1 FROM loop) SELECT * FROM loop;\n"
+  },
+  "expectedContainment": ["timeout", "runtime_error"]
+}
