@@ -134,6 +134,14 @@ export function usePollAttempt(attemptId: string | null): UsePollAttemptReturn {
       if (!mountedRef.current) return;
 
       if (!res.ok) {
+        if (res.status === 401) {
+          // Session expired mid-poll. Stop polling immediately; surface
+          // AUTH_REQUIRED so the caller can redirect to /signin (WR-02).
+          setStatus('error');
+          setError({ code: 'AUTH_REQUIRED', message: 'Session expired — please sign in again' });
+          clearTimer();
+          return;
+        }
         if (res.status === 404) {
           setStatus('error');
           setError({ code: 'NOT_FOUND', message: 'Attempt not found' });
@@ -143,6 +151,18 @@ export function usePollAttempt(attemptId: string | null): UsePollAttemptReturn {
         if (res.status === 403) {
           setStatus('error');
           setError({ code: 'FORBIDDEN', message: 'Not authorized' });
+          clearTimer();
+          return;
+        }
+        if (res.status === 503) {
+          // Judge0 / sandbox backend unavailable. Stop polling and surface a
+          // user-friendly message instead of retrying against a down runner
+          // until the 60s wall clock elapses (WR-03).
+          setStatus('error');
+          setError({
+            code: 'SANDBOX_UNAVAILABLE',
+            message: 'Judge0 sandbox temporarily unavailable — try again in a moment',
+          });
           clearTimer();
           return;
         }

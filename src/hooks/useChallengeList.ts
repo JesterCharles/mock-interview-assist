@@ -187,6 +187,18 @@ export function useChallengeList(
               if (Number.isFinite(n)) retryAfterSeconds = n;
             }
           }
+          // WR-02: 401 means the caller lost their session. Surface an
+          // explicit AUTH_REQUIRED code; do not retry silently.
+          if (res.status === 401) {
+            code = 'AUTH_REQUIRED';
+            message = 'Session expired — please sign in again';
+          }
+          // WR-03: 503 = upstream sandbox unavailable. Map to a clear user
+          // message instead of "Request failed: 503".
+          if (res.status === 503) {
+            code = code === 'UNKNOWN' ? 'SANDBOX_UNAVAILABLE' : code;
+            message = 'Judge0 sandbox temporarily unavailable — try again in a moment';
+          }
           setError({ code, message, retryAfterSeconds });
           if (!append) setItems([]);
           setNextCursor(null);

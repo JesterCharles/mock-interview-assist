@@ -182,6 +182,45 @@ describe('usePollAttempt', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('401 → AUTH_REQUIRED, stops polling immediately (WR-02)', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: { code: 'AUTH_REQUIRED', message: 'Sign-in required' } }),
+    });
+    render(createElement(Probe, { attemptId: 'a1' }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(screen.getByTestId('error-code').textContent).toBe('AUTH_REQUIRED');
+    expect(screen.getByTestId('status').textContent).toBe('error');
+    // No retries — single fetch even after advancing past wall clock.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(65_000);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('503 → SANDBOX_UNAVAILABLE, stops polling immediately (WR-03)', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      json: async () => ({ error: { code: 'SANDBOX_UNAVAILABLE', message: 'down' } }),
+    });
+    render(createElement(Probe, { attemptId: 'a1' }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(screen.getByTestId('error-code').textContent).toBe('SANDBOX_UNAVAILABLE');
+    expect(screen.getByTestId('status').textContent).toBe('error');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(65_000);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('attemptId change resets backoff + wall clock', async () => {
     vi.useFakeTimers();
     fetchMock.mockResolvedValue(pendingResponse());

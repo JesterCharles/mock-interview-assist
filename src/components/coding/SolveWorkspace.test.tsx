@@ -256,6 +256,56 @@ describe('SubmitBar', () => {
     expect(call.retryAfterSeconds).toBe(17);
   });
 
+  it('WR-02: 401 surfaces AUTH_REQUIRED via onError', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      headers: { get: () => null },
+      json: async () => ({ error: { code: 'AUTH_REQUIRED', message: 'nope' } }),
+    });
+    const onError = vi.fn();
+    render(
+      <SubmitBar
+        challengeId="c1"
+        language="python"
+        code="x=1"
+        onAttemptStarted={() => {}}
+        onError={onError}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+    });
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(onError.mock.calls[0][0].code).toBe('AUTH_REQUIRED');
+  });
+
+  it('WR-03: 503 surfaces SANDBOX_UNAVAILABLE with friendly message', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      headers: { get: () => null },
+      json: async () => ({}),
+    });
+    const onError = vi.fn();
+    render(
+      <SubmitBar
+        challengeId="c1"
+        language="python"
+        code="x=1"
+        onAttemptStarted={() => {}}
+        onError={onError}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+    });
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    const err = onError.mock.calls[0][0];
+    expect(err.code).toBe('SANDBOX_UNAVAILABLE');
+    expect(err.message).toMatch(/Judge0 sandbox temporarily unavailable/i);
+  });
+
   it('does not submit when code is empty/whitespace', async () => {
     render(
       <SubmitBar

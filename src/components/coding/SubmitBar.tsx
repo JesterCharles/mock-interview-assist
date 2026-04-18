@@ -67,6 +67,18 @@ export function SubmitBar({
           if (Number.isFinite(n)) retryAfterSeconds = n;
         }
       }
+      // WR-02: 401 indicates session expiry. Surface AUTH_REQUIRED so the
+      // host page can redirect to /signin instead of a generic toast.
+      if (res.status === 401) {
+        code2 = 'AUTH_REQUIRED';
+        message = 'Session expired — please sign in again';
+      }
+      // WR-03: 503 = Judge0 sandbox down. Map to a clear user-facing message
+      // rather than "HTTP 503".
+      if (res.status === 503) {
+        code2 = code2 ?? 'SANDBOX_UNAVAILABLE';
+        message = 'Judge0 sandbox temporarily unavailable — try again in a moment';
+      }
       onError?.({ code: code2, message, retryAfterSeconds });
     } catch (err) {
       onError?.({
