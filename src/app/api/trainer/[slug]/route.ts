@@ -104,6 +104,7 @@ export async function GET(
       skill: g.skill,
       topic: g.topic === '' ? null : g.topic,
       weightedScore: g.weightedScore,
+      prevWeightedScore: g.prevWeightedScore,
       sessionCount: g.sessionCount,
     }))
 

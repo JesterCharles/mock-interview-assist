@@ -90,7 +90,7 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
       readinessStatus: true,
       recommendedArea: true,
       gapScores: {
-        select: { skill: true, topic: true, weightedScore: true, sessionCount: true },
+        select: { skill: true, topic: true, weightedScore: true, prevWeightedScore: true, sessionCount: true },
       },
       sessions: {
         where: { status: 'completed' },
@@ -139,6 +139,7 @@ export default async function AssociateDashboardPage({ params }: PageProps) {
     skill: g.skill,
     topic: g.topic,
     weightedScore: g.weightedScore,
+    prevWeightedScore: g.prevWeightedScore,
     sessionCount: g.sessionCount,
   }));
 
