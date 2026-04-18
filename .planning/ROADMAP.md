@@ -97,6 +97,13 @@ Plans:
 **Success**: Challenge authored in repo appears in app within 5 min; validation rejects malformed challenges; hidden tests never appear in public API responses
 **Estimate**: ~1 week, 2-3 plans
 
+**Plans:** 3 plans in 3 waves
+
+Plans:
+- [ ] 37-01-PLAN.md — Repo schema docs + Zod schemas + loader skeleton (Wave 1)
+- [ ] 37-02-PLAN.md — Public/private fetch + ETag cache + idempotent DB sync (Wave 2)
+- [ ] 37-03-PLAN.md — Trainer-only POST /api/coding/bank/refresh (Wave 3)
+
 #### Phase 38: Judge0 Infrastructure (Local + Remote-Ready) — SPIKE GATE
 **Goal**: Judge0 stack pinned, hardened, and env-driven so local-mono and remote-MSA deploys are identical code; resource sizing committed from real GCE spike
 **Depends on**: Phase 36 (env wiring only)
