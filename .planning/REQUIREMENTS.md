@@ -49,11 +49,11 @@
 
 ### UI (CODING-UI-NN) — Phase 40
 
-- [ ] **CODING-UI-01**: `/coding` route shows challenge list filtered by language, week, difficulty, status (unstarted/attempted/passed); empty state when no cohort
-- [ ] **CODING-UI-02**: `/coding/[challengeId]` renders prompt markdown + Monaco editor (lazy-loaded, language-switched) + Run/Submit buttons + attempt history sidebar
-- [ ] **CODING-UI-03**: Run/Submit states surfaced explicitly in UI: queued → running → verdict (visible test results shown; hidden tests show only pass count, never inputs)
-- [ ] **CODING-UI-04**: Attempt history sidebar per associate per challenge (recent N attempts with verdict badges + timestamps), scoped to the authenticated associate
-- [ ] **CODING-UI-05**: AppShell integration — new sidebar entry "Coding" in associate and trainer nav (role-aware), uses existing DESIGN.md tokens, dark mode compliant
+- [x] **CODING-UI-01**: `/coding` route shows challenge list filtered by language, week, difficulty, status (unstarted/attempted/passed); empty state when no cohort
+- [x] **CODING-UI-02**: `/coding/[challengeId]` renders prompt markdown + Monaco editor (lazy-loaded, language-switched) + Run/Submit buttons + attempt history sidebar
+- [x] **CODING-UI-03**: Run/Submit states surfaced explicitly in UI: queued → running → verdict (visible test results shown; hidden tests show only pass count, never inputs)
+- [x] **CODING-UI-04**: Attempt history sidebar per associate per challenge (recent N attempts with verdict badges + timestamps), scoped to the authenticated associate
+- [x] **CODING-UI-05**: AppShell integration — new sidebar entry "Coding" in associate and trainer nav (role-aware), uses existing DESIGN.md tokens, dark mode compliant
 
 ### GapScore Integration (CODING-SCORE-NN) — Phase 41
 

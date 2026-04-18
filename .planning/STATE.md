@@ -4,14 +4,14 @@ milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
 status: Phase 38 code shipped — JUDGE-06 spike gate DEFERRED (docker unavailable); Phase 39 BLOCKED
 stopped_at: Phase 43 MSA deployment — all 4 plans shipped (IaC + CI/CD + metrics + runbook); Plan 43-01 Task 3 human-gated (DEPLOY-CHECKPOINT.md)
-last_updated: "2026-04-18T11:46:53.040Z"
+last_updated: "2026-04-18T11:54:04.552Z"
 last_activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate deferred)
 progress:
   total_phases: 9
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 28
-  completed_plans: 21
-  percent: 75
+  completed_plans: 23
+  percent: 82
 ---
 
 # v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
