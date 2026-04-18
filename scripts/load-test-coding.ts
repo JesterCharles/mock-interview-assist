@@ -164,16 +164,51 @@ async function submitOne(
     );
     const deadline = startedAt + timeoutMs;
 
+    // Retry transient poll failures (e.g., 502 during app restart, 429
+    // rate-limit on poll) instead of aborting the submission — WR-02.
+    const MAX_POLL_RETRIES = 3;
+    const RETRY_BACKOFF_MS = 1000;
+    let consecutivePollErrors = 0;
+    let lastPollError: string | null = null;
+
     while (Date.now() < deadline) {
       await sleep(pollIntervalMs);
-      const pollRes = await fetch(
-        `${baseUrl}/api/coding/attempts/${result.attemptId}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } },
-      );
-      if (!pollRes.ok) {
-        result.error = `poll ${pollRes.status}: ${await pollRes.text()}`;
-        return result;
+      let pollRes: Response;
+      try {
+        pollRes = await fetch(
+          `${baseUrl}/api/coding/attempts/${result.attemptId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+      } catch (networkErr) {
+        const msg = networkErr instanceof Error ? networkErr.message : String(networkErr);
+        consecutivePollErrors += 1;
+        lastPollError = `poll network: ${msg}`;
+        console.error(
+          `[load-test] poll retry ${consecutivePollErrors}/${MAX_POLL_RETRIES} for attempt=${result.attemptId}: ${lastPollError}`,
+        );
+        if (consecutivePollErrors >= MAX_POLL_RETRIES) {
+          result.error = lastPollError;
+          return result;
+        }
+        await sleep(RETRY_BACKOFF_MS);
+        continue;
       }
+      if (!pollRes.ok) {
+        consecutivePollErrors += 1;
+        lastPollError = `poll ${pollRes.status}: ${await pollRes.text()}`;
+        console.error(
+          `[load-test] poll retry ${consecutivePollErrors}/${MAX_POLL_RETRIES} for attempt=${result.attemptId}: ${lastPollError}`,
+        );
+        if (consecutivePollErrors >= MAX_POLL_RETRIES) {
+          result.error = lastPollError;
+          return result;
+        }
+        await sleep(RETRY_BACKOFF_MS);
+        continue;
+      }
+      // Reset the retry counter on any successful poll — only *consecutive*
+      // failures trip the cap.
+      consecutivePollErrors = 0;
       const pollBody = (await pollRes.json()) as { verdict: string };
       if (pollBody.verdict && pollBody.verdict !== 'pending') {
         result.verdict = pollBody.verdict;
@@ -183,7 +218,9 @@ async function submitOne(
       }
     }
 
-    result.error = `timeout — no verdict within ${timeoutMs}ms`;
+    result.error = lastPollError
+      ? `timeout — no verdict within ${timeoutMs}ms (last poll error: ${lastPollError})`
+      : `timeout — no verdict within ${timeoutMs}ms`;
   } catch (err: unknown) {
     result.error = err instanceof Error ? err.message : String(err);
   }
