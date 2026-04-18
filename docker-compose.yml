@@ -78,11 +78,13 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD}
     command: ["/api/docker-entrypoint.sh"]
-    # SECURITY (D-09): 127.0.0.1 binding ONLY. If deploying to a host with a
-    # public IP, either remove this block or ensure host firewall blocks :2358
-    # inbound. NEVER bind 2358 to all interfaces under any circumstance.
-    ports:
-      - "127.0.0.1:2358:2358"
+    # SECURITY (D-09): Port 2358 is NEVER exposed by this base file. The app
+    # container reaches judge0-server over the internal judge0-net bridge by
+    # service name. For local debugging (curl, spike harness from host) merge
+    # the overlay file which binds 127.0.0.1:2358:
+    #   docker compose -f docker-compose.yml -f docker-compose.expose-judge0.yml up
+    # In production deploys, NEVER pass the overlay file. Judge0 then remains
+    # reachable only via judge0-net. See .env.judge0.example for details.
     networks:
       - judge0-net
     depends_on:

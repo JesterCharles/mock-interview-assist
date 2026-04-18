@@ -1,0 +1,23 @@
+# =============================================================================
+# docker-compose.expose-judge0.yml — OPTIONAL overlay, DEV/DEBUG ONLY
+# =============================================================================
+# Wires D-09 `JUDGE0_EXPOSE_LOCAL` behavior: merging this file in exposes the
+# Judge0 HTTP API on 127.0.0.1:2358 so the spike harness, curl, or a host-side
+# client can hit it without entering a container.
+#
+# USAGE (local only):
+#   docker compose -f docker-compose.yml -f docker-compose.expose-judge0.yml up
+#
+# PRODUCTION: do NOT merge this file. Leaving it out keeps Judge0 reachable
+# only over the internal judge0-net bridge (by service name from the app
+# container). The port is never published to the host.
+#
+# SECURITY: binding is pinned to 127.0.0.1 (loopback). NEVER change to
+# 0.0.0.0 or a public interface — Judge0 sandbox escape GHSA-q7vg-26pg-v5hr
+# is patched in 1.13.1 but exposure to untrusted networks is still a hard no.
+# =============================================================================
+
+services:
+  judge0-server:
+    ports:
+      - "127.0.0.1:2358:2358"
