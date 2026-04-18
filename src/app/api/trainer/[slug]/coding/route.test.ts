@@ -59,7 +59,7 @@ describe('GET /api/trainer/[slug]/coding', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 401 when caller is an associate (even matching slug) — trainer-only per D-07', async () => {
+  it('returns 403 when caller is an associate (even matching slug) — trainer-only per D-07 (WR-01)', async () => {
     mockAuth.mockResolvedValue({
       kind: 'associate',
       associateId: 1,
@@ -68,7 +68,7 @@ describe('GET /api/trainer/[slug]/coding', () => {
       email: 'jane@test.com',
     });
     const res = await GET(req(), makeCtx('jane'));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it('returns 400 for invalid slug characters', async () => {

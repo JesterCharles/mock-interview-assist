@@ -32,10 +32,15 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  // Auth — trainer/admin only. Associates (even matching slug) get 401.
+  // Auth — trainer/admin only. Associates (even matching slug) get 403.
+  // Anonymous → 401 (not signed in), authenticated non-trainer → 403 (forbidden).
+  // HTTP semantics per Phase 41 WR-01.
   const caller = await getCallerIdentity(); // [AUDIT-VERIFIED: P20]
-  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
+  if (caller.kind === 'anonymous') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (caller.kind !== 'trainer' && caller.kind !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { slug } = await params;
