@@ -205,6 +205,7 @@ model CodingTestCase {
 
   challenge CodingChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
+  @@unique([challengeId, id])
   @@index([challengeId])
   @@index([isHidden])
 }
