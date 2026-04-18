@@ -63,4 +63,15 @@ resource "google_compute_instance" "judge0" {
   // Allow `terraform apply` to stop the VM for machine_type changes. Without
   // this, any disruptive update fails at plan time.
   allow_stopping_for_update = true
+
+  lifecycle {
+    // Judge0 VM is NOT cattle: it's the single code-execution host for the
+    // whole coding stack. Accidentally blowing it away via `terraform
+    // destroy` or a plan that re-creates it wipes Postgres data until the
+    // attached persistent disk re-attaches, and costs ~5 min of downtime
+    // to bootstrap docker compose. Flipping this on forces the operator
+    // to explicitly `terraform taint google_compute_instance.judge0` before
+    // a replace — see runbook §5 Tier 3 recovery (WR-07, Phase 43 review).
+    prevent_destroy = true
+  }
 }
