@@ -196,9 +196,20 @@ export async function systemInfo(timeoutMs = 2000): Promise<Judge0SystemInfo> {
   }
 }
 
+/**
+ * WR-02: Cap response-body reads at 500 chars to prevent log bloat and to
+ * limit exposure if a misconfigured Judge0 ever echoes back request headers
+ * (e.g., X-Auth-Token) or request body in a 4xx/5xx error response.
+ * Appends a `[truncated]` marker when truncation occurs so logs are honest
+ * about the cut.
+ */
+const SAFE_TEXT_MAX = 500;
+
 async function safeText(res: Response): Promise<string> {
   try {
-    return await res.text();
+    const body = await res.text();
+    if (body.length <= SAFE_TEXT_MAX) return body;
+    return `${body.slice(0, SAFE_TEXT_MAX)}...[truncated]`;
   } catch {
     return '';
   }

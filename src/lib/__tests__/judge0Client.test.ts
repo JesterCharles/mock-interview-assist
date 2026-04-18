@@ -131,6 +131,54 @@ describe('judge0Client', () => {
     expect((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
   });
 
+  // ---------- 7b. WR-02: 4xx body truncated at 500 chars ----------
+  it('submit() truncates oversize 4xx response body to 500 chars with marker', async () => {
+    const huge = 'X'.repeat(2000);
+    mockFetchOnce({ status: 400, textBody: huge });
+    const { submit } = await loadClient();
+    try {
+      await submit({ sourceCode: 'x', language: 'python', stdin: '' });
+      throw new Error('expected throw');
+    } catch (err) {
+      // Response body is surfaced on `cause` for logging — MUST be bounded.
+      const cause = String((err as { cause?: unknown }).cause ?? '');
+      // Full 2000-char body must NOT appear verbatim.
+      expect(cause).not.toContain(huge);
+      // Must contain truncation marker.
+      expect(cause).toMatch(/\[truncated\]/i);
+      // Total cause length must be bounded (500 body + envelope overhead).
+      expect(cause.length).toBeLessThan(700);
+    }
+  });
+
+  it('getSubmission() truncates oversize 4xx response body to 500 chars with marker', async () => {
+    const huge = 'Y'.repeat(1500);
+    mockFetchOnce({ status: 404, textBody: huge });
+    const { getSubmission } = await loadClient();
+    try {
+      await getSubmission('nope');
+      throw new Error('expected throw');
+    } catch (err) {
+      const cause = String((err as { cause?: unknown }).cause ?? '');
+      expect(cause).not.toContain(huge);
+      expect(cause).toMatch(/\[truncated\]/i);
+      expect(cause.length).toBeLessThan(700);
+    }
+  });
+
+  it('submit() does NOT truncate when 4xx body is already short', async () => {
+    mockFetchOnce({ status: 400, textBody: 'bad request' });
+    const { submit } = await loadClient();
+    try {
+      await submit({ sourceCode: 'x', language: 'python', stdin: '' });
+      throw new Error('expected throw');
+    } catch (err) {
+      const cause = String((err as { cause?: unknown }).cause ?? '');
+      expect(cause).toContain('bad request');
+      expect(cause).not.toMatch(/\[truncated\]/i);
+    }
+  });
+
   // ---------- 8. Retry on timeout/AbortError ----------
   it('submit() retries once on AbortError and succeeds', async () => {
     const abortErr = Object.assign(new Error('aborted'), { name: 'AbortError' });
