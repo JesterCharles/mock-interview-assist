@@ -231,9 +231,16 @@ export function checkCodingSubmitRateLimit(userKey: string): CodingSubmitRateRes
         };
     }
 
-    // Roll over windows if expired (but do not persist — check is read-only).
+    // Roll over windows if expired. WR-03 (Phase 39 review): rolloverBucket
+    // always returns a fresh spread-copy, so a reference-identity check was
+    // ALWAYS true and triggered a disk write on every call. Compare the
+    // fields that actually roll (hourly/daily window starts) so we only
+    // persist when a window boundary was crossed.
     const rolled = rolloverBucket(bucket, now);
-    if (rolled !== bucket) {
+    const windowAdvanced =
+        rolled.hourlyWindowStart !== bucket.hourlyWindowStart ||
+        rolled.dailyWindowStart !== bucket.dailyWindowStart;
+    if (windowAdvanced) {
         setCodingBucket(userKey, rolled);
         bucket = rolled;
     }

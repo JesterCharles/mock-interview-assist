@@ -136,6 +136,40 @@ describe('rateLimitService — coding-submit scope', () => {
     expect(keys).not.toContain('associate:42');
   });
 
+  it('WR-03: check does NOT rewrite disk when no window has rolled', () => {
+    // Seed a bucket inside both the hourly and daily windows.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-15T10:00:00Z'));
+    incrementCodingSubmitCount('associate:42'); // creates & persists bucket
+    const afterIncrement = fs.readFileSync(RATE_LIMITS_PATH, 'utf-8');
+
+    // Advance 5 minutes — still inside the same hourly window, same UTC day.
+    vi.setSystemTime(new Date('2026-01-15T10:05:00Z'));
+    const result = checkCodingSubmitRateLimit('associate:42');
+    expect(result.allowed).toBe(true);
+
+    // File must be byte-identical: no rollover, no write.
+    const afterCheck = fs.readFileSync(RATE_LIMITS_PATH, 'utf-8');
+    expect(afterCheck).toBe(afterIncrement);
+  });
+
+  it('WR-03: check DOES rewrite disk when the hourly window has rolled', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-15T10:00:00Z'));
+    incrementCodingSubmitCount('associate:42');
+    const beforeRoll = fs.readFileSync(RATE_LIMITS_PATH, 'utf-8');
+
+    // Advance past the hourly window.
+    vi.setSystemTime(new Date('2026-01-15T11:05:00Z'));
+    checkCodingSubmitRateLimit('associate:42');
+
+    const afterRoll = fs.readFileSync(RATE_LIMITS_PATH, 'utf-8');
+    expect(afterRoll).not.toBe(beforeRoll);
+    // Bucket is now reset — count should be 0.
+    const parsed = JSON.parse(afterRoll);
+    expect(parsed['coding-submit:associate:42'].hourlyCount).toBe(0);
+  });
+
   it('returns retryAfterSeconds at earliest of next hour window or midnight', () => {
     vi.useFakeTimers();
     // 23:30 — next midnight in 30 min; next hour window in 60 min
