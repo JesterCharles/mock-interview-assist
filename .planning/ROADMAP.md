@@ -144,7 +144,14 @@ Plans:
 **Depends on**: Phase 40
 **Requirements**: CODING-SCORE-01..04
 **Success**: Attempt verdict triggers GapScore recompute within 5 sec; trainer dashboard shows per-associate coding panel; readiness math documented in PROJECT.md + DESIGN.md
-**Estimate**: ~1 week, 2-3 plans
+**Estimate**: ~1 week, 3 plans
+
+**Plans:** 3 plans in 3 waves
+
+Plans:
+- [ ] 41-01-PLAN.md — gapPersistence coding extension + DIFFICULTY_MULTIPLIERS + Phase 39 poll-handler wiring (Wave 1)
+- [ ] 41-02-PLAN.md — Trainer dashboard coding panel + /api/trainer/[slug]/coding route (Wave 2)
+- [ ] 41-03-PLAN.md — PROJECT.md readiness math + DESIGN.md coding panel spec + v1.5 Open Items (Wave 3)
 
 #### Phase 42: SQL MVP (SQLite Only)
 **Goal**: SQLite language wired as a Judge0 path with server-side schema + seed injection; trainer-facing dialect label explicit
