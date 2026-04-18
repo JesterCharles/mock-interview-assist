@@ -1,0 +1,59 @@
+# Phase 47 D-19 — manual-dispatch smoke test to prove WIF end-to-end.
+# No push triggers. Phase 48 replaces / extends with pr-checks.yml + deploy-staging.yml.
+# Source: https://github.com/google-github-actions/auth — canonical WIF example.
+
+name: WIF smoke test (staging)
+
+on:
+  workflow_dispatch:
+
+# CRITICAL — `id-token: write` is required for GH Actions to mint OIDC tokens
+# that google-github-actions/auth@v2 can exchange via the WIF provider.
+# Without this permission, the auth step fails with "Unable to get ID token".
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    name: Prove WIF authentication
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (WIF)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          # workload_identity_provider uses the project NUMBER (Pitfall 3), not the project ID.
+          # STAGING_PROJECT_NUMBER is a GitHub repo VARIABLE (not a secret) — captured from:
+          #   gcloud projects describe nlm-staging-493715 --format='value(projectNumber)'
+          workload_identity_provider: 'projects/${{ vars.STAGING_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github'
+          service_account: 'github-actions-deployer@nlm-staging-493715.iam.gserviceaccount.com'
+          # token_format defaults to 'access_token' — sufficient for gcloud.
+
+      # Pitfall 8: `google-github-actions/auth@v2` does NOT install `gcloud`.
+      # Always sequence auth → setup-gcloud → gcloud <cmd>.
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Prove identity
+        run: |
+          set -euo pipefail
+
+          echo "Active account:"
+          gcloud auth list --filter=status:ACTIVE --format="value(account)"
+
+          echo ""
+          echo "Identity token (first 40 chars as proof of exchange):"
+          gcloud auth print-identity-token | head -c 40
+          echo ""
+
+          echo ""
+          echo "Project (should be nlm-staging-493715 via auth step's project_id default):"
+          gcloud config get-value project
+
+          echo ""
+          echo "PASS: WIF authentication succeeded end-to-end."
