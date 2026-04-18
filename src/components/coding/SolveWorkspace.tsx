@@ -32,6 +32,7 @@ export interface ChallengeDetail {
   language: string;
   languages: string[];
   starters: Record<string, string>;
+  visibleTests?: Array<{ caseId: string; stdin: string; expectedStdout: string }>;
 }
 
 export interface SolveWorkspaceProps {
@@ -193,6 +194,7 @@ export function SolveWorkspace({ challenge }: SolveWorkspaceProps) {
               response={poll.response}
               phase={poll.phase}
               error={poll.error}
+              visibleTests={challenge.visibleTests}
             />
           )}
 

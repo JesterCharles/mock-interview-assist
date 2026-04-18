@@ -24,10 +24,23 @@ import type {
   PollPhase,
 } from '@/hooks/usePollAttempt';
 
+export interface VisibleTestFixture {
+  caseId: string;
+  stdin: string;
+  expectedStdout: string;
+}
+
 export interface VerdictCardProps {
   response: AttemptPollResponse | null;
   phase: PollPhase;
   error: PollError | null;
+  /**
+   * Visible-test fixtures from `/api/coding/challenges/[id]`. When a visible
+   * test case fails, VerdictCard renders stdin + expected alongside actual
+   * stdout so users can see the mismatch without leaving the page. Hidden
+   * test fixtures are NEVER passed here — the D-05 shield is preserved.
+   */
+  visibleTests?: VisibleTestFixture[];
 }
 
 const VERDICT_LABELS: Record<AttemptVerdict, string> = {
@@ -147,7 +160,15 @@ function ErrorCard({ error }: { error: PollError }) {
   );
 }
 
-export function VerdictCard({ response, phase, error }: VerdictCardProps) {
+export function VerdictCard({
+  response,
+  phase,
+  error,
+  visibleTests,
+}: VerdictCardProps) {
+  const fixtureByCaseId = new Map(
+    (visibleTests ?? []).map((f) => [f.caseId, f]),
+  );
   if (error) return <ErrorCard error={error} />;
 
   if (phase === 'queued') {
@@ -320,32 +341,97 @@ export function VerdictCard({ response, phase, error }: VerdictCardProps) {
                     "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
                   fontSize: '13px',
                   color: 'var(--ink)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
                 }}
               >
-                <div style={{ marginBottom: '8px' }}>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
-                      color: 'var(--muted)',
-                    }}
-                  >
-                    Your output
-                  </span>
-                  <pre
-                    style={{
-                      background: 'var(--surface)',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      margin: '4px 0 0',
-                      whiteSpace: 'pre-wrap',
-                      overflowX: 'auto',
-                    }}
-                  >
-                    {tc.stdout ?? ''}
-                  </pre>
-                </div>
+                {(() => {
+                  const fixture = fixtureByCaseId.get(tc.caseId);
+                  const showDiff = !tc.passed && fixture !== undefined;
+                  return (
+                    <>
+                      {showDiff && (
+                        <div>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.08em',
+                              color: 'var(--muted)',
+                            }}
+                          >
+                            Input (stdin)
+                          </span>
+                          <pre
+                            style={{
+                              background: 'var(--surface)',
+                              padding: '10px',
+                              borderRadius: '6px',
+                              margin: '4px 0 0',
+                              whiteSpace: 'pre-wrap',
+                              overflowX: 'auto',
+                            }}
+                          >
+                            {fixture.stdin || '(empty)'}
+                          </pre>
+                        </div>
+                      )}
+                      {showDiff && (
+                        <div>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.08em',
+                              color: 'var(--success)',
+                            }}
+                          >
+                            Expected
+                          </span>
+                          <pre
+                            style={{
+                              background: 'var(--success-bg)',
+                              padding: '10px',
+                              borderRadius: '6px',
+                              margin: '4px 0 0',
+                              whiteSpace: 'pre-wrap',
+                              overflowX: 'auto',
+                            }}
+                          >
+                            {fixture.expectedStdout}
+                          </pre>
+                        </div>
+                      )}
+                      <div>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                            color: showDiff ? 'var(--danger)' : 'var(--muted)',
+                          }}
+                        >
+                          {showDiff ? 'Got' : 'Your output'}
+                        </span>
+                        <pre
+                          style={{
+                            background: showDiff
+                              ? 'var(--danger-bg)'
+                              : 'var(--surface)',
+                            padding: '10px',
+                            borderRadius: '6px',
+                            margin: '4px 0 0',
+                            whiteSpace: 'pre-wrap',
+                            overflowX: 'auto',
+                          }}
+                        >
+                          {tc.stdout ?? '(no output)'}
+                        </pre>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </details>
           ))}
