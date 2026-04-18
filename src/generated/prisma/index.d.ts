@@ -18282,6 +18282,7 @@ export namespace Prisma {
 
   export type CodingTestCaseWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    challengeId_id?: CodingTestCaseChallengeIdIdCompoundUniqueInput
     AND?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
     OR?: CodingTestCaseWhereInput[]
     NOT?: CodingTestCaseWhereInput | CodingTestCaseWhereInput[]
@@ -18292,7 +18293,7 @@ export namespace Prisma {
     weight?: FloatFilter<"CodingTestCase"> | number
     orderIndex?: IntFilter<"CodingTestCase"> | number
     challenge?: XOR<CodingChallengeScalarRelationFilter, CodingChallengeWhereInput>
-  }, "id">
+  }, "id" | "challengeId_id">
 
   export type CodingTestCaseOrderByWithAggregationInput = {
     id?: SortOrder
@@ -20379,6 +20380,11 @@ export namespace Prisma {
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type CodingTestCaseChallengeIdIdCompoundUniqueInput = {
+    challengeId: string
+    id: string
   }
 
   export type CodingTestCaseCountOrderByAggregateInput = {
