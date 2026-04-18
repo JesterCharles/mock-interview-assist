@@ -79,6 +79,10 @@ export function CodingEditor({
   return (
     <div
       className={className}
+      // Monaco injects <script> tags for its web-worker bootstrap; React
+      // warns about script tags in render trees. Suppress — Monaco's pattern
+      // is intentional and not under our control. (F-09)
+      suppressHydrationWarning
       style={{
         width: '100%',
         height,
