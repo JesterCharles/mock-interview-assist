@@ -16,6 +16,7 @@ import { prisma } from '@/lib/prisma';
 import { getSubmission } from '@/lib/judge0Client';
 import { normalizeJudge0Verdict, type CanonicalVerdict } from '@/lib/judge0Verdict';
 import { mapSignalToScore, type SignalType } from '@/lib/codingSignalService';
+import { persistCodingSignalToGapScore } from '@/lib/gapPersistence';
 
 export class AttemptNotFoundError extends Error {
   constructor(id: string) {
@@ -160,6 +161,7 @@ function deriveSignalType(
 
 interface AttemptRow {
   id: string;
+  associateId: number;
   verdict: string;
   score: number | null;
   visibleTestResults: unknown;
@@ -168,7 +170,13 @@ interface AttemptRow {
   submittedAt: Date;
   completedAt: Date | null;
   challengeId: string;
-  challenge: { skillSlug: string } | null;
+  challenge: {
+    skillSlug: string;
+    // Phase 41: difficulty + language feed DIFFICULTY_MULTIPLIERS and
+    // topic="coding:<language>" on the GapScore upsert.
+    difficulty: 'easy' | 'medium' | 'hard';
+    language: string;
+  } | null;
 }
 
 function toPollResultFromPersisted(attempt: AttemptRow): PollResult {
@@ -202,8 +210,9 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
       judge0Token: true,
       submittedAt: true,
       completedAt: true,
+      associateId: true,
       challengeId: true,
-      challenge: { select: { skillSlug: true } },
+      challenge: { select: { skillSlug: true, difficulty: true, language: true } },
     },
   })) as AttemptRow | null;
 
@@ -306,21 +315,22 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
     throw err;
   }
 
-  // Fire-and-forget signal writeback (non-blocking)
+  // Fire-and-forget signal writeback (non-blocking — D-11 contract).
+  // WR-01 (Phase 39 review): must NOT await — a slow/failed signal write
+  // must not delay the poll response. Errors are logged, never thrown.
   const signalType = deriveSignalType(finalVerdict, agg.perCase);
   const skillSlug = attempt.challenge?.skillSlug ?? 'unknown';
-  try {
-    // For partial, compute testsPassed/totalTests from all cases
-    const totalTests = agg.perCase.length;
-    const testsPassed = agg.perCase.filter((pc) => pc.passed).length;
+  // For partial, compute testsPassed/totalTests from all cases
+  const totalTests = agg.perCase.length;
+  const testsPassed = agg.perCase.filter((pc) => pc.passed).length;
+  const mapped = mapSignalToScore(
+    signalType === 'partial'
+      ? { skillSlug, signalType, testsPassed, totalTests }
+      : { skillSlug, signalType },
+  );
 
-    const mapped = mapSignalToScore(
-      signalType === 'partial'
-        ? { skillSlug, signalType, testsPassed, totalTests }
-        : { skillSlug, signalType },
-    );
-
-    await prisma.codingSkillSignal.upsert({
+  void prisma.codingSkillSignal
+    .upsert({
       where: { attemptId },
       create: {
         attemptId,
@@ -330,10 +340,10 @@ export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<Pol
         mappedScore: mapped.rawScore,
       },
       update: {},
+    })
+    .catch((err) => {
+      console.error('[codingAttemptPoll] signal writeback failed for', attemptId, err);
     });
-  } catch (err) {
-    console.error('[codingAttemptPoll] signal writeback failed for', attemptId, err);
-  }
 
   const hiddenPassedCount = agg.perCase.filter((pc) => pc.isHidden && pc.passed).length;
   const hiddenTotal = agg.perCase.filter((pc) => pc.isHidden).length;

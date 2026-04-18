@@ -397,9 +397,54 @@ describe('pollAndMaybeResolveAttempt', () => {
     const result = await pollAndMaybeResolveAttempt('a-3');
     expect(result.resolved).toBe(true);
     expect(result.verdict).toBe('pass');
+
+    // WR-01: signal writeback is fire-and-forget — the .catch runs on a later
+    // microtask after the function returns. Flush the queue before asserting.
+    await new Promise((resolve) => setImmediate(resolve));
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+  });
+
+  it('WR-01: signal writeback does NOT block poll return (fire-and-forget)', async () => {
+    (prisma.codingAttempt.findUnique as Mock).mockResolvedValue({
+      id: 'a-ff',
+      verdict: 'pending',
+      score: null,
+      visibleTestResults: [],
+      hiddenTestResults: [],
+      judge0Token: JSON.stringify(['t']),
+      submittedAt: new Date(),
+      completedAt: null,
+      challengeId: 'ch',
+      challenge: { skillSlug: 'py' },
+    });
+    (prisma.codingTestCase.findMany as Mock).mockResolvedValue([
+      { id: 'v', isHidden: false, weight: 1, orderIndex: 0 },
+    ]);
+    (judge0Client.getSubmission as Mock).mockResolvedValue(j0Result(3));
+    (prisma.codingAttempt.update as Mock).mockResolvedValue({ id: 'a-ff' });
+
+    // Signal upsert that resolves only after an external latch — if the poll
+    // awaited it, the test would hang.
+    let resolveSignal: (value: unknown) => void = () => {};
+    const signalPromise = new Promise((r) => {
+      resolveSignal = r;
+    });
+    (prisma.codingSkillSignal.upsert as Mock).mockReturnValue(signalPromise);
+
+    const start = Date.now();
+    const result = await pollAndMaybeResolveAttempt('a-ff');
+    const elapsed = Date.now() - start;
+
+    // Poll must return promptly even while signal is still pending.
+    expect(result.resolved).toBe(true);
+    expect(elapsed).toBeLessThan(100);
+    expect(prisma.codingSkillSignal.upsert).toHaveBeenCalledOnce();
+
+    // Clean up dangling promise so Vitest doesn't see an unhandled rejection.
+    resolveSignal({ id: 's' });
+    await signalPromise;
   });
 
   it('hiddenTestResults stored as server-detail Array (caseId, passed, durationMs only — no stdin/expected)', async () => {
