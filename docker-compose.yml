@@ -13,6 +13,9 @@
 #   OPENAI_API_KEY=your_key GITHUB_TOKEN=your_token docker compose up --build
 #
 # =============================================================================
+# v1.4 Phase 38 addition: Judge0 coding sandbox stack (server, workers, db, redis)
+# See .planning/phases/38-judge0-infrastructure/ for decisions + resource sizing.
+# =============================================================================
 
 services:
   interview-assistant:
@@ -28,6 +31,10 @@ services:
     volumes:
       # Persist interview history data directly to the host ./data folder
       - ./data:/app/data
+    # App needs to reach judge0-server by service name via judge0-net (D-08).
+    networks:
+      - default
+      - judge0-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
@@ -35,3 +42,191 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # judge0-server — Judge0 HTTP API (Plan 38-01, D-01, D-04..D-10, D-14)
+  # ---------------------------------------------------------------------------
+  # SECURITY (D-01): Pinned to 1.13.1 to patch GHSA-q7vg-26pg-v5hr sandbox escape.
+  # Never use :latest. If 1.13.1 tag missing on Docker Hub at execution time,
+  # fall back to the first stable 1.13.x tag — NEVER :latest.
+  # digest: sha256:TBD — pin after first pull during Plan 38-03 spike.
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    # SECURITY (D-04): ENABLE_NETWORK=false is non-negotiable — prevents
+    # sandboxed code from making network egress. Mitigates GHSA-q7vg-26pg-v5hr
+    # class attacks when paired with 1.13.1 pin.
+    env_file:
+      - .env.judge0
+    environment:
+      AUTHN_HEADER: X-Auth-Token
+      AUTHN_TOKEN: ${JUDGE0_AUTH_TOKEN}
+      ENABLE_NETWORK: "false"
+      ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: "true"
+      ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: "true"
+      MAX_CPU_TIME_LIMIT: "10"
+      MAX_WALL_TIME_LIMIT: "15"
+      MAX_MEMORY_LIMIT: "256000"
+      MAX_PROCESSES_AND_OR_THREADS: "60"
+      MAX_FILE_SIZE: "8192"
+      MAX_NUMBER_OF_RUNS: "1"
+      POSTGRES_HOST: judge0-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD}
+      REDIS_HOST: judge0-redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD}
+    command: ["/api/docker-entrypoint.sh"]
+    # SECURITY (D-09): 127.0.0.1 binding ONLY. If deploying to a host with a
+    # public IP, either remove this block or ensure host firewall blocks :2358
+    # inbound. NEVER bind 2358 to all interfaces under any circumstance.
+    ports:
+      - "127.0.0.1:2358:2358"
+    networks:
+      - judge0-net
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Placeholder; Plan 38-03 spike commits final values per D-03.
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:2358/system_info || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # judge0-workers — Judge0 execution workers (resque consumers)
+  # ---------------------------------------------------------------------------
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    # digest: sha256:TBD — pin after first pull during Plan 38-03 spike.
+    env_file:
+      - .env.judge0
+    environment:
+      AUTHN_HEADER: X-Auth-Token
+      AUTHN_TOKEN: ${JUDGE0_AUTH_TOKEN}
+      ENABLE_NETWORK: "false"
+      ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: "true"
+      ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: "true"
+      MAX_CPU_TIME_LIMIT: "10"
+      MAX_WALL_TIME_LIMIT: "15"
+      MAX_MEMORY_LIMIT: "256000"
+      MAX_PROCESSES_AND_OR_THREADS: "60"
+      MAX_FILE_SIZE: "8192"
+      MAX_NUMBER_OF_RUNS: "1"
+      POSTGRES_HOST: judge0-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD}
+      REDIS_HOST: judge0-redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD}
+      # D-07: Empty default uses Judge0's 2×vCPU default. Override during spike.
+      COUNT_WORKERS: ${COUNT_WORKERS:-}
+    command: ["/api/docker-entrypoint.sh", "run_workers"]
+    # NO ports: workers never accept HTTP, only consume from Redis queue.
+    networks:
+      - judge0-net
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+      judge0-server:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Placeholder; Plan 38-03 spike commits final values per D-03.
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f resque || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # judge0-db — Judge0-internal Postgres (D-02)
+  # ---------------------------------------------------------------------------
+  judge0-db:
+    image: postgres:15-alpine
+    # digest: sha256:TBD — pin after first pull during Plan 38-03 spike.
+    environment:
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD}
+      POSTGRES_DB: judge0
+    volumes:
+      - judge0-db-data:/var/lib/postgresql/data
+    networks:
+      - judge0-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Placeholder; Plan 38-03 spike commits final values per D-03.
+          cpus: '1'
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U judge0"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # judge0-redis — Judge0 job queue (D-02)
+  # ---------------------------------------------------------------------------
+  judge0-redis:
+    image: redis:7-alpine
+    # digest: sha256:TBD — pin after first pull during Plan 38-03 spike.
+    command: ["redis-server", "--requirepass", "${JUDGE0_REDIS_PASSWORD}"]
+    volumes:
+      - judge0-redis-data:/data
+    networks:
+      - judge0-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          # Placeholder; Plan 38-03 spike commits final values per D-03.
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$JUDGE0_REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  # Default bridge network for interview-assistant (existing behavior preserved).
+  default:
+    driver: bridge
+
+  # Internal bridge. App container bridges to it by adding judge0-net to its
+  # networks list. Do NOT make this external or expose ports from it.
+  # Judge0 services sit ONLY on judge0-net (never on default).
+  judge0-net:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  judge0-db-data:
+  judge0-redis-data:
