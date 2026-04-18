@@ -552,30 +552,22 @@ echo -n "postgresql://postgres:....@aws-0-us-west-1.pooler.supabase.com:6543/pos
 | A5 | Auto replication is Google-default and free at <13 secrets | §Pitfall 6 | Billing surprise. LOW — pricing verified below free-tier storage. |
 | A6 | The smoke test relaxation (Pitfall 4, Option C) is acceptable to user | §Dockerfile Smoke | Phase 45 "verification" argued over. MEDIUM — planner must surface this explicitly and get /discuss sign-off OR land Option A (staging Supabase creds in dummy.env). |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should we `terraform import` the manually-bootstrapped bucket?**
-   - What we know: D-06 leaves this optional; planner decides.
-   - What's unclear: Tradeoff between "import = future drift detection" vs "import = easier-to-accidentally-destroy."
-   - Recommendation: Leave the `state.tf` as a commented stub (Pattern 6). Add a one-line README note: "Bucket is deliberately NOT in TF state; manage via gcloud only." Matches the Atmos / Gruntwork industry-standard bootstrap pattern.
+   - RESOLVED: Leave `state.tf` as a commented stub (Pattern 6). Bucket stays un-managed by TF. README notes "managed via gcloud only." Matches Atmos / Gruntwork industry-standard bootstrap pattern. Adopted in Plan 01.
 
 2. **Is `disable_on_destroy = false` the right call for `serviceusage` and `cloudresourcemanager` specifically?**
-   - What we know: These are the two seed APIs. Destroying them would brick the project's TF management.
-   - What's unclear: If user deletes the project later, leaving APIs enabled is harmless.
-   - Recommendation: `disable_on_destroy = false` for all 10-12 managed APIs. v7 default aligns.
+   - RESOLVED: `disable_on_destroy = false` for all managed APIs. Aligns with provider v7 default. Adopted in Plan 01 `apis.tf`.
 
 3. **Does D-09's secret list match the app's actual `process.env.*` reads?**
-   - What we know: The list was captured during /discuss.
-   - What's unclear: Whether new code (e.g., v1.4 coding challenges) added any reads not in the list.
-   - Recommendation: Planner task: `rg 'process\.env\.[A-Z_]+' src/ | sed -E 's/.*process\.env\.([A-Z_]+).*/\1/' | sort -u` and reconcile against D-09. Missing entries go into a Phase 46 backlog.
+   - RESOLVED: Planner task in Plan 01 runs `rg 'process\.env\.[A-Z_]+' src/ | sort -u` reconcile; gaps filed as a Phase 46 backlog item. D-09's 13 names remain the canonical Phase 45 scope.
 
 4. **Cloud Build API enablement — keep or drop?**
-   - What we know: D-12 marks it optional. GH Actions in Phase 48 does all builds on runner-side, so `cloudbuild.googleapis.com` shouldn't be needed.
-   - Recommendation: Drop from v1.5 initial list. Easy to add in a future phase (single-line addition).
+   - RESOLVED: Dropped. GH Actions in Phase 48 builds on runner-side. `cloudbuild.googleapis.com` not in Plan 01's 11-API list. Easy to add later.
 
 5. **`nlm-tfstate` bucket location: US multi-region vs us-central1 regional?**
-   - What we know: D-05 doesn't specify. Reference `infra/terraform/README.md` used `${REGION}` (regional).
-   - Recommendation: US multi-region (`location = "US"`). State file durability > latency. Cost delta is ~$0.00001/month at <1MB state.
+   - RESOLVED: US multi-region (`location = "US"`). State durability > latency. Cost delta negligible (~$0.00001/month at <1MB). Adopted in Plan 01 bootstrap script.
 
 ## Environment Availability
 
