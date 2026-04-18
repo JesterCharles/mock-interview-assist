@@ -223,10 +223,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. `legacy.nextlevelmock.com` resolves to v0.1 GCE LB and serves the old app; trainer can revert `nextlevelmock.com` to v0.1 with a single Cloudflare DNS record change (kill switch documented in DEPLOY.md)
   4. Day 0-21 sunset window is underway: v1.5 is deployed to staging (day 0-14 gate passed), DNS cutover is complete (day 15-21 gate), v0.1 GCE remains warm for 30-day rollback
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 52-01-PLAN.md — Pre-cutover preflight + live session setup + T-0 email + baseline cutover log (Wave 1)
+  - [ ] 52-02-PLAN.md — Apex cutover via `terraform apply -target=cloudflare_record.apex` + 5min dig/curl polling (Wave 2)
+  - [ ] 52-03-PLAN.md — scripts/kill-switch.sh + T+30min revert/restore rehearsal + legacy.nextlevelmock.com uptime check (Wave 3)
+  - [ ] 52-04-PLAN.md — Post-cutover smokes (abuse, k6 light, trainer login, public interview E2E) + DEPLOY.md Sunset Window + verify-phase-52.sh (Wave 3)
 
 ### Phase 53: Reflect + Maintain + Runbook Finalization + Decommission Plan
 **Goal**: The v1.4 retro is done, the codebase health check is complete, all runbooks and docs reflect the Cloud Run reality, and the v0.1 GCE teardown checklist is committed for day-45 execution
@@ -239,10 +239,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   4. `CLAUDE.md` deployment section reflects Cloud Run (GCE + Docker Compose references replaced); new env vars and workflow names are listed
   5. `README.md` project-overview section says "Deployed to Cloud Run on GCP" with a link to DEPLOY.md; `.planning/SECURITY-v1.5.md` captures STRIDE findings signed off by codex
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 53-01-PLAN.md — Retro + Maintain sweep (v1.4 + v1.5), numeric health_score, second-brain notes
+  - [ ] 53-02-PLAN.md — DEPLOY.md §7 Secret Rotation + §8 Supabase Migration Promotion + §9 v0.1 Sunset Day-45 Teardown + script stub
+  - [ ] 53-03-PLAN.md — CLAUDE.md (strip docker-compose, add Cloud Run Deploy + Tech Stack additions) + README.md overview link
+  - [ ] 53-04-PLAN.md — v1.6 seeds + verify-phase-53.sh phase gate (10 must-have checks)
 
 ## Progress
 
@@ -261,7 +261,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 | 50. Judge0 Integration Points + Flag Audit | v1.5 | 0/4 | Planned | - |
 | 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 0/4 | Planned | - |
 | 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 0/? | Not started | - |
-| 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 0/? | Not started | - |
+| 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 0/4 | Planned | - |
 
 ## Backlog
 
