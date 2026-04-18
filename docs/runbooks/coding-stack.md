@@ -498,12 +498,24 @@ Navigate: Logs Explorer → Create Alert.
   ```
   Trigger: 5+ matches in 5 min.
 
-- Query 3 (unreachable):
+- Query 3 (unreachable — Judge0 VM / process down):
   ```
   logName="projects/${PROJECT}/logs/judge0-metrics"
   jsonPayload.status = "unreachable"
   ```
-  Trigger: 2+ matches in 5 min.
+  Trigger: 2+ matches in 5 min. Indicates ECONNREFUSED, ENOTFOUND,
+  timeout — the pusher could not reach Judge0 at all.
+
+- Query 3b (error — Judge0 returning HTTP 4xx/5xx):
+  ```
+  logName="projects/${PROJECT}/logs/judge0-metrics"
+  jsonPayload.status = "error"
+  ```
+  Trigger: 2+ matches in 5 min. Indicates Judge0 is reachable but the
+  server is returning non-2xx on `/system_info` or `/submissions` — the
+  host is up but the app is broken (DB connection, Redis, etc.).
+  WR-04 (Phase 43 review) split this from "unreachable" so the first
+  response (SSH/restart vs re-ping) can branch correctly.
 
 Notify: email + optional Slack/PagerDuty integration (user choice — not in
 Terraform scope per D-12 / Claude's Discretion in CONTEXT.md).

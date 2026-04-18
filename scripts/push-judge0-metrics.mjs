@@ -44,12 +44,20 @@ export function computePercentiles(latenciesMs) {
 
 // Build the structured JSON payload emitted to Logs Explorer.
 // Shape must match `.planning/phases/43-msa-deployment/43-03-PLAN.md` interfaces.
-export function buildLogPayload({ queueDepth, latenciesMs, judge0Version, error } = {}) {
+//
+// errorKind (WR-04, Phase 43 review):
+//   "unreachable" — network-level failure (ECONNREFUSED, ENOTFOUND, timeout).
+//                   The Judge0 VM is down, firewalled off, or the process
+//                   exited. Alert query 3 in runbook Appendix B.
+//   "error"       — HTTP-level failure (Judge0 returned 4xx/5xx). The server
+//                   is reachable but broken. Alert query 3b in Appendix B.
+// Default is "unreachable" for back-compat with existing alert rules.
+export function buildLogPayload({ queueDepth, latenciesMs, judge0Version, error, errorKind } = {}) {
   const timestamp = new Date().toISOString();
   if (error) {
     return {
       timestamp,
-      status: 'unreachable',
+      status: errorKind === 'error' ? 'error' : 'unreachable',
       error: error.message || String(error),
     };
   }
@@ -63,6 +71,14 @@ export function buildLogPayload({ queueDepth, latenciesMs, judge0Version, error 
     sampleSize,
     judge0Version: judge0Version || 'unknown',
   };
+}
+
+// Narrow error kind heuristic: messages thrown from our fetch() wrappers
+// that mention "HTTP" are HTTP-level failures; everything else (network
+// errors, DNS, timeouts) is surfaced as unreachable.
+function classifyError(err) {
+  const msg = err?.message || String(err || '');
+  return /HTTP\s+\d{3}/i.test(msg) ? 'error' : 'unreachable';
 }
 
 async function fetchJudge0Metrics() {
@@ -111,6 +127,7 @@ async function fetchJudge0Metrics() {
 }
 
 function writeLogEntry(payload) {
+  // Both "unreachable" and "error" map to ERROR severity; "ok" is INFO.
   const severity = payload.status === 'ok' ? 'INFO' : 'ERROR';
   // execFileSync with args array — no shell, no injection. Payload is passed
   // as a discrete argv; `--payload-type=json` tells Cloud Logging to treat the
@@ -135,7 +152,7 @@ async function main() {
     const metrics = await fetchJudge0Metrics();
     payload = buildLogPayload(metrics);
   } catch (err) {
-    payload = buildLogPayload({ error: err });
+    payload = buildLogPayload({ error: err, errorKind: classifyError(err) });
   }
   try {
     writeLogEntry(payload);

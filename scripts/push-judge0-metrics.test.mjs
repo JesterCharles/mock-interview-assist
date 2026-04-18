@@ -47,10 +47,35 @@ describe('buildLogPayload', () => {
     expect(typeof payload.p95Ms).toBe('number');
   });
 
-  it('builds an unreachable payload on error', () => {
-    const payload = buildLogPayload({ error: new Error('ECONNREFUSED') });
+  it('builds an unreachable payload when Judge0 cannot be contacted', () => {
+    // Network-level failure — ECONNREFUSED, ENOTFOUND, etc. — is surfaced as
+    // `status: "unreachable"` (the VM or the process is down, per WR-04).
+    const payload = buildLogPayload({
+      error: new Error('ECONNREFUSED'),
+      errorKind: 'unreachable',
+    });
     expect(payload.status).toBe('unreachable');
     expect(payload.error).toBe('ECONNREFUSED');
     expect(typeof payload.timestamp).toBe('string');
+  });
+
+  it('builds an error payload when Judge0 returns non-2xx', () => {
+    // HTTP-level failure — Judge0 is reachable but returning 5xx/4xx —
+    // is distinct from unreachable (the server is up but broken).
+    // WR-04: split so Appendix B alert queries can distinguish.
+    const payload = buildLogPayload({
+      error: new Error('system_info returned HTTP 500'),
+      errorKind: 'error',
+    });
+    expect(payload.status).toBe('error');
+    expect(payload.error).toBe('system_info returned HTTP 500');
+    expect(typeof payload.timestamp).toBe('string');
+  });
+
+  it('defaults unspecified errorKind to unreachable (back-compat)', () => {
+    // Legacy call sites without errorKind continue to log "unreachable"
+    // so existing alert rules don't silently stop matching.
+    const payload = buildLogPayload({ error: new Error('boom') });
+    expect(payload.status).toBe('unreachable');
   });
 });
