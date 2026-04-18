@@ -149,7 +149,9 @@ export interface ValidatedChallenge {
 
 function firstIssuePath(err: z.ZodError, prefix: string): { path: string; message: string } {
   const issue = err.issues[0];
-  const joined = issue.path.map((p) => (typeof p === 'number' ? `[${p}]` : `.${p}`)).join('');
+  const joined = issue.path
+    .map((p) => (typeof p === 'number' ? `[${p}]` : `.${String(p)}`))
+    .join('');
   // Build "prefix.field" or "prefix[n].field" while collapsing leading "."
   const tail = joined.startsWith('.') ? joined.slice(1) : joined;
   const path = tail ? `${prefix}.${tail}`.replace('.[', '[') : prefix;
