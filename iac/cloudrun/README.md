@@ -102,9 +102,106 @@ echo -n "postgresql://postgres:...@pooler.supabase.com:6543/postgres?connection_
 
 Run `bash iac/cloudrun/scripts/verify-phase-45.sh` (added by Plan 04) against both projects. Must exit 0 before `/gsd-verify-work`.
 
+## Phase 47 apply sequence
+
+v1.5 Phase 47 provisions: staging Cloud Run service, HTTPS LB, managed SSL cert, Cloudflare DNS, WIF pool+provider in both projects, SA IAM bindings.
+
+### Prerequisites
+- Phase 45 applied (Artifact Registry + 13 secret shells + 2 SAs in both projects)
+- Phase 46 applied (all 13 secrets populated with real values in both projects)
+- First image pushed to `us-central1-docker.pkg.dev/nlm-staging-493715/nlm-app/nlm-app` (Phase 45-02 Docker smoke HALTED — Phase 48 CI is the first path that pushes a real image)
+- `CLOUDFLARE_API_TOKEN` exported in shell (scope: Zone.DNS.Edit on `nextlevelmock.com`; token is never stored in Secret Manager per D-21 / T-47-09)
+- `staging.tfvars` has real values for `initial_image_digest` (from Artifact Registry after Phase 48 CI push) and `cf_zone_id` (Cloudflare zone ID from one-time lookup below)
+
+### One-time Cloudflare zone lookup
+```bash
+export CLOUDFLARE_API_TOKEN='<token-with-Zone.Read+Zone.DNS.Edit-on-nextlevelmock.com>'
+curl -sf -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  "https://api.cloudflare.com/client/v4/zones?name=nextlevelmock.com" \
+  | jq -r '.result[0].id'
+# Paste the 32-char hex output into staging.tfvars: cf_zone_id = "..."
+```
+
+**Recommended:** stash the token in macOS Keychain so it's never in shell history:
+```bash
+security add-generic-password -a "$USER" -s "CLOUDFLARE_API_TOKEN_NLM" -w '<token>'
+# Retrieve later:
+export CLOUDFLARE_API_TOKEN=$(security find-generic-password -a "$USER" -s CLOUDFLARE_API_TOKEN_NLM -w)
+```
+
+### Artifact Registry digest capture
+```bash
+# After Phase 48 CI pushes the first real image:
+gcloud artifacts docker images list us-central1-docker.pkg.dev/nlm-staging-493715/nlm-app/nlm-app \
+  --include-tags --filter='tags:*' --format='value(DIGEST)' --limit=1
+# Paste into staging.tfvars: initial_image_digest = "sha256:<64-hex>"
+```
+
+### Apply sequence (Wave 1 → 2 → 3)
+```bash
+cd iac/cloudrun
+terraform init -reconfigure -backend-config="prefix=cloudrun/staging"
+
+# Wave 1 — Cloud Run service (Plan 01)
+terraform apply -var-file=staging.tfvars \
+  -target=google_cloud_run_v2_service.nlm_staging \
+  -target=google_cloud_run_v2_service_iam_member.public_invoke
+
+# Wave 2 — LB + DNS (Plan 02) and WIF (Plan 03) — can run in any order; no shared resources
+terraform apply -var-file=staging.tfvars \
+  -target=google_compute_global_address.nlm_staging_lb_ip \
+  -target=google_compute_region_network_endpoint_group.nlm_staging_neg \
+  -target=google_compute_backend_service.nlm_staging_backend \
+  -target=google_compute_url_map.nlm_staging_urlmap \
+  -target=google_compute_managed_ssl_certificate.nlm_staging_cert \
+  -target=google_compute_target_https_proxy.nlm_staging_https_proxy \
+  -target=google_compute_global_forwarding_rule.nlm_staging_https_fwd \
+  -target=cloudflare_record.staging
+
+# Plan 03 WIF bindings (also Wave 2) — see 47-03-PLAN.md for full sequence including prod project.
+terraform apply -var-file=staging.tfvars \
+  -target=google_iam_workload_identity_pool.github \
+  -target=google_iam_workload_identity_pool_provider.github \
+  -target=google_service_account_iam_member.wif_impersonation \
+  -target=google_project_iam_member.ghactions_artifactregistry_writer \
+  -target=google_project_iam_member.ghactions_run_admin \
+  -target=google_service_account_iam_member.ghactions_act_as_cloudrun_sa
+
+# Same WIF bindings against nlm-prod (D-14 — one-time per project)
+terraform init -reconfigure -backend-config="prefix=cloudrun/prod"
+terraform apply -var-file=prod.tfvars \
+  -target=google_iam_workload_identity_pool.github \
+  -target=google_iam_workload_identity_pool_provider.github \
+  -target=google_service_account_iam_member.wif_impersonation \
+  -target=google_project_iam_member.ghactions_artifactregistry_writer \
+  -target=google_project_iam_member.ghactions_run_admin \
+  -target=google_service_account_iam_member.ghactions_act_as_cloudrun_sa
+```
+
+### Post-apply — wait for managed SSL cert (Pitfall 1)
+```bash
+# Async 10-60 min. Poll until ACTIVE.
+for i in {1..40}; do
+  S=$(gcloud compute ssl-certificates describe nlm-staging-ssl-cert \
+      --project=nlm-staging-493715 --format='value(managed.status)')
+  echo "[$i] cert=$S"; [[ "$S" == "ACTIVE" ]] && break; sleep 60
+done
+```
+
+If status stays `PROVISIONING` past 60 min, or flips to `FAILED_NOT_VISIBLE`:
+1. Verify `dig +short staging.nextlevelmock.com A` matches `gcloud compute addresses describe nlm-staging-lb-ip --global --format='value(address)'`
+2. Verify Cloudflare dashboard shows the record with cloud icon GRAY (proxied OFF) — orange cloud on is the #1 cause (Pitfall 5)
+3. If still stuck past 24h, Google declares failure; delete + recreate the cert resource via `terraform taint google_compute_managed_ssl_certificate.nlm_staging_cert[0] && terraform apply`
+
+### Post-apply — NEXT_PUBLIC_SITE_URL secret (D-07)
+Plan 04 runbook step populates the `NEXT_PUBLIC_SITE_URL` secret value (added out-of-band, not via TF per D-10).
+
 ## References
 
 - `.planning/phases/45-terraform-skeleton-artifact-registry-secret-manager/45-CONTEXT.md` — locked decisions
 - `.planning/phases/45-terraform-skeleton-artifact-registry-secret-manager/45-RESEARCH.md` — HCL patterns + pitfalls
 - `.planning/phases/45-terraform-skeleton-artifact-registry-secret-manager/45-VALIDATION.md` — test map
-- `.planning/REQUIREMENTS.md` §INFRA — milestone requirements
+- `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-CONTEXT.md` — Phase 47 locked decisions
+- `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-RESEARCH.md` — Phase 47 patterns + pitfalls
+- `.planning/phases/47-staging-cloud-run-service-load-balancer-domains/47-VALIDATION.md` — Phase 47 test map
+- `.planning/REQUIREMENTS.md` §INFRA, §CI — milestone requirements
