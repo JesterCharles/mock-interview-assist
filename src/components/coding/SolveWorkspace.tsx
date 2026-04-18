@@ -19,6 +19,7 @@ import { SubmitBar } from './SubmitBar';
 import type { SubmitBarError } from './SubmitBar';
 import { VerdictCard } from './VerdictCard';
 import { AttemptHistorySidebar } from './AttemptHistorySidebar';
+import { CodingComingSoon } from './CodingComingSoon';
 import { usePollAttempt } from '@/hooks/usePollAttempt';
 import { SQL_DIALECT_LABEL, isSqlDialectChallenge } from '@/lib/codingLabels';
 
@@ -59,12 +60,21 @@ export function SolveWorkspace({ challenge }: SolveWorkspaceProps) {
   const [code, setCode] = useState<string>(challenge.starters[initialLang] ?? '');
   const [latestAttemptId, setLatestAttemptId] = useState<string | null>(null);
   const [historyRefresh, setHistoryRefresh] = useState<number>(0);
+  // Phase 50 (JUDGE-INTEG-02): race-case defense-in-depth. If the server-side
+  // page render saw the flag on (workspace hydrated) but a subsequent submit
+  // hits a revision where the flag is off, swap in ComingSoon rather than
+  // toasting a misleading "sandbox down" message.
+  const [disabledByServer, setDisabledByServer] = useState<boolean>(false);
 
   const poll = usePollAttempt(latestAttemptId);
 
   const diff = difficultyPill(challenge.difficulty);
 
   const handleSubmitError = (err: SubmitBarError) => {
+    if (err.code === 'FEATURE_DISABLED') {
+      setDisabledByServer(true);
+      return;
+    }
     if (err.code === 'RATE_LIMITED' && err.retryAfterSeconds) {
       toast.error(`Too many submissions — try again in ${err.retryAfterSeconds}s.`);
     } else if (err.code === 'FORBIDDEN') {
@@ -75,6 +85,10 @@ export function SolveWorkspace({ challenge }: SolveWorkspaceProps) {
       toast.error(err.message || 'Submit failed.');
     }
   };
+
+  if (disabledByServer) {
+    return <CodingComingSoon />;
+  }
 
   return (
     <>
