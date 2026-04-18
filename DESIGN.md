@@ -224,6 +224,8 @@ Extends the athletic stat-line pattern from Readiness Signal Pattern.
 | dipping | "Slipping" |
 | stalling | "Needs focus" |
 
+**Trajectory visual (canonical):** The SkillRadar Before/Now overlay on the associate dashboard is the single canonical trajectory visualization. Per-skill line charts are intentionally out of scope — radar vertex + polygon comparison expresses the same delta with less chart real estate.
+
 ## Anti-Patterns (never use)
 - Purple/violet gradients
 - Glass morphism / backdrop-filter blur
@@ -248,3 +250,4 @@ Extends the athletic stat-line pattern from Readiness Signal Pattern.
 | 2026-04-15 | Dark mode wired app-wide | v1.1 Phase 15-02 added a boot-time theme script on `<html>` with `suppressHydrationWarning`. All tokens have dark-mode equivalents. Toggle is available in the unified Navbar. |
 | 2026-04-16 | Data visualization tokens + conventions added | Phase 26: chart palette (6 series colors), axis/grid/tooltip conventions, trajectory language vocabulary. Tokens in globals.css, documentation in this section. |
 | 2026-04-17 | Two-rectangle App Shell with full-height sidebar | v1.3 UX pass: sidebar spans the full left edge of the viewport with the NLM wordmark in its top corner and no divider; TopBar starts to the right and owns the collapse toggle (top-left chip). Main is the sole scroll container — prevents the sidebar-bleeds-into-TopBar bug. Collapse state lifted to AppShell so TopBar + sidebar stay in sync, persisted via `localStorage.nlm_sidebar_collapsed`. |
+| 2026-04-17 | Radar is the canonical trajectory visual | Phase 34: VIZ-03 cut — per-skill LineChart redundant given Before/Now radar overlay. SkillRadar Before polygon now sourced from real `GapScore.prevWeightedScore` snapshots, no approximation caption. |
