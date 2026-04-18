@@ -1,0 +1,116 @@
+name: Deploy App
+
+# -----------------------------------------------------------------------------
+# Required GitHub Actions secrets (Settings → Secrets and variables → Actions):
+#   GCP_SA_KEY       service account JSON (storage.admin + compute.instanceAdmin)
+#   GCP_PROJECT_ID   GCP project id (e.g. "nlm-prod")
+#   APP_VM_NAME      name of app VM (matches Terraform app_vm_name)
+#   APP_VM_ZONE      app VM zone (e.g. "us-central1-a")
+#   APP_VM_SSH_KEY   private SSH key authorized on app VM via OS Login
+#
+# Trigger: push a git tag `app-v<SEMVER>` (e.g. git tag app-v1.4.0 && git push --tags)
+# Image tag mapping: app-v1.4.0 -> gcr.io/$PROJECT/app:1.4.0
+#
+# Rollback: on /api/health failure post-deploy, SSH-restore the previously
+# running image and fail the workflow loudly (IAC-03).
+# -----------------------------------------------------------------------------
+
+on:
+  push:
+    tags:
+      - 'app-v*'
+
+concurrency:
+  group: deploy-app-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract image tag from git tag
+        id: tag
+        run: |
+          IMAGE_TAG="${GITHUB_REF_NAME#app-v}"
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "full_image=gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ steps.tag.outputs.full_image }} .
+          docker tag ${{ steps.tag.outputs.full_image }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest
+          docker push ${{ steps.tag.outputs.full_image }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.APP_VM_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Capture previous image for rollback
+        id: prev
+        run: |
+          PREV_TAG=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
+            --zone=${{ secrets.APP_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="docker inspect --format='{{index .Config.Image}}' interview-assistant 2>/dev/null || echo gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest" \
+            --quiet 2>/dev/null || echo "gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest")
+          echo "prev_image=$PREV_TAG" >> "$GITHUB_OUTPUT"
+          echo "Previous image recorded for rollback: $PREV_TAG"
+
+      - name: Deploy new image to app VM
+        id: deploy
+        run: |
+          gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
+            --zone=${{ secrets.APP_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="set -e; cd ~/app && gcloud auth configure-docker --quiet && docker pull ${{ steps.tag.outputs.full_image }} && docker tag ${{ steps.tag.outputs.full_image }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest && docker compose up -d --no-deps interview-assistant"
+
+      - name: Health check
+        id: health
+        run: |
+          sleep 20
+          for i in 1 2 3 4 5; do
+            STATUS=$(gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
+              --zone=${{ secrets.APP_VM_ZONE }} \
+              --ssh-key-file=~/.ssh/id_ed25519 \
+              --command="curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health" \
+              --quiet 2>/dev/null || echo "000")
+            echo "Health check attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "health=ok" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "health=fail" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Rollback on health failure
+        if: failure() && steps.health.outputs.health == 'fail'
+        run: |
+          echo "::error::Health check failed. Rolling back to ${{ steps.prev.outputs.prev_image }}"
+          gcloud compute ssh ${{ secrets.APP_VM_NAME }} \
+            --zone=${{ secrets.APP_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="set -e; cd ~/app && docker pull ${{ steps.prev.outputs.prev_image }} && docker tag ${{ steps.prev.outputs.prev_image }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/app:latest && docker compose up -d --no-deps interview-assistant"
+          echo "::error::Rollback complete. Deploy FAILED — investigate before retrying."
+          exit 1

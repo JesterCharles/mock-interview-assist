@@ -1,0 +1,107 @@
+name: Deploy Judge0
+
+# -----------------------------------------------------------------------------
+# Required GitHub Actions secrets (Settings → Secrets and variables → Actions):
+#   GCP_SA_KEY         service account JSON (compute.instanceAdmin on Judge0 VM)
+#   GCP_PROJECT_ID     GCP project id
+#   JUDGE0_VM_NAME     name of Judge0 VM (default from Plan 43-01: "nlm-judge0-prod")
+#   JUDGE0_VM_ZONE     Judge0 VM zone
+#   JUDGE0_VM_SSH_KEY  private SSH key authorized on Judge0 VM via OS Login
+#   JUDGE0_AUTH_TOKEN  X-Auth-Token configured in Judge0 server (Phase 38 JUDGE-04)
+#
+# Trigger: push a git tag `judge0-v<VERSION>` (e.g. git tag judge0-v1.13.1 && git push --tags)
+# Image tag mapping: judge0-v1.13.1 -> judge0/api:1.13.1
+#
+# Assumes the Judge0 compose file on the VM is ~/judge0/docker-compose.yml and
+# references the image via ${JUDGE0_IMAGE_TAG} env var (set in ~/judge0/.env).
+# Rollback restores the previous .env via .env.rollback and re-runs up -d.
+# -----------------------------------------------------------------------------
+
+on:
+  push:
+    tags:
+      - 'judge0-v*'
+
+concurrency:
+  group: deploy-judge0-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Judge0 version from git tag
+        id: tag
+        run: |
+          JUDGE0_VERSION="${GITHUB_REF_NAME#judge0-v}"
+          echo "judge0_version=$JUDGE0_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Deploying Judge0 version: $JUDGE0_VERSION"
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.JUDGE0_VM_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Backup current Judge0 config for rollback
+        id: prev
+        run: |
+          PREV_VERSION=$(gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
+            --zone=${{ secrets.JUDGE0_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="cd ~/judge0 && cp .env .env.rollback && grep JUDGE0_IMAGE_TAG .env | cut -d= -f2" \
+            --quiet 2>/dev/null || echo "1.13.1")
+          echo "prev_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Previous Judge0 version recorded for rollback: $PREV_VERSION"
+
+      - name: Update Judge0 image tag and deploy
+        id: deploy
+        run: |
+          gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
+            --zone=${{ secrets.JUDGE0_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="set -e; cd ~/judge0 && sed -i 's/^JUDGE0_IMAGE_TAG=.*/JUDGE0_IMAGE_TAG=${{ steps.tag.outputs.judge0_version }}/' .env && docker compose pull && docker compose up -d"
+
+      - name: Health check /system_info
+        id: health
+        run: |
+          sleep 30
+          for i in 1 2 3 4 5; do
+            STATUS=$(gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
+              --zone=${{ secrets.JUDGE0_VM_ZONE }} \
+              --ssh-key-file=~/.ssh/id_ed25519 \
+              --command="curl -s -o /dev/null -w '%{http_code}' -H 'X-Auth-Token: ${{ secrets.JUDGE0_AUTH_TOKEN }}' http://localhost:2358/system_info" \
+              --quiet 2>/dev/null || echo "000")
+            echo "Judge0 health check attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "health=ok" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "health=fail" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Rollback on health failure
+        if: failure() && steps.health.outputs.health == 'fail'
+        run: |
+          echo "::error::Judge0 /system_info health check failed. Rolling back to version ${{ steps.prev.outputs.prev_version }}"
+          gcloud compute ssh ${{ secrets.JUDGE0_VM_NAME }} \
+            --zone=${{ secrets.JUDGE0_VM_ZONE }} \
+            --ssh-key-file=~/.ssh/id_ed25519 \
+            --command="set -e; cd ~/judge0 && cp .env.rollback .env && docker compose pull && docker compose up -d"
+          echo "::error::Rollback complete. Judge0 deploy FAILED — investigate before retrying."
+          exit 1
