@@ -1,9 +1,11 @@
 # Pipeline Status
 
-## Current Run — v1.4 (PLAN COMPLETE)
+## Current Run — v1.4 (EXECUTE PARTIAL — HALTED ON SPIKE GATE)
 - Started: 2026-04-18
-- Current stage: PLAN complete ✓ — all 9 phases (36-44) planned, 28 plans total. Ready for EXECUTE.
-- Mode: interactive (resume)
+- Current stage: EXECUTE partial — P36/37/38 code complete + reviewed + validated. P39-44 BLOCKED on JUDGE-06 spike gate (human-only: docker daemon unavailable on exec host)
+- Mode: `--resume --unattended --discuss` (autonomous)
+- Session 1 summary: 3 phases shipped, 27 commits, 680 tests passing, 1 P0 + 5 P2 review findings fixed
+- Report: `.planning/AUTONOMOUS-REPORT.md`
 - Previous: v1.3 shipped + tagged 2026-04-18 (commit 42cd703, tag v1.3)
 - Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (9 phases 36-44, 44 reqs, Approach B MSA-from-day-1)
 
@@ -32,19 +34,33 @@
 - `/gsd-plan-phase 36` — Data Model & Schema (CodingChallenge/CodingAttempt/CodingTestCase/CodingSkillSignal + idempotent migration)
 - Then sequential: 37 (Challenge Bank) → 38 (Judge0 spike GATE) → 39 (Submission API) → 40-44
 
-## Stages (v1.4 — IN PROGRESS)
+## Stages (v1.4 — EXECUTE PARTIAL)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
 | discover | done | 2026-04-18 | 2026-04-18 | Office-hours + codex consult → Approach B MSA. PIPELINE-DISCOVER.md |
 | init | done | 2026-04-18 | 2026-04-18 | Milestone initialized; REQUIREMENTS.md (44 reqs), ROADMAP expanded (P36-44), PROJECT.md updated |
-| design | pending | | | Evaluate per-phase — UI surfaces likely in P41 (challenge UI) |
-| plan | done | 2026-04-18 | 2026-04-18 | All 9 phases planned (36-44), 28 plans across 28 waves. Next: execute 36 first (blocks 37+). |
-| execute | pending | | | Wave execution per phase after plan |
-| review | pending | | | Codex review after execute |
-| test | pending | | | Unit + Playwright after execute |
+| design | pending | | | Evaluate per-phase — UI surfaces likely in P40 (UI MVP) |
+| plan | done | 2026-04-18 | 2026-04-18 | All 9 phases planned (36-44), 28 plans across 28 waves |
+| execute | **partial** | 2026-04-18 | | P36/37/38 DONE. P39-44 BLOCKED on JUDGE-06 spike gate (human-verify, docker unavailable on exec host). AUTONOMOUS-REPORT.md |
+| review | partial | 2026-04-18 | | P36/37/38 done. P37 1xP0+3xP2 fixed. P38 2xP2 fixed. P39-44 pending execute unblock |
+| test | partial | 2026-04-18 | | P36/37/38 validate audits done. Full suite 680 passing / 4 skipped |
 | ship | pending | | | PR + merge gate at milestone end |
 | reflect | pending | | | Retro + seeds at milestone end |
 | maintain | pending | | | Health check after ship |
+
+## Session 1 outcome (2026-04-18 autonomous run)
+
+| Phase | Result | Commits |
+|-------|--------|---------|
+| 36 | ✓ shipped + reviewed + validated | e7642ea, 4bb0ecd, a22873c, b5efb88, a7ffa9e, 21e26b4 |
+| 37 | ✓ shipped + reviewed (1 P0 fixed) + validated | c2d4d66, d82ff7c, 4c1e42e, af1f18d, a65921b, 3d4462c, e3d77f0, bb89da2, 13dfc2a |
+| 38 | ⚠️ code complete + reviewed (2 P2 fixed), **spike DEFERRED** | c6a3379, 1ebc69c, af2113d, e69ff96, ca8f14f, d20a5a3, 66fdc36, 7878bd4, 22e33de, 4295efa |
+| 42 | ✗ halted gracefully (deps upstream) | 5a60ebc |
+| (meta) | pipeline artifacts | ebde8a8 |
+
+## Next human action
+
+Run spike verification manually — see `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Expected <30 min. After PASS, resume with `/pipeline-coordinator --resume --unattended --discuss` to execute P39-44.
 
 ## HITL Gates (v1.4)
 | Gate | Stage | Type | Status | Decision |
