@@ -16,6 +16,11 @@ import { AppShell } from '@/components/shell/AppShell';
 import { AssociateShell } from '@/components/shell/AssociateShell';
 import { ChallengeList } from '@/components/coding/ChallengeList';
 import type { ChallengeListItem } from '@/hooks/useChallengeList';
+// Phase 42 §D-07/D-08: the SQL dialect label (`SQL_DIALECT_LABEL`) is rendered
+// on challenge cards via `isSqlDialectChallenge` inside
+// src/components/coding/ChallengeCard.tsx. Import lives there (server
+// component cannot directly render per-item conditional markup — the client
+// card component owns the per-card conditional).
 
 interface CodingListPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

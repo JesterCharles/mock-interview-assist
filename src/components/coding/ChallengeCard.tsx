@@ -12,6 +12,7 @@
 
 import Link from 'next/link';
 import type { ChallengeListItem } from '@/hooks/useChallengeList';
+import { SQL_DIALECT_LABEL, isSqlDialectChallenge } from '@/lib/codingLabels';
 
 export interface ChallengeCardProps {
   challenge: ChallengeListItem;
@@ -102,19 +103,33 @@ export function ChallengeCard({ challenge }: ChallengeCardProps) {
             gap: '12px',
           }}
         >
-          <h3
-            style={{
-              fontFamily: "var(--font-display), 'Clash Display', sans-serif",
-              fontWeight: 600,
-              fontSize: '22px',
-              lineHeight: 1.25,
-              color: 'var(--ink)',
-              margin: 0,
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {challenge.title}
-          </h3>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h3
+              style={{
+                fontFamily: "var(--font-display), 'Clash Display', sans-serif",
+                fontWeight: 600,
+                fontSize: '22px',
+                lineHeight: 1.25,
+                color: 'var(--ink)',
+                margin: 0,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {challenge.title}
+            </h3>
+            {isSqlDialectChallenge(challenge) && (
+              <p
+                style={{
+                  fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+                  fontSize: '13px',
+                  color: 'var(--muted)',
+                  margin: '4px 0 0 0',
+                }}
+              >
+                {SQL_DIALECT_LABEL}
+              </p>
+            )}
+          </div>
           <span
             style={{
               ...pillBase,

@@ -1,6 +1,7 @@
 'use client'
 
 import type { CodingAttemptSummary } from '@/lib/trainer-types'
+import { getLanguageDialectLabel } from '@/lib/codingLabels'
 
 interface Props {
   attempts: CodingAttemptSummary[]
@@ -103,6 +104,17 @@ export function CodingAttemptsTable({ attempts }: Props) {
                   }}
                 >
                   {a.language}
+                  {getLanguageDialectLabel(a.language) && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        color: 'var(--muted)',
+                        marginLeft: '8px',
+                      }}
+                    >
+                      ({getLanguageDialectLabel(a.language)})
+                    </span>
+                  )}
                 </td>
                 <td
                   style={{

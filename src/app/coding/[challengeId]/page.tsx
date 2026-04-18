@@ -15,6 +15,10 @@ import {
   SolveWorkspace,
   type ChallengeDetail,
 } from '@/components/coding/SolveWorkspace';
+// Phase 42 §D-07/D-08: the SQL dialect label (`SQL_DIALECT_LABEL`) is rendered
+// inside SolveWorkspace via `isSqlDialectChallenge`. The header markup lives
+// in the client component so the label sits adjacent to the title without
+// duplicating the page-level layout.
 
 interface CodingSolvePageProps {
   params: Promise<{ challengeId: string }>;

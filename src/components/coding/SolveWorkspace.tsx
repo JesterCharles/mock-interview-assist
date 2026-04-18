@@ -20,6 +20,7 @@ import type { SubmitBarError } from './SubmitBar';
 import { VerdictCard } from './VerdictCard';
 import { AttemptHistorySidebar } from './AttemptHistorySidebar';
 import { usePollAttempt } from '@/hooks/usePollAttempt';
+import { SQL_DIALECT_LABEL, isSqlDialectChallenge } from '@/lib/codingLabels';
 
 export interface ChallengeDetail {
   id: string;
@@ -108,6 +109,18 @@ export function SolveWorkspace({ challenge }: SolveWorkspaceProps) {
             >
               {challenge.title}
             </h1>
+            {isSqlDialectChallenge(challenge) && (
+              <p
+                style={{
+                  fontFamily: "var(--font-dm-sans), 'DM Sans', sans-serif",
+                  fontSize: '13px',
+                  color: 'var(--muted)',
+                  margin: '6px 0 0 0',
+                }}
+              >
+                {SQL_DIALECT_LABEL}
+              </p>
+            )}
             <div
               style={{
                 display: 'flex',
