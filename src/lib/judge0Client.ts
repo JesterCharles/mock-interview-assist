@@ -36,8 +36,8 @@ export type Judge0Language = 'python' | 'javascript' | 'typescript' | 'java' | '
  */
 export const JUDGE0_LANGUAGE_MAP: Record<Judge0Language, number> = {
   python: 71, // Python 3.8.1
-  javascript: 93, // JavaScript (Node.js 18.15.0)
-  typescript: 94, // TypeScript 5.0.3
+  javascript: 63, // JavaScript (Node.js 12.14.0)
+  typescript: 74, // TypeScript 3.7.4
   java: 62, // Java OpenJDK 13.0.1
   sql: 82, // SQL (SQLite 3.27.2)
   csharp: 51, // C# Mono 6.6.0.161
