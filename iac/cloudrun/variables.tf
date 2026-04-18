@@ -70,3 +70,29 @@ variable "ghactions_sa_id" {
   type        = string
   default     = "github-actions-deployer"
 }
+
+# Phase 47 additions
+
+variable "initial_image_digest" {
+  description = "Immutable @sha256 digest of the initial Cloud Run image (D-04). Defaults to the Phase 45 phase45-smoke digest. Phase 48 CI updates the revision via `gcloud run deploy --image=...`; this TF variable is NEVER used after first apply because lifecycle.ignore_changes is set on template.containers[0].image (T-47-07)."
+  type        = string
+  # No default — must be supplied via staging.tfvars so planner catches missing digest early.
+}
+
+variable "domain_name" {
+  description = "Public hostname served by the staging HTTPS LB (D-12). Used in the managed SSL cert (Plan 02) and the Cloudflare A record (Plan 02)."
+  type        = string
+  default     = "staging.nextlevelmock.com"
+}
+
+variable "github_repo_slug" {
+  description = "GitHub repository in 'owner/name' form (D-16). Load-bearing security control: the WIF attribute_condition restricts federation to this repo only (Plan 03). Tokens from any other repo silently get zero permissions."
+  type        = string
+  default     = "JesterCharles/mock-interview-assist"
+}
+
+variable "cf_zone_id" {
+  description = "Cloudflare zone ID for nextlevelmock.com (D-12). Looked up once via `curl https://api.cloudflare.com/client/v4/zones?name=nextlevelmock.com` and stored in staging.tfvars."
+  type        = string
+  # No default — zone ID is account-specific; staging.tfvars supplies it.
+}
