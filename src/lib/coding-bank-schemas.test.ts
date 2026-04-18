@@ -9,6 +9,10 @@ import {
   StarterSchema,
   ChallengeValidationError,
   validateChallenge,
+  SETUP_SQL_MAX_BYTES,
+  SetupSqlSchema,
+  SqlTestCaseSchema,
+  parseVisibleTestsForChallenge,
 } from './coding-bank-schemas';
 
 describe('CODING_LANGUAGES / LANGUAGE_EXTENSIONS', () => {
@@ -483,5 +487,113 @@ describe('validateChallenge (5-step pipeline)', () => {
       expect(e).toBeInstanceOf(ChallengeValidationError);
       expect((e as ChallengeValidationError).path).toMatch(/^meta\./);
     }
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// Phase 42 Plan 01 — SQL-specific schema extensions (D-01, D-02)
+// ──────────────────────────────────────────────────────────────────────────
+
+describe('SETUP_SQL_MAX_BYTES / SetupSqlSchema', () => {
+  it('enforces the 64 KB soft cap per D-01', () => {
+    expect(SETUP_SQL_MAX_BYTES).toBe(64 * 1024);
+  });
+
+  it('accepts setup.sql at or under 64 KB', () => {
+    const ok = 'SELECT 1;'.repeat(100);
+    expect(() => SetupSqlSchema.parse(ok)).not.toThrow();
+    const atCap = 'a'.repeat(SETUP_SQL_MAX_BYTES);
+    expect(() => SetupSqlSchema.parse(atCap)).not.toThrow();
+  });
+
+  it('rejects setup.sql exceeding 64 KB', () => {
+    const tooBig = 'a'.repeat(SETUP_SQL_MAX_BYTES + 1);
+    expect(() => SetupSqlSchema.parse(tooBig)).toThrow(/exceeds/);
+  });
+});
+
+describe('SqlTestCaseSchema', () => {
+  const base = {
+    id: 'tc-1',
+    stdin: 'SELECT 1;',
+    expectedStdout: '1',
+    weight: 1,
+    orderIndex: 0,
+  };
+
+  it('accepts expectedRows + expectedColumns optionally per D-02', () => {
+    const parsed = SqlTestCaseSchema.parse({
+      ...base,
+      expectedRows: [
+        ['alice', 30],
+        ['bob', null],
+      ],
+      expectedColumns: ['name', 'age'],
+    });
+    expect(parsed.expectedRows).toHaveLength(2);
+    expect(parsed.expectedColumns).toEqual(['name', 'age']);
+  });
+
+  it('accepts D-05 normalization flags', () => {
+    const parsed = SqlTestCaseSchema.parse({
+      ...base,
+      trimMode: 'strict',
+      numericCoerce: false,
+      orderSensitiveColumns: false,
+      rowOrderSensitive: true,
+    });
+    expect(parsed.trimMode).toBe('strict');
+    expect(parsed.numericCoerce).toBe(false);
+    expect(parsed.orderSensitiveColumns).toBe(false);
+    expect(parsed.rowOrderSensitive).toBe(true);
+  });
+
+  it('rejects invalid trimMode values', () => {
+    expect(() =>
+      SqlTestCaseSchema.parse({ ...base, trimMode: 'loose' }),
+    ).toThrow();
+  });
+
+  it('allows all SQL-specific fields to be absent (backward compat)', () => {
+    const parsed = SqlTestCaseSchema.parse(base);
+    expect(parsed.expectedRows).toBeUndefined();
+    expect(parsed.expectedColumns).toBeUndefined();
+    expect(parsed.trimMode).toBeUndefined();
+  });
+});
+
+describe('parseVisibleTestsForChallenge', () => {
+  const sqlMeta = {
+    slug: 'sql-basics',
+    title: 'SQL Basics',
+    difficulty: 'easy' as const,
+    skillSlug: 'sql',
+    cohortId: null,
+    languages: ['sql' as const],
+  };
+  const pyMeta = { ...sqlMeta, languages: ['python' as const] };
+
+  it('parses SQL-aware test cases when meta.languages includes "sql"', () => {
+    const result = parseVisibleTestsForChallenge(sqlMeta, [
+      {
+        id: 'tc-1',
+        stdin: 'SELECT x FROM t;',
+        expectedStdout: '1',
+        weight: 1,
+        orderIndex: 0,
+        expectedRows: [[1]],
+        expectedColumns: ['x'],
+      },
+    ]);
+    expect(result).toHaveLength(1);
+    // SQL path retains expectedRows
+    expect((result[0] as { expectedRows?: unknown[] }).expectedRows).toEqual([[1]]);
+  });
+
+  it('parses base visible tests for non-SQL challenges', () => {
+    const result = parseVisibleTestsForChallenge(pyMeta, [
+      { id: 'tc-1', stdin: 'a', expectedStdout: 'b', weight: 1, orderIndex: 0 },
+    ]);
+    expect(result).toHaveLength(1);
   });
 });
