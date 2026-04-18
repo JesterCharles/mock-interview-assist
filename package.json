@@ -14,7 +14,11 @@
     "validate-challenge": "tsx scripts/validate-challenge.ts",
     "seed-staging": "tsx scripts/seed-staging.ts",
     "verify-env-hygiene": "tsx scripts/verify-env-hygiene.ts",
-    "verify-phase-46": "bash scripts/verify-phase-46.sh"
+    "verify-phase-46": "bash scripts/verify-phase-46.sh",
+    "verify-phase-49": "bash scripts/verify-phase-49.sh",
+    "loadtest:local": "bash loadtest/run-baseline.sh",
+    "loadtest:report": "tsx loadtest/generate-report.ts /tmp/loadtest-result.json",
+    "abuse-test:all": "tsx scripts/abuse-test-all.ts"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^5.1.0",
