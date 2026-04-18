@@ -1,0 +1,13 @@
+{
+  "target": "https://staging.nextlevelmock.com",
+  "run_at": "PENDING — staging not yet deployed",
+  "commit": "PENDING",
+  "status": "not-yet-run",
+  "reason": "Phase 49 Plan 03 delivered scripts/abuse-test-all.ts + scripts/lib/route-discovery.ts. Live run deferred until Phase 48 deploy-staging.yml ships the first image to staging.nextlevelmock.com. After staging is live, execute: ABUSE_TEST_BASE_URL=https://staging.nextlevelmock.com npm run abuse-test:all (this file will be overwritten with real results).",
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "results": []
+}
