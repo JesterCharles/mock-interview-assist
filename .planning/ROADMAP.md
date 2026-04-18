@@ -111,12 +111,12 @@ Plans:
 **Success**: 10 concurrent mixed-language submissions on actual GCE VM size complete without queue death; p50/p95 measured; resource caps committed to PROJECT.md before Phase 39
 **Estimate**: ~1.5 weeks, 3 plans (includes spike)
 
-**Plans:** 3 plans in 2 waves
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 38-01-PLAN.md — docker-compose Judge0 stack + env templates + network isolation (Wave 1)
-- [ ] 38-02-PLAN.md — judge0Client.ts (locked contract) + /api/health probe (Wave 1)
-- [ ] 38-03-PLAN.md — JUDGE-06 spike gate: run on GCE, commit resource limits, BLOCKING Phase 39 (Wave 2)
+- [x] 38-01-PLAN.md — docker-compose Judge0 stack + env templates + network isolation (Wave 1)
+- [x] 38-02-PLAN.md — judge0Client.ts (locked contract) + /api/health probe (Wave 1)
+- [x] 38-03-PLAN.md — JUDGE-06 spike gate: run on GCE, commit resource limits, BLOCKING Phase 39 (Wave 2)
 
 #### Phase 39: Execution API (Server-Side)
 **Goal**: Auth-gated async submit + poll endpoints with server-side hidden test injection, language allowlist, rate limits, and verdict normalization

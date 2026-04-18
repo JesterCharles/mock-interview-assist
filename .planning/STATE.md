@@ -3,27 +3,38 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Coding Challenges + Multi-Language Sandbox
 status: completed
-stopped_at: Phase 37 complete — all 3 plans shipped. Challenge bank contract + loader + refresh route live. Next — Phase 38 (Judge0 infra).
-last_updated: "2026-04-18T04:17:00.000Z"
+stopped_at: Phase 38 harness/client shipped; JUDGE-06 spike DEFERRED (docker unavailable)
+last_updated: "2026-04-18T09:19:24.420Z"
 last_activity: 2026-04-18 -- Phase 37 execution complete (all 3 plans)
 progress:
   total_phases: 9
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 28
-  completed_plans: 6
-  percent: 21
+  completed_plans: 9
+  percent: 32
 ---
 
 # v1.4 — Coding Challenges + Multi-Language Sandbox (PLANNING)
 
 ## Current Position
 
-Status: Phase 37 complete — ready for Phase 38 (Judge0 Infrastructure)
-Last activity: 2026-04-18 -- Phase 37 execution complete (all 3 plans)
+Status: Phase 38 code shipped — JUDGE-06 spike gate DEFERRED (docker unavailable); Phase 39 BLOCKED
+Last activity: 2026-04-18 -- Phase 38 execution complete (3 plans; spike gate deferred)
 
 ```
-Progress: [████----------------] 21% (2/9 phases complete, 6/28 plans)
+Progress: [███░░░░░░░] 32% (3/9 phases complete, 9/28 plans)
 ```
+
+Phase 38 delivered:
+
+- docker-compose.yml Judge0 stack (server, workers, postgres-15-alpine, redis-7-alpine) on internal judge0-net bridge, pinned to 1.13.1 (GHSA-q7vg-26pg-v5hr patch), port 2358 bound to 127.0.0.1 only
+- .env.judge0.example template + .env.example/.env.docker.example app wiring (JUDGE0_URL, JUDGE0_AUTH_TOKEN, JUDGE0_EXPOSE_LOCAL, COUNT_WORKERS)
+- src/lib/judge0Client.ts locked HTTP contract (submit/getSubmission/systemInfo, lazy env, 1-retry on 5xx/AbortError, no retry on 4xx, X-Auth-Token, no blocking-wait)
+- src/lib/judge0Errors.ts (UnsupportedLanguageError, Judge0UnavailableError, Judge0ConfigError)
+- /api/health extended with judge0 reachability probe (2-sec timeout, parallel db+judge0, 503 on either fail)
+- 19 new unit tests all passing (13 client + 6 health)
+- scripts/judge0-spike.ts + 10 fixture JSONs ready for human-triggered run
+- JUDGE-06 gate DEFERRED — see .planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md
 
 Phase 36 delivered:
 
@@ -85,6 +96,10 @@ v1.4 added 9 phases (36-44). Phase 38 carries a spike gate (required by codex co
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:09:47.183Z
-Stopped at: Phase 42 halted — prerequisites 37-41 unshipped and Judge0 offline. Resume with /gsd-execute-phase 37. See .planning/phases/42-sql-mvp-sqlite/SQLITE-JUDGE0-VERIFICATION.md.
-Resume with: `/gsd-execute-phase 37` (Challenge Authoring / GitHub Loader)
+Last session: 2026-04-18T09:19:24.418Z
+Stopped at: Phase 38 harness/client shipped; JUDGE-06 spike DEFERRED (docker unavailable)
+Resume with: **HUMAN ACTION REQUIRED** — run Judge0 spike manually per `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Phase 39 is BLOCKED until spike PASSES and resource limits are committed.
+
+## Active Blockers
+
+- **Phase 39 blocked by JUDGE-06 gate**: docker daemon unavailable at Phase 38 execution time. Manual-run protocol in `.planning/phases/38-judge0-infrastructure/SPIKE-VERIFICATION.md`. Expected effort: ~30-45 min on a host with colima running or on the GCE n1-standard-2 VM.

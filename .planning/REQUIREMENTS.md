@@ -30,11 +30,11 @@
 
 ### Judge0 Infrastructure (JUDGE-NN) — Phase 38
 
-- [ ] **JUDGE-01**: Judge0 pinned to ≥ 1.13.1 (addresses sandbox escape advisory GHSA-q7vg-26pg-v5hr) in `docker-compose.yml`
-- [ ] **JUDGE-02**: Judge0 stack added to local `docker-compose.yml`: judge0-server, judge0-workers, Judge0 Postgres, Judge0 Redis — bound to internal Docker network or localhost only, never published to host
-- [ ] **JUDGE-03**: Judge0 sandbox config: `enable_network=false`, CPU + memory caps tuned, worker count = 2×vCPU baseline with explicit override env var
-- [ ] **JUDGE-04**: `JUDGE0_URL` + `JUDGE0_AUTH_TOKEN` env vars drive the client — architecture deploys local-mono OR remote-MSA without code changes
-- [ ] **JUDGE-05**: `/api/health` extended with Judge0 reachability probe (200 ok / 503 unreachable)
+- [x] **JUDGE-01**: Judge0 pinned to ≥ 1.13.1 (addresses sandbox escape advisory GHSA-q7vg-26pg-v5hr) in `docker-compose.yml`
+- [x] **JUDGE-02**: Judge0 stack added to local `docker-compose.yml`: judge0-server, judge0-workers, Judge0 Postgres, Judge0 Redis — bound to internal Docker network or localhost only, never published to host
+- [x] **JUDGE-03**: Judge0 sandbox config: `enable_network=false`, CPU + memory caps tuned, worker count = 2×vCPU baseline with explicit override env var
+- [x] **JUDGE-04**: `JUDGE0_URL` + `JUDGE0_AUTH_TOKEN` env vars drive the client — architecture deploys local-mono OR remote-MSA without code changes
+- [x] **JUDGE-05**: `/api/health` extended with Judge0 reachability probe (200 ok / 503 unreachable)
 - [ ] **JUDGE-06**: Load spike at Phase 38 gate: 10 concurrent mixed-language submissions on actual GCE VM size; measure CPU/RAM/p50/p95 — commit resource sizing to PROJECT.md before Phase 39 begins
 
 ### Execution API (CODING-API-NN) — Phase 39
