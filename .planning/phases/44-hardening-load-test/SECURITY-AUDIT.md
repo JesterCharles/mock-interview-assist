@@ -46,8 +46,9 @@ Files reviewed (v1.4 surface through Phase 43):
 | Component        | Threats reviewed                    |
 |------------------|-------------------------------------|
 | Judge0 sandbox   | Tampering, Elevation                |
-| Execution API    | Spoofing, Tampering, Info Disclosure, DoS |
+| Execution API    | Spoofing, Tampering, Repudiation, Info Disclosure, DoS |
 | Terraform / CI   | Elevation, Tampering                |
+| Attempt provenance | Repudiation                       |
 
 ---
 
@@ -141,6 +142,36 @@ key.
 MITIGATION: confirm during `/cso` run that no secret appears in logs or in
 the Terraform plan output.
 
+**F-10 | `JUDGE0_METRICS_CMD` runs through `sh -c`**
+SEVERITY: INFO
+STRIDE: Tampering (operator trust boundary)
+Evidence: `scripts/load-test-coding.ts:210` calls
+`execFileSync('sh', ['-c', cmd])` on the operator-supplied
+`JUDGE0_METRICS_CMD` env var. Not exploitable under the intended
+operator-runs-own-harness model (the operator fully controls the env), but
+the `sh -c` path is documented here so a future audit doesn't mistake it
+for a data-path injection surface.
+MITIGATION: treat `JUDGE0_METRICS_CMD` as trusted operator input — never
+interpolate associate/user input into it. Future cleanup could parse the
+command into an arg vector (`execFileSync(parts[0], parts.slice(1))`) to
+remove the shell entirely.
+
+### Attempt Provenance
+
+**F-11 | Attempt provenance (Repudiation)**
+SEVERITY: INFO
+STRIDE: Repudiation
+Evidence: `CodingAttempt` rows link to `Session.associateId` with a
+database-enforced timestamp, and authenticated sign-in events land in the
+`AuthEvent` table. Submit/poll routes only accept an authenticated caller
+(`F-06`), so every attempt is traceable to an associate identity and time
+window.
+MITIGATION: `/cso` should verify (a) `CodingAttempt.associateId` is
+non-null on every production row, (b) `AuthEvent` captures the login that
+issued the access token used on submit, and (c) no path allows an
+associate to mutate another associate's attempts (RLS + Phase 20
+defense-in-depth).
+
 ---
 
 ## Adversarial Lens (executor pass)
@@ -177,7 +208,7 @@ loader uses content SHA where available. Confirm during `/cso`.
 | HIGH     | 0     |
 | MEDIUM   | 0     |
 | LOW      | 1 (F-07, accepted for v1.4) |
-| INFO     | 11    |
+| INFO     | 13    |
 
 **DRAFT VERDICT: PASS** (pending `/cso` + `codex adversarial-review`
 confirmation per Plan 44-02 gate criteria).
