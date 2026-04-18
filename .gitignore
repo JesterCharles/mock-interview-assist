@@ -53,3 +53,8 @@ scripts/judge0-spike-output.json
 
 # Ephemeral Playwright test output
 test-results/.last-run.json
+
+# Phase 50: GCE Judge0 reference template — never init terraform here
+iac/gce-judge0/.terraform.lock.hcl
+iac/gce-judge0/.terraform/
+iac/gce-judge0/terraform.tfstate*

@@ -98,8 +98,11 @@ flowchart LR
   math (D-16 weight table).
 - `src/lib/gapPersistence.ts` (Phase 41) — `persistCodingSignalToGapScore`
   with difficulty multipliers (easy 0.7 / medium 1.0 / hard 1.3).
-- `infra/terraform/judge0-vm.tf` (Phase 43) — dedicated GCE host for Judge0;
-  private VPC; firewall rules restrict ingress to the App VM.
+- `iac/gce-judge0/judge0-vm.tf` (Phase 43; reference template only in v1.5 —
+  relabeled from `infra/terraform/` in Phase 50) — dedicated GCE host for
+  Judge0; private VPC; firewall rules restrict ingress to the App VM. v1.5
+  prod uses `iac/cloudrun/` instead; see `iac/cloudrun/judge0.tf.disabled`
+  for the v1.6 Judge0 reactivation plan.
 - `scripts/push-judge0-metrics.mjs` (Phase 43 D-11) — queue-depth + latency
   metrics cron → Cloud Logging.
 - `.github/workflows/deploy-app.yml` / `deploy-judge0.yml` (Phase 43) — CI/CD

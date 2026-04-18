@@ -171,7 +171,7 @@ sustainably.
    ```
    If ≥ 10 entries in 30 min window, proceed.
 
-2. Edit `infra/terraform/variables.tf`:
+2. Edit `iac/gce-judge0/variables.tf`:
    ```hcl
    variable "judge0_machine_type" {
      default = "n1-standard-4"   # was n1-standard-2
@@ -186,7 +186,7 @@ sustainably.
 
 3. Plan + apply:
    ```bash
-   cd infra/terraform
+   cd iac/gce-judge0
    terraform plan    # machine_type: in-place update (stop/start). disk: resize only.
    terraform apply
    ```
@@ -332,14 +332,14 @@ If still stuck → Tier 3.
 Persistent disk survives; VM is recreated and re-attaches the disk.
 
 ```bash
-cd infra/terraform
+cd iac/gce-judge0
 terraform taint google_compute_instance.judge0
 terraform apply
 ```
 
 After recreation, SSH in and re-bootstrap the Judge0 compose file (should be
 baked into the VM image if using an image-based bootstrap; else re-run install
-script per `infra/terraform/README.md`).
+script per `iac/gce-judge0/README.md`).
 
 ```bash
 gcloud compute ssh $JUDGE0_VM_NAME --zone=$JUDGE0_VM_ZONE \
@@ -395,7 +395,7 @@ Verify `/system_info` responds and queue drains.
 ### Quarterly (1 hour)
 
 - [ ] Review Phase 38 sizing — re-run spike if cohort count has doubled
-- [ ] Update `infra/terraform/variables.tf` defaults if spike warrants
+- [ ] Update `iac/gce-judge0/variables.tf` defaults if spike warrants
 - [ ] Review runbook — append to Review Log with date + changes
 
 ***

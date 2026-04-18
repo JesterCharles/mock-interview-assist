@@ -1,4 +1,15 @@
-# NLM Infrastructure (Terraform)
+# GCE Judge0 Reference (v1.4)
+
+> ⚠ **REFERENCE TEMPLATE — NOT ACTIVE INFRASTRUCTURE.**
+> This directory captures the v1.4 GCE Judge0 layout for future reference.
+> v1.5 uses `iac/cloudrun/` (Cloud Run). This code is **NOT** applied by
+> the v1.5 CI/CD pipeline. Moved from `infra/terraform/` in Phase 50
+> (JUDGE-INTEG-04) via `git mv` (history preserved). See
+> `iac/cloudrun/judge0.tf.disabled` for the v1.6 activation plan.
+
+---
+
+## Original v1.4 Content
 
 Phase 43 MSA deployment: dedicated Judge0 VM + imported app VM. State lives in
 GCS; no local state file is ever committed.
