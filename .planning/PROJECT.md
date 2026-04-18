@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An adaptive technical skills development platform that gives associates repeated mock interview experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers. Features trainer-led and AI-automated mock interviews, persistent session storage (Prisma + Supabase), two-level gap scoring, readiness classification, a trainer dashboard with gap charts, and adaptive mock setup that pre-populates from gap history.
+An adaptive technical skills development platform that gives associates repeated mock interview experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers. Features trainer-led and AI-automated mock interviews, persistent session storage (Prisma + Supabase), two-level gap scoring, readiness classification, a unified two-level app shell for both trainers and associates, a trainer analytics dashboard, an associate self-dashboard with trajectory-language visualizations (SkillCardList + FocusHero + SkillRadar Before/Now overlay), curriculum visibility for associates, and adaptive mock setup that pre-populates from gap history.
 
 ## Core Value
 
@@ -10,11 +10,13 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ## Current State
 
-**v1.1 shipped (PR `4238e36`, merged 2026-04-14) — production deploy deferred to v1.2 cycle.**
+**v1.3 shipped (PR #6 `05d2546`, merged 2026-04-18).** All four milestones to date (v1.0, v1.1, v1.2, v1.3) are on main. Production deploy automation remains deferred to v1.4.
 
 - **v1.0 (2026-04-14):** 7 phases, 15 plans, 22 requirements. Prisma + Supabase foundation, gap scoring, readiness classification, trainer dashboard, adaptive mock setup.
-- **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest, 24/24 Playwright, Codex findings all P1/P2 resolved pre-merge.
-- Total codebase: 35 routes, standalone Docker output, idempotent migrations.
+- **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest.
+- **v1.2 (2026-04-16):** 10 phases (16–25), 26 plans, 30 requirements. Supabase Auth cutover (trainer password + associate magic link), RLS defense-in-depth, two-level app shell, trainer analytics, associate self-dashboard, PDF analytics, PIN removal. 205 commits, 470 tests.
+- **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests. Audit status: tech_debt (verification-hygiene only, no functional gaps).
+- Total codebase: 35+ routes, standalone Docker output, idempotent migrations, 524 passing tests.
 
 ## Database Access Architecture
 
@@ -56,22 +58,17 @@ Middleware (`src/middleware.ts`) was rewritten to Supabase-primary in Phase 18. 
 
 The PIN-based associate auth was never shipped to production. No grace window code exists — `getCallerIdentity()` reads Supabase session only.
 
-## Current Milestone: v1.3 UX Unification & Polish
+## Next Milestone: v1.4 (Planning)
 
-**Goal:** Unify all surfaces to the two-level shell, enrich associate experience with curriculum visibility and richer data visualization, polish dark mode.
+Milestone not yet defined. Candidates in the active backlog:
 
-**Target features:**
+- **999.1 Staging / Prod Split** — Second Supabase project for staging, `.env.local`/`.env` split, Docker deploy routed to prod only, pre-merge CI smoke tests.
+- **999.2 Trainer Default Cohort** — Persist each trainer's default cohort (`Profile.defaultCohortId` or join table); roster boots scoped instead of "All Cohorts".
+- **DEPLOY-01 / DEPLOY-02 / DEPLOY-03** — CI/CD pipeline, production deploy automation, scheduled readiness-sweep cron. Deferred since v1.2.
 
-- **Unified App Shell** — Associate pages adopt same topbar+sidebar shell as trainer (restricted views: Dashboard · Interviews only). Old single-navbar layout removed from all surfaces.
-- **Sign-in Redesign** — Single page with two stacked buttons ("Sign in with email" for magic link, "Sign in with password"). No tabs. First-login password setup prompt for associates so all users can use both auth methods.
-- **Associate Data Visualization** — Strengths/weaknesses list sourced from gap scores with trend arrows, trend charts with per-skill filtering across cumulative interviews, trajectory graphs for easier understanding of focus areas.
-- **Associate Curriculum View** — Associates see their assigned cohort and curriculum schedule so they can prep for upcoming topics.
-- **DESIGN.md Data-Viz Section** — Chart palette, informational hierarchy, trajectory/trend presentation patterns for all surfaces.
-- **Dark Mode QA** — Full consistency sweep fixing pages stuck on parchment-light.
+Kick off with `/gsd-new-milestone`.
 
-**Deferred to v1.4 (Deploy milestone):** CI/CD pipeline, production deploy automation, readiness sweep cron.
-
-**Deferred features (see prior milestones):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, Nyquist validation backfill.
+**Deferred features (see prior milestones):** curriculum cloning, curriculum-scoped gap computation, cohort snapshots + per-cohort trend charts, readiness-change email notifications, Nyquist validation backfill (VALID-01), v1.3 phase-level VERIFICATION.md normalization.
 
 ## Requirements
 
@@ -108,12 +105,21 @@ The PIN-based associate auth was never shipped to production. No grace window co
 - ✓ AUTH-01..04: Associate Supabase auth (magic-link, bulk invite, Supabase cutover) — v1.2
 - ✓ PIPE-01..02: Authenticated automated-interview pipeline + readiness recompute marker + sweep — v1.1
 - ✓ COHORT-01..04: Cohort CRUD, nullable FK, roster filter, opt-in summary (backward-compatible shape) — v1.1
-- ✓ CURRIC-01..02: Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
-- ✓ DESIGN-01..03: Unified DESIGN.md token system; legacy `--nlm-*` deleted; single `/signin` tabs — v1.1
+- ✓ CURRIC-01..02 (v1.1): Weekly curriculum with canonical skillSlug + exact-match wizard filter — v1.1
+- ✓ DESIGN-01..03 (v1.1): Unified DESIGN.md token system; legacy `--nlm-*` deleted; single `/signin` tabs — v1.1
 
-### Active (v1.3 — populated by roadmap)
+- ✓ SHELL-01..04: Associate pages on unified topbar+sidebar shell with Dashboard/Interviews/Curriculum nav + cohort header; PublicShell + AssociateNav deleted — v1.3
+- ✓ SIGNIN-01..02: Accordion sign-in (no tabs); first-login password gate for both trainers and associates — v1.3 (trainer path closed in Phase 33)
+- ✓ PROFILE-01: Prisma Profile model + tabbed profile page + lazy backfill migrating first-login detection from `user_metadata` to `Profile.passwordSetAt` — v1.3
+- ✓ VIZ-01..07: SkillCardList with trajectory arrows + FocusHero + trajectory language + SkillRadar Before/Now overlay with real `GapScore.prevWeightedScore` snapshots + dashboard-wide 2-component skill filter (VIZ-03 formally cut — radar is canonical) — v1.3
+- ✓ CURRIC-01..02 (v1.3): Associate-facing curriculum schedule with current-week highlight + empty state — v1.3
+- ✓ DESIGN-01..02 (v1.3): DESIGN.md Data Visualization section + chart color tokens with light/dark pairs — v1.3
+- ✓ DARK-01..02: No hardcoded hex; all recharts use CSS var tokens; semantic `--success-bg`/`--warning-bg`/`--danger-bg` — v1.3
+- ✓ SHELL-32-01..09: Sidebar-primary nav for all roles + utility-only TopBar + Profile modal + landing header + roster slug cleanup + password change gated by old-password or email OTP — v1.3
 
-(REQ-IDs to be filled by requirements gathering)
+### Active (v1.4 — populated by next requirements gathering)
+
+(REQ-IDs to be filled by `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -156,6 +162,13 @@ The PIN-based associate auth was never shipped to production. No grace window co
 | Dual-write migration (file + DB) | v1.0: preserve existing flows. | ✓ Validated P2 |
 | Postgres canonical for v1.1 | Cohorts/PINs/automated pipeline are DB-only by design; file layer is legacy backup. | Codex review 2026-04-14 |
 | Supabase-only auth (Phase 25) | PIN system removed after Supabase cutover; getCallerIdentity() is sole identity resolver. | Phase 25 cleanup |
+| AppShell role prop defaults to 'trainer' | Prevent trainer layout regression during v1.3 shell refactor. | ✓ Validated v1.3 P27 |
+| Chart tokens before chart code | Build recharts with CSS vars from day one; avoids dark-mode retrofit. | ✓ Validated v1.3 P26→P31 |
+| Profile model keyed on authUserId (no FK to Associate) | Trainers get profiles too; lazy backfill handles `user_metadata`→Profile migration organically. | ✓ Validated v1.3 P28.1 |
+| SkillRadar Before/Now overlay as canonical trajectory | Per-skill LineChart (VIZ-03) redundant given radar; DESIGN.md documents the cut. | ✓ Validated v1.3 P34 |
+| `GapScore.prevWeightedScore` captured inline on upsert, no backfill | Nullable column; radar hides Before polygon until populated. | ✓ Validated v1.3 P34 |
+| Sidebar-primary navigation for all roles | TopBar utility-only; Settings as collapsible accordion; Profile as modal (not route). | ✓ Validated v1.3 P32 |
+| Trainer first-login gate via exchange route reorder + SignInTabs client gate | Passport Profile check runs before trainer role short-circuit; fail-open on getUser errors (middleware still enforces). | ✓ Validated v1.3 P33 |
 | Interview format only for MVP | Validate core loop before expanding | ✓ Good |
 
 ## Evolution
@@ -176,4 +189,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 — v1.3 UX Unification & Polish milestone started*
+*Last updated: 2026-04-18 — v1.3 UX Unification & Polish milestone shipped*

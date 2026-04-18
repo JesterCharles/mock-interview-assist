@@ -1,5 +1,34 @@
 # Milestones
 
+## v1.3 UX Unification & Polish (Shipped: 2026-04-18)
+
+**Phases completed:** 11 phases (26-35, incl. decimal 28.1), 18 plans
+**Timeline:** 2026-04-16 → 2026-04-18 (~2 days wall time)
+**Requirements:** 27/27 met (28 defined — VIZ-03 formally cut, VIZ-07 added as replacement)
+**Merge commit:** `05d2546` on `main` (PR #6 — v1.3 Gap Closure: P33-35)
+**Tests:** 524 passing / 4 skipped (npm run test, 2026-04-18)
+**Audit:** TECH_DEBT (no blocking gaps; verification-hygiene items only — see [v1.3-MILESTONE-AUDIT](milestones/v1.3-MILESTONE-AUDIT.md))
+
+**Key accomplishments:**
+
+- Unified two-level app shell for associates — same topbar + SectionSidebar as trainers with role-aware nav (Dashboard / Interviews / Curriculum) + cohort name header; PublicShell + AssociateNav deleted
+- Accordion sign-in replacing tab UI (Mail + KeyRound icons, grid-row animation) with mandatory first-login password gate (trainer path closed in gap-closure Phase 33)
+- Profile model + tabbed profile page + first-login detection migrated from `user_metadata` to `Profile.passwordSetAt` via lazy backfill
+- Associate data-viz suite: ranked `SkillCardList` with trajectory language, `FocusHero` recommendation, `SkillRadar` Before/Now overlay backed by real `GapScore.prevWeightedScore` snapshots
+- Associate curriculum schedule page with 5-band score coloring, hover tooltips, current-week highlight, and empty state
+- Dark-mode coverage sweep: hardcoded hex eliminated across trainer + interview + review + PDF surfaces; semantic `--success-bg`/`--warning-bg`/`--danger-bg` tokens added
+- Shell architecture overhaul: sidebar-primary nav for all roles, TopBar stripped to utility-only, Settings collapsible accordion, Profile modal overlay, landing-page minimal header, roster slug column removed, password change gated behind old-password or email OTP verification
+- Chart design tokens + DESIGN.md Data Visualization section (5-series palette, axis/tooltip conventions, trajectory vocabulary) landed before any chart component was built — no dark-mode retrofit needed
+- Gap-closure wave (Phases 33-35, PR #6) closed 5 audit gaps: trainer first-login gate, synthetic radar prior replaced with real snapshots, associate Settings accordion wired, `@deprecated settingsSidebarGroups` removed
+
+**Archives:**
+
+- [Roadmap](milestones/v1.3-ROADMAP.md)
+- [Requirements](milestones/v1.3-REQUIREMENTS.md)
+- [Audit](milestones/v1.3-MILESTONE-AUDIT.md)
+
+---
+
 ## v1.2 Analytics & Auth Overhaul (Shipped: 2026-04-16)
 
 **Phases completed:** 10 phases (16-25), 26 plans
