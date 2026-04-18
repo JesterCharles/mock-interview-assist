@@ -47,3 +47,9 @@ next-env.d.ts
 
 # judge0 spike harness output (ephemeral; only SPIKE-REPORT.md committed)
 scripts/judge0-spike-output.json
+
+# Editor config (personal, not shared across team)
+.obsidian/
+
+# Ephemeral Playwright test output
+test-results/.last-run.json
