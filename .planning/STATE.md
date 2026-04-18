@@ -3,29 +3,29 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: "Production Migration: Cloud Run + Supabase Hybrid"
 status: executing
-last_updated: "2026-04-18T23:15:00.000Z"
-last_activity: 2026-04-18 -- Phase 45 executed (3/4 plans clean, 1 partial-halt on docker smoke)
+last_updated: "2026-04-18T18:15:00.000Z"
+last_activity: 2026-04-18 -- Phase 46 executed (1/4 plans fully complete, 3/4 code-complete with operator checkpoints pending)
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 36
-  completed_plans: 4
-  percent: 11
+  completed_plans: 5
+  percent: 14
 ---
 
 # Project State — v1.5 Production Migration
 
 ## Current Position
 
-Phase: 45 (executed — 3/4 plans clean, 1 partial-halt on docker smoke)
-Plan: Next → 46 (Supabase Staging + Env Hygiene + Prisma Migrate Baseline)
-Status: Phase 45 complete with HALT on docker smoke assertions (deferred to Phase 47 per DOCKER-NOTES.md)
-Last activity: 2026-04-18 -- Phase 45 execute finished (15/17 verify-phase-45 assertions pass)
+Phase: 46 (executed — 1/4 complete, 3/4 code-complete HALT on operator checkpoints)
+Plan: Next → 47 (Staging Cloud Run Service + Load Balancer + Domains) after operator executes Phase 46 runbook Phases A–J
+Status: Phase 46 code + runbook + phase-gate all shipped; operator must execute the live wipe + key rotation + Auth redirect PATCH before Phase 47
+Last activity: 2026-04-18 -- Phase 46 code ship complete (11 commits, 30+ new green tests, 1005 passing / 4 skipped suite-wide)
 
 ## Progress Bar
 
 ```
-v1.5: [████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 11% (1/9 phases, 4/36 plans)
+v1.5: [█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 14% (1/9 phases, 5/36 plans)
 ```
 
 ## Project Reference
@@ -41,7 +41,7 @@ See: `.planning/PROJECT.md`
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 45 | Terraform Skeleton + Artifact Registry + Secret Manager | INFRA-01..03, INFRA-06..07 | Complete (docker smoke deferred) |
-| 46 | Supabase Staging + Env Hygiene + Prisma Migrate Baseline | DATA-01..06 | Not started |
+| 46 | Supabase Staging + Env Hygiene + Prisma Migrate Baseline | DATA-01..06 | Code complete (3 operator checkpoints pending) |
 | 47 | Staging Cloud Run Service + Load Balancer + Domains | INFRA-04..05, CI-04 | Not started |
 | 48 | GitHub Actions CI + Deploy-Staging + Observability | CI-01..02, CI-05..06, OBS-01..04 | Not started |
 | 49 | k6 Load Test + Hardening (HARD-01..03) | LOAD-01..03, HARD-01..03 | Not started |
@@ -74,11 +74,15 @@ See: `.planning/PROJECT.md`
 - v1.2: 10 phases, 30 reqs, ~16h, 205 commits, 470 tests
 - v1.3: 11 phases (incl. decimal 28.1), 18 plans, 27 reqs, ~2 days, 524 passing tests
 - v1.4: 9 phases (36-44), 28 plans, 44 reqs, 963 passing tests
+- v1.5 Phase 46 (2026-04-18): 4 plans, 11 per-task commits, ~35min wall, 30+ new tests, 1005 passing total; 1 plan autonomous, 3 halted on operator checkpoints
 
 ## Accumulated Context
 
 ### Decisions (v1.5)
 
+- **Phase 46 (2026-04-18):** Phase 46 shipped as code + runbook + phase-gate under unattended rules. Plan 46-01 fully autonomous (guard + faker seeder + 24 green tests); Plans 46-02/03/04 code-complete with operator checkpoints gated behind live prod wipe, Supabase dashboard key rotation, Supabase Management API PATCH — all require human-held credentials. Operator runbook at `docs/runbooks/phase-46-supabase-wipe.md` (Phases A–J, ~700 lines). Phase-gate aggregator at `scripts/verify-phase-46.sh`.
+- **Phase 46 (2026-04-18):** `@faker-js/faker@^10.4.0` added as devDependency. `scripts/lib/assert-staging-env.ts` exports `STAGING_REF = 'lzuqbpqmqlvzwebliptj'`, `assertStagingDatabase`, `assertProdDatabase`, `maskUrl` — reusable guard for any future mutating script.
+- **Phase 46 (2026-04-18):** Seed payload locked at 3 cohorts / 30 associates / 36 curriculum weeks / 15 sessions / 1 settings singleton. CodingChallenges deferred (`TODO 46-03` in source) — bank-slug selection is downstream.
 - **Phase 45 (2026-04-18):** Upgraded terraform 1.5.7 → 1.14.8 via `hashicorp/tap` (default brew formula is BSL-capped at 1.5.7). Provider `hashicorp/google ~> 7.0` now pinned at v7.28.0 via committed `.terraform.lock.hcl`.
 - **Phase 45 (2026-04-18):** ADC refresh requires browser interaction — used `GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)` as a non-interactive fallback for all terraform invocations. Future phases should follow the same pattern until human reruns `gcloud auth application-default login`.
 - **Phase 45 (2026-04-18):** Docker smoke image (D-16) HALTED — `src/lib/supabase/admin.ts` eagerly instantiates `createClient(...)` at module load, crashing `npm run build` during Next.js page-data collection when `NEXT_PUBLIC_SUPABASE_URL` is absent from the build env. D-15 (no Dockerfile changes) + phase scope (no app-code changes) prevent an in-phase fix. Chose Option D (defer smoke to Phase 47 real Cloud Run deploy via CI). Full analysis in `.planning/phases/45-*/DOCKER-NOTES.md`.
@@ -95,17 +99,18 @@ See: `.planning/PROJECT.md`
 - HARD-01 / HARD-02 / HARD-03 — live load test, live abuse test, live security review. All require deployed stack. Scheduled for Phase 49.
 - v1.4 reflect + maintain deferred — scheduled for Phase 53.
 - **Phase 45 docker smoke (DOCKER-NOTES.md)** — Dockerfile build fails due to supabase-admin eager init. Options: (A) lazy-init supabaseAdmin in code [Phase 47 scope], (B)/(C) Dockerfile build-arg injection [violates D-15], (D) defer to Phase 47/48 CI [chosen]. Human decision can reopen A if desired before Phase 47.
+- **Phase 46 operator checkpoints (3 open):** Plan 46-02 Task 3 (prod wipe A–F), Plan 46-03 Task 4 (key rotation + migrate deploy G–I), Plan 46-04 Task 5 (Auth redirect PATCH J + phase-gate). All require human-held credentials and live production mutations. Runbook is ready; `bash scripts/verify-phase-46.sh` is the single-command exit criterion.
 
 ### Todos
 
 - At Phase 45 execute start: run `gcloud auth login` + `gcloud config set project nlm-staging-493715` to give Claude GCP access.
-- At Phase 46: confirm Supabase prod backup is taken before wipe (DATA-02 gate).
+- At Phase 46: confirm Supabase prod backup is taken before wipe (DATA-02 gate) — **runbook ready, awaiting operator execution**.
 - At Phase 47: benchmark cold-start latency; decide if `min-instances=1` is worth the cost before prod goes live.
 - Pitch demo data question (from discover seeds): does champion walkthrough need seeded demo users on prod, or is staging URL acceptable? Decide before Phase 52 cutover.
 
 ## Session Continuity
 
-To resume: `/gsd-discuss-phase 46` (or execute 46 directly if already planned)
+To resume: operator executes `docs/runbooks/phase-46-supabase-wipe.md` Phases A–J + `bash scripts/verify-phase-46.sh`, then `/gsd-execute-phase 47 --unattended`.
 
 Dependency order: ~~45~~ → 46 → 47 → 48 → 49 (parallel: 50 can run after 45) → 51 → 52 → 53
 
