@@ -144,10 +144,10 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
   3. Workload Identity Federation is configured; a test GH Actions workflow run authenticates to GCP and pushes an image without any service-account JSON key in secrets
   4. A cold-start request to the staging URL (after scale-to-zero) returns a valid response within 30 seconds
 **Plans:** 4 plans
-  - [ ] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
-  - [ ] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
-  - [ ] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
-  - [ ] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
+  - [ ] 47-01-PLAN.md — Cloud Run service (INFRA-04): cloudrun-staging.tf + variables/providers/outputs/tfvars extensions, digest-pinned image, 13-secret mounts, lifecycle.ignore_changes, allUsers invoker IAM
+  - [ ] 47-02-PLAN.md — LB + SSL + DNS (INFRA-05): loadbalancer-staging.tf (7 resources) + dns-staging.tf (Cloudflare A record proxied=false) + README runbook with SSL ACTIVE polling
+  - [ ] 47-03-PLAN.md — WIF + SA bindings + smoke (CI-04): wif.tf pool+provider (both projects, D-14), D-18 role matrix on github-actions-deployer, wif-smoke.yml workflow_dispatch proof
+  - [ ] 47-04-PLAN.md — Phase gate: NEXT_PUBLIC_SITE_URL secret population (D-07), coldstart-probe-staging.sh (SC#4), verify-phase-47.sh aggregator
 
 ### Phase 48: GitHub Actions CI + Deploy-Staging + Observability
 **Goal**: Every PR is gated by automated checks; every merge to main automatically deploys to staging within 5 minutes; structured logs and an uptime alert are active on prod (ready to watch when prod goes live)
