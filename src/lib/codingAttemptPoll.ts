@@ -14,6 +14,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getSubmission } from '@/lib/judge0Client';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
 import { normalizeJudge0Verdict, type CanonicalVerdict } from '@/lib/judge0Verdict';
 import { mapSignalToScore, type SignalType } from '@/lib/codingSignalService';
 import { persistCodingSignalToGapScore } from '@/lib/gapPersistence';
@@ -72,6 +73,12 @@ export async function aggregateJudge0Results(
   cases: Array<{ id: string; isHidden: boolean; weight: number }>,
   getSub = getSubmission,
 ): Promise<AggregateResult> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): defense-in-depth short-circuit so a
+  // background job or test harness never hits Judge0 (placeholder URL) when
+  // the feature is flag-dark.
+  if (!isCodingEnabled()) {
+    return { allResolved: false, perCase: [] };
+  }
   if (tokens.length !== cases.length) {
     // Defensive: mismatched counts indicates a bug in submit flow. Treat as not-yet-resolved.
     return { allResolved: false, perCase: [] };
@@ -202,6 +209,20 @@ function toPollResultFromPersisted(attempt: AttemptRow): PollResult {
 }
 
 export async function pollAndMaybeResolveAttempt(attemptId: string): Promise<PollResult> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): short-circuit before any I/O when the
+  // feature is flag-dark. The API route wrapping this (/api/coding/attempts/[id])
+  // already returns 503 via its own guard; this is defense-in-depth for any
+  // background job or direct helper consumer.
+  if (!isCodingEnabled()) {
+    return {
+      resolved: false,
+      verdict: 'pending',
+      score: null,
+      visibleTestResults: [],
+      hiddenAggregate: { passed: 0, total: 0 },
+    };
+  }
+
   const attempt = (await prisma.codingAttempt.findUnique({
     where: { id: attemptId },
     select: {
