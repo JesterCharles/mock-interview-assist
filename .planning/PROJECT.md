@@ -18,16 +18,27 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 - **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests.
 - **v1.4 (2026-04-18):** 9 phases (36-44), 28 plans, 44 requirements. Coding challenges shipped as continuous-practice rep alongside mock interviews. Judge0 multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C#), public+private GitHub challenge bank, Monaco editor UI, `CodingSkillSignal` → `GapScore` integration. Terraform IaC + GitHub Actions deploy workflows scaffolded. 963 passing / 4 skipped tests. Deferred to v1.5: HARD-01/02/03 (live load/abuse/security — require deployed stack).
 
-## Next Milestone (v1.5 — Planning)
+## Current Milestone: v1.5 — Production Migration (Cloud Run + Supabase Hybrid)
 
-Direction pending `/gsd-new-milestone`:
+**Goal:** Migrate NLM from legacy v0.1 GCE to Cloud Run + Supabase hybrid, ship v1.0-v1.4 accumulated code to prod without breaking existing public-interview users, establish staging + CI/CD on tag + k6 load-test baseline, bake Judge0 integration points for v1.6 drop-in.
 
-- Hybrid migration from v0.1 GCE to Cloud Run + Supabase as primary production
-- PaaS-first hosting (Fly/Railway + hosted Judge0) — dedicated Judge0 VM deferred to v1.6
-- P0: load test + staging split + CI/CD (closes HARD-01/02/03 under deployed stack)
-- Candidates: backlog 999.1 (staging/prod split), 999.2 (trainer default cohort)
+**Target features:**
+- Cloud Run app runtime (staging + prod services), Docker-native for eventual AWS portability
+- Supabase staging = new free-tier project (separate from prod, not branches); Prisma migrate deploy promotion
+- Terraform `iac/cloudrun/` — Cloud Run + Secret Manager + LB + custom domain (separate from Phase 43 `iac/gce-judge0/` reference)
+- GitHub Actions CI/CD: `pr-checks.yml`, `deploy-staging.yml` (on merge to main), `deploy-prod.yml` (on tag `v*`)
+- k6 single-instance load-test baseline in `loadtest/` — concurrent-user ceiling + cost/1k-requests math
+- Cloudflare DNS cutover runbook + 30-day v0.1 GCE rollback (`legacy.nextlevelmock.com`)
+- Judge0 integration points baked in — env vars (`JUDGE0_URL`, `JUDGE0_AUTH_TOKEN`, `CODING_CHALLENGES_ENABLED` flag-dark on prod), facade usage, `judge0.tf.disabled` stub
+- Env-hygiene reset: wipe dirty dev data from existing Supabase "prod" project; reseed staging with demo data; prod reserved for real users only
 
-- Total codebase: 40+ routes, standalone Docker output, idempotent migrations, 963 passing tests.
+**Key context:**
+- `nextlevelmock.com` has been live on v0.1 GCE — v1.0-v1.4 code never shipped to prod. v1.5 = migration + upgrade, not greenfield.
+- GCP projects: `nlm-prod`, `nlm-staging-493715` (suffix accepted — `nlm-staging` globally taken). Billing `01A910-0C5083-DCCFED`. Supabase staging ref `lzuqbpqmqlvzwebliptj`. DNS: Cloudflare Free on `nextlevelmock.com`.
+- Judge0 IaC deferred to v1.6; integration points only in v1.5. Coding challenges flag-dark on prod.
+- 3-4 week estimate. v1.4 reflect + maintain run at v1.5 ship.
+- Includes HARD-01/02/03 from v1.4 (load test + abuse test + security review, require deployed stack).
+- Hard constraint: Docker-native throughout so eventual AWS migration is config-only. Supabase stays (cloud-agnostic, company-standard).
 
 ## Database Access Architecture
 
@@ -69,9 +80,9 @@ Middleware (`src/middleware.ts`) was rewritten to Supabase-primary in Phase 18. 
 
 The PIN-based associate auth was never shipped to production. No grace window code exists — `getCallerIdentity()` reads Supabase session only.
 
-## Active Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (Planning)
+## Previous Milestone: v1.4 — Coding Challenges + Multi-Language Sandbox (Shipped 2026-04-18)
 
-**Phases:** 36-44 (9 phases) | **Requirements:** 44 | **Approach:** B — MSA-from-day-1 | **Estimate:** 8-10 weeks
+**Phases:** 36-44 (9 phases) | **Requirements:** 44 | **Approach:** B — MSA-from-day-1 | **Actual:** ~1 wall-day autonomous + human spike-gate
 
 **Goal:** Add coding challenges as a new continuous-practice rep type alongside mock interviews. Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C# Mono) loaded from public GitHub challenge banks (with hidden tests in a separate private repo). Coding attempts feed `GapScore` via explicit `CodingSkillSignal` mapping — continuous skill telemetry across all 11 cohort weeks instead of the current 3 front-loaded assessment points.
 
@@ -215,19 +226,31 @@ Readiness classification (`readinessService.ts`, unchanged) then uses this 71.93
 - ✓ DARK-01..02: No hardcoded hex; all recharts use CSS var tokens; semantic `--success-bg`/`--warning-bg`/`--danger-bg` — v1.3
 - ✓ SHELL-32-01..09: Sidebar-primary nav for all roles + utility-only TopBar + Profile modal + landing header + roster slug cleanup + password change gated by old-password or email OTP — v1.3
 
-### Active (v1.4 — Coding Challenges + Multi-Language Sandbox)
+### Validated (v1.4 — Coding Challenges + Multi-Language Sandbox, shipped 2026-04-18)
 
-See `.planning/REQUIREMENTS.md` for the full 44-requirement list. Summary by theme:
+See `.planning/milestones/v1.4-REQUIREMENTS.md` for the archived 44-requirement list. Summary by theme:
 
-- **CODING-MODEL-01..06** — New Prisma models (`CodingChallenge`, `CodingAttempt`, `CodingTestCase`, `CodingSkillSignal`) + idempotent migration + signal→GapScore mapping service — Phase 36
-- **CODING-BANK-01..05** — Public + private GitHub repo schemas, loader mirroring `github-service.ts`, ETag cache, validation pipeline — Phase 37
-- **JUDGE-01..06** — Judge0 ≥ 1.13.1 pinned, docker-compose integration, sandbox hardening, env-driven URL, health probe, 10-submission spike gate — Phase 38
-- **CODING-API-01..07** — Auth-gated async submit + poll endpoints, server-side hidden test injection, language allowlist, rate limits, verdict normalization — Phase 39
-- **CODING-UI-01..05** — `/coding` + `/coding/[id]` routes, Monaco editor, attempt history, shell integration — Phase 40
-- **CODING-SCORE-01..04** — `CodingSkillSignal` → GapScore with difficulty weighting; trainer dashboard extension — Phase 41
-- **SQL-01..03** — Judge0 SQLite wired, result normalization, explicit dialect label — Phase 42
-- **IAC-01..05** — Terraform module, CI/CD workflows, health/rollback, monitoring, runbook — Phase 43
-- **HARD-01..04** — 50-concurrent load test, abuse test, STRIDE review, docs — Phase 44
+- ✓ **CODING-MODEL-01..06** — Prisma models + idempotent migration + signal→GapScore mapping — Phase 36
+- ✓ **CODING-BANK-01..05** — Public + private GitHub loader, ETag cache, validation — Phase 37
+- ✓ **JUDGE-01..06** — Judge0 ≥ 1.13.1 pinned, docker-compose, sandbox hardening, spike gate (human-verified) — Phase 38
+- ✓ **CODING-API-01..07** — Auth-gated async submit + poll, hidden tests, allowlist, rate limits — Phase 39
+- ✓ **CODING-UI-01..05** — `/coding` + `/coding/[id]`, Monaco, attempt history — Phase 40
+- ✓ **CODING-SCORE-01..04** — `CodingSkillSignal` → GapScore with difficulty weighting — Phase 41
+- ✓ **SQL-01..03** — Judge0 SQLite wired, dialect label — Phase 42
+- ✓ **IAC-01..05** — Terraform + CI/CD scaffold (deploy deferred to v1.5) — Phase 43
+- ⏳ **HARD-01..04** — Deferred to v1.5 (require deployed stack)
+
+### Active (v1.5 — Production Migration: Cloud Run + Supabase Hybrid)
+
+See `.planning/REQUIREMENTS.md` for the full v1.5 requirement list. Summary by theme (finalized after roadmap):
+
+- **INFRA-XX** — Cloud Run services (staging + prod), Secret Manager, LB + custom domain, terraform `iac/cloudrun/`
+- **DATA-XX** — Supabase staging project (new free-tier), env hygiene reset, Prisma migrate deploy promotion
+- **CI-XX** — GH Actions `pr-checks` + `deploy-staging` (on merge) + `deploy-prod` (on tag)
+- **LOAD-XX / HARD-01..03** — k6 single-instance load-test baseline, abuse test, STRIDE security review (deferred from v1.4)
+- **DNS-XX** — Cloudflare record mgmt + cutover runbook + 30-day v0.1 GCE rollback (`legacy.nextlevelmock.com`)
+- **JUDGE-INTEG-XX** — Judge0 env vars + flag `CODING_CHALLENGES_ENABLED` (flag-dark on prod) + `judge0.tf.disabled` stub for v1.6 drop-in
+- **SUNSET-XX** — v0.1 GCE decommission runbook + day-45 teardown checklist
 
 ### Out of Scope
 
@@ -321,4 +344,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. **Trainer alerts on coding gap threshold** — Push notification when an associate's coding-only `weightedScore` crosses a warning boundary. Out of v1.4 scope; revisit after first cohort runs with v1.4.
 
 ---
-*Last updated: 2026-04-18 — Phase 41 readiness-math documentation*
+*Last updated: 2026-04-18 — v1.5 milestone kickoff (Production Migration, Cloud Run + Supabase hybrid)*

@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: v1.4 shipped; awaiting v1.5 milestone initialization
-stopped_at: "v1.4 archived — ready for /gsd-new-milestone"
-last_updated: "2026-04-18T16:31:18.354Z"
+milestone: v1.5
+milestone_name: "Production Migration — Cloud Run + Supabase Hybrid"
+status: "Defining requirements"
+stopped_at: "v1.5 initialized — REQUIREMENTS.md + ROADMAP.md next"
+last_updated: "2026-04-18T17:00:00.000Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 0
@@ -14,11 +14,14 @@ progress:
   percent: 0
 ---
 
-# Project State — between milestones
+# Project State — v1.5 Production Migration
 
 ## Current Position
 
-v1.4 Coding Challenges + Multi-Language Sandbox shipped 2026-04-18 (9 phases / 28 plans). Milestone archived to `milestones/v1.4-*`. v1.5 not yet initialized.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-18 — Milestone v1.5 started via `/gsd-new-milestone v1.5`
 
 ## Project Reference
 
@@ -26,15 +29,24 @@ See: `.planning/PROJECT.md`
 
 **Core value:** Associates get consistent, feedback-rich practice reps that adapt to their weaknesses — replacing snapshot audits with continuous improvement trajectories.
 
-**Current focus:** Planning v1.5. Run `/gsd-new-milestone` to initialize.
+**Current focus:** v1.5 — migrate v1.0-v1.4 codebase from legacy v0.1 GCE to Cloud Run + Supabase hybrid; ship staging + CI/CD + k6 load-test baseline; cut DNS from v0.1 to new prod without breaking existing public-interview users.
 
-## v1.5 Direction (from memory)
+## v1.5 Direction (finalized in discover)
 
-- Hybrid migration from v0.1 GCE to Cloud Run + Supabase
-- Judge0 deferred to v1.6 (PaaS-first hosting favored: Fly/Railway + hosted Judge0)
-- P0 scope: load-test + staging + CI/CD
-- HARD-01/02/03 (deployment-gated) carried from v1.4 as verification work under a deployed stack
-- Backlog items 999.1 (staging/prod split) + 999.2 (trainer default cohort) candidates for inclusion
+- **Approach C — Hybrid:** Cloud Run app + Supabase DB/auth (both stay). Supabase = company-standard, cloud-agnostic for future AWS migration.
+- **Judge0 integration points only** (env vars, facade, `judge0.tf.disabled` stub) — self-hosted IaC deferred to v1.6.
+- **P0 scope:** staging Cloud Run + staging Supabase project + deploy-on-tag CI/CD + k6 single-instance load-test baseline.
+- **HARD-01/02/03** carried from v1.4 — executed under the deployed stack.
+- **Env hygiene reset:** wipe dirty dev data from existing "prod" Supabase, reseed staging with demo data, reserve prod for real users.
+- **DNS cutover:** Cloudflare Free Tier on `nextlevelmock.com`; 30-day `legacy.nextlevelmock.com` rollback window.
+
+### Finalized IDs (for execute phase)
+
+- GCP projects: `nlm-prod`, `nlm-staging-493715` (suffix accepted — `nlm-staging` globally taken)
+- GCP billing: `01A910-0C5083-DCCFED` (active)
+- Supabase staging ref: `lzuqbpqmqlvzwebliptj`
+- Supabase prod: existing (will be wiped + reseeded clean at first execute phase)
+- DNS: Cloudflare Free Tier on `nextlevelmock.com`
 
 ## Performance Metrics (shipped milestones)
 
@@ -46,4 +58,5 @@ See: `.planning/PROJECT.md`
 
 ## Open Blockers Carried Forward
 
-- HARD-01 / HARD-02 / HARD-03 — live load test, live abuse test, live security review. All require deployed stack. Tracked in `.planning/milestones/v1.4-phases/44-hardening-load-test/LOAD-TEST-CHECKPOINT.md`. Route into v1.5 deployment milestone.
+- HARD-01 / HARD-02 / HARD-03 — live load test, live abuse test, live security review. All require deployed stack. v1.4 checkpoint: `.planning/milestones/v1.4-phases/44-hardening-load-test/LOAD-TEST-CHECKPOINT.md`. Folded into v1.5 scope.
+- v1.4 reflect + maintain deferred — run as part of v1.5 ship.
