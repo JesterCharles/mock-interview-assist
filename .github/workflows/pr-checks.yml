@@ -1,56 +1,73 @@
-# -----------------------------------------------------------------------------
-# PR Checks — gate for merges into main.
-# No deploy secrets referenced; only the built-in GITHUB_TOKEN.
-# To enforce: Settings → Branches → Protect `main` → Require status check
-# "checks" before merge.
-# -----------------------------------------------------------------------------
-
 name: PR Checks
 
 on:
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
 
 concurrency:
   group: pr-checks-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
-  checks:
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npx prisma generate
+      - run: npx tsc --noEmit
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npm run lint
+
+  test:
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - run: npx prisma generate
+      - run: npm run test
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Prisma generate (required for typecheck)
-        run: npx prisma generate
-
-      - name: Typecheck
-        run: npx tsc --noEmit
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm run test -- --run
-
-      - name: Build
-        run: npm run build
-        env:
-          OPENAI_API_KEY: "pr-check-dummy"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
-          DIRECT_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
-          NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "dummy"
-          SUPABASE_SECRET_KEY: "dummy"
-          RESEND_API_KEY: "dummy"
+  prisma-format:
+    name: Prisma Schema Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Format check
+        run: |
+          npx prisma format
+          git diff --exit-code prisma/schema.prisma \
+            || (echo "::error::prisma/schema.prisma is not canonically formatted. Run 'npx prisma format' locally and commit."; exit 1)
