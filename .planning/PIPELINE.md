@@ -1,10 +1,21 @@
 # Pipeline Status
 
-## Current Run — v1.3 Gap Closure (Phases 33-35)
-- Started: 2026-04-17
-- Current stage: PLAN (auto-discuss → plan → execute for P33-35)
-- Mode: unattended + auto-discuss (--resume --unattended --discuss)
-- Previous: v1.3 main run shipped 2026-04-17 (PR #5 c444f9e)
+## Current Run — v1.4 (DISCOVER)
+- Started: 2026-04-18
+- Current stage: DISCOVER (HITL — defining v1.4 milestone scope)
+- Mode: interactive
+- Previous: v1.3 shipped + tagged 2026-04-18 (commit 42cd703, tag v1.3)
+
+### v1.4 Candidate Themes (from user, awaiting discover refinement)
+1. **PDF curriculum port** — ingest existing curriculum PDFs into CurriculumWeek model (smaller, compounds v1.1+v1.3)
+2. **More learner features** — vague, needs office-hours brainstorm
+3. **Coding challenges + multi-language** — biggest swing, needs sandbox/runtime/judge architecture
+
+### Discover stage will:
+- Office hours / Socratic ideation to clarify learner gap
+- Web research on coding challenge platforms (Judge0, Piston, eval sandboxes) if option 3
+- PDF parsing/extraction patterns if option 1
+- Output: PROJECT.md update + REQUIREMENTS.md (fresh) + ROADMAP.md v1.4 expansion
 
 ## Resume Point
 
