@@ -32,6 +32,15 @@ cf_zone_id = "PLACEHOLDER_32_HEX_FROM_CLOUDFLARE_ZONE_LOOKUP"
 
 # v0.1 GCE LB IP — source of truth for apex + legacy records (Plan 02).
 # Static across v1.5; torn down in Phase 53 SUNSET-03.
+#
+# Phase 52 Plan 02 cutover note (2026-04-18):
+#   The apex flip is a HCL edit (dns-prod.tf line 26), NOT a tfvars value swap.
+#   Per .planning/DEPLOY.md Section 3.1:
+#     -  value = var.v01_gce_ip
+#     +  value = google_compute_global_address.nlm_prod_lb_ip[0].address
+#   The legacy record keeps `value = var.v01_gce_ip` (SUNSET-02 30-day warm).
+#   This variable stays populated with the v0.1 IP through Phase 52 + Phase 53
+#   day-45 decommission (scripts/kill-switch.sh revert reads it for rollback).
 v01_gce_ip = "PLACEHOLDER_V01_GCE_IPV4"
 
 # D-16 / D-22 — explicit for clarity even though defaults match.
