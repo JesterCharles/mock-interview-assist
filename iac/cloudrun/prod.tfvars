@@ -25,10 +25,10 @@ uptime_host_prod = "nextlevelmock.com"
 #       underlying `content` from Cloudflare API: see scripts/import-cloudflare-apex.sh)
 #
 # T-47-05 / T-51-03 mitigations: digest-only pull; :latest NEVER appears here.
-initial_image_digest = "sha256:PHASE51_CI_WILL_POPULATE_000000000000000000000000000000000000"
+initial_image_digest = "sha256:be81e0a51ef991c0750d00c45d56b00bb08007b82e935677e19b4d07097dc6b8"
 
 # Cloudflare zone for nextlevelmock.com (same zone as staging — one-time lookup shared).
-cf_zone_id = "PLACEHOLDER_32_HEX_FROM_CLOUDFLARE_ZONE_LOOKUP"
+cf_zone_id = "f0a9741530073e3d64c20b0e8e3ca629"
 
 # v0.1 GCE LB IP — source of truth for apex + legacy records (Plan 02).
 # Static across v1.5; torn down in Phase 53 SUNSET-03.
@@ -41,7 +41,7 @@ cf_zone_id = "PLACEHOLDER_32_HEX_FROM_CLOUDFLARE_ZONE_LOOKUP"
 #   The legacy record keeps `value = var.v01_gce_ip` (SUNSET-02 30-day warm).
 #   This variable stays populated with the v0.1 IP through Phase 52 + Phase 53
 #   day-45 decommission (scripts/kill-switch.sh revert reads it for rollback).
-v01_gce_ip = "PLACEHOLDER_V01_GCE_IPV4"
+v01_gce_ip = "34.54.138.253"
 
 # D-16 / D-22 — explicit for clarity even though defaults match.
 github_repo_slug = "JesterCharles/mock-interview-assist"
