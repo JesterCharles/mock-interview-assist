@@ -371,6 +371,51 @@ gcloud run services describe nlm-prod --region=us-central1 --project=nlm-prod \
   --format='value(template.containers[0].image)'
 ```
 
+## Sunset Window (added Phase 52 D-12)
+
+v1.5 v0.1 decommission is gated through these day-based checkpoints. The window anchors on T-0 (the Phase 52 apex flip). Phase 53 owns the decommission gate.
+
+| Window | Days | State | Gate |
+|--------|------|-------|------|
+| Build | Day 0-14 | v1.5 on `staging.nextlevelmock.com`; load test + hardening signed off | Phases 47-49 complete (SUNSET-01) |
+| Cutover | Day 15-21 | `nextlevelmock.com` apex → prod Cloud Run LB; v0.1 warm behind `legacy.nextlevelmock.com` | Phase 52 complete + `cutover-log-v1.5.md` committed (SUNSET-02) |
+| Warm | Day 22-45 | 30-day rollback window; v0.1 stays fully running; legacy uptime check green | Phase 52 D-13 (v0.1 untouched) + legacy uptime alert quiet |
+| Decommission gate | Day 45 | Phase 53 triggers v0.1 teardown checklist; terraform archive; legacy DNS retired | SUNSET-03 (Phase 53 owns) |
+
+### Kill switch (SUNSET-04)
+
+`scripts/kill-switch.sh revert` flips apex back to `$V01_GCE_IP` in ~2s via the Cloudflare API. Rehearsed in Phase 52 Plan 03 at T+30min. Required env: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `V01_GCE_IP`, `PROD_CLOUDRUN_LB_IP`.
+
+```bash
+# Status only — no mutation
+bash scripts/kill-switch.sh status
+
+# Emergency rollback to v0.1 GCE (apex flip back; ~30-60s DNS propagation)
+bash scripts/kill-switch.sh revert
+
+# Forward back to prod Cloud Run
+bash scripts/kill-switch.sh restore
+
+# Reconcile terraform state after any revert/restore
+terraform -chdir=iac/cloudrun refresh -var-file=prod.tfvars
+```
+
+After a kill-switch revert, operator MUST also run `gcloud run services update-traffic nlm-prod --to-revisions=<previous-digest>=100 --project=nlm-prod` via `rollback-prod.yml` **IF** the rollback is due to a bad prod revision (not a DNS issue). DNS-only rollback does not change which revision prod serves — it changes which origin clients resolve to.
+
+### Monitoring during warm window
+
+- `nextlevelmock.com/api/health` uptime (Phase 48 D-13) — now exercises prod Cloud Run.
+- `legacy.nextlevelmock.com/api/health` uptime (Phase 52 D-14) — monitors v0.1 warm capacity for the 30-day window. Same email alert channel as apex.
+- Both bind to: `jestercharles@gmail.com` (ADMIN_EMAILS Secret Manager secret).
+
+### v0.1 GCE posture during warm (D-13)
+
+Services running. LB alive. SSL cert auto-renewed. **No throttling. No scaling-down.** Cost accepted (~1 e2-small / month for 30 days; ~$7 total). The tradeoff is explicit: the kill-switch path is only viable as long as v0.1 is receiving requests successfully on `legacy.nextlevelmock.com`.
+
+### Phase 52 verification
+
+Run `bash scripts/verify-phase-52.sh` after the T+60min smokes complete. The phase-gate aggregates every Phase 52 must-have (cutover log sections present, apex DNS + health green, kill-switch + legacy uptime artifacts shipped, DEPLOY.md Sunset Window section present, `prod.tfvars` canonical state).
+
 ## Post-Cutover Reminders
 
 - v0.1 GCE stays live on `legacy.nextlevelmock.com` for 30 days (SUNSET-03 countdown starts at T-0).
