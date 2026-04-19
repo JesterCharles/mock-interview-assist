@@ -114,7 +114,8 @@ jobs:
 
       - name: Prisma migrate deploy against prod DIRECT_URL
         env:
-          DATABASE_URL: ${{ steps.secrets.outputs.DIRECT_URL }}
+          # prisma.config.ts reads process.env.DIRECT_URL (not DATABASE_URL).
+          DIRECT_URL: ${{ steps.secrets.outputs.DIRECT_URL }}
         run: npx prisma migrate deploy
 
       # ---- STEP 5: Deploy Cloud Run by digest (D-11 step 3) -------------------------
