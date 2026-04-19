@@ -17,7 +17,9 @@ npm run test     # Run Vitest tests
 npm run test:watch  # Run Vitest in watch mode
 ```
 
-Docker: `docker compose up` (uses `.env.docker`, maps port 80 → 3000).
+## Deploy
+
+Deployed to Cloud Run on GCP. See `.planning/DEPLOY.md`. Env vars live in Google Secret Manager per project. CI: `.github/workflows/pr-checks.yml` + `deploy-staging.yml` + `deploy-prod.yml` + `rollback-prod.yml`. Auth via WIF — no SA keys in repo.
 
 ## Architecture
 
@@ -154,6 +156,9 @@ RLS deployed as defense-in-depth (Phase 20). See PROJECT.md > Database Access Ar
 - **PDF**: @react-pdf/renderer
 - **Email**: Resend
 - **Path alias**: `@/*` maps to `src/*`
+- **Seed data**: @faker-js/faker (devDep, staging seeder per Phase 46)
+- **Load testing**: k6 (loadtest/baseline.js per Phase 49)
+- **CI auth**: google-github-actions/auth + setup-gcloud via WIF (no SA keys in repo)
 
 ## Unified Workflow — Tool Ownership
 

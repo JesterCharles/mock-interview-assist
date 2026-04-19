@@ -2,6 +2,8 @@
 
 An adaptive technical skills development platform that gives associates repeated mock experiences with AI-scored feedback, tracks improvement over time, and surfaces readiness signals to trainers.
 
+Deployed to Cloud Run on GCP. See [DEPLOY.md](.planning/DEPLOY.md).
+
 ## Features
 
 - **Trainer-led interviews** — Setup wizard (`/interview/new`) configures GitHub-sourced question banks with weighted technologies, voice input via Web Speech API, keyword tracking, soft skills assessment, LLM scoring (GPT-4o-mini via LangGraph)
@@ -59,7 +61,9 @@ npm run test:watch   # Vitest in watch mode
 
 Playwright E2E specs live under `tests/e2e/` and `tests/visual/phase-*/`; run via `npx playwright test --config <config>`.
 
-## Docker
+## Docker (Local Dev Only)
+
+For local development against Dockerized Judge0 (see "Coding Challenges — Local Dev" below). Production runs on Cloud Run; see [DEPLOY.md](.planning/DEPLOY.md).
 
 ```bash
 docker compose up    # Uses .env.docker, maps port 80 -> 3000
