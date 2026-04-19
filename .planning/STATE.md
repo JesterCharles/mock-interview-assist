@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: "Production Migration: Cloud Run + Supabase Hybrid"
-status: milestone-ready-for-ship
-last_updated: "2026-04-19T01:45:00.000Z"
-last_activity: 2026-04-18 -- Phase 53 executed in UNATTENDED mode (4/4 plans fully autonomous; 5 commits — c834d48, 389cabb, 3bdbd9a, 83a2851, cf97b05; ~12min wall; 0 new tests; PIPELINE-REFLECT.md dual v1.4+v1.5 retro + PIPELINE-MAINTAIN.md health 9.2/10 + DEPLOY.md §7/§8/§9 + decommission stub + CLAUDE.md/README.md Cloud Run update + v1.6-seeds.md + verify-phase-53.sh 10/10 PASS). **v1.5 code-complete 36/36 plans; ship gated on operator live-infra queue (P45-52) + review/test/ship stages.**
+status: shipped
+last_updated: "2026-04-19T13:55:00.000Z"
+last_activity: 2026-04-19 -- Milestone SHIPPED. Phase 52 DNS cutover complete (apex → prod Cloud Run LB 34.107.229.181). PR #11 (v1.5 squash), PR #12 (CI migrate env fix), PR #13 (cutover state alignment) all merged. Uptime checks enabled + green. v0.1 GCE preserved as 30-day rollback via legacy.nextlevelmock.com; day-45 decommission target 2026-06-03.
 progress:
   total_phases: 9
   completed_phases: 9
   total_plans: 36
   completed_plans: 36
   percent: 100
+next_milestone: v1.6 (not yet scoped — run /gsd-new-milestone v1.6)
 ---
 
 # Project State — v1.5 Production Migration

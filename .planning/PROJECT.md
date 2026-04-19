@@ -10,35 +10,35 @@ Associates get consistent, feedback-rich practice reps that adapt to their weakn
 
 ## Current State
 
-**v1.4 shipped 2026-04-18.** v1.0 through v1.4 all shipped on main. v1.5 not yet initialized.
+**v1.5 shipped 2026-04-19.** Apex `nextlevelmock.com` now serves the Cloud Run + Supabase hybrid stack. v0.1 GCE preserved as 30-day rollback target at `legacy.nextlevelmock.com`; day-45 decommission scheduled for 2026-06-03.
 
 - **v1.0 (2026-04-14):** 7 phases, 15 plans, 22 requirements. Prisma + Supabase foundation, gap scoring, readiness classification, trainer dashboard, adaptive mock setup.
 - **v1.1 (2026-04-14):** 8 phases (8–15), 22 plans, 14 requirements. Cohorts + curriculum filter + authenticated automated interviews + PIN auth (flag-gated off) + unified DESIGN system (`--nlm-*` deleted). 131 commits, 239/239 vitest.
 - **v1.2 (2026-04-16):** 10 phases (16–25), 26 plans, 30 requirements. Supabase Auth cutover (trainer password + associate magic link), RLS defense-in-depth, two-level app shell, trainer analytics, associate self-dashboard, PDF analytics, PIN removal. 205 commits, 470 tests.
 - **v1.3 (2026-04-18):** 11 phases (26–35 incl. decimal 28.1), 18 plans, 27 requirements. Associate shell unification, accordion sign-in, Profile model, associate data-viz suite, curriculum view, dark-mode sweep, sidebar-primary architecture overhaul, gap-closure wave (P33-35). 524 passing / 4 skipped tests.
 - **v1.4 (2026-04-18):** 9 phases (36-44), 28 plans, 44 requirements. Coding challenges shipped as continuous-practice rep alongside mock interviews. Judge0 multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C#), public+private GitHub challenge bank, Monaco editor UI, `CodingSkillSignal` → `GapScore` integration. Terraform IaC + GitHub Actions deploy workflows scaffolded. 963 passing / 4 skipped tests. Deferred to v1.5: HARD-01/02/03 (live load/abuse/security — require deployed stack).
+- **v1.5 (2026-04-19):** 9 phases (45-53), 36 plans, 47 requirements. Cloud Run + Supabase hybrid migration. Per-env CI/CD via WIF (staging on main push, prod on tag push). k6 load-test baseline + stress scenario (single instance serves 300 VU @ 44% CPU; OpenAI/Supabase pool is the real bottleneck, not Cloud Run). Security hardening (STRIDE + abuse-test 258 attempts, 0 real vulns). Judge0 flag-dark on prod (v1.6 drop-in). Health route updated to treat Judge0 as `disabled` when env unset. 1094 passing / 4 skipped tests. See [v1.5 archive](milestones/v1.5-ROADMAP.md) for full details.
 
-## Current Milestone: v1.5 — Production Migration (Cloud Run + Supabase Hybrid)
+## Next Milestone: v1.6 (not yet scoped)
 
-**Goal:** Migrate NLM from legacy v0.1 GCE to Cloud Run + Supabase hybrid, ship v1.0-v1.4 accumulated code to prod without breaking existing public-interview users, establish staging + CI/CD on tag + k6 load-test baseline, bake Judge0 integration points for v1.6 drop-in.
+Seeds for v1.6 live in `.planning/seeds/`:
+- Judge0 VPC connector + `terraform apply` of `judge0.tf.disabled`
+- Coding challenges flag-flip on prod (`CODING_CHALLENGES_ENABLED=true`)
+- Real Postgres SQL runner (hardened isolation)
+- Day-45 decommission of v0.1 GCE (2026-06-03)
+- F-03 tag regex SemVer validation, F-04 prisma migrate guardrails (v1.5 review follow-ups)
 
-**Target features:**
-- Cloud Run app runtime (staging + prod services), Docker-native for eventual AWS portability
-- Supabase staging = new free-tier project (separate from prod, not branches); Prisma migrate deploy promotion
-- Terraform `iac/cloudrun/` — Cloud Run + Secret Manager + LB + custom domain (separate from Phase 43 `iac/gce-judge0/` reference)
-- GitHub Actions CI/CD: `pr-checks.yml`, `deploy-staging.yml` (on merge to main), `deploy-prod.yml` (on tag `v*`)
-- k6 single-instance load-test baseline in `loadtest/` — concurrent-user ceiling + cost/1k-requests math
-- Cloudflare DNS cutover runbook + 30-day v0.1 GCE rollback (`legacy.nextlevelmock.com`)
-- Judge0 integration points baked in — env vars (`JUDGE0_URL`, `JUDGE0_AUTH_TOKEN`, `CODING_CHALLENGES_ENABLED` flag-dark on prod), facade usage, `judge0.tf.disabled` stub
-- Env-hygiene reset: wipe dirty dev data from existing Supabase "prod" project; reseed staging with demo data; prod reserved for real users only
+Run `/gsd-new-milestone v1.6` to scope formally.
 
-**Key context:**
-- `nextlevelmock.com` has been live on v0.1 GCE — v1.0-v1.4 code never shipped to prod. v1.5 = migration + upgrade, not greenfield.
-- GCP projects: `nlm-prod`, `nlm-staging-493715` (suffix accepted — `nlm-staging` globally taken). Billing `01A910-0C5083-DCCFED`. Supabase staging ref `lzuqbpqmqlvzwebliptj`. DNS: Cloudflare Free on `nextlevelmock.com`.
-- Judge0 IaC deferred to v1.6; integration points only in v1.5. Coding challenges flag-dark on prod.
-- 3-4 week estimate. v1.4 reflect + maintain run at v1.5 ship.
-- Includes HARD-01/02/03 from v1.4 (load test + abuse test + security review, require deployed stack).
-- Hard constraint: Docker-native throughout so eventual AWS migration is config-only. Supabase stays (cloud-agnostic, company-standard).
+## v1.5 Ship-day Findings
+
+Ship via PR #11 (squash) + PR #12 (CI fix) + PR #13 (infra state). Codex review surfaced 14 findings: 1 P0 (`wipe-prod.ts` dual-URL guard) + 3 P1 (docker build args, tag regex, migrate ordering) + 8 P2 + 2 P3. P0/P1 fixed before merge except F-03/F-04 which are v1.6 backlog. Live firing uptime alert on ship day promoted F-05 (`/api/health` 503 when Judge0 flag-dark) to in-scope fix.
+
+Ship-day infra one-offs (out-of-band, documented):
+- `github-actions-deployer` SA needed explicit `roles/secretmanager.secretAccessor` on 5 per-env secrets (Phase 46 missed this binding)
+- Workflow migrate step env var renamed `DATABASE_URL` → `DIRECT_URL` (prisma.config.ts reads DIRECT_URL, not DATABASE_URL)
+- Single-domain `nlm-prod-ssl-cert-www` cert created as a workaround for apex `FAILED_NOT_VISIBLE` pre-cutover (multi-domain cert wouldn't validate until apex DNS pointed at LB)
+- Post-cutover: uptime check reverted to apex `nextlevelmock.com`; alert policy recreated (new id `9281970391756775135`) + enabled
 
 ## Database Access Architecture
 
