@@ -114,3 +114,81 @@ resource "google_monitoring_alert_policy" "uptime" {
     mime_type = "text/markdown"
   }
 }
+
+# ---------- Phase 52 D-14: legacy.nextlevelmock.com uptime check ----------
+# Monitors v0.1 GCE during the 30-day SUNSET-02 warm window (day 22-45 post-
+# cutover). Uses the same email notification channel as apex + staging so a
+# v0.1 outage still pages the operator — v0.1 must stay healthy for the
+# kill-switch rollback path to remain viable.
+#
+# count-gated on env="prod" so staging terraform apply is unaffected.
+# Phase 53 SUNSET-03 removes this resource block as part of v0.1 decommission.
+resource "google_monitoring_uptime_check_config" "legacy" {
+  count = var.env == "prod" ? 1 : 0
+
+  project      = var.project_id
+  display_name = "nlm-prod-legacy-uptime"
+  timeout      = "10s"
+  period       = "60s"
+
+  http_check {
+    path           = "/api/health"
+    port           = 443
+    use_ssl        = true
+    validate_ssl   = true
+    request_method = "GET"
+    # Match apex tolerance: 2xx OR 503 (transient DB-pool hiccup must not page).
+    accepted_response_status_codes {
+      status_class = "STATUS_CLASS_2XX"
+    }
+    accepted_response_status_codes {
+      status_value = 503
+    }
+  }
+
+  monitored_resource {
+    type = "uptime_url"
+    labels = {
+      project_id = var.project_id
+      host       = "legacy.nextlevelmock.com"
+    }
+  }
+}
+
+resource "google_monitoring_alert_policy" "legacy_uptime" {
+  count = var.env == "prod" ? 1 : 0
+
+  project      = var.project_id
+  display_name = "NLM Uptime — legacy v0.1 (SUNSET-02 warm window)"
+  combiner     = "OR"
+
+  conditions {
+    display_name = "legacy.nextlevelmock.com uptime check failed 2 consecutive 60s windows"
+    condition_threshold {
+      filter          = "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" metric.label.check_id=\"${google_monitoring_uptime_check_config.legacy[0].uptime_check_id}\""
+      duration        = "120s"
+      comparison      = "COMPARISON_LT"
+      threshold_value = 1
+      aggregations {
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_FRACTION_TRUE"
+        cross_series_reducer = "REDUCE_COUNT_FALSE"
+        group_by_fields      = ["resource.label.host"]
+      }
+      trigger {
+        count = 1
+      }
+    }
+  }
+
+  notification_channels = [google_monitoring_notification_channel.email.name]
+
+  alert_strategy {
+    auto_close = "1800s"
+  }
+
+  documentation {
+    content   = "legacy.nextlevelmock.com /api/health failed 2x. v0.1 GCE is the 30-day rollback target (SUNSET-02). If this fires, the kill-switch revert path may be degraded. Investigate v0.1 GCE health before Phase 53 day-45 decommission."
+    mime_type = "text/markdown"
+  }
+}
