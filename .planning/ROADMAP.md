@@ -97,7 +97,7 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 - [ ] **Phase 49: k6 Load Test + Hardening (HARD-01..03)** - Baseline load report committed; abuse test + STRIDE review against live staging
 - [ ] **Phase 50: Judge0 Integration Points + Flag Audit** - Env vars plumbed, flag-dark on prod, .disabled stub, gce-judge0 labeled
 - [ ] **Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Runbook** - Prod service provisioned, deploy-on-tag + rollback wired, DNS records set
-- [ ] **Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch** - Cloudflare A-record swap, session continuity verified, legacy.nextlevelmock.com live
+- [ ] **Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch** - Cloudflare A-record swap, session continuity verified, legacy.nextlevelmock.com live (code-complete 2026-04-18; 4/4 plans shipped artifacts, all halted on human-present operator gates — cutover, rehearsal, smokes, tag)
 - [ ] **Phase 53: Reflect + Maintain + Runbook Finalization + Decommission Plan** - v1.4 retro, maintain sweep, DEPLOY.md complete, CLAUDE.md updated, v0.1 teardown checklist
 
 ## Phase Details
