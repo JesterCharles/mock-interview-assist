@@ -12,6 +12,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SCRIPT = path.join(REPO_ROOT, 'scripts', 'verify-env-hygiene.ts');
+const TSX_BIN = path.join(REPO_ROOT, 'node_modules', '.bin', 'tsx');
 const PROD_REF_FIXTURE = 'prodref123abc';
 
 function runInTempDir(
@@ -23,7 +24,7 @@ function runInTempDir(
     if (v === undefined) delete merged[k];
     else merged[k] = v;
   }
-  return spawnSync('npx', ['--no-install', 'tsx', SCRIPT], {
+  return spawnSync(TSX_BIN, [SCRIPT], {
     cwd: tempDir,
     env: merged,
     encoding: 'utf8',
