@@ -101,7 +101,8 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-# Start the application
-# Applies any pending Prisma migrations against DIRECT_URL before starting the Next server (D-04).
-# DIRECT_URL must be set at runtime via docker compose / env — migrations use port 5432 (not pooler).
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Start the application.
+# Migrations run out-of-band (CI deploy-staging.yml / deploy-prod.yml do `prisma migrate deploy`
+# before pushing the new revision). Running migrate in the container CMD breaks on cold start
+# because Next.js standalone bundle doesn't include prisma's transitive deps (e.g. `effect`).
+CMD ["node", "server.js"]
