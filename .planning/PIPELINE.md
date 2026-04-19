@@ -1,9 +1,9 @@
 # Pipeline Status
 
-## Current Run — v1.5 (PLAN done → EXECUTE next)
+## Current Run — v1.5 (EXECUTE done → REVIEW/TEST/SHIP pending)
 - Started: 2026-04-18
-- Current stage: PLAN **done** 2026-04-18 → ready for EXECUTE (`/gsd-execute-phase 45` or `/pipeline-coordinator --resume`)
-- **Plans:** 36 across 9 phases (45-53); all frontmatter + structure valid; Wave B (46 ∥ 50) parallelizable. Full summary at `.planning/PIPELINE-PLAN.md`.
+- Current stage: **EXECUTE done 2026-04-18** — all 9 phases (45-53) code-complete on `chore/v1.5-archive-v1.4`; 36/36 plans shipped. Reflect + maintain done at Phase 53. Next stages: **review + test + ship** (all gated on operator live-infra queue from P45-52, then fresh-session codex run).
+- **Plans:** 36 / 36 code-complete. Milestone status: **code-complete, ship pending operator live queue + review/test/ship stages**. Full summary at `.planning/PIPELINE-PLAN.md`.
 - Mode: sync HITL (user-present, interactive approvals)
 - Previous: v1.4 shipped 2026-04-18 (PR #7 squash-merged). v1.4 reflect + maintain **deferred** — will run at v1.5 ship
 - **Chosen approach:** Approach C Hybrid — **Cloud Run + Supabase** migration from live v0.1 GCE (`nextlevelmock.com`). Judge0 deferred to v1.6. Staging + CI/CD + k6 load-test baseline are P0. 3-4 week estimate.
@@ -53,19 +53,19 @@ nextlevelmock.com has been LIVE on v0.1 GCE serving public-interview users this 
 - `/gsd-plan-phase 36` — Data Model & Schema (CodingChallenge/CodingAttempt/CodingTestCase/CodingSkillSignal + idempotent migration)
 - Then sequential: 37 (Challenge Bank) → 38 (Judge0 spike GATE) → 39 (Submission API) → 40-44
 
-## Stages (v1.5 — current)
+## Stages (v1.5 — current — CODE-COMPLETE, ship pending)
 | Stage | Status | Started | Completed | Notes |
 |-------|--------|---------|-----------|-------|
 | discover | **done** | 2026-04-18 | 2026-04-18 | Hybrid approach chosen (Cloud Run + Supabase). PIPELINE-DISCOVER.md + seeds + memory |
 | init | **done** | 2026-04-18 | 2026-04-18 | PROJECT.md + STATE.md + REQUIREMENTS.md (47 reqs, 11 themes) + ROADMAP.md (9 phases 45-53). Commits 942007c + 3365f03 + f4bf08d |
 | design | skipped | | | DevOps milestone, no UI surfaces |
 | plan | **done** | 2026-04-18 | 2026-04-18 | All 9 phases planned, 36 plans total. Waves A-H defined (Wave B = 46 ∥ 50). `.planning/PIPELINE-PLAN.md` is the summary. Commit range 4354d7c…48aff11. Multi-lens review deferred to Phase 49 codex adversarial-review + Phase 53 retro |
-| execute | pending | | | Next: `/gsd-execute-phase 45` or `/pipeline-coordinator --resume` |
-| review | pending | | | |
-| test | pending | | | Includes k6 load-test baseline (P0 deliverable) |
-| ship | pending | | | PR + merge gate at milestone end. DNS cutover from v0.1 GCE |
-| reflect | pending | | | Also covers v1.4 reflect (deferred) |
-| maintain | pending | | | Also covers v1.4 maintain (deferred). v0.1 GCE decommission runbook |
+| execute | **done** | 2026-04-18 | 2026-04-18 | All 9 phases 45-53 code-complete on `chore/v1.5-archive-v1.4`. 36/36 plans shipped. Per-phase gates 45-53 all PASS. Phases 45-52 have ~20 operator live-infra gates pending (non-code); Phase 53 fully autonomous closed the milestone |
+| review | pending | | | Needs live staging stack + `/cso` + `codex review` + `codex adversarial-review` on fresh Claude session (Phase 49-04 deferred) |
+| test | pending | | | Includes k6 load-test baseline (P0 deliverable) + abuse-test artifact + 4 RLS skipped tests un-skip after staging reseed |
+| ship | pending | | | PR + merge gate at milestone end. DNS cutover from v0.1 GCE per DEPLOY.md §1-9 |
+| reflect | **done** | 2026-04-18 | 2026-04-18 | Phase 53 Plan 01: PIPELINE-REFLECT.md dual v1.4+v1.5 + second-brain notes. Also covers v1.4 reflect (deferred) |
+| maintain | **done** | 2026-04-18 | 2026-04-18 | Phase 53 Plan 01: PIPELINE-MAINTAIN.md health_score 9.2/10. Phase 53 Plan 02: DEPLOY.md §9 + decommission-checklist-v01.md + scripts/decommission-v01.sh stub (day-45 target 2026-06-02) |
 
 ## HITL Gates (v1.5)
 | Gate | Stage | Type | Status | Decision |

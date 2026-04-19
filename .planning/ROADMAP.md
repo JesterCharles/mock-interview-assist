@@ -7,7 +7,7 @@
 - **v1.2 Analytics & Auth Overhaul** -- Phases 16-25, 26 plans, 30 reqs (shipped 2026-04-16) | [Archive](milestones/v1.2-ROADMAP.md)
 - **v1.3 UX Unification & Polish** -- Phases 26-35, 18 plans, 27 reqs (shipped 2026-04-18) | [Archive](milestones/v1.3-ROADMAP.md)
 - **v1.4 Coding Challenges + Multi-Language Sandbox** -- Phases 36-44, 28 plans, 44 reqs (shipped 2026-04-18) | [Archive](milestones/v1.4-ROADMAP.md)
-- **v1.5 Production Migration (Cloud Run + Supabase Hybrid)** -- Phases 45-53 (in progress)
+- **v1.5 Production Migration (Cloud Run + Supabase Hybrid)** -- Phases 45-53, 36 plans, 47 reqs (**code-complete 2026-04-18**, ship pending operator live-infra queue + review/test/ship stages; health 9.2/10, 1085 tests passing, health gate 10/10 PASS)
 
 ## Phases
 
@@ -253,15 +253,15 @@ Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- 
 | 16-25. Analytics & Auth | v1.2 | 26/26 | Complete | 2026-04-16 |
 | 26-35. UX Unification & Polish | v1.3 | 18/18 | Complete | 2026-04-18 |
 | 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 28/28 | Complete | 2026-04-18 |
-| 45. Terraform Skeleton + Artifact Registry + Secret Manager | v1.5 | 4/4 | Complete   | 2026-04-18 |
-| 46. Supabase Staging + Env Hygiene + Prisma Migrate Baseline | v1.5 | 0/? | Not started | - |
-| 47. Staging Cloud Run Service + Load Balancer + Domains | v1.5 | 0/? | Not started | - |
-| 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 0/? | Not started | - |
-| 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 0/4 | Planned | - |
-| 50. Judge0 Integration Points + Flag Audit | v1.5 | 0/4 | Planned | - |
-| 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 0/4 | Planned | - |
-| 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 0/? | Not started | - |
-| 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 0/4 | Planned | - |
+| 45. Terraform Skeleton + Artifact Registry + Secret Manager | v1.5 | 4/4 | Complete (docker smoke deferred) | 2026-04-18 |
+| 46. Supabase Staging + Env Hygiene + Prisma Migrate Baseline | v1.5 | 4/4 | Code-complete (3 operator gates pending) | 2026-04-18 |
+| 47. Staging Cloud Run Service + Load Balancer + Domains | v1.5 | 4/4 | Code-complete (4 operator gates pending) | 2026-04-18 |
+| 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 4/4 | Code-complete (3 operator gates pending) | 2026-04-18 |
+| 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 4/4 | Code-complete (3 live-resume items pending) | 2026-04-18 |
+| 50. Judge0 Integration Points + Flag Audit | v1.5 | 4/4 | Complete (fully autonomous) | 2026-04-18 |
+| 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 4/4 | Code-complete (4 operator gates pending) | 2026-04-18 |
+| 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 4/4 | Code-complete (4 human-present cutover gates pending) | 2026-04-19 |
+| 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 4/4 | Complete (fully autonomous, gate 10/10 PASS) | 2026-04-18 |
 
 ## Backlog
 
