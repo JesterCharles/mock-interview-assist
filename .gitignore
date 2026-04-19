@@ -58,3 +58,4 @@ test-results/.last-run.json
 iac/gce-judge0/.terraform.lock.hcl
 iac/gce-judge0/.terraform/
 iac/gce-judge0/terraform.tfstate*
+prod-pre-wipe-*.dump
