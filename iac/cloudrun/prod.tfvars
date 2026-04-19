@@ -3,8 +3,13 @@ project_id = "nlm-prod"
 env        = "prod"
 region     = "us-central1"
 
-# Phase 48 — uptime check target (defaults already correct)
-uptime_host_prod = "nextlevelmock.com"
+# Phase 48 / F-UPTIME-02 — uptime check target.
+# Phase 52 cutover flips this back to "nextlevelmock.com" (apex). Until then,
+# apex still points at v0.1 GCE which never had /api/health, so the uptime
+# check hits Cloud Run directly to reflect real app health.
+# On cutover day: set this back to "nextlevelmock.com" and
+#   terraform apply -var-file=prod.tfvars -target=google_monitoring_uptime_check_config.health
+uptime_host_prod = "nlm-prod-609812564722.us-central1.run.app"
 
 # Phase 51 additions (Plan 01 + Plan 02)
 #

@@ -208,6 +208,30 @@ git commit -m "feat(52-01): flip apex nextlevelmock.com from v0.1 GCE to prod Cl
 git push
 ```
 
+### 3.4 Revert the apex uptime-check override (F-UPTIME-02)
+
+During the v0.1 warm window the prod uptime check was pointed at the Cloud Run
+direct URL (`nlm-prod-<hash>.us-central1.run.app`) because apex still resolved
+to v0.1 GCE which never had `/api/health`. Post-cutover apex resolves to Cloud
+Run, so revert the override to monitor the user-facing hostname + Cloudflare
+edge path end-to-end.
+
+```diff
+ # iac/cloudrun/prod.tfvars
+-uptime_host_prod = "nlm-prod-609812564722.us-central1.run.app"
++uptime_host_prod = "nextlevelmock.com"
+```
+
+```bash
+cd iac/cloudrun
+terraform apply -var-file=prod.tfvars \
+  -target=google_monitoring_uptime_check_config.health \
+  -auto-approve
+```
+
+Verify via `gcloud monitoring uptime list-configs --project=nlm-prod` that
+the prod check's host is now `nextlevelmock.com`. Commit the tfvars edit.
+
 ## Section 4: Verification (T+5min)
 
 ### 4.1 DNS propagation
