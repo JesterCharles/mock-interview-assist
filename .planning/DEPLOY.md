@@ -421,3 +421,101 @@ Run `bash scripts/verify-phase-52.sh` after the T+60min smokes complete. The pha
 - v0.1 GCE stays live on `legacy.nextlevelmock.com` for 30 days (SUNSET-03 countdown starts at T-0).
 - Lower apex TTL back to Auto after 7 days of green (reduces Cloudflare query volume).
 - Phase 53 handles decommissioning v0.1 GCE + archival of this runbook's v1.5 version.
+
+## 7. Secret Rotation
+
+Rotate a secret without downtime. Cloud Run loads secrets at revision-deploy time, so rotation = new secret version + new revision.
+
+### Rotate a secret (both envs)
+
+1. Generate the new secret value (provider dashboard, `openssl rand`, etc.).
+2. Add the new version to Secret Manager:
+   ```bash
+   echo -n "<new-value>" | gcloud secrets versions add <SECRET_NAME> \
+     --data-file=- \
+     --project=<PROJECT_ID>
+   ```
+3. Deploy a new Cloud Run revision so it picks up the latest version. Either:
+   - Push an empty commit and let `deploy-staging.yml` / `deploy-prod.yml` roll a new revision, OR
+   - Manually: `gcloud run services update nlm-<env> --update-secrets=<ENV_VAR>=<SECRET_NAME>:latest --project=<PROJECT_ID>`
+4. Smoke: `curl -sfI https://<host>/api/health` returns 200.
+5. (Optional) Destroy the old version after 24h soak: `gcloud secrets versions destroy <SECRET_NAME> --version=<OLD_NUM>`.
+
+### Rotation cadence (recommended)
+
+| Secret | Cadence | Trigger |
+|--------|---------|---------|
+| `DATABASE_URL` / `DIRECT_URL` | On Supabase password reset | Supabase dashboard prompt |
+| `SUPABASE_SECRET_KEY` | Quarterly | Calendar reminder |
+| `OPENAI_API_KEY` | On employee offboarding or suspected leak | Ad-hoc |
+| `RESEND_API_KEY` | On suspected leak | Ad-hoc |
+| `JUDGE0_AUTH_TOKEN` | N/A in v1.5 (flag-dark) | v1.6 |
+| WIF provider config | Annually | Calendar |
+
+## 8. Supabase Migration Promotion
+
+How a Prisma schema change travels from `main` → staging → prod.
+
+### Normal flow
+
+1. Developer authors schema change in `prisma/schema.prisma` on a feature branch.
+2. Locally: `npx prisma migrate dev --name <descriptive-name>` against a dev Supabase (or a throwaway local Postgres). Commits the generated migration file under `prisma/migrations/`.
+3. Open PR → `pr-checks.yml` runs `prisma format` + `prisma validate` (no DB apply).
+4. Merge to `main` → `deploy-staging.yml` runs `prisma migrate deploy` against the staging `DIRECT_URL` as a pre-deploy step. If it fails, the deploy aborts.
+5. Staging smoke + manual validation.
+6. Cut release tag `v*` → `deploy-prod.yml` runs `prisma migrate deploy` against prod `DIRECT_URL` (same migration file). Same failure behavior.
+
+### Emergency rollback
+
+Schema changes are **forward-only**. If a migration breaks prod:
+1. Immediately revert the app via `rollback-prod.yml` (Cloud Run revision swap) — app on old image keeps working against new schema IF the schema change was additive.
+2. If the schema change was destructive (DROP COLUMN, etc.) and the old revision can't read the new schema, manual recovery is required: restore the pre-migration `pg_dump` from the Phase 46 backup bucket. This is a last resort and implies data loss for writes since the migration.
+
+### Additive-only policy
+
+Per the Phase 46 migrate-deploy baseline, schema changes should be additive (ADD COLUMN, CREATE TABLE, CREATE INDEX). Destructive changes (DROP COLUMN, RENAME TABLE) require a two-step migration:
+- v*.a: Add new column, dual-write from app.
+- v*.b (next milestone): Drop old column once all readers have migrated.
+
+## 9. v0.1 Sunset + Day-45 Teardown Checklist
+
+**Target teardown date: 2026-06-02** (cutover 2026-04-18 + 45 days).
+
+This section is the authoritative runbook. The standalone file `.planning/decommission-checklist-v01.md` mirrors it for operator sign-off. `scripts/decommission-v01.sh` contains the gcloud commands pre-commented — operator uncomments one block per step.
+
+### Preconditions (gate before any delete)
+
+- 30-day warm window elapsed without a rollback event (check Phase 48 uptime history on `legacy.nextlevelmock.com`).
+- Prod Cloud Run uptime >= 99% over the past 30 days.
+- No outstanding kill-switch requests in issue tracker.
+- A fresh `pg_dump` of the prod Supabase taken within 24h of teardown (belt-and-suspenders; prod Supabase is untouched by teardown).
+
+### Step-by-step teardown (9 steps)
+
+1. **Confirm 30-day warm window elapsed without rollback.** Check Phase 48 uptime history on `legacy.nextlevelmock.com` and Cloudflare analytics on legacy traffic. No rollback event recorded.
+2. **Delete the legacy app VM:**
+   ```bash
+   gcloud compute instances delete nlm-app-vm --zone=us-central1-a --project=<v0.1-project-id> --quiet
+   ```
+3. **Delete the legacy Judge0 VM:**
+   ```bash
+   gcloud compute instances delete judge0-vm --zone=us-central1-a --project=<v0.1-project-id> --quiet
+   ```
+4. **Delete legacy forwarding rule (load balancer):**
+   ```bash
+   gcloud compute forwarding-rules delete <legacy-LB-rule-name> --region=us-central1 --project=<v0.1-project-id> --quiet
+   ```
+5. **Release legacy static IP:**
+   ```bash
+   gcloud compute addresses release <legacy-IP-name> --region=us-central1 --project=<v0.1-project-id>
+   ```
+6. **Remove `legacy.nextlevelmock.com` DNS record.** Cloudflare dashboard → DNS → delete the A record. (OR terraform-managed: remove the resource from `iac/cloudrun/dns-prod.tf` and `terraform apply`.)
+7. **Remove the legacy uptime check from Cloud Monitoring.** Cloud Console → Monitoring → Uptime Checks → delete the check targeting `legacy.nextlevelmock.com`. This stops paging on the now-torn-down service.
+8. **Archive / retain `iac/gce-judge0/`.** Per Phase 50 D-13 decision: **retain as a v1.6 reference template.** Do NOT delete; the README in that directory already labels it as a reference, not active infrastructure.
+9. **Update project docs to remove v0.1 references.** Open PRs against `.planning/STATE.md` and `.planning/PROJECT.md` removing "v0.1 GCE" language. Commit as `docs(v0.1-sunset): remove v0.1 references post-teardown`.
+
+### Post-teardown
+
+- Tick the sign-off line in `.planning/decommission-checklist-v01.md`: `Executed by: <name> on <date>`.
+- Close the milestone v1.5 retrospective action item tracking v0.1 teardown.
+- Announce internally (email / Slack) that legacy GCE is off.
