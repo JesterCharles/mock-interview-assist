@@ -40,8 +40,18 @@ COPY . .
 # prisma/schema.prisma is included via COPY . . above
 RUN npx prisma generate
 
-# Build the Next.js application
-# Note: We build without secrets - they will be provided at runtime
+# NEXT_PUBLIC_* values must be present at build time because Next.js inlines them
+# into both server and client bundles during `next build`. Pass per-env values via
+# --build-arg when running docker build.
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
+# Build the Next.js application.
+# Server-only secrets (OPENAI_API_KEY, DATABASE_URL, etc.) come from runtime env.
 RUN npm run build
 
 # -----------------------------------------------------------------------------
