@@ -15,6 +15,8 @@ import {
   SolveWorkspace,
   type ChallengeDetail,
 } from '@/components/coding/SolveWorkspace';
+import { CodingComingSoon } from '@/components/coding/CodingComingSoon';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
 // Phase 42 §D-07/D-08: the SQL dialect label (`SQL_DIALECT_LABEL`) is rendered
 // inside SolveWorkspace via `isSqlDialectChallenge`. The header markup lives
 // in the client component so the label sits adjacent to the title without
@@ -30,6 +32,21 @@ export default async function CodingSolvePage({ params }: CodingSolvePageProps) 
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
     redirect('/signin');
+  }
+
+  // Phase 50 (JUDGE-INTEG-02 / D-08): server-side flag short-circuit.
+  if (!isCodingEnabled()) {
+    const backHref =
+      caller.kind === 'associate' ? `/associate/${caller.associateSlug}` : '/dashboard';
+    const comingSoon = <CodingComingSoon backHref={backHref} />;
+    if (caller.kind === 'associate') {
+      return (
+        <AssociateShell slug={caller.associateSlug} cohortName={null}>
+          {comingSoon}
+        </AssociateShell>
+      );
+    }
+    return <AppShell>{comingSoon}</AppShell>;
   }
 
   const hdrs = await headers();

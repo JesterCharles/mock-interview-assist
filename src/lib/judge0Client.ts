@@ -18,10 +18,12 @@
  */
 
 import {
+  CodingFeatureDisabledError,
   Judge0ConfigError,
   Judge0UnavailableError,
   UnsupportedLanguageError,
 } from './judge0Errors';
+import { isCodingEnabled } from './codingFeatureFlag';
 
 // ---------------------------------------------------------------------------
 // Language allowlist (D-14)
@@ -133,6 +135,13 @@ async function withRetry<T>(fn: () => Promise<T>, backoffMs = 1000): Promise<T> 
  *   - Judge0UnavailableError: 4xx (no retry) or 2 consecutive 5xx/timeout
  */
 export async function submit(opts: SubmitOptions): Promise<{ token: string }> {
+  // Phase 50 (JUDGE-INTEG-02 / D-04): fires BEFORE language + env validation
+  // so the placeholder JUDGE0_URL/JUDGE0_AUTH_TOKEN values (v1.5 Secret
+  // Manager content) never surface as Judge0ConfigError when the feature is
+  // flag-dark. Defense-in-depth against missed API-route guards.
+  if (!isCodingEnabled()) {
+    throw new CodingFeatureDisabledError();
+  }
   if (!(opts.language in JUDGE0_LANGUAGE_MAP)) {
     throw new UnsupportedLanguageError(opts.language);
   }
@@ -165,6 +174,9 @@ export async function submit(opts: SubmitOptions): Promise<{ token: string }> {
 
 /** Fetch submission result by token. */
 export async function getSubmission(submissionToken: string): Promise<Judge0Submission> {
+  if (!isCodingEnabled()) {
+    throw new CodingFeatureDisabledError();
+  }
   const { url, token } = getEnv();
   return withRetry(async () => {
     const res = await fetch(
@@ -188,6 +200,9 @@ export async function getSubmission(submissionToken: string): Promise<Judge0Subm
  * NO retry — probes must be snappy; one timeout = unreachable.
  */
 export async function systemInfo(timeoutMs = 2000): Promise<Judge0SystemInfo> {
+  if (!isCodingEnabled()) {
+    throw new CodingFeatureDisabledError();
+  }
   const { url, token } = getEnv();
   try {
     const res = await fetch(`${url}/system_info`, {

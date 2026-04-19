@@ -5,7 +5,7 @@
  * idempotent poll + hidden-test shield.
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
 vi.mock('@/lib/identity', () => ({
   getCallerIdentity: vi.fn(),
@@ -80,6 +80,10 @@ function standardAttemptRow(overrides: Partial<{
 describe('GET /api/coding/attempts/[id]', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('Test 1: anonymous → 401 AUTH_REQUIRED', async () => {

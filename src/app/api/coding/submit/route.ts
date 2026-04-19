@@ -25,6 +25,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
+import { codingDisabledResponse } from '@/app/api/coding/_disabledResponse';
 import {
   submit as judge0Submit,
   JUDGE0_LANGUAGE_MAP,
@@ -53,6 +55,13 @@ const SubmitBodySchema = z.object({
 const SUPPORTED_LANGUAGES = Object.keys(JUDGE0_LANGUAGE_MAP) as Judge0Language[];
 
 export async function POST(request: Request): Promise<NextResponse> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): feature-flag gate. Fires BEFORE
+  // identity check, body parse, and all DB reads. When CODING_CHALLENGES_ENABLED
+  // !== 'true' we short-circuit with the canonical 503 + coming-soon body.
+  if (!isCodingEnabled()) {
+    return codingDisabledResponse();
+  }
+
   // 1. Caller identity (early short-circuit for anonymous — avoids unnecessary parsing)
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {

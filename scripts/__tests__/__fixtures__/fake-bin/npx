@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Test stub — replaces `npx` on PATH during verify-migrations.test.ts.
+# Mode toggled via FIXTURE_MODE env var (default: up-to-date).
+case "${FIXTURE_MODE:-up-to-date}" in
+  up-to-date)
+    echo "11 migrations found in prisma/migrations"
+    echo "Database schema is up to date!"
+    exit 0
+    ;;
+  pending)
+    echo "5 migrations found in prisma/migrations"
+    echo "Following migrations have not yet been applied:"
+    exit 0
+    ;;
+  error)
+    echo "Error: P3005 The database schema is not empty" >&2
+    exit 1
+    ;;
+  *)
+    echo "unknown FIXTURE_MODE: ${FIXTURE_MODE}" >&2
+    exit 99
+    ;;
+esac

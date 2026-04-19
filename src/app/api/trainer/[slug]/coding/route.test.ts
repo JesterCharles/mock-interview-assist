@@ -6,7 +6,7 @@
  * coding:% topics exist.
  */
 
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 vi.mock('@/lib/prisma', () => {
   const mockPrisma = {
@@ -51,6 +51,10 @@ const ALLOWED_KEYS = new Set([
 describe('GET /api/trainer/[slug]/coding', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('returns 401 when caller is anonymous', async () => {

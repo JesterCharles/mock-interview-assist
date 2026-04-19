@@ -8,7 +8,7 @@
  * Asserts the hidden-test shield (Test 14) and the no-wait-true contract (Test 12).
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
 // ---------- Mocks (must be set up BEFORE module import) ----------
 vi.mock('@/lib/identity', () => ({
@@ -126,6 +126,13 @@ function happyPathSetup(overrides: Partial<{
 describe('POST /api/coding/submit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Phase 50 (JUDGE-INTEG-02): default flag ON for existing happy-path tests.
+    // Flag-off scenarios are in the dedicated Phase 50 describe block below.
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('Test 1: anonymous caller → 401 AUTH_REQUIRED', async () => {
@@ -455,5 +462,54 @@ describe('POST /api/coding/submit', () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  // ---------- Phase 50 (JUDGE-INTEG-02) — flag-off short-circuit ----------
+  describe('Phase 50 — CODING_CHALLENGES_ENABLED gating', () => {
+    it('returns 503 + coming-soon body when flag is "false" (before identity check)', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      happyPathSetup();
+
+      const res = await POST(buildRequest({
+        challengeId: 'ch-1',
+        language: 'python',
+        code: 'print(1)',
+      }) as any);
+
+      expect(res.status).toBe(503);
+      const body = await res.json();
+      expect(body).toEqual({
+        enabled: false,
+        message: 'Coding challenges coming soon. Check back later!',
+      });
+      // Guard fired BEFORE identity check — getCallerIdentity never called.
+      expect(getCallerIdentity as unknown as Mock).not.toHaveBeenCalled();
+      // Guard fired BEFORE DB — findUnique never called.
+      expect(prisma.codingChallenge.findUnique as unknown as Mock).not.toHaveBeenCalled();
+    });
+
+    it('returns 503 when flag is unset/empty', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', '');
+      happyPathSetup();
+
+      const res = await POST(buildRequest({
+        challengeId: 'ch-1',
+        language: 'python',
+        code: 'print(1)',
+      }) as any);
+      expect(res.status).toBe(503);
+    });
+
+    it('returns 503 when flag is uppercase "TRUE" (strict case-sensitive)', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'TRUE');
+      happyPathSetup();
+
+      const res = await POST(buildRequest({
+        challengeId: 'ch-1',
+        language: 'python',
+        code: 'print(1)',
+      }) as any);
+      expect(res.status).toBe(503);
+    });
   });
 });

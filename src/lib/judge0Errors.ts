@@ -26,3 +26,15 @@ export class Judge0ConfigError extends Error {
     super(`Judge0 config missing: ${missing}`);
   }
 }
+
+/**
+ * Phase 50 (JUDGE-INTEG-02 / D-04): thrown by every judge0Client.ts +
+ * codingAttemptPoll.ts export when CODING_CHALLENGES_ENABLED !== 'true'.
+ * API routes catch this and map to HTTP 503 with the "coming soon" body.
+ */
+export class CodingFeatureDisabledError extends Error {
+  readonly name = 'CodingFeatureDisabledError';
+  constructor(message = 'Coding challenges are currently disabled') {
+    super(message);
+  }
+}

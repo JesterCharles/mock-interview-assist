@@ -319,4 +319,34 @@ describe('SubmitBar', () => {
     expect(btn).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  // Phase 50 (JUDGE-INTEG-02 / D-05): flag-dark 503 → FEATURE_DISABLED
+  it('Phase 50: 503 + {enabled:false} body surfaces FEATURE_DISABLED via onError', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      headers: { get: () => null },
+      json: async () => ({
+        enabled: false,
+        message: 'Coding challenges coming soon. Check back later!',
+      }),
+    });
+    const onError = vi.fn();
+    render(
+      <SubmitBar
+        challengeId="c1"
+        language="python"
+        code="x=1"
+        onAttemptStarted={() => {}}
+        onError={onError}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+    });
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    const err = onError.mock.calls[0][0];
+    expect(err.code).toBe('FEATURE_DISABLED');
+    expect(err.message).toMatch(/coming soon/i);
+  });
 });

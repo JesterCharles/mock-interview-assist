@@ -6,7 +6,8 @@
 - **v1.1 Cohort Readiness System** -- Phases 8-15, 22 plans, 14 reqs (shipped 2026-04-14) | [Archive](milestones/v1.1-ROADMAP.md)
 - **v1.2 Analytics & Auth Overhaul** -- Phases 16-25, 26 plans, 30 reqs (shipped 2026-04-16) | [Archive](milestones/v1.2-ROADMAP.md)
 - **v1.3 UX Unification & Polish** -- Phases 26-35, 18 plans, 27 reqs (shipped 2026-04-18) | [Archive](milestones/v1.3-ROADMAP.md)
-- **v1.4 Coding Challenges + Multi-Language Sandbox** -- Phases 36-44, 44 reqs (planning, initialized 2026-04-18)
+- **v1.4 Coding Challenges + Multi-Language Sandbox** -- Phases 36-44, 28 plans, 44 reqs (shipped 2026-04-18) | [Archive](milestones/v1.4-ROADMAP.md)
+- **v1.5 Production Migration (Cloud Run + Supabase Hybrid)** -- Phases 45-53, 36 plans, 47 reqs (**code-complete 2026-04-18**, ship pending operator live-infra queue + review/test/ship stages; health 9.2/10, 1085 tests passing, health gate 10/10 PASS)
 
 ## Phases
 
@@ -70,146 +71,178 @@
 
 </details>
 
-### v1.4 Coding Challenges + Multi-Language Sandbox (Planning, Phases 36-44)
+<details>
+<summary>v1.4 Coding Challenges + Multi-Language Sandbox (Phases 36-44) -- SHIPPED 2026-04-18</summary>
 
-**Approach:** B — MSA-from-day-1 | **Estimate:** 8-10 weeks | **Requirements:** 44 | **Source:** `.planning/PIPELINE-DISCOVER.md`
+- [x] Phase 36: Data Model & Schema (3/3 plans) -- completed 2026-04-18
+- [x] Phase 37: Challenge Bank Contract & Loader (3/3 plans) -- completed 2026-04-18
+- [x] Phase 38: Judge0 Infrastructure -- SPIKE GATE (3/3 plans) -- completed 2026-04-18
+- [x] Phase 39: Execution API (Server-Side) (3/3 plans) -- completed 2026-04-18
+- [x] Phase 40: UI MVP (4/4 plans) -- completed 2026-04-18
+- [x] Phase 41: GapScore Integration & Trainer Visibility (3/3 plans) -- completed 2026-04-18
+- [x] Phase 42: SQL MVP (SQLite Only) (2/2 plans) -- completed 2026-04-18
+- [x] Phase 43: MSA Deployment (Terraform + CI/CD) (4/4 plans) -- completed 2026-04-18
+- [x] Phase 44: Hardening + Load Test (3/3 plans) -- completed 2026-04-18
 
-Adds coding challenges as a continuous-practice rep type alongside mock interviews. Judge0-based multi-language sandbox (Python, JS/TS, Java, SQL-SQLite, C# Mono), GitHub-loaded challenge bank (public prompts, private hidden tests), and `CodingSkillSignal` mapping into the existing GapScore engine. MSA-from-day-1 deployment (dedicated Judge0 host + Terraform IaC + GitHub Actions CI/CD) folds in deferred DEPLOY-01/02/03 backlog as part of meaningful product work.
+Deferred to v1.5: HARD-01/02/03 (live load test, abuse test, security review -- require deployed stack). See [archive](milestones/v1.4-ROADMAP.md) for full phase details.
 
-#### Phase 36: Data Model & Schema
-**Goal**: Prisma models for coding challenges, attempts, test cases, and skill signals — plus idempotent migration and signal→GapScore mapping unit-tested
-**Depends on**: v1.3 shipped
-**Requirements**: CODING-MODEL-01..06
-**Success**: `prisma migrate deploy` clean on existing DB; signal-to-GapScore pure function has unit tests covering all signal types; generated client exports new models
-**Estimate**: ~1 week, 2-3 plans
+</details>
 
-**Plans:** 3/3 plans complete
+### v1.5 Production Migration: Cloud Run + Supabase Hybrid (Phases 45-53)
 
-Plans:
-- [x] 36-01-PLAN.md — Prisma schema: 4 coding models + back-relations (Wave 1)
-- [x] 36-02-PLAN.md — Hand-written idempotent migration + smoke test (Wave 2)
-- [x] 36-03-PLAN.md — codingSignalService + Vitest suite (Wave 2)
+- [x] **Phase 45: Terraform Skeleton + Artifact Registry + Secret Manager** - Provision IaC foundation (no Cloud Run services yet) (completed 2026-04-18)
+- [ ] **Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline** - Isolated staging Supabase project, prod wipe + reseed, migrate deploy wired
+- [ ] **Phase 47: Staging Cloud Run Service + Load Balancer + Domains** - Staging service live at staging.nextlevelmock.com; WIF auth for GH Actions
+- [ ] **Phase 48: GitHub Actions CI + Deploy-Staging + Observability** - PR checks, auto-deploy on merge, structured logs, dashboards, uptime alert (code-complete 2026-04-18; 1/4 fully done [48-03], 3/4 halted on operator apply/live-run gates)
+- [ ] **Phase 49: k6 Load Test + Hardening (HARD-01..03)** - Baseline load report committed; abuse test + STRIDE review against live staging
+- [ ] **Phase 50: Judge0 Integration Points + Flag Audit** - Env vars plumbed, flag-dark on prod, .disabled stub, gce-judge0 labeled
+- [ ] **Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Runbook** - Prod service provisioned, deploy-on-tag + rollback wired, DNS records set
+- [ ] **Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch** - Cloudflare A-record swap, session continuity verified, legacy.nextlevelmock.com live (code-complete 2026-04-18; 4/4 plans shipped artifacts, all halted on human-present operator gates — cutover, rehearsal, smokes, tag)
+- [ ] **Phase 53: Reflect + Maintain + Runbook Finalization + Decommission Plan** - v1.4 retro, maintain sweep, DEPLOY.md complete, CLAUDE.md updated, v0.1 teardown checklist
 
-#### Phase 37: Challenge Bank Contract & Loader
-**Goal**: Trainers author coding challenges in GitHub repos (public prompts + private hidden tests); app loader fetches, validates, caches
-**Depends on**: Phase 36
-**Requirements**: CODING-BANK-01..05
-**Success**: Challenge authored in repo appears in app within 5 min; validation rejects malformed challenges; hidden tests never appear in public API responses
-**Estimate**: ~1 week, 2-3 plans
+## Phase Details
 
-**Plans:** 3 plans in 3 waves
-
-Plans:
-- [ ] 37-01-PLAN.md — Repo schema docs + Zod schemas + loader skeleton (Wave 1)
-- [ ] 37-02-PLAN.md — Public/private fetch + ETag cache + idempotent DB sync (Wave 2)
-- [ ] 37-03-PLAN.md — Trainer-only POST /api/coding/bank/refresh (Wave 3)
-
-#### Phase 38: Judge0 Infrastructure (Local + Remote-Ready) — SPIKE GATE
-**Goal**: Judge0 stack pinned, hardened, and env-driven so local-mono and remote-MSA deploys are identical code; resource sizing committed from real GCE spike
-**Depends on**: Phase 36 (env wiring only)
-**Requirements**: JUDGE-01..06
-**Success**: 10 concurrent mixed-language submissions on actual GCE VM size complete without queue death; p50/p95 measured; resource caps committed to PROJECT.md before Phase 39
-**Estimate**: ~1.5 weeks, 3 plans (includes spike)
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 38-01-PLAN.md — docker-compose Judge0 stack + env templates + network isolation (Wave 1)
-- [x] 38-02-PLAN.md — judge0Client.ts (locked contract) + /api/health probe (Wave 1)
-- [x] 38-03-PLAN.md — JUDGE-06 spike gate: run on GCE, commit resource limits, BLOCKING Phase 39 (Wave 2)
-
-#### Phase 39: Execution API (Server-Side)
-**Goal**: Auth-gated async submit + poll endpoints with server-side hidden test injection, language allowlist, rate limits, and verdict normalization
-**Depends on**: Phase 37 + Phase 38
-**Requirements**: CODING-API-01..07
-**Success**: End-to-end submit→verdict path works for all 5 languages; hidden test inputs never appear in client responses; rate limits enforced; Judge0 never exposed to browser
-**Estimate**: ~1 week, 3 plans
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 39-01-PLAN.md — Verdict normalizer + rate-limit scope + POST /api/coding/submit (Wave 1)
-- [x] 39-02-PLAN.md — codingAttemptPoll helper + GET /api/coding/attempts/[id] with Zod shield (Wave 2)
-- [x] 39-03-PLAN.md — codingApiErrors library + GET /api/coding/challenges (Wave 3)
-
-#### Phase 40: UI MVP
-**Goal**: Associates browse challenges, solve in Monaco editor, see verdicts clearly — integrated into existing AppShell
-**Depends on**: Phase 39
-**Requirements**: CODING-UI-01..05
-**Success**: `/coding` list + `/coding/[id]` solve page functional for all 5 languages; queued/running/verdict states visible; dark mode compliant; passes design review
-**Estimate**: ~1.5 weeks, 4 plans
-
+### Phase 45: Terraform Skeleton + Artifact Registry + Secret Manager
+**Goal**: The IaC foundation for Cloud Run infrastructure exists and is executable; no Cloud Run services yet but the state backend, image registry, and secret store are ready for the rest of the migration
+**Depends on**: Nothing (first v1.5 phase)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-06, INFRA-07
+**Success Criteria** (what must be TRUE):
+  1. `terraform init && terraform plan` in `iac/cloudrun/` completes with no errors against both GCP projects
+  2. GCS bucket `nlm-tfstate` holds remote state; `terraform state list` shows provisioned resources
+  3. Google Artifact Registry repositories exist in `nlm-staging-493715` and `nlm-prod`; a manually pushed test image is pullable by digest
+  4. All runtime secrets (DATABASE_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, JUDGE0_*) exist in Secret Manager for both projects; no secrets baked into the Dockerfile or image
+  5. `docker build` with the existing Dockerfile produces a runnable standalone Next.js image on Node 22-alpine with no host-package dependencies
 **Plans:** 4/4 plans complete
+  - [x] 45-01-PLAN.md — Bootstrap & skeleton (providers, variables, apis, state, tfvars, README, bootstrap scripts)
+  - [x] 45-02-PLAN.md — Artifact Registry (both projects) + phase45-smoke image push
+  - [x] 45-03-PLAN.md — Secret Manager (13 secrets × 2 projects) + 2 service accounts + per-secret IAM
+  - [x] 45-04-PLAN.md — Dockerfile smoke (INFRA-07, D-15, Option C) + phase gate script
 
-Plans:
-- [x] 40-01-PLAN.md — UI-SPEC gate + Monaco install + nav entry + route shells (Wave 1)
-- [x] 40-02-PLAN.md — /coding list page with filters + cursor pagination + empty states (Wave 2)
-- [x] 40-03-PLAN.md — /coding/[id] solve page: prompt + Monaco editor + submit/run bar (Wave 2)
-- [x] 40-04-PLAN.md — usePollAttempt + VerdictCard + attempt history sidebar + bundle regression (Wave 3)
+### Phase 46: Supabase Staging + Env Hygiene + Prisma Migrate Baseline
+**Goal**: Supabase staging project is fully isolated from prod; the existing prod Supabase is wiped clean and reserved for real users; Prisma migrate deploy runs end-to-end against both envs
+**Depends on**: Phase 45 (Secret Manager must exist to store new keys)
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06
+**Success Criteria** (what must be TRUE):
+  1. Staging Supabase project (`lzuqbpqmqlvzwebliptj`) has its own anon + service-role keys stored in staging Secret Manager; prod keys are absent from any developer machine checkout
+  2. Prod Supabase is wiped (no dirty dev data); a backup is confirmed before the wipe; no test associates, cohorts, or coding attempts remain
+  3. `npx ts-node scripts/seed-staging.ts` runs to completion idempotently and populates staging with demo associates, cohorts, curriculum weeks, sessions, and coding challenges
+  4. `prisma migrate deploy` against staging DIRECT_URL succeeds with all migrations applied; `prisma migrate deploy` against prod DIRECT_URL succeeds identically
+  5. Supabase Auth redirect allowlists are correct per env: staging accepts `staging.nextlevelmock.com/*` + `localhost:3000/*`; prod accepts `nextlevelmock.com/*` only
+**Plans:** 4 plans
+  - [ ] 46-01-PLAN.md — Seed infrastructure (assert-staging-env helper, idempotent Faker+upsert seed-staging.ts, vitest tests, @faker-js/faker devDep)
+  - [ ] 46-02-PLAN.md — Prod backup + wipe (wipe-prod.ts dry-run default, runbook Phases A-F: pg_dump + gsutil upload gate + TRUNCATE + auth admin.deleteUser + migrate deploy + COUNT verify)
+  - [ ] 46-03-PLAN.md — Key population + migrate deploy validation (runbook Phases G-I: 7 secrets × 2 projects, migrate deploy both envs, Secret Manager separation verify) + verify-migrations.sh
+  - [ ] 46-04-PLAN.md — Env hygiene + auth allowlist (ENV-HYGIENE.md, verify-env-hygiene.ts, runbook Phase J: Management API PATCH, verify-phase-46.sh phase-gate)
 
-#### Phase 41: GapScore Integration & Trainer Visibility
-**Goal**: Coding attempts feed GapScore with difficulty-weighted signals; trainer dashboard shows continuous coding skill traceability across all 11 cohort weeks
-**Depends on**: Phase 40
-**Requirements**: CODING-SCORE-01..04
-**Success**: Attempt verdict triggers GapScore recompute within 5 sec; trainer dashboard shows per-associate coding panel; readiness math documented in PROJECT.md + DESIGN.md
-**Estimate**: ~1 week, 3 plans
+### Phase 47: Staging Cloud Run Service + Load Balancer + Domains
+**Goal**: The NLM app runs on Cloud Run at `staging.nextlevelmock.com` with HTTPS; GH Actions can authenticate to GCP without long-lived service-account keys
+**Depends on**: Phase 45 (Artifact Registry + Secret Manager), Phase 46 (staging DB ready)
+**Requirements**: INFRA-04, INFRA-05, CI-04
+**Success Criteria** (what must be TRUE):
+  1. `https://staging.nextlevelmock.com/api/health` returns HTTP 200 with a valid JSON body; managed SSL cert is active
+  2. Cloud Run staging service is deployed from a signed image pulled by digest (never `:latest`); service config shows `min-instances=0, max-instances=10, cpu=1, memory=512Mi, timeout=300s`
+  3. Workload Identity Federation is configured; a test GH Actions workflow run authenticates to GCP and pushes an image without any service-account JSON key in secrets
+  4. A cold-start request to the staging URL (after scale-to-zero) returns a valid response within 30 seconds
+**Plans:** 4 plans
+  - [ ] 47-01-PLAN.md — Cloud Run service (INFRA-04): cloudrun-staging.tf + variables/providers/outputs/tfvars extensions, digest-pinned image, 13-secret mounts, lifecycle.ignore_changes, allUsers invoker IAM
+  - [ ] 47-02-PLAN.md — LB + SSL + DNS (INFRA-05): loadbalancer-staging.tf (7 resources) + dns-staging.tf (Cloudflare A record proxied=false) + README runbook with SSL ACTIVE polling
+  - [ ] 47-03-PLAN.md — WIF + SA bindings + smoke (CI-04): wif.tf pool+provider (both projects, D-14), D-18 role matrix on github-actions-deployer, wif-smoke.yml workflow_dispatch proof
+  - [ ] 47-04-PLAN.md — Phase gate: NEXT_PUBLIC_SITE_URL secret population (D-07), coldstart-probe-staging.sh (SC#4), verify-phase-47.sh aggregator
 
-**Plans:** 3 plans in 3 waves
+### Phase 48: GitHub Actions CI + Deploy-Staging + Observability
+**Goal**: Every PR is gated by automated checks; every merge to main automatically deploys to staging within 5 minutes; structured logs and an uptime alert are active on prod (ready to watch when prod goes live)
+**Depends on**: Phase 47 (staging Cloud Run + WIF must exist)
+**Requirements**: CI-01, CI-02, CI-05, CI-06, OBS-01, OBS-02, OBS-03, OBS-04
+**Success Criteria** (what must be TRUE):
+  1. Opening a PR triggers `pr-checks.yml`; a deliberate typecheck/lint/test failure causes the check to fail and blocks merge
+  2. Merging a commit to `main` triggers `deploy-staging.yml`; within 5 minutes the updated image is live on staging and `/api/health` returns HTTP 200
+  3. `rollback-prod.yml` manual dispatch successfully pins Cloud Run to a previous revision by digest (validated against staging as a rehearsal)
+  4. Cloud Logging shows structured request + error logs for the staging service; a sample error log is queryable by env label
+  5. Cloud Monitoring `NLM Production` dashboard renders request count, p95 latency, error rate, instance count, CPU/memory widgets (populated with staging data)
+  6. `/api/metrics` endpoint exists and returns a Prometheus-compatible text response (even if zero-valued); uptime check is configured and would email `jestercharles@gmail.com` on failure
+**Plans:** 4 plans (3/4 code-complete awaiting operator gates, 1/4 fully done)
+  - [~] 48-01-PLAN.md — PR gating (pr-checks.yml 4 parallel jobs: typecheck/lint/test/prisma-format) + branch protection runbook (code-complete; halt on gh-api branch protection toggle)
+  - [~] 48-02-PLAN.md — deploy-staging.yml (WIF + build/migrate/deploy/smoke sequential) + rollback-prod.yml + load-test.yml skeleton + delete wif-smoke.yml (code-complete; halt on first deploy/rollback live run)
+  - [x] 48-03-PLAN.md — Structured logger + middleware/3-routes wire-up + /api/metrics feature-flagged route (default OFF) (fully complete; TDD autonomous; 18/18 tests green)
+  - [~] 48-04-PLAN.md — Cloud Monitoring dashboard (both projects) + uptime checks + email alert policy + verify-phase-48.sh phase gate (code-complete; halt on terraform apply + email verification)
 
-Plans:
-- [x] 41-01-PLAN.md — gapPersistence coding extension + DIFFICULTY_MULTIPLIERS + Phase 39 poll-handler wiring (Wave 1) (completed 2026-04-18)
-- [ ] 41-02-PLAN.md — Trainer dashboard coding panel + /api/trainer/[slug]/coding route (Wave 2)
-- [ ] 41-03-PLAN.md — PROJECT.md readiness math + DESIGN.md coding panel spec + v1.5 Open Items (Wave 3)
+### Phase 49: k6 Load Test + Hardening (HARD-01..03)
+**Goal**: A quantified load-test baseline exists for the staging deployment; every API route has been abuse-tested; the STRIDE threat model for the Cloud Run + DNS surface is reviewed and triaged
+**Depends on**: Phase 48 (staging must be deployed, CI must be green, observability must be on)
+**Requirements**: LOAD-01, LOAD-02, LOAD-03, HARD-01, HARD-02, HARD-03
+**Success Criteria** (what must be TRUE):
+  1. `loadtest/baseline.js` k6 script runs against staging; the ramp 10→50→100 VU scenario completes with zero 5xx errors when coding challenges flag is off
+  2. `load-test.yml` GH Actions workflow (manual dispatch) uploads a JSON report artifact; the run completes without timing out
+  3. `.planning/loadtest-baseline-v1.5.md` is committed and contains: max concurrent users before p95 > 500ms, cost/1000 requests (GCP extrapolation), CPU+memory at ceiling, Supabase query count per user session
+  4. `.planning/SECURITY-v1.5.md` documents the abuse-test results: every `/api/*` route returns 401/403 on unauthenticated/unauthorized access with no information leakage
+  5. STRIDE threat model covers Cloud Run deployment + DNS cutover surface; every finding is triaged with an action or explicit accept; `codex adversarial-review` sign-off recorded in the doc
+**Plans:** 4 plans
+  - [ ] 49-01-PLAN.md — k6 scenario + JSON-to-markdown report + Cloud Run cost extrapolator (LOAD-01)
+  - [ ] 49-02-PLAN.md — Fill load-test.yml body, run first live baseline, commit loadtest-baseline-v1.5.md (LOAD-02, LOAD-03, HARD-01)
+  - [ ] 49-03-PLAN.md — Generalize abuse test: route-discovery + abuse-test-all.ts against every /api/* route (HARD-02)
+  - [ ] 49-04-PLAN.md — STRIDE + /cso + codex review + adversarial-review sign-off + verify-phase-49.sh (HARD-03)
 
-#### Phase 42: SQL MVP (SQLite Only)
-**Goal**: SQLite language wired as a Judge0 path with server-side schema + seed injection; trainer-facing dialect label explicit
-**Depends on**: Phase 39 + Phase 40
-**Requirements**: SQL-01..03
-**Success**: Trainer-authored SQL challenge runs end-to-end with normalized row output; dialect label visible on challenge cards; Postgres SQL deferral documented
-**Estimate**: ~0.5 week, 2 plans
+### Phase 50: Judge0 Integration Points + Flag Audit
+**Goal**: All Judge0 call sites are guarded by the `CODING_CHALLENGES_ENABLED` flag; prod defaults to flag-dark; the v1.6 Terraform stub is committed; the v1.4 GCE IaC is labeled as a reference template
+**Depends on**: Phase 45 (Secret Manager plumbing exists to store the flag value)
+**Requirements**: JUDGE-INTEG-01, JUDGE-INTEG-02, JUDGE-INTEG-03, JUDGE-INTEG-04
+**Success Criteria** (what must be TRUE):
+  1. `JUDGE0_URL`, `JUDGE0_AUTH_TOKEN`, and `CODING_CHALLENGES_ENABLED` are stored in Secret Manager for both projects and injected into Cloud Run as env vars; prod value of `CODING_CHALLENGES_ENABLED` is `false`
+  2. With `CODING_CHALLENGES_ENABLED=false`, navigating to `/coding` and calling any `/api/coding/*` route returns a user-friendly "coming soon" response; gap-score persistence hooks are also short-circuited (verified by test or manual check)
+  3. `iac/cloudrun/judge0.tf.disabled` exists and documents the v1.6 VPC connector + private IP + firewall plan; it is not applied by `terraform apply`
+  4. `iac/gce-judge0/README.md` explicitly states this directory is a v1.6 reference template, not active infrastructure
+**Plans:** 4 plans
+  - [ ] 50-01-PLAN.md — Flag helper (isCodingEnabled) + CodingFeatureDisabledError + gcloud secret population script (JUDGE-INTEG-01)
+  - [ ] 50-02-PLAN.md — /api/coding/status probe + guard all 7 coding API routes + judge0Client/codingAttemptPoll library guards (JUDGE-INTEG-02 server)
+  - [ ] 50-03-PLAN.md — CodingComingSoon component + useCodingStatus hook + /coding page + SolveWorkspace swap (JUDGE-INTEG-02 client)
+  - [ ] 50-04-PLAN.md — git mv infra/terraform/ → iac/gce-judge0/ + iac/cloudrun/judge0.tf.disabled stub + verify-phase-50.sh phase gate (JUDGE-INTEG-03, 04)
 
-**Plans:** 2/2 plans complete
+### Phase 51: Prod Cloud Run + Deploy-Prod Pipeline + DNS Records
+**Goal**: The prod Cloud Run service exists and can receive a tagged deploy; DNS records are provisioned so the cutover in the next phase is a single record swap; the rollback workflow is validated
+**Depends on**: Phase 48 (CI patterns established), Phase 49 (staging fully green + hardened), Phase 50 (Judge0 flags set before first prod deploy)
+**Requirements**: CI-03, DNS-01, DNS-02, DNS-03
+**Success Criteria** (what must be TRUE):
+  1. Pushing a `v*` tag triggers `deploy-prod.yml`; it builds + pushes a signed image, runs `prisma migrate deploy` against prod Supabase, deploys to prod Cloud Run, and posts HTTP 200 from the `/api/health` smoke check -- all without manual intervention
+  2. Cloud Run prod service is reachable at its default `*.run.app` URL (pre-DNS-cutover); the managed cert for `nextlevelmock.com` is provisioned and in PENDING or ACTIVE state
+  3. Cloudflare DNS contains three records: `nextlevelmock.com` A/AAAA → prod Cloud Run LB, `staging.nextlevelmock.com` → staging Cloud Run, `legacy.nextlevelmock.com` → v0.1 GCE LB
+  4. `.planning/DEPLOY.md` cutover runbook exists with: pre-flight checklist, TTL=300 step (24h before), step-by-step A-record swap, verification commands (dig, curl, Supabase session check), rollback procedure
+  5. `rollback-prod.yml` manual dispatch successfully reverts prod Cloud Run to the previous revision by digest
+**Plans:** 4 plans
+  - [ ] 51-01-PLAN.md — Prod Cloud Run service + LB + managed SSL cert (apex + www) [CI-03 infrastructure dep]
+  - [ ] 51-02-PLAN.md — Cloudflare DNS records (apex imported, www, legacy) — apex stays on v0.1 [DNS-01, DNS-02]
+  - [ ] 51-03-PLAN.md — deploy-prod.yml (tag-triggered, WIF to prod, v1.5.0-rc1 first run) [CI-03]
+  - [ ] 51-04-PLAN.md — DEPLOY.md cutover runbook + rollback rehearsal + verify-phase-51.sh [DNS-03]
 
-Plans:
-- [x] 42-01-PLAN.md — Bank schema extension + SQL result normalizer + submit-route SQL pre-step (Wave 1)
-- [x] 42-02-PLAN.md — Dialect label constant + render on list/solve/trainer surfaces + PROJECT.md Postgres deferral (Wave 2)
+### Phase 52: DNS Cutover + Zero-Downtime Validation + Kill Switch
+**Goal**: `nextlevelmock.com` serves the v1.5 app on Cloud Run; existing public-interview users experience no data loss or extended outage; a single Cloudflare DNS action can revert to v0.1 within the 30-day window
+**Depends on**: Phase 51 (prod Cloud Run live + DNS records in place + runbook ready)
+**Requirements**: DNS-04, SUNSET-01, SUNSET-02, SUNSET-04
+**Success Criteria** (what must be TRUE):
+  1. After the DNS A-record swap, `dig nextlevelmock.com` resolves to the Cloud Run LB IP; `https://nextlevelmock.com/api/health` returns HTTP 200 within 5 minutes of cutover
+  2. A public-interview session started on v0.1 before DNS propagation completes successfully (no mid-session 502); documented in cutover log
+  3. `legacy.nextlevelmock.com` resolves to v0.1 GCE LB and serves the old app; trainer can revert `nextlevelmock.com` to v0.1 with a single Cloudflare DNS record change (kill switch documented in DEPLOY.md)
+  4. Day 0-21 sunset window is underway: v1.5 is deployed to staging (day 0-14 gate passed), DNS cutover is complete (day 15-21 gate), v0.1 GCE remains warm for 30-day rollback
+**Plans:** 4 plans
+  - [ ] 52-01-PLAN.md — Pre-cutover preflight + live session setup + T-0 email + baseline cutover log (Wave 1)
+  - [ ] 52-02-PLAN.md — Apex cutover via `terraform apply -target=cloudflare_record.apex` + 5min dig/curl polling (Wave 2)
+  - [ ] 52-03-PLAN.md — scripts/kill-switch.sh + T+30min revert/restore rehearsal + legacy.nextlevelmock.com uptime check (Wave 3)
+  - [ ] 52-04-PLAN.md — Post-cutover smokes (abuse, k6 light, trainer login, public interview E2E) + DEPLOY.md Sunset Window + verify-phase-52.sh (Wave 3)
 
-#### Phase 43: MSA Deployment (Terraform + CI/CD)
-**Goal**: Dedicated Judge0 GCE host provisioned via Terraform; GitHub Actions deploys app + Judge0 as separate workflows with health checks, rollback, monitoring
-**Depends on**: Phase 38 + Phase 39
-**Requirements**: IAC-01..05
-**Success**: Tag-push deploys app and Judge0 independently; failed health checks auto-revert; queue-depth + latency metrics visible in Logs Explorer; runbook published
-**Estimate**: ~1.5 weeks, 4 plans
-
-**Plans:** 4/4 plans complete
-
-Plans:
-- [x] 43-01-PLAN.md — Terraform module: 2-VM topology + GCS state + firewall (Wave 1, checkpoint)
-- [x] 43-02-PLAN.md — GitHub Actions: pr-checks + deploy-app + deploy-judge0 with rollback (Wave 2)
-- [x] 43-03-PLAN.md — Judge0 metrics pusher script (queue depth + p50/p95) → Logs Explorer (Wave 2)
-- [x] 43-04-PLAN.md — Coding stack operations runbook (6 sections per D-13) (Wave 3)
-
-#### Phase 44: Hardening + Load Test
-**Goal**: Production-ready under 50-concurrent submission load; abuse-safe; security-reviewed; documented
-**Depends on**: Phase 43
-**Requirements**: HARD-01..04
-**Success**: 50 concurrent submissions p95 ≤ 10 sec; malicious payloads contained; `/cso` + codex adversarial-review both pass; ARCHITECTURE.md + README quickstart published
-**Estimate**: ~1 week, 2-3 plans
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 44-01-PLAN.md — Load test harness (50-concurrent) + abuse test suite (6 payload classes) + reports (Wave 1)
-- [x] 44-02-PLAN.md — Security review gates: gstack /cso + codex adversarial-review, both PASS with 0 HIGH (Wave 1)
-- [x] 44-03-PLAN.md — ARCHITECTURE.md + README quickstart + trainer-authoring guide + validate-challenge CLI (Wave 2)
-
-**Total v1.4 plan estimate:** ~21-28 plans across 9 phases.
-
-#### Parked (not in v1.4 scope)
-
-- **999.1 Staging / Prod Split** — Deferred to v1.5; adjacent to IAC-01..05 but scope creep for v1.4
-- **999.2 Trainer Default Cohort** — Deferred to v1.5 / post-v1.4 polish
-- **DEPLOY-01/02/03** — Absorbed into v1.4 Phase 43 (IAC-NN) as part of MSA-from-day-1 approach
+### Phase 53: Reflect + Maintain + Runbook Finalization + Decommission Plan
+**Goal**: The v1.4 retro is done, the codebase health check is complete, all runbooks and docs reflect the Cloud Run reality, and the v0.1 GCE teardown checklist is committed for day-45 execution
+**Depends on**: Phase 52 (prod is live and stable; decommission plan requires confirmed cutover)
+**Requirements**: META-01, META-02, DOCS-01, DOCS-02, DOCS-03, DOCS-04, SUNSET-03
+**Success Criteria** (what must be TRUE):
+  1. v1.4 reflect artifact exists in second-brain under `projects/nlm/notes/retro-2026-04-18.md` (or dated equivalent); `/pipeline-reflect` output committed
+  2. v1.4 maintain artifact exists; health score (0-10) recorded; any tool update actions are tracked or completed
+  3. `.planning/DEPLOY.md` is complete: full deploy flow, secret rotation, rollback, Supabase migration promotion, DNS cutover, v0.1 sunset + day-45 teardown checklist
+  4. `CLAUDE.md` deployment section reflects Cloud Run (GCE + Docker Compose references replaced); new env vars and workflow names are listed
+  5. `README.md` project-overview section says "Deployed to Cloud Run on GCP" with a link to DEPLOY.md; `.planning/SECURITY-v1.5.md` captures STRIDE findings signed off by codex
+**Plans:** 4 plans
+  - [ ] 53-01-PLAN.md — Retro + Maintain sweep (v1.4 + v1.5), numeric health_score, second-brain notes
+  - [ ] 53-02-PLAN.md — DEPLOY.md §7 Secret Rotation + §8 Supabase Migration Promotion + §9 v0.1 Sunset Day-45 Teardown + script stub
+  - [ ] 53-03-PLAN.md — CLAUDE.md (strip docker-compose, add Cloud Run Deploy + Tech Stack additions) + README.md overview link
+  - [ ] 53-04-PLAN.md — v1.6 seeds + verify-phase-53.sh phase gate (10 must-have checks)
 
 ## Progress
 
@@ -219,11 +252,20 @@ Plans:
 | 8-15. Cohort Readiness | v1.1 | 22/22 | Complete | 2026-04-14 |
 | 16-25. Analytics & Auth | v1.2 | 26/26 | Complete | 2026-04-16 |
 | 26-35. UX Unification & Polish | v1.3 | 18/18 | Complete | 2026-04-18 |
-| 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 0/~25 | Planning | — |
+| 36-44. Coding Challenges + Multi-Lang Sandbox | v1.4 | 28/28 | Complete | 2026-04-18 |
+| 45. Terraform Skeleton + Artifact Registry + Secret Manager | v1.5 | 4/4 | Complete (docker smoke deferred) | 2026-04-18 |
+| 46. Supabase Staging + Env Hygiene + Prisma Migrate Baseline | v1.5 | 4/4 | Code-complete (3 operator gates pending) | 2026-04-18 |
+| 47. Staging Cloud Run Service + Load Balancer + Domains | v1.5 | 4/4 | Code-complete (4 operator gates pending) | 2026-04-18 |
+| 48. GitHub Actions CI + Deploy-Staging + Observability | v1.5 | 4/4 | Code-complete (3 operator gates pending) | 2026-04-18 |
+| 49. k6 Load Test + Hardening (HARD-01..03) | v1.5 | 4/4 | Code-complete (3 live-resume items pending) | 2026-04-18 |
+| 50. Judge0 Integration Points + Flag Audit | v1.5 | 4/4 | Complete (fully autonomous) | 2026-04-18 |
+| 51. Prod Cloud Run + Deploy-Prod Pipeline + DNS Records | v1.5 | 4/4 | Code-complete (4 operator gates pending) | 2026-04-18 |
+| 52. DNS Cutover + Zero-Downtime Validation + Kill Switch | v1.5 | 4/4 | Code-complete (4 human-present cutover gates pending) | 2026-04-19 |
+| 53. Reflect + Maintain + Runbook Finalization + Decommission Plan | v1.5 | 4/4 | Complete (fully autonomous, gate 10/10 PASS) | 2026-04-18 |
 
 ## Backlog
 
-- **999.1 Staging / Prod Split** — Provision second Supabase project for staging, split `.env.local` (staging) from `.env` (prod), route Docker deploy to prod only, add staging deploy target. Drivers: avoid seeding demo data into prod DB; enable safe schema/migration previews; unblock pre-merge CI smoke tests. Estimate: 1 phase, ~4-6h.
+- **999.1 Staging / Prod Split** — Absorbed by v1.5 (DATA-01..06 + INFRA-04..05).
 - **999.2 Trainer Default Cohort** — Persist each trainer's assigned/default cohort so roster boots scoped to their cohort instead of "All Cohorts". Options: add `Profile.defaultCohortId` (reuse existing Profile model) or a new `TrainerCohortAssignment` join. UX: dropdown still lets user view others; default sticks. Drivers: trainers typically own one cohort; "All Cohorts" noise hides the roster that matters. Estimate: 1 small phase, ~3h.
 - ~~**999.3 Per-Skill Historical Snapshots**~~ — Shipped as VIZ-07 in Phase 34 (v1.3).
 - ~~**999.4 Shell Edge Cases**~~ — Shipped in PR #5. TopBar wordmark now only hides on desktop when `onToggleSidebar` is passed (AppShell/AssociateShell); bare-TopBar layouts keep it. `SectionSidebar` accepts `homeHref` (default `/trainer`, AssociateShell passes associate dashboard URL). Collapsed Settings icon calls `onExpandSidebar` before opening the accordion so it's visible.

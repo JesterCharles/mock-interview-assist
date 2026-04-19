@@ -4,7 +4,7 @@
  * Auth matrix, body validation, batch error isolation, cache invalidation order.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/identity', () => ({
@@ -40,6 +40,10 @@ function makeReq(body?: unknown): NextRequest {
 describe('POST /api/coding/bank/refresh', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('returns 401 for anonymous caller', async () => {

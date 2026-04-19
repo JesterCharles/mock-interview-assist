@@ -1,0 +1,107 @@
+# ============================================================================
+# Phase 50 (JUDGE-INTEG-03 / D-10): v1.6 Judge0 activation stub
+#
+# ⚠ THIS FILE IS INERT.
+# Terraform ignores any file whose name does not end in `.tf` or `.tf.json`.
+# The `.disabled` suffix prevents this file from being processed by any
+# `terraform plan` or `terraform apply` in this directory during v1.5.
+#
+# To activate in v1.6:
+#   1. Deploy the Judge0 VM module (reuse iac/gce-judge0/ as reference
+#      template; migrate into a new iac/judge0/ module in a dedicated
+#      nlm-judge0-* project).
+#   2. Rename this file: `git mv judge0.tf.disabled judge0.tf`
+#   3. Uncomment the resources below.
+#   4. Populate actual Judge0 URL + auth token in Secret Manager
+#      (overwrite the placeholder values set in Phase 50).
+#   5. `terraform plan -var-file=prod.tfvars` to review.
+#   6. `terraform apply -var-file=prod.tfvars` to deploy.
+#   7. Flip CODING_CHALLENGES_ENABLED to `true` in nlm-prod Secret Manager.
+#
+# Documented per D-10: VPC connector + private IP + firewall + Judge0 VM.
+# No provider blocks (D-11) — resources only. The providers live in
+# iac/cloudrun/providers.tf (Phase 45 Plan 01).
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. VPC connector — enables Cloud Run → private IPs in a VPC.
+#    See: https://cloud.google.com/run/docs/configuring/connecting-vpc
+# ---------------------------------------------------------------------------
+# resource "google_vpc_access_connector" "judge0_connector" {
+#   name          = "nlm-judge0-connector"
+#   project       = var.project_id
+#   region        = var.region
+#   network       = "default"
+#   ip_cidr_range = "10.8.0.0/28"
+#   min_instances = 2
+#   max_instances = 3
+#   machine_type  = "e2-micro"
+# }
+
+# ---------------------------------------------------------------------------
+# 2. Private-IP firewall rule — allow Cloud Run (via connector) → Judge0 VM.
+#    Judge0 VM lives in the same VPC, port 2358 (Judge0 API default).
+# ---------------------------------------------------------------------------
+# resource "google_compute_firewall" "cloudrun_to_judge0" {
+#   name    = "nlm-cloudrun-to-judge0"
+#   project = var.project_id
+#   network = "default"
+#
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["2358"]
+#   }
+#
+#   # Source = the VPC connector's CIDR range only; deny all other ingress.
+#   source_ranges = [google_vpc_access_connector.judge0_connector.ip_cidr_range]
+#   target_tags   = ["judge0-vm"]
+# }
+
+# ---------------------------------------------------------------------------
+# 3. Cloud Run service egress — attach the connector to the existing service.
+#    This is a PATCH to the cloudrun-staging.tf + cloudrun-prod.tf services.
+#    In v1.6, add this block INSIDE the google_cloud_run_v2_service template:
+# ---------------------------------------------------------------------------
+# vpc_access {
+#   connector = google_vpc_access_connector.judge0_connector.id
+#   egress    = "PRIVATE_RANGES_ONLY"   # Internet traffic still goes direct
+# }
+
+# ---------------------------------------------------------------------------
+# 4. Judge0 VM (data source reference — provisioned separately in iac/judge0/)
+#    This is the target the firewall rule points at. The full VM definition
+#    lives in a dedicated Judge0 module; referenced here only so the IP is
+#    available as a Secret Manager input.
+# ---------------------------------------------------------------------------
+# data "google_compute_instance" "judge0_vm" {
+#   name    = "nlm-judge0-prod"
+#   zone    = var.judge0_zone
+#   project = var.judge0_project_id
+# }
+
+# ---------------------------------------------------------------------------
+# 5. Populate Secret Manager with real Judge0 endpoint.
+#    Phase 50 set placeholder values; v1.6 overwrites with:
+#      JUDGE0_URL = http://{judge0_vm_internal_ip}:2358
+#      JUDGE0_AUTH_TOKEN = <generated in v1.6 bootstrap>
+#    (Values added via `gcloud secrets versions add`, NOT in tfstate —
+#     same rule as Phase 45 D-10.)
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# ## Activation — step-by-step (v1.6)
+#
+# 1. Create new module dir `iac/judge0/` (use `iac/gce-judge0/` as reference).
+# 2. Terraform apply the Judge0 VM in a dedicated project `nlm-judge0-prod`.
+# 3. Note the VM internal IP from `terraform output`.
+# 4. `git mv iac/cloudrun/judge0.tf.disabled iac/cloudrun/judge0.tf`
+# 5. Uncomment blocks 1-4 above.
+# 6. Add `vpc_access` block (#3) to cloudrun-staging.tf + cloudrun-prod.tf.
+# 7. `terraform plan -var-file=prod.tfvars` (review connector + firewall).
+# 8. `terraform apply -var-file=prod.tfvars`.
+# 9. `gcloud secrets versions add JUDGE0_URL --data-file=- --project=nlm-prod` with real URL.
+# 10. `gcloud secrets versions add JUDGE0_AUTH_TOKEN --data-file=- --project=nlm-prod` with real token.
+# 11. `gcloud secrets versions add CODING_CHALLENGES_ENABLED --data-file=- --project=nlm-prod` with `true`.
+# 12. Deploy new Cloud Run revision — env vars auto-refresh on next boot.
+# 13. Smoke test: `curl https://nextlevelmock.com/api/coding/status` → `{enabled: true}`.
+# ---------------------------------------------------------------------------

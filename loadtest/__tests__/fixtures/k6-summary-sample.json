@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "values": {
+        "avg": 245.3,
+        "min": 12.1,
+        "med": 210.4,
+        "max": 1820.5,
+        "p(90)": 520.7,
+        "p(95)": 640.2,
+        "p(99)": 980.1
+      }
+    },
+    "http_req_duration{kind:static}": {
+      "type": "trend",
+      "values": {
+        "avg": 180.2,
+        "med": 160.1,
+        "p(95)": 320.5,
+        "p(99)": 480.0
+      }
+    },
+    "http_req_duration{kind:api}": {
+      "type": "trend",
+      "values": {
+        "avg": 310.5,
+        "med": 280.2,
+        "p(95)": 720.8,
+        "p(99)": 950.3
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "values": {
+        "rate": 0.0023,
+        "passes": 12450,
+        "fails": 29
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "values": {
+        "count": 12479,
+        "rate": 42.3
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "values": {
+        "avg": 1950.3,
+        "p(95)": 3200.1
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "values": {
+        "value": 100
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "values": {
+        "rate": 0.998,
+        "passes": 24910,
+        "fails": 50
+      }
+    }
+  },
+  "root_group": {
+    "checks": {},
+    "groups": []
+  }
+}

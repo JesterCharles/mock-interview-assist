@@ -30,6 +30,10 @@ describe('judge0Client', () => {
   beforeEach(() => {
     vi.stubEnv('JUDGE0_URL', BASE_URL);
     vi.stubEnv('JUDGE0_AUTH_TOKEN', TOKEN);
+    // Phase 50 (JUDGE-INTEG-02): the env guard is the VERY FIRST step in each
+    // export. Pre-existing happy-path tests need the flag on to reach the
+    // fetch/env paths they exercise.
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
     vi.stubGlobal('fetch', vi.fn());
   });
 
@@ -245,5 +249,70 @@ describe('judge0Client', () => {
     const { Judge0UnavailableError } = await loadErrors();
     await expect(systemInfo(50)).rejects.toBeInstanceOf(Judge0UnavailableError);
     expect((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
+  });
+
+  // ---------- Phase 50 — CODING_CHALLENGES_ENABLED gating ----------
+  describe('Phase 50 — CODING_CHALLENGES_ENABLED gating', () => {
+    it('submit() throws CodingFeatureDisabledError when flag is "false"', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      const { submit } = await loadClient();
+      const { CodingFeatureDisabledError } = await loadErrors();
+      await expect(
+        submit({ sourceCode: 'x', language: 'python', stdin: '' }),
+      ).rejects.toBeInstanceOf(CodingFeatureDisabledError);
+    });
+
+    it('submit() throws CodingFeatureDisabledError when flag is unset', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', '');
+      const { submit } = await loadClient();
+      const { CodingFeatureDisabledError } = await loadErrors();
+      await expect(
+        submit({ sourceCode: 'x', language: 'python', stdin: '' }),
+      ).rejects.toBeInstanceOf(CodingFeatureDisabledError);
+    });
+
+    it('getSubmission() throws CodingFeatureDisabledError when flag is off', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      const { getSubmission } = await loadClient();
+      const { CodingFeatureDisabledError } = await loadErrors();
+      await expect(getSubmission('tok-123')).rejects.toBeInstanceOf(
+        CodingFeatureDisabledError,
+      );
+    });
+
+    it('systemInfo() throws CodingFeatureDisabledError when flag is off', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      const { systemInfo } = await loadClient();
+      const { CodingFeatureDisabledError } = await loadErrors();
+      await expect(systemInfo()).rejects.toBeInstanceOf(CodingFeatureDisabledError);
+    });
+
+    it('flag check fires BEFORE env validation (placeholder URL does not surface Judge0ConfigError)', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      vi.stubEnv('JUDGE0_URL', 'http://placeholder.invalid');
+      vi.stubEnv('JUDGE0_AUTH_TOKEN', 'placeholder');
+      const { submit } = await loadClient();
+      const { CodingFeatureDisabledError, Judge0ConfigError } = await loadErrors();
+      const err = await submit({
+        sourceCode: 'x',
+        language: 'python',
+        stdin: '',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(CodingFeatureDisabledError);
+      expect(err).not.toBeInstanceOf(Judge0ConfigError);
+    });
+
+    it('flag check fires BEFORE language validation (unknown language does not surface UnsupportedLanguageError)', async () => {
+      vi.stubEnv('CODING_CHALLENGES_ENABLED', 'false');
+      const { submit } = await loadClient();
+      const { CodingFeatureDisabledError, UnsupportedLanguageError } = await loadErrors();
+      const err = await submit({
+        sourceCode: 'x',
+        language: 'cobol' as never,
+        stdin: '',
+      }).catch((e) => e);
+      expect(err).toBeInstanceOf(CodingFeatureDisabledError);
+      expect(err).not.toBeInstanceOf(UnsupportedLanguageError);
+    });
   });
 });

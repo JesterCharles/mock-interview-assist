@@ -52,10 +52,15 @@ export function SubmitBar({
       // Error path
       let code2: string | undefined;
       let message = `HTTP ${res.status}`;
+      let body503Enabled: boolean | undefined;
       try {
         const body = await res.json();
         code2 = body?.error?.code;
-        message = body?.error?.message ?? message;
+        message = body?.error?.message ?? body?.message ?? message;
+        // Phase 50 (JUDGE-INTEG-02 / D-05): flag-dark 503 has shape
+        // { enabled: false, message: "..." }. Detect it here so SolveWorkspace
+        // can swap in the ComingSoon card instead of toasting "sandbox down".
+        if (typeof body?.enabled === 'boolean') body503Enabled = body.enabled;
       } catch {
         /* ignore */
       }
@@ -73,9 +78,14 @@ export function SubmitBar({
         code2 = 'AUTH_REQUIRED';
         message = 'Session expired — please sign in again';
       }
-      // WR-03: 503 = Judge0 sandbox down. Map to a clear user-facing message
-      // rather than "HTTP 503".
-      if (res.status === 503) {
+      // Phase 50: flag-dark 503 → FEATURE_DISABLED so SolveWorkspace swaps
+      // in the ComingSoon card. Use error code, not string matching.
+      if (res.status === 503 && body503Enabled === false) {
+        code2 = 'FEATURE_DISABLED';
+        message = message || 'Coding challenges coming soon. Check back later!';
+      } else if (res.status === 503) {
+        // WR-03: real Judge0 outage (v1.6+) — keep the sandbox-unavailable
+        // mapping for non-flag 503s.
         code2 = code2 ?? 'SANDBOX_UNAVAILABLE';
         message = 'Judge0 sandbox temporarily unavailable — try again in a moment';
       }

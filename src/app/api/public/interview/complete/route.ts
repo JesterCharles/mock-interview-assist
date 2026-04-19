@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rateLimitService';
 import { persistSessionToDb } from '@/lib/sessionPersistence';
 import { InterviewSession } from '@/lib/types';
+import { log } from '@/lib/logger';
 
 /**
  * Anonymous automated-interview completion endpoint.
@@ -66,18 +67,31 @@ export async function POST(request: Request) {
     const success = await persistSessionToDb(sanitized, { mode: 'automated' });
 
     if (!success) {
+      log.error('public.interview.complete.error', {
+        route: '/api/public/interview/complete',
+        sessionId: session.id,
+        err: 'persistSessionToDb returned false',
+      });
       return NextResponse.json(
         { error: 'Failed to persist session' },
         { status: 500 }
       );
     }
 
+    log.info('public.interview.complete', {
+      route: '/api/public/interview/complete',
+      sessionId: session.id,
+      mode: 'automated',
+    });
     return NextResponse.json({
       success: true,
       persisted: 'db',
     });
   } catch (error) {
-    console.error('[public-interview-complete] Error:', error);
+    log.error('public.interview.complete.error', {
+      route: '/api/public/interview/complete',
+      err: String(error),
+    });
     return NextResponse.json(
       { error: 'Failed to save interview session' },
       { status: 500 }

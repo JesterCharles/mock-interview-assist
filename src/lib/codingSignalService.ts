@@ -11,6 +11,10 @@
  * errors here is correct. See RESEARCH §Signal Service Design.
  *
  * Weight table per D-16 (CONTEXT.md) — tuning belongs in code review, not env.
+ *
+ * Phase 50 (JUDGE-INTEG-02): this module is NOT env-gated — it's a pure
+ * mapper with no DB writes. The flag check lives at the call sites that
+ * persist the output (codingAttemptPoll.ts + gapPersistence consumers).
  */
 
 import { z } from 'zod';

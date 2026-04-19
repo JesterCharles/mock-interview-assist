@@ -15,6 +15,8 @@ import { getCallerIdentity } from '@/lib/identity';
 import { AppShell } from '@/components/shell/AppShell';
 import { AssociateShell } from '@/components/shell/AssociateShell';
 import { ChallengeList } from '@/components/coding/ChallengeList';
+import { CodingComingSoon } from '@/components/coding/CodingComingSoon';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
 import type { ChallengeListItem } from '@/hooks/useChallengeList';
 // Phase 42 §D-07/D-08: the SQL dialect label (`SQL_DIALECT_LABEL`) is rendered
 // on challenge cards via `isSqlDialectChallenge` inside
@@ -32,6 +34,23 @@ export default async function CodingListPage({ searchParams }: CodingListPagePro
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
     redirect('/signin');
+  }
+
+  // Phase 50 (JUDGE-INTEG-02 / D-08): server-side flag short-circuit. Avoids
+  // the cost of fetching /api/coding/challenges (which would 503 anyway) when
+  // the feature is flag-dark. Preserves the role-aware shell pattern.
+  if (!isCodingEnabled()) {
+    const backHref =
+      caller.kind === 'associate' ? `/associate/${caller.associateSlug}` : '/dashboard';
+    const comingSoon = <CodingComingSoon backHref={backHref} />;
+    if (caller.kind === 'associate') {
+      return (
+        <AssociateShell slug={caller.associateSlug} cohortName={null}>
+          {comingSoon}
+        </AssociateShell>
+      );
+    }
+    return <AppShell>{comingSoon}</AppShell>;
   }
 
   const sp = (await searchParams) ?? {};

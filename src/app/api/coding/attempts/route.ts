@@ -11,6 +11,8 @@ import { z } from 'zod';
 import { getCallerIdentity } from '@/lib/identity';
 import { prisma } from '@/lib/prisma';
 import { codingApiError } from '@/lib/codingApiErrors';
+import { isCodingEnabled } from '@/lib/codingFeatureFlag';
+import { codingDisabledResponse } from '@/app/api/coding/_disabledResponse';
 
 const QuerySchema = z.object({
   challengeId: z.string().min(1),
@@ -19,6 +21,11 @@ const QuerySchema = z.object({
 });
 
 export async function GET(request: Request): Promise<NextResponse> {
+  // Phase 50 (JUDGE-INTEG-02 / D-05): flag gate — fires before auth + DB.
+  if (!isCodingEnabled()) {
+    return codingDisabledResponse();
+  }
+
   const caller = await getCallerIdentity();
   if (caller.kind === 'anonymous') {
     return codingApiError('AUTH_REQUIRED', 'Sign-in required');

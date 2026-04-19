@@ -5,7 +5,7 @@
  * cursor pagination, filters, latest-attempt join.
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
 vi.mock('@/lib/identity', () => ({
   getCallerIdentity: vi.fn(),
@@ -50,6 +50,11 @@ function mkChallenge(overrides: Partial<{
 describe('GET /api/coding/challenges', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    // Phase 50: flag-on for existing tests; flag-off behavior tested by submit route.
+    vi.stubEnv('CODING_CHALLENGES_ENABLED', 'true');
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('Test 1: anonymous → 401 AUTH_REQUIRED', async () => {
