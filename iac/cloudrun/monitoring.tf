@@ -94,7 +94,7 @@ resource "google_monitoring_alert_policy" "uptime" {
       aggregations {
         alignment_period     = "60s"
         per_series_aligner   = "ALIGN_FRACTION_TRUE"
-        cross_series_reducer = "REDUCE_COUNT_FALSE"
+        cross_series_reducer = "REDUCE_MEAN"
         group_by_fields      = ["resource.label.host"]
       }
       trigger {
@@ -172,7 +172,7 @@ resource "google_monitoring_alert_policy" "legacy_uptime" {
       aggregations {
         alignment_period     = "60s"
         per_series_aligner   = "ALIGN_FRACTION_TRUE"
-        cross_series_reducer = "REDUCE_COUNT_FALSE"
+        cross_series_reducer = "REDUCE_MEAN"
         group_by_fields      = ["resource.label.host"]
       }
       trigger {

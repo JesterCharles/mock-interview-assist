@@ -39,7 +39,7 @@ resource "google_compute_backend_service" "nlm_staging_backend" {
   name                  = "nlm-staging-backend"
   protocol              = "HTTPS"
   port_name             = "http"
-  timeout_sec           = 300 # align with Cloud Run INFRA-04 timeout
+  # timeout_sec not supported for Serverless NEG backends (Cloud Run timeout enforced at service level)
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {

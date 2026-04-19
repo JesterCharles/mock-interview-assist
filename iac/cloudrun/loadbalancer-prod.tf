@@ -45,7 +45,7 @@ resource "google_compute_backend_service" "nlm_prod_backend" {
   name                  = "nlm-prod-backend"
   protocol              = "HTTPS"
   port_name             = "http"
-  timeout_sec           = 300
+  # timeout_sec not supported for Serverless NEG backends (Cloud Run timeout enforced at service level)
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {
