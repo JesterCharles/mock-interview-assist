@@ -1,16 +1,23 @@
 name: Load Test (k6)
 
-# PHASE 48 STATUS: skeleton only. Phase 49 adds k6 scenario + artifact upload.
-# Do not delete or restructure — Phase 49 fills in the shell.
+# Phase 49 Plan 02 (LOAD-02, LOAD-03, HARD-01).
+# Triggers:
+#   - workflow_dispatch (manual; operator runs baseline against staging)
+#   - push tag matching v* (pre-release baseline)
+#   - pull_request with label 'run-load-test' (PR-scoped baseline, optional)
+# Guard: staging-only target; refuses prod URLs (T-49-01 + T-49-05).
 
 on:
   workflow_dispatch:
     inputs:
-      scenario:
-        description: 'Scenario file under loadtest/ (default: baseline.js)'
-        required: false
-        default: 'baseline.js'
+      target:
+        description: 'Target URL (must start with https://staging.)'
+        required: true
+        default: 'https://staging.nextlevelmock.com'
         type: string
+  push:
+    tags:
+      - 'v*'
   pull_request:
     types: [labeled]
 
@@ -24,18 +31,68 @@ permissions:
 
 jobs:
   run:
-    # Only run on pull_request when the `run-load-test` label is applied.
     if: >
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.event.label.name == 'run-load-test')
     name: k6 Load Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Phase 49 placeholder
+      - name: Authenticate to GCP (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER_STAGING }}
+          service_account: ${{ secrets.GCP_SA_STAGING_DEPLOYER }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Guard non-staging target
+        id: guard
         run: |
-          echo "::notice::Phase 48 lands this workflow as a skeleton."
-          echo "::notice::Phase 49 Plan 01 fills in: k6 setup-action, scenario run, JSON artifact upload."
-          echo "Scenario requested: ${{ inputs.scenario }}"
+          T="${{ github.event.inputs.target || 'https://staging.nextlevelmock.com' }}"
+          if [[ "$T" != https://staging.* ]]; then
+            echo "refuse: non-staging target $T"
+            exit 3
+          fi
+          echo "TARGET=$T" >> "$GITHUB_ENV"
+          echo "target=$T" >> "$GITHUB_OUTPUT"
+
+      - name: Run k6 baseline
+        uses: grafana/k6-action@v0.3
+        with:
+          filename: loadtest/baseline.js
+          flags: --out json=/tmp/loadtest-result.json --summary-export=/tmp/loadtest-summary.json
+          fail_on_threshold_fail: true
+        env:
+          TARGET: ${{ env.TARGET }}
+          K6_WEB_DASHBOARD: 'false'
+
+      - name: Fetch Cloud Run metrics
+        if: always()
+        run: bash loadtest/scripts/fetch-cloud-run-metrics.sh > /tmp/cloud-run-metrics.json
+        env:
+          GCP_PROJECT: nlm-staging-493715
+          SERVICE_NAME: nlm-staging
+
+      - name: Fetch Supabase query count per session
+        if: always()
+        run: bash loadtest/scripts/fetch-supabase-query-count.sh > /tmp/supabase-query-counts.json
+        env:
+          GCP_PROJECT: nlm-staging-493715
+          SERVICE_NAME: nlm-staging
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: loadtest-${{ github.run_id }}
+          path: |
+            /tmp/loadtest-result.json
+            /tmp/loadtest-summary.json
+            /tmp/cloud-run-metrics.json
+            /tmp/supabase-query-counts.json
+          retention-days: 30
