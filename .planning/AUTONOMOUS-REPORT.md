@@ -16,8 +16,8 @@ stages_pending: [review, test, ship, reflect-live, maintain-live]
 | Milestone | v1.5 — Cloud Run + Supabase Hybrid Migration |
 | Phases completed (code) | 9/9 (45-53) |
 | Plans completed | 36/36 |
-| Commits landed | 75 on `chore/v1.5-archive-v1.4` (NOT merged, NOT pushed) |
-| Files changed | 204 (+17,477 / -418) |
+| Commits landed | 77 on `chore/v1.5-archive-v1.4` (NOT merged, NOT pushed) |
+| Files changed | 205 (+17,493 / -428) |
 | Test suite | 1085 passing / 4 skipped / 0 failing |
 | Typecheck | clean |
 | Lint | 0 errors (pre-existing warnings unchanged) |
@@ -29,7 +29,7 @@ stages_pending: [review, test, ship, reflect-live, maintain-live]
 | Stage | Gate/Decision | Decision | Reason |
 |-------|--------------|----------|--------|
 | Pre-execute | 12 orphan plans uncommitted (P48/49/52) | Commit before dispatch | STATE rollup claimed 36/36; orphans must land first |
-| P45-02 | Docker smoke push halt (supabaseAdmin eager init) | Option B — defer | Scope discipline; P48 CI will verify build with proper env wiring |
+| P45-02 | Docker smoke push halt (supabaseAdmin eager init) | Initially Option B (defer); **resolved 2026-04-19 — applied Option A** | User re-invoked loop; fix is 1-file Proxy lazy-init, 0 call-site changes, 1085 tests still pass |
 | Per phase (P45-52) | Live terraform apply / gcloud / DNS mutations | HALT, ship code artifacts | Unattended rules: no live infra mutations without operator |
 | P49 + P51 | Parallel dispatch | APPROVED | Non-overlapping file scope (loadtest/** vs iac/cloudrun/*prod*) |
 | P48 + P50 | Parallel dispatch | APPROVED | No file overlap |
@@ -56,7 +56,7 @@ stages_pending: [review, test, ship, reflect-live, maintain-live]
 ### Live-Infra Queue (~20 operator gates — documented in phase EXECUTE-LOG files)
 
 1. **P46 Supabase reseed + wipe + migrate deploy + Auth PATCH** — runbook at `docs/runbooks/phase-46-supabase-wipe.md` Phases A-J
-2. **P45-02 resume** — `gcloud auth application-default login` + push smoke image OR defer to P48 CI
+2. ~~**P45-02 resume** — push smoke image~~ **CODE FIXED 2026-04-19**. Operator only needs `gcloud auth application-default login` + run `bash iac/cloudrun/scripts/push-smoke-image.sh` to produce first AR image
 3. **P47 staging terraform apply** — fill tfvars (image digest, cf_zone_id) + apply Wave 1→2→3
 4. **P47 SSL ACTIVE wait** — 10-60 min async
 5. **P48 branch protection** — GitHub Settings → required checks per RUNBOOK-BRANCH-PROTECTION.md
@@ -86,7 +86,7 @@ stages_pending: [review, test, ship, reflect-live, maintain-live]
 ## Known Deferrals
 
 - **v1.4 reflect + maintain** — rolled into P53 artifacts (PIPELINE-REFLECT.md is dual v1.4+v1.5)
-- **P45-02 docker smoke** — deferred to P48 CI path (Option B)
+- **P45-02 docker smoke** — ~~deferred to P48 CI path (Option B)~~ **resolved 2026-04-19** via `fix(supabase-admin): lazy-init client so next build works without env` (commit `b2cb699`)
 - **Judge0 self-hosted IaC** — stubbed at `iac/gce-judge0/` + `iac/cloudrun/judge0.tf.disabled`; full provisioning deferred to v1.6
 - **HARD-01/02/03 live runs** — require deployed stack; scheduled for operator resumption
 
