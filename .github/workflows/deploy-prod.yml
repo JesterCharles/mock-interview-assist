@@ -49,7 +49,23 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      # ---- STEP 2: Docker build + push to prod Artifact Registry --------------------
+      # ---- STEP 2: Fetch secrets from prod Secret Manager ---------------------------
+      # F-02: NEXT_PUBLIC_* are inlined into the client bundle at build time, so
+      # they MUST be fetched BEFORE `docker build` and passed as --build-arg.
+      # DIRECT_URL is used later for prisma migrate deploy.
+      - name: Fetch secrets from Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          # Literal project paths (Plan 51-03 verify grep expects `DIRECT_URL:nlm-prod/DIRECT_URL`).
+          secrets: |-
+            DIRECT_URL:nlm-prod/DIRECT_URL
+            ADMIN_EMAILS:nlm-prod/ADMIN_EMAILS
+            NEXT_PUBLIC_SUPABASE_URL:nlm-prod/NEXT_PUBLIC_SUPABASE_URL
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:nlm-prod/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+            NEXT_PUBLIC_SITE_URL:nlm-prod/NEXT_PUBLIC_SITE_URL
+
+      # ---- STEP 3: Docker build + push to prod Artifact Registry --------------------
       # D-11 step 1: build + push by digest; :latest + git ref tag added for operator convenience.
       - name: Configure Docker auth for Artifact Registry
         run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
@@ -66,6 +82,13 @@ jobs:
           tags: |
             ${{ env.IMAGE_REPO }}:latest
             ${{ env.IMAGE_REPO }}:${{ github.ref_name }}
+          # F-02: pass NEXT_PUBLIC_* as build ARGs — Next.js inlines them into
+          # the client bundle at build time. Missing these ships an image with
+          # empty strings, breaking browser Supabase auth on first revision.
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ steps.secrets.outputs.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ steps.secrets.outputs.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_SITE_URL=${{ steps.secrets.outputs.NEXT_PUBLIC_SITE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
@@ -75,16 +98,6 @@ jobs:
           [ -n "${{ steps.build.outputs.digest }}" ] \
             || (echo "::error::docker/build-push-action did not emit a digest"; exit 1)
           echo "Image digest: ${{ steps.build.outputs.digest }}"
-
-      # ---- STEP 3: Fetch DIRECT_URL + ADMIN_EMAILS from prod Secret Manager ---------
-      - name: Fetch secrets from Secret Manager
-        id: secrets
-        uses: google-github-actions/get-secretmanager-secrets@v2
-        with:
-          # Literal project paths (Plan 51-03 verify grep expects `DIRECT_URL:nlm-prod/DIRECT_URL`).
-          secrets: |-
-            DIRECT_URL:nlm-prod/DIRECT_URL
-            ADMIN_EMAILS:nlm-prod/ADMIN_EMAILS
 
       # ---- STEP 4: Prisma migrate deploy (D-11 step 2 — BEFORE gcloud run deploy) ----
       - name: Set up Node 22

@@ -43,7 +43,21 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      # ---- STEP 2: Docker build + push to Artifact Registry --------------------------
+      # ---- STEP 2: Fetch secrets from Secret Manager ---------------------------------
+      # F-02: NEXT_PUBLIC_* are inlined into the client bundle at build time, so
+      # they MUST be fetched BEFORE `docker build` and passed as --build-arg.
+      # DIRECT_URL is used later for prisma migrate deploy.
+      - name: Fetch secrets from Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |-
+            DIRECT_URL:${{ env.PROJECT_ID }}/DIRECT_URL
+            NEXT_PUBLIC_SUPABASE_URL:${{ env.PROJECT_ID }}/NEXT_PUBLIC_SUPABASE_URL
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:${{ env.PROJECT_ID }}/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+            NEXT_PUBLIC_SITE_URL:${{ env.PROJECT_ID }}/NEXT_PUBLIC_SITE_URL
+
+      # ---- STEP 3: Docker build + push to Artifact Registry --------------------------
       # D-21: deploy by digest (emitted by docker/build-push-action).
       # D-06: type=gha layer cache.
       - name: Configure Docker auth for Artifact Registry
@@ -61,6 +75,13 @@ jobs:
           tags: |
             ${{ env.IMAGE_REPO }}:latest
             ${{ env.IMAGE_REPO }}:${{ github.sha }}
+          # F-02: pass NEXT_PUBLIC_* as build ARGs — Next.js inlines them into
+          # the client bundle at build time. Missing these ships an image with
+          # empty strings, breaking browser Supabase auth on first revision.
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ steps.secrets.outputs.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ steps.secrets.outputs.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_SITE_URL=${{ steps.secrets.outputs.NEXT_PUBLIC_SITE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false   # avoid dual-digest manifest (simplifies @sha256 pin)
@@ -70,14 +91,6 @@ jobs:
           [ -n "${{ steps.build.outputs.digest }}" ] \
             || (echo "::error::docker/build-push-action did not emit a digest"; exit 1)
           echo "Image digest: ${{ steps.build.outputs.digest }}"
-
-      # ---- STEP 3: Fetch DIRECT_URL from Secret Manager (D-19) -----------------------
-      - name: Fetch DIRECT_URL from Secret Manager
-        id: secrets
-        uses: google-github-actions/get-secretmanager-secrets@v2
-        with:
-          secrets: |-
-            DIRECT_URL:${{ env.PROJECT_ID }}/DIRECT_URL
 
       # ---- STEP 4: Prisma migrate deploy (D-20: BEFORE gcloud run deploy) ------------
       - name: Set up Node 22
