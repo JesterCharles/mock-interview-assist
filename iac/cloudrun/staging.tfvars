@@ -17,10 +17,10 @@ region     = "us-central1"
 # These placeholder values block `terraform apply` intentionally. Operator must overwrite
 # with real values before running the Phase 47 apply sequence (see iac/cloudrun/README.md).
 # T-47-05 mitigation: digest-only pull; :latest NEVER appears here.
-initial_image_digest = "sha256:PHASE48_CI_WILL_POPULATE_000000000000000000000000000000000000"
+initial_image_digest = "sha256:daa14e711df0da52dd67b3bc652ab746e17754a47649b3d0437f0ac7075978af"
 
 # Cloudflare zone for nextlevelmock.com. One-time lookup (see README Plan 02 runbook).
-cf_zone_id = "PLACEHOLDER_32_HEX_FROM_CLOUDFLARE_ZONE_LOOKUP"
+cf_zone_id = "f0a9741530073e3d64c20b0e8e3ca629"
 
 # D-16 / D-22 — explicit for clarity even though defaults match.
 github_repo_slug = "JesterCharles/mock-interview-assist"
