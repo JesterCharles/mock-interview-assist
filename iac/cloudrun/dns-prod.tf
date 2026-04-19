@@ -26,7 +26,7 @@ resource "cloudflare_record" "apex" {
   value   = var.v01_gce_ip # UNCHANGED from pre-Phase-51 state (T-51-01 negative assertion)
   ttl     = 1              # Cloudflare "Auto" (forced when proxied=true)
   proxied = true           # D-01 — orange-cloud ON (public users hit CF edge first)
-  comment = "Phase 51 DNS-02 — apex still on v0.1 GCE; Phase 52 flips to google_compute_global_address.nlm_prod_lb_ip.address"
+  comment = "Phase 51 DNS-02 — apex on v0.1 GCE; Phase 52 flips to prod Cloud Run LB"
 }
 
 resource "cloudflare_record" "www" {
@@ -38,7 +38,7 @@ resource "cloudflare_record" "www" {
   value   = google_compute_global_address.nlm_prod_lb_ip[0].address
   ttl     = 300
   proxied = false # D-01 — orange-cloud OFF (required for Google managed-cert HTTP-01 challenge on www half)
-  comment = "Phase 51 DNS-02 — www → prod Cloud Run LB; triggers SSL provisioning for Plan 01 cert (www half)"
+  comment = "Phase 51 DNS-02 — www → prod Cloud Run LB"
 }
 
 resource "cloudflare_record" "legacy" {
@@ -50,5 +50,5 @@ resource "cloudflare_record" "legacy" {
   value   = var.v01_gce_ip
   ttl     = 300
   proxied = false # direct to v0.1 GCE LB (no CF proxying during rollback window)
-  comment = "Phase 51 DNS-02 — legacy → v0.1 GCE for 30-day rollback window (SUNSET-03 tears down in Phase 53)"
+  comment = "Phase 51 DNS-02 — legacy → v0.1 GCE (30-day rollback)"
 }

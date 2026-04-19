@@ -25,7 +25,7 @@ uptime_host_prod = "nextlevelmock.com"
 #       underlying `content` from Cloudflare API: see scripts/import-cloudflare-apex.sh)
 #
 # T-47-05 / T-51-03 mitigations: digest-only pull; :latest NEVER appears here.
-initial_image_digest = "sha256:be81e0a51ef991c0750d00c45d56b00bb08007b82e935677e19b4d07097dc6b8"
+initial_image_digest = "sha256:410461990f9793973098cdd08fb7e4ff403e3120e996a6451297c50a06647f0a"
 
 # Cloudflare zone for nextlevelmock.com (same zone as staging — one-time lookup shared).
 cf_zone_id = "f0a9741530073e3d64c20b0e8e3ca629"
