@@ -23,10 +23,10 @@ resource "cloudflare_record" "apex" {
   zone_id = var.cf_zone_id
   name    = "@" # root — nextlevelmock.com
   type    = "A"
-  value   = var.v01_gce_ip # UNCHANGED from pre-Phase-51 state (T-51-01 negative assertion)
-  ttl     = 1              # Cloudflare "Auto" (forced when proxied=true)
-  proxied = true           # D-01 — orange-cloud ON (public users hit CF edge first)
-  comment = "Phase 51 DNS-02 — apex on v0.1 GCE; Phase 52 flips to prod Cloud Run LB"
+  value   = google_compute_global_address.nlm_prod_lb_ip[0].address # Phase 52 cutover (2026-04-19)
+  ttl     = 1                                                       # Cloudflare "Auto" (forced when proxied=true)
+  proxied = true                                                    # D-01 — orange-cloud ON (public users hit CF edge first)
+  comment = "Phase 52 cutover — apex on prod Cloud Run LB (v0.1 GCE is 30-day rollback via legacy.)"
 }
 
 resource "cloudflare_record" "www" {
